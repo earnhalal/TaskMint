@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Crown, Gift, Volume2, VolumeX } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, limit, addDoc, serverTimestamp as firestoreTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
-import { db, auth, rtdb } from '../firebase';
-import { ref, get, update, serverTimestamp as rtdbTimestamp } from 'firebase/database';
+import { auth, rtdb } from '../firebase';
+import { getDatabase, ref, onValue, set, get, update, push, serverTimestamp as rtdbTimestamp } from 'firebase/database';
 
 const segments = [
   { id: 0, label: 'Rs. 1', subLabel: 'Cash', color: '#FBBF24', textColor: '#0F172A', probability: 35 },
@@ -44,16 +43,22 @@ export default function SpinWheel({
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [winners, setWinners] = useState<any[]>([]);
 
-  // Live Winners Feed from Firestore
+  // Live Winners Feed from RTDB
   useEffect(() => {
-    const winnersQuery = query(
-      collection(db, 'spin_winners'),
-      orderBy('timestamp', 'desc'),
-      limit(10)
-    );
-    const unsubscribe = onSnapshot(winnersQuery, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setWinners(docs);
+    const winnersRef = ref(rtdb, 'spin_winners');
+    const unsubscribe = onValue(winnersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.entries(data).map(([id, val]: [string, any]) => ({ 
+          id, 
+          ...val 
+        }));
+        // Sort by timestamp desc and take top 10
+        const sorted = list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
+        setWinners(sorted);
+      } else {
+        setWinners([]);
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -98,12 +103,24 @@ export default function SpinWheel({
     }
   };
 
+  // RTDB Spin Data Listener
+  useEffect(() => {
+    if (!auth.currentUser) return;
+    const spinRef = ref(rtdb, `users/${auth.currentUser.uid}/spins`);
+    const unsubscribe = onValue(spinRef, (snapshot) => {
+      const data = snapshot.val();
+      // Update local state if needed, e.g., freeSpins or lastSpinTime
+      // This will help UI update in real-time
+    });
+    return () => unsubscribe();
+  }, []);
+
   const spinWheel = async () => {
     if (isSpinning || !auth.currentUser) return;
     setErrorMsg('');
 
     // RTDB Quota Check
-    const spinRef = ref(rtdb, `spins/${auth.currentUser.uid}`);
+    const spinRef = ref(rtdb, `users/${auth.currentUser.uid}/spins`);
     const snapshot = await get(spinRef);
     const spinData = snapshot.val();
     const today = new Date().toDateString();
@@ -177,20 +194,16 @@ export default function SpinWheel({
         const amount = parseInt(won.label.replace('Rs. ', ''));
         if (!isNaN(amount)) {
           try {
-            // 1. Update Firestore balance
-            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-              balance: increment(amount)
-            });
-
-            // 2. Record win for live feed
-            await addDoc(collection(db, 'spin_winners'), {
+            // 1. Record win for live feed in RTDB (Zero Firestore Reads)
+            const winnersRef = ref(rtdb, 'spin_winners');
+            await push(winnersRef, {
               userId: auth.currentUser.uid,
               userName: localStorage.getItem('taskmint_name') || 'User',
               prize: won.label,
-              timestamp: firestoreTimestamp()
+              timestamp: rtdbTimestamp()
             });
 
-            // 3. Update local state balance
+            // 2. Update balance via parent (which handles Firestore write)
             onUpdateBalance(amount);
           } catch (error) {
             console.error("Error updating spin win:", error);

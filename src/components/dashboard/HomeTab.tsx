@@ -35,6 +35,7 @@ interface HomeTabProps {
   onStreakClick: () => void;
   onLeaderboardClick: () => void;
   onPartnerUpgradeClick: () => void;
+  onActivateClick: () => void;
   appSettings: {
     activationFee: number;
   };
@@ -92,6 +93,7 @@ export default function HomeTab({
   onStreakClick,
   onLeaderboardClick,
   onPartnerUpgradeClick,
+  onActivateClick,
   appSettings
 }: HomeTabProps) {
   const getGreeting = () => {
@@ -113,7 +115,7 @@ export default function HomeTab({
       {/* Account Status Alert for Inactive Users */}
       {accountStatus.toLowerCase() === 'inactive' && (
         <div 
-          onClick={onInviteClick}
+          onClick={onActivateClick}
           className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-red-100 transition-colors group animate-bounce-small"
         >
           <div className="flex items-center gap-3">

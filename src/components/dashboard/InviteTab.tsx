@@ -53,19 +53,6 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             >
               Pay Rs 100 to Start
             </button>
-            <button 
-              onClick={() => {
-                if (window.confirm("DEV: Simulate Admin Approval for your account? This will trigger commissions.")) {
-                  // We'll use a trick to call the parent's handleActivateUser
-                  // Since we don't have it as a prop, we'll just use a window event or something
-                  // Better: Add it as a prop
-                  (window as any).simulateActivation();
-                }
-              }}
-              className="text-[8px] font-bold text-slate-400 hover:underline"
-            >
-              [DEV] Simulate Approval
-            </button>
           </div>
         )}
       </div>

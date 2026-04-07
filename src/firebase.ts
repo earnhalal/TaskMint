@@ -15,7 +15,7 @@ const firebaseConfig = {
   messagingSenderId: "151886381795",
   appId: "1:151886381795:web:d76b5280b7c8cd30767bd6",
   measurementId: "G-JL234NHV11",
-  databaseURL: "https://earapp-f8d27-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  databaseURL: "https://earnapp-f8d27-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 // Initialize Firebase

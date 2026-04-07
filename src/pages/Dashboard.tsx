@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit, updateDoc, increment, setDoc, getDoc, where } from 'firebase/firestore';
 import { db, auth, rtdb } from '../firebase';
-import { ref, onValue, update, increment as rtdbIncrement } from 'firebase/database';
+import { ref, onValue, update, set, increment as rtdbIncrement } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { 
   sendDepositRequestMail, 
@@ -37,6 +37,7 @@ import PinLockView from '../components/PinLockView';
 import UpdatesView from '../components/dashboard/UpdatesView';
 import PartnerUpgradeView from '../components/dashboard/PartnerUpgradeView';
 import AdminPanelView from '../components/dashboard/AdminPanelView';
+import ActivationTab from '../components/dashboard/ActivationTab';
 
 import EditProfileView from '../components/dashboard/EditProfileView';
 
@@ -117,8 +118,6 @@ export default function Dashboard() {
         setWithdrawalAccounts(data.withdrawalAccounts || []);
         setTwoFactorAuth(data.twoFactorAuth || false);
         setJoiningDate(data.joiningDate || '');
-        setStatus(data.status || 'Inactive');
-        setAccountStatus(data.accountStatus || 'inactive');
         setRole(data.role || 'user');
         setPartnerStatus(data.partnerStatus || 'none');
         setTotalTeamEarnings(data.totalTeamEarnings || 0);
@@ -135,6 +134,20 @@ export default function Dashboard() {
         activeMembers: 0,
         totalCommission: 0
       });
+    });
+
+    // Listener for user status from RTDB
+    const statusRef = ref(rtdb, `users/${user.uid}/status`);
+    const unsubscribeStatus = onValue(statusRef, (snapshot) => {
+      const status = snapshot.val();
+      if (status) {
+        setStatus(status);
+        setAccountStatus(status);
+      } else {
+        // Default to inactive if no status in RTDB
+        setStatus('inactive');
+        setAccountStatus('inactive');
+      }
     });
 
     // Listener for deposits
@@ -223,6 +236,7 @@ export default function Dashboard() {
       unsubscribeWithdrawals();
       unsubscribeSettings();
       unsubscribeReferral();
+      unsubscribeStatus();
       if (unsubscribePartner) unsubscribePartner();
     };
   }, [user, role]);
@@ -350,17 +364,27 @@ export default function Dashboard() {
       description: type === 'activation' ? 'Account Activation Fee' : `${method} Deposit`
     };
 
-    // Save to global deposits collection for admin
-    await setDoc(doc(db, 'deposits', depositId), newTx);
+    if (type === 'activation') {
+      // Save to RTDB pending_requests (Zero Firestore)
+      const pendingRef = ref(rtdb, `pending_requests/${user.uid}`);
+      await set(pendingRef, {
+        ...newTx,
+        timestamp: Date.now()
+      });
+      
+      // Update status in RTDB to pending
+      const userStatusRef = ref(rtdb, `users/${user.uid}`);
+      await update(userStatusRef, { status: 'pending' });
+      
+      alert("Activation request submitted! Your account will be activated once the payment is verified.");
+      setActiveTab('home');
+    } else {
+      // Regular deposit still goes to Firestore
+      await setDoc(doc(db, 'deposits', depositId), newTx);
+    }
     
     // Send internal notification
     await sendDepositRequestMail(user.uid, amount, method);
-
-    if (type === 'activation') {
-      await updateDoc(doc(db, 'users', user.uid), { status: 'Pending' });
-      alert("Activation request submitted! Your account will be activated once the payment is verified.");
-      setActiveTab('home');
-    }
   };
 
   const handleActivateAccount = async () => {
@@ -460,6 +484,9 @@ export default function Dashboard() {
 
       // 1. Activate the user
       await updateDoc(userRef, { accountStatus: 'active' });
+      // Update RTDB status
+      const userStatusRef = ref(rtdb, `users/${targetUserId}`);
+      await update(userStatusRef, { status: 'Active', accountStatus: 'active' });
       console.log(`[ADMIN_ACTION_SUCCESS] User ${targetUserId} status updated to Active.`);
       
       // Update deposit status if provided
@@ -636,7 +663,13 @@ export default function Dashboard() {
           status={status}
           referralStats={referralStats}
           referralCode={user?.uid || ''}
-          onActivateClick={() => setActiveTab('deposit')}
+          onActivateClick={() => setActiveTab('activation')}
+        />;
+      case 'activation':
+        return <ActivationTab 
+          onBack={() => setActiveTab('home')}
+          appSettings={appSettings}
+          userName={userName}
         />;
       case 'lottery':
         return <LotteryView 
@@ -723,6 +756,7 @@ export default function Dashboard() {
           onStreakClick={() => setActiveTab('streak')}
           onLeaderboardClick={() => setActiveTab('leaderboard')}
           onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
+          onActivateClick={() => setActiveTab('activation')}
           appSettings={appSettings}
         />;
     }
