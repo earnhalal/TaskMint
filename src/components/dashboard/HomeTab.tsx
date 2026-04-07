@@ -13,13 +13,16 @@ import {
     Ticket as TicketIcon,
     Calendar as CalendarIcon,
     Trophy,
-    AlertTriangle
+    AlertTriangle,
+    Clock,
+    CheckCircle2
 } from 'lucide-react';
 
 interface HomeTabProps {
   name: string;
   balance: number;
-  status: string;
+  accountStatus: string;
+  role: string;
   topEarners: any[];
   onSpinClick: () => void;
   onInviteClick: () => void;
@@ -31,6 +34,10 @@ interface HomeTabProps {
   onLotteryClick: () => void;
   onStreakClick: () => void;
   onLeaderboardClick: () => void;
+  onPartnerUpgradeClick: () => void;
+  appSettings: {
+    activationFee: number;
+  };
 }
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; bgClass: string; iconColor: string; delay: number }> = ({ icon, label, value, bgClass, iconColor, delay }) => (
@@ -71,7 +78,8 @@ const QuickActionBtn: React.FC<{
 export default function HomeTab({ 
   name, 
   balance, 
-  status,
+  accountStatus,
+  role,
   topEarners,
   onSpinClick, 
   onInviteClick, 
@@ -82,7 +90,9 @@ export default function HomeTab({
   onProfileClick, 
   onLotteryClick, 
   onStreakClick,
-  onLeaderboardClick
+  onLeaderboardClick,
+  onPartnerUpgradeClick,
+  appSettings
 }: HomeTabProps) {
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -101,7 +111,7 @@ export default function HomeTab({
     <div className="space-y-6 animate-fade-in pb-24 font-sans">
       
       {/* Account Status Alert for Inactive Users */}
-      {status === 'Inactive' && (
+      {accountStatus.toLowerCase() === 'inactive' && (
         <div 
           onClick={onInviteClick}
           className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-red-100 transition-colors group animate-bounce-small"
@@ -112,17 +122,60 @@ export default function HomeTab({
             </div>
             <div>
               <p className="text-xs font-black text-red-700">Account Inactive</p>
-              <p className="text-[10px] text-red-600/80 font-bold">Pay Rs 100 to start earning!</p>
+              <p className="text-[10px] text-red-600/80 font-bold">Pay Rs {appSettings.activationFee} to start earning!</p>
             </div>
           </div>
           <ArrowRight className="w-4 h-4 text-red-400 group-hover:translate-x-1 transition-transform" />
+        </div>
+      )}
+
+      {/* Account Status Alert for Pending Users */}
+      {accountStatus.toLowerCase() === 'pending' && (
+        <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-center justify-between group animate-pulse-slow">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-amber-700">Activation Pending</p>
+              <p className="text-[10px] text-amber-600/80 font-bold">Admin is verifying your payment.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Partner Program Banner */}
+      {role !== 'partner' && accountStatus.toLowerCase() === 'active' && (
+        <div 
+          onClick={onPartnerUpgradeClick}
+          className="bg-gradient-to-r from-[#060D2D] to-[#151E32] border border-amber-500/30 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:brightness-110 transition-all group relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <Trophy className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs font-black text-amber-400">Partner Program</p>
+              <p className="text-[10px] text-slate-400 font-bold">Earn 10% Team Commission!</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 relative z-10">
+            <span className="text-[9px] font-black text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">Upgrade</span>
+            <ArrowRight className="w-4 h-4 text-amber-500 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
       )}
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
           <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">{getGreeting()},</p>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tighter">{name}</h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-2xl font-black text-slate-900 tracking-tighter">{name}</h1>
+                {status === 'Active' && (
+                  <CheckCircle2 className="w-5 h-5 text-blue-600 fill-blue-600/10" />
+                )}
+              </div>
           </div>
           
           <div className="flex items-center gap-3 w-full md:w-auto">

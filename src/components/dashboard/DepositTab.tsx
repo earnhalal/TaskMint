@@ -17,6 +17,11 @@ interface DepositTabProps {
   onDeposit: (amount: number, method: DepositMethod, transactionId: string, type?: 'activation' | 'regular') => Promise<void>;
   transactions: Transaction[];
   initialType?: 'activation' | 'regular';
+  appSettings: {
+    activationFee: number;
+    paymentNumber: string;
+    paymentName: string;
+  };
 }
 
 const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
@@ -51,9 +56,9 @@ const EasyPaisaIcon = ({ className }: { className?: string }) => (
   </div>
 );
 
-export default function DepositTab({ onDeposit, transactions, initialType = 'regular' }: DepositTabProps) {
+export default function DepositTab({ onDeposit, transactions, initialType = 'regular', appSettings }: DepositTabProps) {
   const [type, setType] = useState<'activation' | 'regular'>(initialType);
-  const [amount, setAmount] = useState(initialType === 'activation' ? '100' : '');
+  const [amount, setAmount] = useState(initialType === 'activation' ? appSettings.activationFee.toString() : '');
   const [transactionId, setTransactionId] = useState('');
   const [method, setMethod] = useState<DepositMethod>('EasyPaisa');
   const [message, setMessage] = useState('');
@@ -77,8 +82,8 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
         setMessage('Please enter a valid amount.');
         return;
     }
-    if (type === 'activation' && numAmount !== 100) {
-        setMessage('Activation fee must be exactly Rs 100.');
+    if (type === 'activation' && numAmount !== appSettings.activationFee) {
+        setMessage(`Activation fee must be exactly Rs ${appSettings.activationFee}.`);
         return;
     }
     if (!transactionId.trim()) {
@@ -105,8 +110,8 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
   };
 
   const accountDetails = {
-      EasyPaisa: { title: 'M-WASEEM', number: '03338739929', icon: <EasyPaisaIcon className="scale-150" /> },
-      JazzCash: { title: 'SHAHID-KALEEM', number: '03299659585', icon: <JazzCashIcon className="scale-150" /> } 
+      EasyPaisa: { title: appSettings.paymentName, number: appSettings.paymentNumber, icon: <EasyPaisaIcon className="scale-150" /> },
+      JazzCash: { title: appSettings.paymentName, number: appSettings.paymentNumber, icon: <JazzCashIcon className="scale-150" /> } 
   };
 
   return (
@@ -121,7 +126,7 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
           </h2>
           <p className="text-slate-500 mt-2">
             {type === 'activation' 
-              ? 'Pay Rs 100 joining fee to start earning from tasks & referrals.' 
+              ? `Pay Rs ${appSettings.activationFee} joining fee to start earning from tasks & referrals.` 
               : 'Top up your wallet to create tasks or upgrade plans.'}
           </p>
       </div>
@@ -244,22 +249,6 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
                                         <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">
                                             {new Date(tx.date).toLocaleDateString()}
                                         </p>
-                                        {tx.status === 'Pending' && (
-                                          <button 
-                                            onClick={() => {
-                                              if (window.confirm(`Simulate Admin Approval for this ${tx.type === 'activation' ? 'Activation' : 'Deposit'}?`)) {
-                                                if (tx.type === 'activation') {
-                                                  (window as any).simulateActivation();
-                                                } else {
-                                                  (window as any).simulateDepositApproval(tx.amount);
-                                                }
-                                              }
-                                            }}
-                                            className="mt-2 text-[8px] font-bold text-amber-600 hover:underline"
-                                          >
-                                            [DEV] Simulate Approval
-                                          </button>
-                                        )}
                                     </div>
                                 </div>
                                 <div className="text-right">

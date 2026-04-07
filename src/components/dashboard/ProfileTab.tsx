@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 
-export default function ProfileTab({ name, email, status, accountNumber, accountTitle, joiningDate, onEditProfile, onLeaderboardClick, onManageWalletClick }: { name: string, email: string, status: string, accountNumber: string, accountTitle: string, joiningDate: string, onEditProfile?: () => void, onLeaderboardClick?: () => void, onManageWalletClick?: () => void }) {
+export default function ProfileTab({ name, email, status, role, accountNumber, accountTitle, joiningDate, onEditProfile, onLeaderboardClick, onManageWalletClick, onPartnerUpgradeClick, onAdminPanelClick }: { name: string, email: string, status: string, role: string, accountNumber: string, accountTitle: string, joiningDate: string, onEditProfile?: () => void, onLeaderboardClick?: () => void, onManageWalletClick?: () => void, onPartnerUpgradeClick?: () => void, onAdminPanelClick?: () => void }) {
   const { user } = useAuth();
   const [avatar, setAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -94,14 +94,24 @@ export default function ProfileTab({ name, email, status, accountNumber, account
             <h2 className="text-xl font-bold text-slate-900">{name}</h2>
             <p className="text-xs text-slate-500 mb-2">{email}</p>
             <div className="flex flex-wrap gap-2">
-                {status === 'Active' ? (
-                  <div className="inline-flex items-center gap-1 bg-emerald-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold shadow-sm">
-                    <CheckCircle2 className="w-3 h-3 text-white" />
+                {role === 'partner' ? (
+                  <div className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-yellow-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold shadow-md">
+                    <Crown className="w-3 h-3 text-white" />
+                    TaskMint Partner
+                  </div>
+                ) : status.toLowerCase() === 'active' ? (
+                  <div className="inline-flex items-center gap-1 bg-blue-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold shadow-sm">
+                    <CheckCircle2 className="w-3 h-3 text-white fill-white/20" />
                     Verified Account
+                  </div>
+                ) : status.toLowerCase() === 'pending' ? (
+                  <div className="inline-flex items-center gap-1 bg-amber-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold shadow-sm">
+                    <Clock className="w-3 h-3 text-white" />
+                    Pending Approval
                   </div>
                 ) : (
                   <div className="inline-flex items-center gap-1 bg-[#0F172A] text-white px-2.5 py-1 rounded-md text-[10px] font-bold">
-                    <Crown className="w-3 h-3 text-yellow-400" />
+                    <Users className="w-3 h-3 text-slate-400" />
                     Member
                   </div>
                 )}
@@ -120,6 +130,20 @@ export default function ProfileTab({ name, email, status, accountNumber, account
 
       <Section title="Rank & Progression">
         <Item icon={<BarChart3 className="w-4 h-4" />} label="Top Earners Leaderboard" onClick={onLeaderboardClick} />
+        {role !== 'partner' && (
+          <Item 
+            icon={<Crown className="w-4 h-4 text-amber-500" />} 
+            label="Upgrade to Partner" 
+            onClick={onPartnerUpgradeClick} 
+          />
+        )}
+        {role === 'admin' && (
+          <Item 
+            icon={<Shield className="w-4 h-4 text-slate-900" />} 
+            label="Admin Control Panel" 
+            onClick={onAdminPanelClick} 
+          />
+        )}
       </Section>
 
       <Section title="Withdrawal Account">

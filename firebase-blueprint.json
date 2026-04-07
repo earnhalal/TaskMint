@@ -35,11 +35,38 @@
         "userName": { "type": "string" },
         "amount": { "type": "number" },
         "method": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "type": { "type": "string", "enum": ["activation", "regular"] }
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected"] },
+        "date": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["activation", "regular"] },
+        "transactionId": { "type": "string" }
       },
-      "required": ["userId", "amount", "method", "status", "timestamp"]
+      "required": ["userId", "amount", "method", "status", "date"]
+    },
+    "Withdrawal": {
+      "title": "Withdrawal",
+      "description": "Record of a user's withdrawal request",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "amount": { "type": "number" },
+        "method": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Approved", "Rejected"] },
+        "date": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "method", "status", "date"]
+    },
+    "PartnerRequest": {
+      "title": "Partner Request",
+      "description": "Request to upgrade to partner status",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "status", "timestamp"]
     },
     "Lottery": {
       "title": "Lottery",
@@ -107,6 +134,21 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "title", "message", "type", "status", "timestamp"]
+    },
+    "AppSettings": {
+      "title": "App Settings",
+      "description": "Global application configuration",
+      "type": "object",
+      "properties": {
+        "activationFee": { "type": "number" },
+        "partnerFee": { "type": "number" },
+        "paymentNumber": { "type": "string" },
+        "paymentName": { "type": "string" },
+        "referralBonusBasic": { "type": "number" },
+        "referralBonusPartner": { "type": "number" },
+        "indirectReferralBonus": { "type": "number" }
+      },
+      "required": ["activationFee", "partnerFee", "paymentNumber", "paymentName"]
     }
   },
   "firestore": {
@@ -137,6 +179,18 @@
     "/deposits/{depositId}": {
       "schema": "Deposit",
       "description": "User deposit requests"
+    },
+    "/withdrawals/{withdrawalId}": {
+      "schema": "Withdrawal",
+      "description": "User withdrawal requests"
+    },
+    "/partnerRequests/{requestId}": {
+      "schema": "PartnerRequest",
+      "description": "User partner upgrade requests"
+    },
+    "/app_settings/{settingsId}": {
+      "schema": "AppSettings",
+      "description": "Global application settings"
     }
   }
 }

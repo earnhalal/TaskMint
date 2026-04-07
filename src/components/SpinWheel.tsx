@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Crown, Gift, Volume2, VolumeX } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, limit, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
-import { db, auth } from '../firebase';
+import { collection, onSnapshot, query, orderBy, limit, addDoc, serverTimestamp as firestoreTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { db, auth, rtdb } from '../firebase';
+import { ref, get, update, serverTimestamp as rtdbTimestamp } from 'firebase/database';
 
 const segments = [
   { id: 0, label: 'Rs. 1', subLabel: 'Cash', color: '#FBBF24', textColor: '#0F172A', probability: 35 },
@@ -97,9 +98,20 @@ export default function SpinWheel({
     }
   };
 
-  const spinWheel = () => {
-    if (isSpinning) return;
+  const spinWheel = async () => {
+    if (isSpinning || !auth.currentUser) return;
     setErrorMsg('');
+
+    // RTDB Quota Check
+    const spinRef = ref(rtdb, `spins/${auth.currentUser.uid}`);
+    const snapshot = await get(spinRef);
+    const spinData = snapshot.val();
+    const today = new Date().toDateString();
+
+    if (spinData && spinData.lastSpinTime === today && spinData.count >= 5) {
+        setErrorMsg("Daily spin quota reached!");
+        return;
+    }
     
     if (freeSpins <= 0) {
       if (balance < 5) {
@@ -110,6 +122,13 @@ export default function SpinWheel({
     } else {
       onUseFreeSpin();
     }
+
+    // Update RTDB Quota
+    const newCount = (spinData && spinData.lastSpinTime === today) ? spinData.count + 1 : 1;
+    await update(spinRef, {
+        lastSpinTime: today,
+        count: newCount
+    });
 
     setIsSpinning(true);
     setPrize(null);
@@ -168,7 +187,7 @@ export default function SpinWheel({
               userId: auth.currentUser.uid,
               userName: localStorage.getItem('taskmint_name') || 'User',
               prize: won.label,
-              timestamp: serverTimestamp()
+              timestamp: firestoreTimestamp()
             });
 
             // 3. Update local state balance

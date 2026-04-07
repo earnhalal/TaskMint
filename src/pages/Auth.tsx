@@ -5,7 +5,8 @@ import { app } from '../firebase';
 import AuthView from '../components/AuthView';
 
 import { doc, setDoc, getDoc, updateDoc, increment } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, rtdb } from '../firebase';
+import { ref, update, increment as rtdbIncrement } from 'firebase/database';
 import { sendWelcomeMail } from '../services/notificationService';
 
 const auth = getAuth(app);
@@ -30,6 +31,9 @@ export default function Auth() {
         phone: data.phone,
         balance: 0,
         status: 'Inactive',
+        role: data.email === 'r83842009@gmail.com' ? 'admin' : 'user',
+        partnerStatus: 'none',
+        totalTeamEarnings: 0,
         freeSpins: 0,
         joiningDate: new Date().toISOString(),
         referredBy: data.referralCode || null,
@@ -50,8 +54,10 @@ export default function Auth() {
         const parentRef = doc(db, 'users', data.referralCode);
         const parentDoc = await getDoc(parentRef);
         if (parentDoc.exists()) {
-          await updateDoc(parentRef, {
-            'referralStats.totalInvited': increment(1)
+          // Update invite count in RTDB
+          const parentReferralRef = ref(rtdb, `invites/${data.referralCode}`);
+          await update(parentReferralRef, {
+            totalInvited: rtdbIncrement(1)
           });
         }
       }

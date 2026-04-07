@@ -10,10 +10,12 @@ import {
   X,
   Sparkles,
   Mail,
-  AlertTriangle
+  AlertTriangle,
+  Crown
 } from 'lucide-react';
 import { doc, onSnapshot, collection, getDocs, query, orderBy, limit, updateDoc, increment, setDoc, getDoc, where } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth, rtdb } from '../firebase';
+import { ref, onValue, update, increment as rtdbIncrement } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { 
   sendDepositRequestMail, 
@@ -33,6 +35,8 @@ import PremiumModal from '../components/dashboard/PremiumModal';
 import LeaderboardView from '../components/dashboard/LeaderboardView';
 import PinLockView from '../components/PinLockView';
 import UpdatesView from '../components/dashboard/UpdatesView';
+import PartnerUpgradeView from '../components/dashboard/PartnerUpgradeView';
+import AdminPanelView from '../components/dashboard/AdminPanelView';
 
 import EditProfileView from '../components/dashboard/EditProfileView';
 
@@ -57,6 +61,10 @@ export default function Dashboard() {
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [joiningDate, setJoiningDate] = useState('');
   const [status, setStatus] = useState('Inactive');
+  const [accountStatus, setAccountStatus] = useState('inactive');
+  const [role, setRole] = useState('user');
+  const [partnerStatus, setPartnerStatus] = useState('none');
+  const [totalTeamEarnings, setTotalTeamEarnings] = useState(0);
   const [referralStats, setReferralStats] = useState({
     totalInvited: 0,
     activeMembers: 0,
@@ -65,6 +73,7 @@ export default function Dashboard() {
   const [referredBy, setReferredBy] = useState<string | null>(null);
   const [notificationMessage, setNotificationMessage] = useState('Sana just earned <span class="font-bold">Rs 2000</span> from a Referral Bonus!');
   const [isNotificationAnimating, setIsNotificationAnimating] = useState(true);
+  const [partnerReferrals, setPartnerReferrals] = useState<any[]>([]);
 
   const names = ['Ahmed', 'Fatima', 'Ali', 'Ayesha', 'Zainab', 'Bilal', 'Hassan', 'Sana', 'Usman', 'Maryam', 'Abdullah', 'Khadija'];
   const amounts = [100, 250, 500, 750, 1000, 1250, 2000];
@@ -81,6 +90,15 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [topEarners, setTopEarners] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [appSettings, setAppSettings] = useState({
+    activationFee: 100,
+    partnerFee: 2500,
+    paymentNumber: '0312-3456789',
+    paymentName: 'TaskMint Admin',
+    referralBonusBasic: 30,
+    referralBonusPartner: 70,
+    indirectReferralBonus: 10
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -91,7 +109,6 @@ export default function Dashboard() {
         const data = doc.data();
         setBalance(data.balance || 0);
         setWithdrawalHistory(data.withdrawalHistory || []);
-        setDepositHistory(data.depositHistory || []);
         setUserPin(data.pin || '');
         setSeenUpdates(data.seenUpdates || []);
         setUserName(data.username || '');
@@ -101,23 +118,55 @@ export default function Dashboard() {
         setTwoFactorAuth(data.twoFactorAuth || false);
         setJoiningDate(data.joiningDate || '');
         setStatus(data.status || 'Inactive');
-        setReferralStats(data.referralStats || {
-          totalInvited: 0,
-          activeMembers: 0,
-          totalCommission: 0
-        });
+        setAccountStatus(data.accountStatus || 'inactive');
+        setRole(data.role || 'user');
+        setPartnerStatus(data.partnerStatus || 'none');
+        setTotalTeamEarnings(data.totalTeamEarnings || 0);
         setReferredBy(data.referredBy || null);
       }
     });
 
+    // Listener for referral stats from RTDB
+    const referralRef = ref(rtdb, `invites/${user.uid}`);
+    const unsubscribeReferral = onValue(referralRef, (snapshot) => {
+      const data = snapshot.val();
+      setReferralStats(data || {
+        totalInvited: 0,
+        activeMembers: 0,
+        totalCommission: 0
+      });
+    });
+
+    // Listener for deposits
+    const qDeposits = query(
+      collection(db, 'deposits'),
+      where('userId', '==', user.uid)
+    );
+    const unsubscribeDeposits = onSnapshot(qDeposits, (snapshot) => {
+      const depositsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      depositsData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setDepositHistory(depositsData);
+    }, (error) => console.error("Deposits Error:", error));
+
+    // Listener for withdrawals
+    const qWithdrawals = query(
+      collection(db, 'withdrawals'),
+      where('userId', '==', user.uid)
+    );
+    const unsubscribeWithdrawals = onSnapshot(qWithdrawals, (snapshot) => {
+      const withdrawalsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      withdrawalsData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setWithdrawalHistory(withdrawalsData);
+    }, (error) => console.error("Withdrawals Error:", error));
+
     // Listener for notifications
     const qNotify = query(
       collection(db, 'notifications'), 
-      where('userId', '==', user.uid),
-      orderBy('timestamp', 'desc')
+      where('userId', '==', user.uid)
     );
     const unsubscribeNotify = onSnapshot(qNotify, (snapshot) => {
-      const notifyData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const notifyData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      notifyData.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       
       // Play sound if a new notification is added (not just initial load)
       snapshot.docChanges().forEach((change) => {
@@ -127,7 +176,20 @@ export default function Dashboard() {
       });
       
       setNotifications(notifyData);
-    });
+    }, (error) => console.error("Notifications Error:", error));
+
+    // Listener for Partner Referrals (if user is a partner)
+    let unsubscribePartner: any = null;
+    if (role === 'partner') {
+      const qPartner = query(
+        collection(db, 'users'),
+        where('referredBy', '==', user.uid)
+      );
+      unsubscribePartner = onSnapshot(qPartner, (snapshot) => {
+        const referrals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPartnerReferrals(referrals);
+      });
+    }
 
     const fetchTasks = async () => {
       const tasksSnapshot = await getDocs(collection(db, 'tasks'));
@@ -146,11 +208,33 @@ export default function Dashboard() {
       setTopEarners(earnersData);
     });
 
+    // Listener for app settings
+    const unsubscribeSettings = onSnapshot(doc(db, 'app_settings', 'global'), (doc) => {
+      if (doc.exists()) {
+        setAppSettings(doc.data() as any);
+      }
+    });
+
     return () => {
       unsubscribe();
+      unsubscribeNotify();
       unsubscribeEarners();
+      unsubscribeDeposits();
+      unsubscribeWithdrawals();
+      unsubscribeSettings();
+      unsubscribeReferral();
+      if (unsubscribePartner) unsubscribePartner();
     };
-  }, [user]);
+  }, [user, role]);
+
+  useEffect(() => {
+    const unsubscribeSettings = onSnapshot(doc(db, 'app_settings', 'global'), (doc) => {
+      if (doc.exists()) {
+        setAppSettings(doc.data() as any);
+      }
+    });
+    return () => unsubscribeSettings();
+  }, []);
 
   useEffect(() => {
     // localStorage.setItem('taskmint_balance', balance.toString());
@@ -203,6 +287,22 @@ export default function Dashboard() {
       await updateDoc(doc(db, 'users', user.uid), {
         balance: increment(amount)
       });
+
+      // Team Commission Logic: If user has a referrer who is a Partner, give them 10%
+      if (amount > 0 && referredBy) {
+        const referrerRef = doc(db, 'users', referredBy);
+        const referrerDoc = await getDoc(referrerRef);
+        if (referrerDoc.exists()) {
+          const referrerData = referrerDoc.data();
+          if (referrerData.role === 'partner') {
+            const commission = amount * 0.1;
+            await updateDoc(referrerRef, {
+              balance: increment(commission),
+              totalTeamEarnings: increment(commission)
+            });
+          }
+        }
+      }
     } catch (error) {
       console.error("Error updating balance:", error);
       // Fallback to local state if Firestore fails
@@ -213,14 +313,19 @@ export default function Dashboard() {
   const handleWithdraw = async (amount: number, method: string) => {
     if (!user) return;
     handleUpdateBalance(-amount);
+    const withdrawalId = `wd-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newTx = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: withdrawalId,
+      userId: user.uid,
+      userName: userName,
       date: new Date().toISOString(),
       amount,
       method,
       status: 'Pending'
     };
-    setWithdrawalHistory(prev => [newTx, ...prev]);
+    
+    // Save to global withdrawals collection
+    await setDoc(doc(db, 'withdrawals', withdrawalId), newTx);
     
     // Send internal notification
     await sendWithdrawalRequestMail(user.uid, amount, method);
@@ -251,11 +356,8 @@ export default function Dashboard() {
     // Send internal notification
     await sendDepositRequestMail(user.uid, amount, method);
 
-    // Update user's local deposit history (optional, as we have a listener)
-    const updatedHistory = [newTx, ...depositHistory];
-    setDepositHistory(updatedHistory);
-
     if (type === 'activation') {
+      await updateDoc(doc(db, 'users', user.uid), { status: 'Pending' });
       alert("Activation request submitted! Your account will be activated once the payment is verified.");
       setActiveTab('home');
     }
@@ -295,22 +397,81 @@ export default function Dashboard() {
     }
   };
 
+  const handleApprovePartner = async (targetUserId: string, requestId: string) => {
+    try {
+      await updateDoc(doc(db, 'users', targetUserId), { 
+        role: 'partner',
+        partnerStatus: 'active'
+      });
+      await updateDoc(doc(db, 'partnerRequests', requestId), { status: 'approved' });
+      alert("Partner request approved!");
+    } catch (error) {
+      console.error("Error approving partner:", error);
+    }
+  };
+
+  const handleApproveDeposit = async (targetUserId: string, depositId: string, amount: number) => {
+    try {
+      await updateDoc(doc(db, 'users', targetUserId), { 
+        balance: increment(amount)
+      });
+      await updateDoc(doc(db, 'deposits', depositId), { status: 'Approved' });
+      await sendDepositApprovedMail(targetUserId, amount);
+      alert("Deposit approved!");
+    } catch (error) {
+      console.error("Error approving deposit:", error);
+    }
+  };
+
+  const handleApproveWithdrawal = async (targetUserId: string, withdrawalId: string) => {
+    try {
+      const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
+      const withdrawalDoc = await getDoc(withdrawalRef);
+      if (!withdrawalDoc.exists()) return;
+      const withdrawalData = withdrawalDoc.data();
+
+      await updateDoc(withdrawalRef, { status: 'Approved' });
+      await sendWithdrawalApprovedMail(targetUserId, withdrawalData.amount);
+      alert("Withdrawal approved!");
+    } catch (error) {
+      console.error("Error approving withdrawal:", error);
+    }
+  };
+
   const unreadUpdatesCount = notifications.filter(n => n.status === 'unread').length;
 
-  const handleActivateUser = async (targetUserId: string) => {
+  const handleActivateUser = async (targetUserId: string, depositId?: string) => {
     try {
+      console.log(`[ADMIN_ACTION] Activating user: ${targetUserId}`);
       const userRef = doc(db, 'users', targetUserId);
       const userDoc = await getDoc(userRef);
-      if (!userDoc.exists()) return;
+      if (!userDoc.exists()) {
+        console.error(`[ADMIN_ACTION_FAILURE] User ${targetUserId} not found.`);
+        alert("User document not found.");
+        return;
+      }
       
       const userData = userDoc.data();
-      if (userData.status === 'Active') return;
+      if (userData.status === 'Active') {
+        console.log(`[ADMIN_ACTION] User ${targetUserId} is already active.`);
+        alert("User is already active.");
+        return;
+      }
 
       // 1. Activate the user
-      await updateDoc(userRef, { status: 'Active' });
+      await updateDoc(userRef, { accountStatus: 'active' });
+      console.log(`[ADMIN_ACTION_SUCCESS] User ${targetUserId} status updated to Active.`);
+      
+      // Update deposit status if provided
+      if (depositId) {
+        await updateDoc(doc(db, 'deposits', depositId), { status: 'Approved' });
+        console.log(`[ADMIN_ACTION_SUCCESS] Deposit ${depositId} status updated to Approved.`);
+      }
       
       // Send internal notification
       await sendActivationMail(targetUserId);
+
+      alert("User activated successfully! They now have full access with a verified badge.");
 
       // 2. Handle Direct Referral (Level 1)
       if (userData.referredBy) {
@@ -319,10 +480,17 @@ export default function Dashboard() {
         
         if (l1Doc.exists()) {
           const l1Data = l1Doc.data();
+          const bonus = l1Data.role === 'partner' ? appSettings.referralBonusPartner : appSettings.referralBonusBasic;
+          
+          // Update referral stats in RTDB
+          const l1ReferralRef = ref(rtdb, `invites/${userData.referredBy}`);
+          await update(l1ReferralRef, {
+            activeMembers: rtdbIncrement(1),
+            totalCommission: rtdbIncrement(bonus)
+          });
+
           await updateDoc(l1Ref, {
-            balance: increment(40),
-            'referralStats.activeMembers': increment(1),
-            'referralStats.totalCommission': increment(40)
+            balance: increment(bonus)
           });
 
           // 3. Handle Indirect Referral (Level 2)
@@ -330,9 +498,15 @@ export default function Dashboard() {
             const l2Ref = doc(db, 'users', l1Data.referredBy);
             const l2Doc = await getDoc(l2Ref);
             if (l2Doc.exists()) {
+              const l2Bonus = appSettings.indirectReferralBonus;
+              // Update indirect referral stats in RTDB
+              const l2ReferralRef = ref(rtdb, `invites/${l1Data.referredBy}`);
+              await update(l2ReferralRef, {
+                totalCommission: rtdbIncrement(l2Bonus)
+              });
+
               await updateDoc(l2Ref, {
-                balance: increment(10),
-                'referralStats.totalCommission': increment(10)
+                balance: increment(l2Bonus)
               });
             }
           }
@@ -363,16 +537,27 @@ export default function Dashboard() {
         await sendWithdrawalApprovedMail(user.uid, amount);
       }
     };
+    (window as any).simulatePartnerApproval = async () => {
+      if (user) {
+        await updateDoc(doc(db, 'users', user.uid), { 
+          role: 'partner',
+          partnerStatus: 'active'
+        });
+        alert("Account upgraded to Partner!");
+      }
+    };
     return () => {
       delete (window as any).simulateActivation;
       delete (window as any).simulateDepositApproval;
       delete (window as any).simulateWithdrawalApproval;
+      delete (window as any).simulatePartnerApproval;
     };
   }, [user]);
 
   const renderTabContent = () => {
     // Restriction logic
-    const isInactive = status === 'Inactive';
+    const currentAccountStatus = accountStatus.toLowerCase();
+    const isInactive = currentAccountStatus !== 'active';
     const earningTabs = ['spin', 'tasks', 'watch', 'lottery', 'streak'];
     
     if (isInactive && earningTabs.includes(activeTab)) {
@@ -381,9 +566,13 @@ export default function Dashboard() {
           <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6">
             <AlertTriangle className="w-10 h-10" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Account Inactive</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            {currentAccountStatus === 'pending' ? 'Activation Pending' : 'Account Inactive'}
+          </h2>
           <p className="text-slate-500 mb-8 max-w-xs">
-            You need to activate your account by paying the Rs 100 joining fee to access earning features.
+            {currentAccountStatus === 'pending' 
+              ? 'Your activation request is being verified by the admin. Please wait 1-6 hours.' 
+              : `You need to activate your account by paying the Rs ${appSettings.activationFee} joining fee to access earning features.`}
           </p>
           <button 
             onClick={() => setActiveTab('invite')}
@@ -401,12 +590,31 @@ export default function Dashboard() {
                  name={userName}
                  email={userEmail}
                  status={status}
+                 role={role}
                  accountNumber={withdrawalAccounts[0]?.number || ''}
                  accountTitle={withdrawalAccounts[0]?.title || ''}
                  joiningDate={joiningDate}
                  onEditProfile={() => setActiveTab('edit_profile')} 
                  onLeaderboardClick={() => setActiveTab('leaderboard')} 
                  onManageWalletClick={() => setActiveTab('manage_wallet')}
+                 onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
+                 onAdminPanelClick={() => setActiveTab('admin')}
+               />;
+      case 'admin':
+        return <AdminPanelView 
+                 onBack={() => setActiveTab('profile')}
+                 onApproveActivation={handleActivateUser}
+                 onApprovePartner={handleApprovePartner}
+                 onApproveDeposit={handleApproveDeposit}
+                 onApproveWithdrawal={handleApproveWithdrawal}
+               />;
+      case 'partner_upgrade':
+        return <PartnerUpgradeView 
+                 userId={user?.uid || ''}
+                 userName={userName}
+                 partnerStatus={partnerStatus}
+                 onBack={() => setActiveTab('profile')}
+                 appSettings={appSettings}
                />;
       case 'edit_profile':
         return <EditProfileView 
@@ -456,6 +664,7 @@ export default function Dashboard() {
           onDeposit={handleDeposit}
           transactions={depositHistory}
           initialType={status === 'Inactive' ? 'activation' : 'regular'}
+          appSettings={appSettings}
         />;
       case 'updates':
         return <UpdatesView 
@@ -500,7 +709,8 @@ export default function Dashboard() {
         return <HomeTab 
           name={userName}
           balance={balance}
-          status={status}
+          accountStatus={accountStatus}
+          role={role}
           topEarners={topEarners}
           onSpinClick={() => setActiveTab('spin')} 
           onInviteClick={() => setActiveTab('invite')}
@@ -512,6 +722,8 @@ export default function Dashboard() {
           onLotteryClick={() => setActiveTab('lottery')}
           onStreakClick={() => setActiveTab('streak')}
           onLeaderboardClick={() => setActiveTab('leaderboard')}
+          onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
+          appSettings={appSettings}
         />;
     }
   };
@@ -519,7 +731,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans">
       {/* Mobile App Container */}
-      <div className="w-full max-w-[400px] bg-slate-50 h-[100dvh] sm:h-[850px] sm:rounded-[2.5rem] shadow-2xl relative flex flex-col overflow-hidden border-0 sm:border-[8px] border-slate-800">
+      <div className={`w-full max-w-[400px] ${role === 'partner' ? 'bg-amber-50' : 'bg-slate-50'} h-[100dvh] sm:h-[850px] sm:rounded-[2.5rem] shadow-2xl relative flex flex-col overflow-hidden border-0 sm:border-[8px] border-slate-800`}>
         
         {/* Notch simulation (Desktop only) */}
         <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-3xl z-50"></div>
@@ -549,20 +761,20 @@ export default function Dashboard() {
         </AnimatePresence>
 
         {/* Header */}
-        <div className="px-5 py-4 bg-white/95 backdrop-blur-md flex items-center justify-between sticky top-0 z-10 shadow-sm border-b border-gray-100">
+        <div className={`px-5 py-4 ${role === 'partner' ? 'bg-gradient-to-r from-amber-500 to-yellow-600' : 'bg-white/95 backdrop-blur-md'} flex items-center justify-between sticky top-0 z-10 shadow-sm border-b border-gray-100`}>
           <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setActiveTab('home')}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/30 transition-transform group-hover:scale-105">
+            <div className={`w-9 h-9 rounded-xl ${role === 'partner' ? 'bg-white/20' : 'bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600'} flex items-center justify-center text-white shadow-lg shadow-amber-500/30 transition-transform group-hover:scale-105`}>
               <Sparkles className="w-5 h-5" />
             </div>
-            <h1 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tighter">
-              Task<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-600">Mint</span>
+            <h1 className={`font-black text-xl sm:text-2xl ${role === 'partner' ? 'text-white' : 'text-slate-900'} tracking-tighter`}>
+              Task<span className={role === 'partner' ? 'text-white/80' : 'text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-600'}>Mint</span>
             </h1>
           </div>
           <button 
             onClick={() => setActiveTab('updates')}
-            className="relative p-2 rounded-full hover:bg-gray-100 transition-colors group"
+            className={`relative p-2 rounded-full ${role === 'partner' ? 'hover:bg-white/10' : 'hover:bg-gray-100'} transition-colors group`}
           >
-            <Mail className="w-6 h-6 text-slate-600 transition-colors group-hover:text-amber-600" />
+            <Mail className={`w-6 h-6 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-amber-600`} />
             {unreadUpdatesCount > 0 && (
               <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm animate-bounce">
                 {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
@@ -572,7 +784,57 @@ export default function Dashboard() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-5 pt-6 hide-scrollbar bg-slate-50/50">
+        <div className={`flex-1 overflow-y-auto px-5 pt-6 hide-scrollbar ${role === 'partner' ? 'bg-amber-50/50' : 'bg-slate-50/50'}`}>
+          {role === 'partner' && activeTab === 'home' && (
+            <div className="mb-6 space-y-4">
+              <div className="bg-gradient-to-br from-[#060D2D] to-[#151E32] rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                  <h3 className="font-black text-lg text-amber-400">Partner Analytics</h3>
+                  <Crown className="w-5 h-5 text-amber-500" />
+                </div>
+                <div className="grid grid-cols-2 gap-4 relative z-10">
+                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Team Earnings</p>
+                    <p className="text-xl font-black text-white">Rs {totalTeamEarnings.toFixed(2)}</p>
+                  </div>
+                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Active Team</p>
+                    <p className="text-xl font-black text-white">{partnerReferrals.filter(r => r.status === 'Active').length}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-3xl p-5 border border-amber-100 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-slate-900 text-sm">Member Verification</h3>
+                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase">Helper Tool</span>
+                </div>
+                <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                  {partnerReferrals.length > 0 ? partnerReferrals.map((member, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+                          {member.username?.substring(0, 1).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">{member.username}</p>
+                          <p className={`text-[9px] font-bold uppercase ${member.status === 'Active' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                            {member.status}
+                          </p>
+                        </div>
+                      </div>
+                      {member.status === 'Inactive' && (
+                        <button className="text-[9px] font-bold text-amber-600 hover:underline">Verify</button>
+                      )}
+                    </div>
+                  )) : (
+                    <p className="text-[10px] text-slate-400 text-center py-4">No team members yet.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           {renderTabContent()}
         </div>
 

@@ -10,6 +10,12 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "r83842009@gmail.com" && request.auth.token.email_verified == true));
+    }
+
     function isValidUser(data) {
       return data.keys().hasAll(['uid', 'name', 'email', 'balance']) &&
              data.uid is string &&
@@ -22,35 +28,68 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isOwner(userId) && isValidUser(request.resource.data);
-      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) || isAdmin();
     }
 
     // Lotteries
     match /lotteries/{lotteryId} {
       allow read: if isAuthenticated();
-      allow write: if false; // Only admin via console/backend
+      allow write: if isAdmin();
     }
 
     // Lottery entries
     match /lottery_entries/{entryId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      request.resource.data.keys().hasAll(['lotteryId', 'userId', 'timestamp']);
+                      request.resource.data.userId == request.auth.uid;
     }
 
     // Lottery winners
     match /lottery_winners/{winnerId} {
       allow read: if isAuthenticated();
-      allow write: if false; // Only admin
+      allow write: if isAdmin();
     }
 
     // Spin winners
     match /spin_winners/{winnerId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && 
-                      request.resource.data.userId == request.auth.uid &&
-                      request.resource.data.keys().hasAll(['userId', 'userName', 'prize', 'timestamp']);
+                      request.resource.data.userId == request.auth.uid;
+    }
+
+    // Deposits
+    match /deposits/{depositId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+    }
+
+    // Withdrawals
+    match /withdrawals/{withdrawalId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+    }
+
+    // Partner Requests
+    match /partnerRequests/{requestId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAdmin();
+      allow update: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // App Settings
+    match /app_settings/{settingsId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
