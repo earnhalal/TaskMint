@@ -1,0 +1,142 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and balance information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "balance": { "type": "number" },
+        "withdrawalAccounts": { "type": "array" },
+        "pin": { "type": "string" },
+        "freeSpins": { "type": "number" },
+        "joiningDate": { "type": "string" },
+        "status": { "type": "string", "enum": ["Active", "Inactive"] },
+        "referredBy": { "type": "string" },
+        "referralStats": {
+          "type": "object",
+          "properties": {
+            "totalInvited": { "type": "number" },
+            "activeMembers": { "type": "number" },
+            "totalCommission": { "type": "number" }
+          }
+        }
+      },
+      "required": ["uid", "name", "email", "balance", "status"]
+    },
+    "Deposit": {
+      "title": "Deposit",
+      "description": "Record of a user's deposit for activation",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "amount": { "type": "number" },
+        "method": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["activation", "regular"] }
+      },
+      "required": ["userId", "amount", "method", "status", "timestamp"]
+    },
+    "Lottery": {
+      "title": "Lottery",
+      "description": "Active and completed lottery draws",
+      "type": "object",
+      "properties": {
+        "fee": { "type": "number" },
+        "maxMembers": { "type": "number" },
+        "currentMembers": { "type": "number" },
+        "prizePool": { "type": "number" },
+        "drawDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "completed"] },
+        "color": { "type": "string" }
+      },
+      "required": ["fee", "maxMembers", "currentMembers", "status"]
+    },
+    "LotteryEntry": {
+      "title": "Lottery Entry",
+      "description": "Record of a user joining a lottery",
+      "type": "object",
+      "properties": {
+        "lotteryId": { "type": "string" },
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["lotteryId", "userId", "timestamp"]
+    },
+    "LotteryWinner": {
+      "title": "Lottery Winner",
+      "description": "Record of a lottery winner",
+      "type": "object",
+      "properties": {
+        "lotteryId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "prize": { "type": "number" },
+        "lotteryName": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["lotteryId", "userId", "userName", "prize", "timestamp"]
+    },
+    "SpinWinner": {
+      "title": "Spin Winner",
+      "description": "Record of a recent spin wheel winner",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "prize": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userName", "prize", "timestamp"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "System notification or message for a user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["welcome", "activation", "deposit", "withdrawal", "verification", "system"] },
+        "status": { "type": "string", "enum": ["unread", "read"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "type", "status", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User specific system notifications"
+    },
+    "/lotteries/{lotteryId}": {
+      "schema": "Lottery",
+      "description": "Lottery draw data"
+    },
+    "/lottery_entries/{entryId}": {
+      "schema": "LotteryEntry",
+      "description": "User entries into lotteries"
+    },
+    "/lottery_winners/{winnerId}": {
+      "schema": "LotteryWinner",
+      "description": "Historical lottery winners"
+    },
+    "/spin_winners/{winnerId}": {
+      "schema": "SpinWinner",
+      "description": "Recent spin wheel winners for live feed"
+    },
+    "/deposits/{depositId}": {
+      "schema": "Deposit",
+      "description": "User deposit requests"
+    }
+  }
+}
