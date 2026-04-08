@@ -75,6 +75,7 @@ export default function Dashboard() {
   const [notificationMessage, setNotificationMessage] = useState('Sana just earned <span class="font-bold">Rs 2000</span> from a Referral Bonus!');
   const [isNotificationAnimating, setIsNotificationAnimating] = useState(true);
   const [partnerReferrals, setPartnerReferrals] = useState<any[]>([]);
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
 
   const names = ['Ahmed', 'Fatima', 'Ali', 'Ayesha', 'Zainab', 'Bilal', 'Hassan', 'Sana', 'Usman', 'Maryam', 'Abdullah', 'Khadija'];
   const amounts = [100, 250, 500, 750, 1000, 1250, 2000];
@@ -143,10 +144,18 @@ export default function Dashboard() {
       if (status) {
         setStatus(status);
         setAccountStatus(status);
+        if (status.toLowerCase() !== 'active' && !sessionStorage.getItem('inactiveModalShown')) {
+          setShowInactiveModal(true);
+          sessionStorage.setItem('inactiveModalShown', 'true');
+        }
       } else {
         // Default to inactive if no status in RTDB
         setStatus('inactive');
         setAccountStatus('inactive');
+        if (!sessionStorage.getItem('inactiveModalShown')) {
+          setShowInactiveModal(true);
+          sessionStorage.setItem('inactiveModalShown', 'true');
+        }
       }
     });
 
@@ -773,6 +782,45 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans">
+      {/* Urdu Inactive Modal */}
+      <AnimatePresence>
+        {showInactiveModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" dir="rtl">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100"
+            >
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4 mx-auto">
+                <AlertTriangle className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-center text-slate-900 mb-3 font-urdu">خوش آمدید! آپ کا اکاؤنٹ ابھی فعال (Active) نہیں ہے۔</h3>
+              <p className="text-base text-center text-slate-600 mb-6 font-urdu leading-relaxed">
+                ارننگ شروع کرنے کے لیے آپ کو ایک بار جوائننگ فیس جمع کروانی ہوگی۔ نیچے دیے گئے بٹن پر کلک کریں اور فیس جمع کروا کر واٹس ایپ پر اسکرین شاٹ بھیجیں۔ اکاؤنٹ جلد ہی ایکٹیو کر دیا جائے گا۔
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowInactiveModal(false)}
+                  className="flex-1 bg-slate-100 text-slate-700 font-bold py-3.5 rounded-xl hover:bg-slate-200 transition-colors font-urdu"
+                >
+                  بند کریں
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowInactiveModal(false);
+                    setActiveTab('activation');
+                  }}
+                  className="flex-[2] bg-red-600 text-white font-bold py-3.5 rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20 font-urdu"
+                >
+                  فیس جمع کروائیں
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Mobile App Container */}
       <div className={`w-full max-w-[400px] ${role === 'partner' ? 'bg-amber-50' : 'bg-slate-50'} h-[100dvh] sm:h-[850px] sm:rounded-[2.5rem] shadow-2xl relative flex flex-col overflow-hidden border-0 sm:border-[8px] border-slate-800`}>
         

@@ -65,7 +65,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
 
     setIsSubmitting(true);
     try {
-      const requestId = push(ref(rtdb, `activation_requests/${auth.currentUser.uid}`)).key;
+      const requestId = 'latest_request';
       const data = {
         userId: auth.currentUser.uid,
         userName: userName,
@@ -127,19 +127,18 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
         </div>
       </div>
 
-      {/* Instructions Card */}
-      {!activeRequest && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 space-y-6"
-        >
-          <div className="bg-amber-50 border-2 border-amber-100 rounded-2xl p-4 flex gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-            <p className="text-[11px] font-bold text-amber-800 leading-relaxed">
-              Neeche diye gaye number par <span className="text-amber-900 font-black">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein. Aapka account foran active kar diya jayega.
-            </p>
-          </div>
+      {/* Instructions Card (Always Visible) */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 space-y-6"
+      >
+        <div className="bg-amber-50 border-2 border-amber-100 rounded-2xl p-4 flex gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+          <p className="text-[11px] font-bold text-amber-800 leading-relaxed">
+            Neeche diye gaye number par <span className="text-amber-900 font-black">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein. Aapka account foran active kar diya jayega.
+          </p>
+        </div>
 
           <div className="grid grid-cols-1 gap-3">
             <button
@@ -181,7 +180,6 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
             </button>
           </div>
         </motion.div>
-      )}
 
       {/* Active Request Status */}
       {activeRequest && (
