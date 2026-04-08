@@ -21,7 +21,8 @@ service cloud.firestore {
              data.uid is string &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              data.email is string &&
-             data.balance is number;
+             data.balance is number &&
+             (!('lockedBalance' in data) || data.lockedBalance is number);
     }
 
     // User profiles

@@ -6,7 +6,7 @@ import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 
-export default function ProfileTab({ name, email, status, role, accountNumber, accountTitle, joiningDate, onEditProfile, onLeaderboardClick, onManageWalletClick, onPartnerUpgradeClick, onAdminPanelClick }: { name: string, email: string, status: string, role: string, accountNumber: string, accountTitle: string, joiningDate: string, onEditProfile?: () => void, onLeaderboardClick?: () => void, onManageWalletClick?: () => void, onPartnerUpgradeClick?: () => void, onAdminPanelClick?: () => void }) {
+export default function ProfileTab({ name, email, status, role, balance, lockedBalance, accountNumber, accountTitle, joiningDate, onEditProfile, onLeaderboardClick, onManageWalletClick, onPartnerUpgradeClick, onAdminPanelClick }: { name: string, email: string, status: string, role: string, balance: number, lockedBalance: number, accountNumber: string, accountTitle: string, joiningDate: string, onEditProfile?: () => void, onLeaderboardClick?: () => void, onManageWalletClick?: () => void, onPartnerUpgradeClick?: () => void, onAdminPanelClick?: () => void }) {
   const { user } = useAuth();
   const [avatar, setAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -146,6 +146,26 @@ export default function ProfileTab({ name, email, status, role, accountNumber, a
           Edit Info
         </button>
       </div>
+
+      <Section title="Wallet Overview">
+        <div className="p-4 border-b border-slate-50 flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Available Balance</p>
+              <p className="text-lg font-black text-emerald-600">{balance?.toLocaleString() || 0} PKR</p>
+            </div>
+            <Wallet className="w-5 h-5 text-emerald-500" />
+        </div>
+        {lockedBalance > 0 && (
+          <div className="p-4 flex justify-between items-center bg-amber-50/30">
+              <div>
+                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">Locked Balance</p>
+                <p className="text-lg font-black text-amber-600">{lockedBalance?.toLocaleString() || 0} PKR</p>
+                <p className="text-[9px] text-amber-500 font-medium">Invite friends to unlock!</p>
+              </div>
+              <Clock className="w-5 h-5 text-amber-500" />
+          </div>
+        )}
+      </Section>
 
       <Section title="Rank & Progression">
         <Item icon={<BarChart3 className="w-4 h-4" />} label="Top Earners Leaderboard" onClick={onLeaderboardClick} />

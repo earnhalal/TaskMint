@@ -22,6 +22,7 @@ import {
 interface HomeTabProps {
   name: string;
   balance: number;
+  lockedBalance: number;
   accountStatus: string;
   role: string;
   topEarners: any[];
@@ -81,6 +82,7 @@ const QuickActionBtn: React.FC<{
 export default function HomeTab({ 
   name, 
   balance, 
+  lockedBalance,
   accountStatus,
   role,
   topEarners,
@@ -227,17 +229,34 @@ export default function HomeTab({
 
         {/* Content - Horizontal Layout */}
         <div className="relative z-10 flex items-center justify-between gap-4">
-            <div>
-                <div className="flex items-center gap-1.5 mb-1 opacity-80">
-                    <WalletIcon className="w-3 h-3 text-amber-400" />
-                    <span className="text-[9px] font-bold tracking-widest uppercase text-amber-100">Balance</span>
+            <div className="flex flex-col gap-4">
+                <div>
+                    <div className="flex items-center gap-1.5 mb-1 opacity-80">
+                        <WalletIcon className="w-3 h-3 text-amber-400" />
+                        <span className="text-[9px] font-bold tracking-widest uppercase text-amber-100">Balance</span>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                        <span className="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-500 drop-shadow-sm">
+                            {balance.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                        </span>
+                        <span className="text-xs font-bold text-amber-600/80 font-mono">PKR</span>
+                    </div>
                 </div>
-                <div className="flex items-baseline gap-1.5">
-                    <span className="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-500 drop-shadow-sm">
-                        {balance.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
-                    </span>
-                    <span className="text-xs font-bold text-amber-600/80 font-mono">PKR</span>
-                </div>
+
+                {lockedBalance > 0 && (
+                  <div className="bg-white/5 rounded-xl p-2 border border-white/5">
+                    <div className="flex items-center gap-1.5 mb-0.5 opacity-60">
+                        <Clock className="w-2.5 h-2.5 text-amber-200" />
+                        <span className="text-[8px] font-bold tracking-widest uppercase text-amber-50">Locked Balance</span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-sm font-black text-amber-200">
+                            {lockedBalance.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                        </span>
+                        <span className="text-[8px] font-bold text-amber-400/60 font-mono">PKR</span>
+                    </div>
+                  </div>
+                )}
             </div>
 
             <div className="flex flex-col gap-2">

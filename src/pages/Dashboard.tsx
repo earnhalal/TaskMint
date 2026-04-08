@@ -86,6 +86,7 @@ export default function Dashboard() {
   ];
 
   const [balance, setBalance] = useState(0);
+  const [lockedBalance, setLockedBalance] = useState(0);
   const [freeSpins, setFreeSpins] = useState(0);
   const [withdrawalHistory, setWithdrawalHistory] = useState<any[]>([]);
   const [depositHistory, setDepositHistory] = useState<any[]>([]);
@@ -110,6 +111,7 @@ export default function Dashboard() {
       if (doc.exists()) {
         const data = doc.data();
         setBalance(data.balance || 0);
+        setLockedBalance(data.lockedBalance || 0);
         setWithdrawalHistory(data.withdrawalHistory || []);
         setUserPin(data.pin || '');
         setSeenUpdates(data.seenUpdates || []);
@@ -272,17 +274,25 @@ export default function Dashboard() {
   }, [seenUpdates]);
 
   useEffect(() => {
-    const notificationInterval = setInterval(() => {
-      setIsNotificationAnimating(false);
-      setTimeout(() => {
-        const randomName = names[Math.floor(Math.random() * names.length)];
-        const randomAmount = amounts[Math.floor(Math.random() * amounts.length)];
-        const randomEvent = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
-        setNotificationMessage(`${randomName} just ${randomEvent.action} <span class="font-bold">Rs ${randomAmount}</span> ${randomEvent.source}`);
-        setIsNotificationAnimating(true); 
-      }, 500);
-    }, 5000);
-    return () => clearInterval(notificationInterval);
+    const winnersRef = ref(rtdb, 'spin_winners');
+    const unsubscribe = onValue(winnersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.values(data) as any[];
+        // Sort by timestamp desc and take the latest
+        const sorted = list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        if (sorted.length > 0) {
+          const latest = sorted[0];
+          setIsNotificationAnimating(false);
+          setTimeout(() => {
+            setNotificationMessage(`${latest.userName} just won <span class="font-bold">${latest.prize}</span> from Spin & Win!`);
+            setIsNotificationAnimating(true);
+          }, 500);
+        }
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -330,6 +340,17 @@ export default function Dashboard() {
       console.error("Error updating balance:", error);
       // Fallback to local state if Firestore fails
       setBalance(prev => prev + amount);
+    }
+  };
+
+  const handleWinLockedPrize = async (amount: number, requiredInvites: number) => {
+    if (!user) return;
+    try {
+      await updateDoc(doc(db, 'users', user.uid), {
+        lockedBalance: increment(amount)
+      });
+    } catch (error) {
+      console.error("Locked Prize Error:", error);
     }
   };
 
@@ -635,6 +656,8 @@ export default function Dashboard() {
                  email={userEmail}
                  status={status}
                  role={role}
+                 balance={balance}
+                 lockedBalance={lockedBalance}
                  accountNumber={withdrawalAccounts[0]?.number || ''}
                  accountTitle={withdrawalAccounts[0]?.title || ''}
                  joiningDate={joiningDate}
@@ -737,6 +760,8 @@ export default function Dashboard() {
           freeSpins={freeSpins}
           onUseFreeSpin={handleUseFreeSpin}
           onGoToDeposit={() => setActiveTab('deposit')}
+          activeInvites={referralStats.activeMembers}
+          onWinLockedPrize={handleWinLockedPrize}
         />;
       case 'premium':
         return <PremiumModal onClose={() => setActiveTab('home')} />;
@@ -760,6 +785,7 @@ export default function Dashboard() {
         return <HomeTab 
           name={userName}
           balance={balance}
+          lockedBalance={lockedBalance}
           accountStatus={accountStatus}
           role={role}
           topEarners={topEarners}
