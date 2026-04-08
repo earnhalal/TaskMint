@@ -188,7 +188,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
                                         type="text" 
                                         placeholder="Referral Code (Optional)"
                                         value={referralCode}
-                                        onChange={e => setReferralCode(e.target.value)}
+                                        onChange={e => setReferralCode(e.target.value.replace(/\s+/g, '').toLowerCase())}
                                         className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
                                     />
                                     <label className="flex items-center gap-3 cursor-pointer group">

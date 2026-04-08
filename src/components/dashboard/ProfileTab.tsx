@@ -6,7 +6,7 @@ import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 
-export default function ProfileTab({ name, email, status, role, balance, lockedBalance, accountNumber, accountTitle, joiningDate, onEditProfile, onLeaderboardClick, onManageWalletClick, onPartnerUpgradeClick, onAdminPanelClick }: { name: string, email: string, status: string, role: string, balance: number, lockedBalance: number, accountNumber: string, accountTitle: string, joiningDate: string, onEditProfile?: () => void, onLeaderboardClick?: () => void, onManageWalletClick?: () => void, onPartnerUpgradeClick?: () => void, onAdminPanelClick?: () => void }) {
+export default function ProfileTab({ name, email, status, role, balance, lockedBalance, accountNumber, accountTitle, joiningDate, referralCode, onEditProfile, onLeaderboardClick, onManageWalletClick, onPartnerUpgradeClick, onAdminPanelClick }: { name: string, email: string, status: string, role: string, balance: number, lockedBalance: number, accountNumber: string, accountTitle: string, joiningDate: string, referralCode: string, onEditProfile?: () => void, onLeaderboardClick?: () => void, onManageWalletClick?: () => void, onPartnerUpgradeClick?: () => void, onAdminPanelClick?: () => void }) {
   const { user } = useAuth();
   const [avatar, setAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -111,6 +111,7 @@ export default function ProfileTab({ name, email, status, role, balance, lockedB
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-900">{name}</h2>
+            <p className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded inline-block mb-1">ID: {referralCode}</p>
             <p className="text-xs text-slate-500 mb-2">{email}</p>
             <div className="flex flex-wrap gap-2">
                 {role === 'partner' ? (

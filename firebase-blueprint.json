@@ -16,6 +16,7 @@
         "joiningDate": { "type": "string" },
         "status": { "type": "string", "enum": ["Active", "Inactive"] },
         "referredBy": { "type": "string" },
+        "referralCode": { "type": "string" },
         "referralStats": {
           "type": "object",
           "properties": {

@@ -72,6 +72,8 @@ export default function Dashboard() {
     totalCommission: 0
   });
   const [referredBy, setReferredBy] = useState<string | null>(null);
+  const [referralCode, setReferralCode] = useState<string>('');
+  const [showReferralUpdateNotify, setShowReferralUpdateNotify] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('Sana just earned <span class="font-bold">Rs 2000</span> from a Referral Bonus!');
   const [isNotificationAnimating, setIsNotificationAnimating] = useState(true);
   const [partnerReferrals, setPartnerReferrals] = useState<any[]>([]);
@@ -107,9 +109,9 @@ export default function Dashboard() {
     if (!user) return;
 
     // Listener for user profile
-    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
-      if (doc.exists()) {
-        const data = doc.data();
+    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
         setBalance(data.balance || 0);
         setLockedBalance(data.lockedBalance || 0);
         setWithdrawalHistory(data.withdrawalHistory || []);
@@ -125,6 +127,19 @@ export default function Dashboard() {
         setPartnerStatus(data.partnerStatus || 'none');
         setTotalTeamEarnings(data.totalTeamEarnings || 0);
         setReferredBy(data.referredBy || null);
+        setReferralCode(data.referralCode || '');
+
+        // Migration logic for old users
+        if (!data.referralCode && data.username) {
+          const generateCode = async () => {
+            const phoneSuffix = (data.phone || '').slice(-3) || Math.floor(100 + Math.random() * 900).toString();
+            const newCode = `${data.username.toLowerCase()}_${phoneSuffix}`;
+            await updateDoc(doc(db, 'users', user.uid), { referralCode: newCode });
+            setReferralCode(newCode);
+            setShowReferralUpdateNotify(true);
+          };
+          generateCode();
+        }
       }
     });
 
@@ -563,11 +578,15 @@ export default function Dashboard() {
       }
 
       // 1. Activate the user
-      await updateDoc(userRef, { accountStatus: 'active' });
+      await updateDoc(userRef, { 
+        status: 'Active',
+        accountStatus: 'active' 
+      });
+      
       // Update RTDB status
       const userStatusRef = ref(rtdb, `users/${targetUserId}`);
       await update(userStatusRef, { status: 'Active', accountStatus: 'active' });
-      console.log(`[ADMIN_ACTION_SUCCESS] User ${targetUserId} status updated to Active.`);
+      console.log(`[ADMIN_ACTION_SUCCESS] User ${targetUserId} status updated to Active in Firestore and RTDB.`);
       
       // Update deposit status if provided
       if (depositId) {
@@ -578,19 +597,22 @@ export default function Dashboard() {
       // Send internal notification
       await sendActivationMail(targetUserId);
 
-      alert("User activated successfully! They now have full access with a verified badge.");
-
       // 2. Handle Direct Referral (Level 1)
       if (userData.referredBy) {
+        console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
         const parentUsernameDoc = await getDoc(doc(db, 'usernames', userData.referredBy.toLowerCase()));
+        
         if (parentUsernameDoc.exists()) {
           const l1Uid = parentUsernameDoc.data().uid;
+          console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
+          
           const l1Ref = doc(db, 'users', l1Uid);
           const l1Doc = await getDoc(l1Ref);
           
           if (l1Doc.exists()) {
             const l1Data = l1Doc.data();
             const bonus = l1Data.role === 'partner' ? appSettings.referralBonusPartner : appSettings.referralBonusBasic;
+            console.log(`[REFERRAL_LOG] Distributing Level 1 Bonus: Rs ${bonus} to ${l1Uid}`);
             
             // Update referral stats in RTDB
             const l1ReferralRef = ref(rtdb, `invites/${l1Uid}`);
@@ -605,13 +627,20 @@ export default function Dashboard() {
 
             // 3. Handle Indirect Referral (Level 2)
             if (l1Data.referredBy) {
+              console.log(`[REFERRAL_LOG] Level 1 Parent was referred by: ${l1Data.referredBy}`);
               const l2UsernameDoc = await getDoc(doc(db, 'usernames', l1Data.referredBy.toLowerCase()));
+              
               if (l2UsernameDoc.exists()) {
                 const l2Uid = l2UsernameDoc.data().uid;
+                console.log(`[REFERRAL_LOG] Found Level 2 Parent UID: ${l2Uid}`);
+                
                 const l2Ref = doc(db, 'users', l2Uid);
                 const l2Doc = await getDoc(l2Ref);
+                
                 if (l2Doc.exists()) {
                   const l2Bonus = appSettings.indirectReferralBonus;
+                  console.log(`[REFERRAL_LOG] Distributing Level 2 Bonus: Rs ${l2Bonus} to ${l2Uid}`);
+                  
                   // Update indirect referral stats in RTDB
                   const l2ReferralRef = ref(rtdb, `invites/${l2Uid}`);
                   await update(l2ReferralRef, {
@@ -624,16 +653,24 @@ export default function Dashboard() {
                 }
               }
             }
+          } else {
+            console.warn(`[REFERRAL_LOG] Level 1 Parent document not found for UID: ${l1Uid}`);
           }
+        } else {
+          console.warn(`[REFERRAL_LOG] Parent username document not found for: ${userData.referredBy}`);
         }
+      } else {
+        console.log(`[REFERRAL_LOG] User ${targetUserId} has no referrer.`);
       }
       
       if (targetUserId === user?.uid) {
         setStatus('Active');
       }
-      alert("User activated and commissions distributed!");
+      
+      alert("User activated and commissions distributed successfully!");
     } catch (error) {
       console.error("Error activating user:", error);
+      alert("Error during activation. Check console for details.");
     }
   };
 
@@ -711,6 +748,7 @@ export default function Dashboard() {
                  accountNumber={withdrawalAccounts[0]?.number || ''}
                  accountTitle={withdrawalAccounts[0]?.title || ''}
                  joiningDate={joiningDate}
+                 referralCode={referralCode}
                  onEditProfile={() => setActiveTab('edit_profile')} 
                  onLeaderboardClick={() => setActiveTab('leaderboard')} 
                  onManageWalletClick={() => setActiveTab('manage_wallet')}
@@ -752,7 +790,7 @@ export default function Dashboard() {
         return <InviteTab 
           status={status}
           referralStats={referralStats}
-          referralCode={userName || ''}
+          referralCode={referralCode || userName || ''}
           onActivateClick={() => setActiveTab('activation')}
         />;
       case 'activation':
@@ -860,6 +898,43 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans">
+      {/* Referral Update Notification */}
+      <AnimatePresence>
+        {showReferralUpdateNotify && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 to-yellow-600"></div>
+              
+              <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="w-10 h-10 text-amber-500" />
+              </div>
+
+              <h3 className="text-2xl font-black text-slate-900 mb-4 leading-tight">Link Update!</h3>
+              <p className="text-sm text-slate-500 font-medium mb-8 leading-relaxed">
+                Aapka naya referral link update ho gaya hai, mazeed security ke liye ab isay istemal karein.
+              </p>
+
+              <div className="bg-slate-50 rounded-2xl p-4 mb-8 border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">New Referral Code</p>
+                <p className="text-lg font-black text-slate-900 font-mono tracking-wider">{referralCode}</p>
+              </div>
+
+              <button 
+                onClick={() => setShowReferralUpdateNotify(false)}
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all"
+              >
+                Samajh Gaya!
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Urdu Inactive Modal */}
       <AnimatePresence>
         {showInactiveModal && (

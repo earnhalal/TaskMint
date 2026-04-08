@@ -4,7 +4,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, se
 import { app } from '../firebase';
 import AuthView from '../components/AuthView';
 
-import { doc, setDoc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, increment, query, collection, where, getDocs } from 'firebase/firestore';
 import { db, rtdb } from '../firebase';
 import { ref, update, increment as rtdbIncrement } from 'firebase/database';
 import { sendWelcomeMail } from '../services/notificationService';
@@ -39,6 +39,10 @@ export default function Auth() {
         username: data.username
       });
 
+      // Generate unique referral code for the new user
+      const phoneSuffix = data.phone.slice(-3) || Math.floor(100 + Math.random() * 900).toString();
+      const uniqueReferralCode = `${data.username.toLowerCase()}_${phoneSuffix}`;
+
       // Save user data to Firestore
       const userData = {
         uid: user.uid,
@@ -53,6 +57,7 @@ export default function Auth() {
         freeSpins: 0,
         joiningDate: new Date().toISOString(),
         referredBy: data.referralCode || null,
+        referralCode: uniqueReferralCode,
         referralStats: {
           totalInvited: 0,
           activeMembers: 0,
@@ -67,19 +72,46 @@ export default function Auth() {
 
       // If referred, update parent's totalInvited count
       if (data.referralCode) {
-        // We need to find the parent's UID from their username
-        const parentUsernameDoc = await getDoc(doc(db, 'usernames', data.referralCode.toLowerCase()));
-        if (parentUsernameDoc.exists()) {
-          const parentUid = parentUsernameDoc.data().uid;
+        const sanitizedRef = data.referralCode.trim().toLowerCase();
+        console.log(`[SIGNUP_REFERRAL_LOG] User ${user.uid} signed up with referral code: ${sanitizedRef}`);
+        
+        // Backward Compatibility: 
+        // 1. Try finding by referralCode field
+        // 2. Try finding by username field (legacy)
+        
+        let parentUid = null;
+        
+        // Search in users collection by referralCode
+        const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          parentUid = querySnapshot.docs[0].id;
+          console.log(`[SIGNUP_REFERRAL_LOG] Found parent by referralCode: ${parentUid}`);
+        } else {
+          // Fallback: Search in usernames collection (legacy)
+          const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
+          if (parentUsernameDoc.exists()) {
+            parentUid = parentUsernameDoc.data().uid;
+            console.log(`[SIGNUP_REFERRAL_LOG] Found parent by legacy username: ${parentUid}`);
+          }
+        }
+
+        if (parentUid) {
           const parentRef = doc(db, 'users', parentUid);
           const parentDoc = await getDoc(parentRef);
           if (parentDoc.exists()) {
+            console.log(`[SIGNUP_REFERRAL_LOG] Updating totalInvited for parent: ${parentUid}`);
             // Update invite count in RTDB
             const parentReferralRef = ref(rtdb, `invites/${parentUid}`);
             await update(parentReferralRef, {
               totalInvited: rtdbIncrement(1)
             });
+          } else {
+            console.warn(`[SIGNUP_REFERRAL_LOG] Parent user document not found for UID: ${parentUid}`);
           }
+        } else {
+          console.warn(`[SIGNUP_REFERRAL_LOG] Parent not found for code/username: ${sanitizedRef}`);
         }
       }
 

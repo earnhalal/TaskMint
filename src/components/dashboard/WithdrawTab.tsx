@@ -35,6 +35,8 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
   const [error, setError] = useState('');
 
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const selectedAccount = accounts.find(a => a.id === selectedAccountId);
 
   const handleWithdraw = () => {
@@ -54,6 +56,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
     onWithdraw(val, selectedAccount.method);
     setAmount('');
     setError('');
+    setShowSuccess(true);
   };
 
   const displayHistory = history.map(h => ({
@@ -193,9 +196,9 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             <button 
                 onClick={handleWithdraw}
                 disabled={!selectedAccount || parseFloat(amount) < 1000}
-                className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:cursor-not-allowed text-white py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all active:scale-95 shadow-2xl shadow-slate-900/20"
+                className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:cursor-not-allowed text-white py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl shadow-slate-900/10"
             >
-                Confirm Withdrawal <ArrowRight className="w-6 h-6" />
+                Confirm Withdrawal <ArrowRight className="w-5 h-5" />
             </button>
         </div>
 
@@ -238,6 +241,44 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center px-6 bg-slate-900/60 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm text-center shadow-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+              
+              <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping"></div>
+                <CheckCircle2 className="w-10 h-10 text-emerald-500 relative z-10" />
+              </div>
+
+              <h3 className="text-2xl font-black text-slate-900 mb-2">Withdrawal Placed!</h3>
+              <p className="text-sm text-slate-500 font-medium mb-8 leading-relaxed">
+                Apka withdrawal lag gya ha. It will be processed within 1-24 hours.
+              </p>
+
+              <button 
+                onClick={() => setShowSuccess(false)}
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all"
+              >
+                Great, Thanks!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
