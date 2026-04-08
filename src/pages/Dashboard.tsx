@@ -719,6 +719,7 @@ export default function Dashboard() {
           onUpdateBalance={handleUpdateBalance}
           freeSpins={freeSpins}
           onUseFreeSpin={handleUseFreeSpin}
+          onGoToDeposit={() => setActiveTab('deposit')}
         />;
       case 'premium':
         return <PremiumModal onClose={() => setActiveTab('home')} />;

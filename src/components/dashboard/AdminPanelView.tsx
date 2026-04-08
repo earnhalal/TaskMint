@@ -12,7 +12,8 @@ import {
   Search,
   Filter,
   Settings,
-  Save
+  Save,
+  Ticket
 } from 'lucide-react';
 import { 
   collection, 
@@ -166,8 +167,153 @@ function SettingsView() {
   );
 }
 
+function LotteriesAdminView() {
+  const [lotteries, setLotteries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [newLottery, setNewLottery] = useState({
+    fee: 50,
+    maxMembers: 100,
+    prizePool: 4000,
+    color: 'from-purple-500 to-indigo-600'
+  });
+
+  useEffect(() => {
+    const q = query(collection(db, 'lotteries'), orderBy('drawDate', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setLotteries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleCreate = async () => {
+    setCreating(true);
+    try {
+      // Draw date 7 days from now
+      const drawDate = new Date();
+      drawDate.setDate(drawDate.getDate() + 7);
+
+      await setDoc(doc(collection(db, 'lotteries')), {
+        fee: newLottery.fee,
+        maxMembers: newLottery.maxMembers,
+        currentMembers: 0,
+        prizePool: newLottery.prizePool,
+        drawDate: drawDate,
+        status: 'active',
+        color: newLottery.color
+      });
+      alert("Lottery created successfully!");
+    } catch (error) {
+      console.error("Error creating lottery:", error);
+      alert("Failed to create lottery.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleComplete = async (id: string) => {
+    if (!window.confirm("Mark this lottery as completed?")) return;
+    try {
+      await updateDoc(doc(db, 'lotteries', id), { status: 'completed' });
+    } catch (error) {
+      console.error("Error updating lottery:", error);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
+        <h3 className="text-sm font-black text-slate-900 mb-4 flex items-center gap-2">
+          <Ticket className="w-4 h-4 text-purple-500" /> Create New Lottery
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Entry Fee (Rs)</label>
+            <input 
+              type="number" 
+              value={newLottery.fee}
+              onChange={(e) => setNewLottery({...newLottery, fee: Number(e.target.value)})}
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Prize Pool (Rs)</label>
+            <input 
+              type="number" 
+              value={newLottery.prizePool}
+              onChange={(e) => setNewLottery({...newLottery, prizePool: Number(e.target.value)})}
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Max Members</label>
+            <input 
+              type="number" 
+              value={newLottery.maxMembers}
+              onChange={(e) => setNewLottery({...newLottery, maxMembers: Number(e.target.value)})}
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Color Theme</label>
+            <select 
+              value={newLottery.color}
+              onChange={(e) => setNewLottery({...newLottery, color: e.target.value})}
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+            >
+              <option value="from-purple-500 to-indigo-600">Purple/Indigo</option>
+              <option value="from-amber-400 to-orange-500">Amber/Orange</option>
+              <option value="from-emerald-400 to-teal-500">Emerald/Teal</option>
+              <option value="from-rose-400 to-red-500">Rose/Red</option>
+            </select>
+          </div>
+        </div>
+        <button 
+          onClick={handleCreate}
+          disabled={creating}
+          className="w-full bg-purple-600 text-white py-3 rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+        >
+          {creating ? 'CREATING...' : 'CREATE LOTTERY'}
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-sm font-black text-slate-900">Active & Past Lotteries</h3>
+        {loading ? (
+          <p className="text-xs text-slate-400 text-center py-4">Loading lotteries...</p>
+        ) : lotteries.length > 0 ? (
+          lotteries.map(lottery => (
+            <div key={lottery.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Prize: Rs {lottery.prizePool}</p>
+                <p className="text-[10px] text-slate-500">Fee: Rs {lottery.fee} • Members: {lottery.currentMembers}/{lottery.maxMembers}</p>
+                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${lottery.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                  {lottery.status}
+                </span>
+              </div>
+              {lottery.status === 'active' && (
+                <button 
+                  onClick={() => handleComplete(lottery.id)}
+                  className="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold"
+                >
+                  Mark Completed
+                </button>
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="text-xs text-slate-400 text-center py-4">No lotteries found.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPanelView({ onBack, onApproveActivation, onApprovePartner, onApproveDeposit, onApproveWithdrawal }: AdminPanelViewProps) {
-  const [activeTab, setActiveTab] = useState<'activations' | 'partners' | 'deposits' | 'withdrawals' | 'settings'>('activations');
+  const [activeTab, setActiveTab] = useState<'activations' | 'partners' | 'deposits' | 'withdrawals' | 'settings' | 'lotteries'>('activations');
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -244,6 +390,7 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
           { id: 'partners', label: 'Partners', icon: <Crown className="w-3.5 h-3.5" /> },
           { id: 'deposits', label: 'Deposits', icon: <Wallet className="w-3.5 h-3.5" /> },
           { id: 'withdrawals', label: 'Withdrawals', icon: <ArrowLeft className="w-3.5 h-3.5 rotate-180" /> },
+          { id: 'lotteries', label: 'Lotteries', icon: <Ticket className="w-3.5 h-3.5" /> },
           { id: 'settings', label: 'Settings', icon: <Settings className="w-3.5 h-3.5" /> },
         ].map((tab) => (
           <button
@@ -263,6 +410,8 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
 
       {activeTab === 'settings' ? (
         <SettingsView />
+      ) : activeTab === 'lotteries' ? (
+        <LotteriesAdminView />
       ) : (
         <>
           <div className="relative mb-6">

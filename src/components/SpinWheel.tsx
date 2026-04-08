@@ -28,20 +28,39 @@ export default function SpinWheel({
   balance, 
   onUpdateBalance, 
   freeSpins, 
-  onUseFreeSpin 
+  onUseFreeSpin,
+  onGoToDeposit
 }: { 
   onClose: () => void;
   balance: number;
   onUpdateBalance: (amount: number) => void;
   freeSpins: number;
   onUseFreeSpin: () => void;
+  onGoToDeposit?: () => void;
 }) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [prize, setPrize] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showDepositPopup, setShowDepositPopup] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [winners, setWinners] = useState<any[]>([]);
+
+  const getProbabilities = (isPaid: boolean) => {
+    if (isPaid) {
+      return [
+        { id: 0, probability: 20 }, // Rs. 1
+        { id: 1, probability: 40 }, // Rs. 5
+        { id: 2, probability: 20 }, // Try Again
+        { id: 3, probability: 10 }, // Rs. 10
+        { id: 4, probability: 5 },  // Rs. 50
+        { id: 5, probability: 3 },  // Rs. 500
+        { id: 6, probability: 1.5 },// Rs. 1000
+        { id: 7, probability: 0.5 },// Rs. 5000
+      ];
+    }
+    return segments.map(s => ({ id: s.id, probability: s.probability }));
+  };
 
   // Live Winners Feed from RTDB
   useEffect(() => {
@@ -115,9 +134,21 @@ export default function SpinWheel({
     return () => unsubscribe();
   }, []);
 
-  const spinWheel = async () => {
+  const spinWheel = async (isPaid: boolean) => {
     if (isSpinning || !auth.currentUser) return;
     setErrorMsg('');
+
+    if (isPaid) {
+      if (balance < 5) {
+        setShowDepositPopup(true);
+        return;
+      }
+    } else {
+      if (freeSpins <= 0) {
+        setErrorMsg("No free spins left today! Use a Paid Spin.");
+        return;
+      }
+    }
 
     // RTDB Quota Check
     const spinRef = ref(rtdb, `users/${auth.currentUser.uid}/spins`);
@@ -125,16 +156,12 @@ export default function SpinWheel({
     const spinData = snapshot.val();
     const today = new Date().toDateString();
 
-    if (spinData && spinData.lastSpinTime === today && spinData.count >= 5) {
-        setErrorMsg("Daily spin quota reached!");
+    if (spinData && spinData.lastSpinTime === today && spinData.count >= 10) {
+        setErrorMsg("Daily spin quota reached! Try again tomorrow.");
         return;
     }
     
-    if (freeSpins <= 0) {
-      if (balance < 5) {
-        setErrorMsg("Insufficient balance! You need Rs. 5 to buy a spin.");
-        return;
-      }
+    if (isPaid) {
       onUpdateBalance(-5);
     } else {
       onUseFreeSpin();
@@ -154,8 +181,10 @@ export default function SpinWheel({
     let cumulative = 0;
     let winningIndex = 0;
     
-    for (let i = 0; i < segments.length; i++) {
-      cumulative += segments[i].probability;
+    const currentProbs = getProbabilities(isPaid);
+
+    for (let i = 0; i < currentProbs.length; i++) {
+      cumulative += currentProbs[i].probability;
       if (rand <= cumulative) {
         winningIndex = i;
         break;
@@ -266,6 +295,14 @@ export default function SpinWheel({
 
         {/* Controls (Sound & Close) */}
         <div className="absolute top-12 sm:top-10 right-4 z-50 flex items-center gap-2">
+          {onGoToDeposit && (
+            <button 
+              onClick={onGoToDeposit}
+              className="px-3 h-10 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 rounded-xl flex items-center justify-center text-emerald-400 hover:text-emerald-300 transition-colors font-bold text-xs gap-1"
+            >
+              <span className="text-lg leading-none">+</span> Top-up
+            </button>
+          )}
           <button 
             onClick={() => setSoundEnabled(!soundEnabled)} 
             className="w-10 h-10 bg-slate-800/50 hover:bg-slate-700/50 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-colors"
@@ -367,26 +404,25 @@ export default function SpinWheel({
             </motion.div>
           </div>
 
-          {/* Spin Button */}
-          <button 
-            onClick={spinWheel}
-            disabled={isSpinning}
-            className="mt-12 w-full max-w-[240px] bg-white text-slate-900 font-display font-bold text-xl py-4 rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none flex flex-col items-center justify-center leading-none"
-          >
-            {isSpinning ? (
-              <span className="py-2">SPINNING...</span>
-            ) : freeSpins > 0 ? (
-              <>
-                <span>SPIN NOW</span>
-                <span className="text-xs text-emerald-600 mt-1">1 FREE SPIN</span>
-              </>
-            ) : (
-              <>
-                <span>BUY SPIN</span>
-                <span className="text-xs text-slate-500 mt-1">Cost: Rs. 5</span>
-              </>
-            )}
-          </button>
+          {/* Spin Buttons */}
+          <div className="mt-12 w-full max-w-sm flex gap-4">
+            <button 
+              onClick={() => spinWheel(false)}
+              disabled={isSpinning || freeSpins <= 0}
+              className="flex-1 bg-emerald-500 text-white font-display font-bold text-lg py-3 rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none flex flex-col items-center justify-center leading-none"
+            >
+              <span>FREE SPIN</span>
+              <span className="text-[10px] text-emerald-100 mt-1">{freeSpins > 0 ? '1 Left Today' : '0 Left'}</span>
+            </button>
+            <button 
+              onClick={() => spinWheel(true)}
+              disabled={isSpinning}
+              className="flex-1 bg-yellow-500 text-slate-900 font-display font-bold text-lg py-3 rounded-2xl shadow-[0_0_20px_rgba(250,204,21,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none flex flex-col items-center justify-center leading-none"
+            >
+              <span>PAID SPIN</span>
+              <span className="text-[10px] text-slate-800 mt-1">Cost: Rs. 5</span>
+            </button>
+          </div>
           
           {errorMsg ? (
             <p className="text-red-400 text-sm mt-4 text-center font-bold bg-red-400/10 py-2 px-4 rounded-lg border border-red-400/20">
@@ -394,7 +430,7 @@ export default function SpinWheel({
             </p>
           ) : (
             <p className="text-slate-400 text-sm mt-4 text-center">
-              {freeSpins > 0 ? `You have ${freeSpins} free spin(s) left today.` : 'Buy an extra spin for Rs. 5'}
+              Paid spin has higher chances of winning big!
             </p>
           )}
         </div>
@@ -462,6 +498,50 @@ export default function SpinWheel({
               >
                 Awesome
               </button>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Deposit Popup */}
+        {showDepositPopup && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[110] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-slate-800 border border-slate-700 p-8 rounded-3xl w-full max-w-sm text-center shadow-2xl"
+            >
+              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">💸</span>
+              </div>
+              <h3 className="text-2xl font-display font-bold text-white mb-2">
+                Insufficient Balance!
+              </h3>
+              <p className="text-slate-300 mb-6 text-sm">
+                Add Rs. 5 to spin again and win up to <span className="text-yellow-400 font-bold">Rs. 5000</span>!
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowDepositPopup(false)}
+                  className="flex-1 bg-slate-700 text-white font-bold py-3 rounded-xl hover:bg-slate-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowDepositPopup(false);
+                    if (onGoToDeposit) onGoToDeposit();
+                  }}
+                  className="flex-1 bg-emerald-500 text-white font-bold py-3 rounded-xl hover:bg-emerald-400 transition-colors"
+                >
+                  Deposit Now
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
