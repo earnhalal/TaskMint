@@ -96,7 +96,7 @@ export default function Dashboard() {
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
-    referralBonusBasic: 30,
+    referralBonusBasic: 50,
     referralBonusPartner: 70,
     indirectReferralBonus: 10
   });
@@ -502,39 +502,47 @@ export default function Dashboard() {
 
       // 2. Handle Direct Referral (Level 1)
       if (userData.referredBy) {
-        const l1Ref = doc(db, 'users', userData.referredBy);
-        const l1Doc = await getDoc(l1Ref);
-        
-        if (l1Doc.exists()) {
-          const l1Data = l1Doc.data();
-          const bonus = l1Data.role === 'partner' ? appSettings.referralBonusPartner : appSettings.referralBonusBasic;
+        const parentUsernameDoc = await getDoc(doc(db, 'usernames', userData.referredBy.toLowerCase()));
+        if (parentUsernameDoc.exists()) {
+          const l1Uid = parentUsernameDoc.data().uid;
+          const l1Ref = doc(db, 'users', l1Uid);
+          const l1Doc = await getDoc(l1Ref);
           
-          // Update referral stats in RTDB
-          const l1ReferralRef = ref(rtdb, `invites/${userData.referredBy}`);
-          await update(l1ReferralRef, {
-            activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(bonus)
-          });
+          if (l1Doc.exists()) {
+            const l1Data = l1Doc.data();
+            const bonus = l1Data.role === 'partner' ? appSettings.referralBonusPartner : appSettings.referralBonusBasic;
+            
+            // Update referral stats in RTDB
+            const l1ReferralRef = ref(rtdb, `invites/${l1Uid}`);
+            await update(l1ReferralRef, {
+              activeMembers: rtdbIncrement(1),
+              totalCommission: rtdbIncrement(bonus)
+            });
 
-          await updateDoc(l1Ref, {
-            balance: increment(bonus)
-          });
+            await updateDoc(l1Ref, {
+              balance: increment(bonus)
+            });
 
-          // 3. Handle Indirect Referral (Level 2)
-          if (l1Data.referredBy) {
-            const l2Ref = doc(db, 'users', l1Data.referredBy);
-            const l2Doc = await getDoc(l2Ref);
-            if (l2Doc.exists()) {
-              const l2Bonus = appSettings.indirectReferralBonus;
-              // Update indirect referral stats in RTDB
-              const l2ReferralRef = ref(rtdb, `invites/${l1Data.referredBy}`);
-              await update(l2ReferralRef, {
-                totalCommission: rtdbIncrement(l2Bonus)
-              });
+            // 3. Handle Indirect Referral (Level 2)
+            if (l1Data.referredBy) {
+              const l2UsernameDoc = await getDoc(doc(db, 'usernames', l1Data.referredBy.toLowerCase()));
+              if (l2UsernameDoc.exists()) {
+                const l2Uid = l2UsernameDoc.data().uid;
+                const l2Ref = doc(db, 'users', l2Uid);
+                const l2Doc = await getDoc(l2Ref);
+                if (l2Doc.exists()) {
+                  const l2Bonus = appSettings.indirectReferralBonus;
+                  // Update indirect referral stats in RTDB
+                  const l2ReferralRef = ref(rtdb, `invites/${l2Uid}`);
+                  await update(l2ReferralRef, {
+                    totalCommission: rtdbIncrement(l2Bonus)
+                  });
 
-              await updateDoc(l2Ref, {
-                balance: increment(l2Bonus)
-              });
+                  await updateDoc(l2Ref, {
+                    balance: increment(l2Bonus)
+                  });
+                }
+              }
             }
           }
         }

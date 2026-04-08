@@ -73,17 +73,17 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       className="pb-24"
     >
       {/* Activation Status Indicator */}
-      <div className={`mb-6 p-4 rounded-2xl flex items-center justify-between border-2 ${status === 'Active' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-red-50 border-red-100 text-red-700'}`}>
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${status === 'Active' ? 'bg-emerald-100' : 'bg-red-100'}`}>
-            {status === 'Active' ? <CheckCircle className="w-6 h-6" /> : <AlertCircle className="w-6 h-6" />}
+      {status !== 'Active' && (
+        <div className="mb-6 p-4 rounded-2xl flex items-center justify-between border-2 bg-red-50 border-red-100 text-red-700">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-red-100">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Account Status</p>
+              <p className="text-sm font-bold">Inactive</p>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Account Status</p>
-            <p className="text-sm font-bold">{status === 'Active' ? 'Active' : 'Inactive'}</p>
-          </div>
-        </div>
-        {status !== 'Active' && (
           <div className="flex flex-col items-end gap-2">
             <button 
               onClick={onActivateClick}
@@ -92,10 +92,10 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
               Pay Rs 100 to Start
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Top Card: Earn Rs 40 per Friend! */}
+      {/* Top Card: Earn Rs 50 per Friend! */}
       <div className="bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 rounded-[2rem] p-8 text-center shadow-xl mb-6 relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.3),transparent_50%)]"></div>
         <motion.div 
@@ -110,11 +110,11 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             Limited Time Offer
           </div>
           <h1 className="text-3xl font-black text-white mb-2 leading-tight drop-shadow-md">
-            Earn Rs 40<br/>
+            Earn Rs 50<br/>
             <span className="text-white/90 text-2xl">per Friend!</span>
           </h1>
           <p className="text-xs text-white/80 font-medium leading-relaxed max-w-[280px] mx-auto">
-            Invite friends to join TaskMint. When they activate their account, you get <span className="font-bold text-white underline">Rs 40</span> instantly!
+            Invite friends to join TaskMint. When they activate their account, you get <span className="font-bold text-white underline">Rs 50</span> instantly!
           </p>
         </div>
       </div>

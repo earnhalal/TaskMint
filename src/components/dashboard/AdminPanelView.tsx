@@ -43,7 +43,7 @@ function SettingsView() {
     partnerFee: 2500,
     paymentNumber: '0312-3456789',
     paymentName: 'TaskMint Admin',
-    referralBonusBasic: 30,
+    referralBonusBasic: 50,
     referralBonusPartner: 70,
     indirectReferralBonus: 10
   });

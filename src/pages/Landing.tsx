@@ -160,7 +160,7 @@ export default function Landing() {
               <button onClick={() => setActiveModal('how-it-works')} className="hover:text-amber-600 transition-colors">How it Works</button>
               <button onClick={() => setActiveModal('about')} className="hover:text-amber-600 transition-colors">About</button>
               <button onClick={() => setActiveModal('blog')} className="hover:text-amber-600 transition-colors">Blog</button>
-              <button onClick={() => setActiveModal('support')} className="hover:text-amber-600 transition-colors">Support</button>
+              <button onClick={() => navigate('/contact')} className="hover:text-amber-600 transition-colors">Support</button>
             </nav>
 
             <div className="hidden md:flex items-center gap-4">
@@ -263,28 +263,21 @@ export default function Landing() {
             <section className="py-24 px-6 bg-white relative">
                  <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
-                        <h2 className="text-amber-600 font-bold tracking-widest uppercase text-sm mb-3">The TaskMint Advantage</h2>
-                        <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">Designed for <br/> Maximum Profit.</h3>
+                        <h2 className="text-amber-600 font-bold tracking-widest uppercase text-sm mb-3">Earning Features</h2>
+                        <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">How You Can Earn <br/> With TaskMint.</h3>
+                        <p className="text-slate-600 mt-4 max-w-2xl mx-auto text-lg">
+                            We offer multiple streams of income so you can maximize your earnings every single day.
+                        </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="bg-white border border-gray-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-                            <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
-                                <WalletIcon className="w-8 h-8" />
-                            </div>
-                            <h4 className="text-xl font-bold text-slate-900 mb-3">Instant Withdrawals</h4>
-                            <p className="text-slate-500 leading-relaxed font-medium text-sm">
-                                Access your funds quickly. We process payouts via JazzCash, EasyPaisa, and Bank Transfer within 24-48 hours.
-                            </p>
-                        </div>
-
-                        <div className="bg-white border border-gray-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-                            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
                                 <BriefcaseIcon className="w-8 h-8" />
                             </div>
-                            <h4 className="text-xl font-bold text-slate-900 mb-3">Premium Jobs</h4>
+                            <h4 className="text-xl font-bold text-slate-900 mb-3">Daily Premium Tasks</h4>
                             <p className="text-slate-500 leading-relaxed font-medium text-sm">
-                                Unlock high-paying opportunities like data entry and reviews. Subscribe to premium plans for unlimited earnings.
+                                Complete simple, high-paying tasks every day. From data entry to reviewing products, our premium tasks are designed to be quick and rewarding.
                             </p>
                         </div>
 
@@ -294,7 +287,17 @@ export default function Landing() {
                             </div>
                             <h4 className="text-xl font-bold text-slate-900 mb-3">Referral Empire</h4>
                             <p className="text-slate-500 leading-relaxed font-medium text-sm">
-                                Invite friends and build a passive income stream. Earn up to 200 Rs for every active referral you bring.
+                                Invite friends and build a passive income stream. Earn Rs 50 for every active referral, plus indirect bonuses from their network.
+                            </p>
+                        </div>
+
+                        <div className="bg-white border border-gray-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                            <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                                <SparklesIcon className="w-8 h-8" />
+                            </div>
+                            <h4 className="text-xl font-bold text-slate-900 mb-3">Spin & Win</h4>
+                            <p className="text-slate-500 leading-relaxed font-medium text-sm">
+                                Try your luck with our daily Spin & Win wheel. Win free cash prizes, multipliers, and exclusive rewards just for logging in.
                             </p>
                         </div>
                         
@@ -303,21 +306,21 @@ export default function Landing() {
                              <div className="flex-1 relative z-10">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="p-2 bg-amber-500/20 rounded-lg text-amber-400 backdrop-blur-sm border border-amber-500/30">
-                                        <SparklesIcon className="w-6 h-6" />
+                                        <WalletIcon className="w-6 h-6" />
                                     </div>
-                                    <span className="text-amber-400 font-bold uppercase tracking-wider text-sm">Daily Bonus</span>
+                                    <span className="text-amber-400 font-bold uppercase tracking-wider text-sm">Fast Payouts</span>
                                 </div>
-                                <h4 className="text-3xl font-bold mb-3">Spin & Win Daily</h4>
+                                <h4 className="text-3xl font-bold mb-3">Instant Local Withdrawals</h4>
                                 <p className="text-gray-300 leading-relaxed mb-8 font-medium">
-                                    Log in every day to spin the wheel. Win free cash prizes, multipliers, and exclusive rewards just for being active.
+                                    Your earnings are yours. Withdraw your funds instantly to your local mobile wallets like JazzCash, EasyPaisa, or directly to your Bank Account.
                                 </p>
                                 <button onClick={() => onGetStarted('signup')} className="bg-white text-slate-900 px-8 py-3.5 rounded-full font-bold hover:bg-amber-50 transition-colors shadow-lg">
-                                    Try Your Luck
+                                    Start Earning Now
                                 </button>
                              </div>
                              <div className="w-full md:w-1/3 flex justify-center">
                                 <div className="w-40 h-40 rounded-full border-[6px] border-amber-500/80 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 animate-pulse-glow animate-float">
-                                    <TrophyIcon className="w-20 h-20 text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" />
+                                    <BankIcon className="w-20 h-20 text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]" />
                                 </div>
                              </div>
                         </div>
@@ -327,8 +330,8 @@ export default function Landing() {
                             <div className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 shadow-inner">
                                 <DiamondIcon className="w-10 h-10 text-amber-600 animate-float-slow" />
                             </div>
-                            <h4 className="text-xl font-bold text-slate-900 mb-1 relative z-10">VIP Levels</h4>
-                            <p className="text-slate-500 text-sm font-medium relative z-10">Climb ranks for bigger rewards.</p>
+                            <h4 className="text-xl font-bold text-slate-900 mb-1 relative z-10">VIP Partner</h4>
+                            <p className="text-slate-500 text-sm font-medium relative z-10">Upgrade to Partner for 2x earnings and higher referral bonuses.</p>
                         </div>
                     </div>
                  </div>
@@ -395,9 +398,9 @@ export default function Landing() {
                         <span className="font-display font-bold text-xl tracking-tight text-slate-900">TaskMint</span>
                     </div>
                     <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-500">
-                        <button onClick={() => setActiveModal('privacy')} className="hover:text-amber-600 transition-colors">Privacy Policy</button>
-                        <button onClick={() => setActiveModal('terms')} className="hover:text-amber-600 transition-colors">Terms of Service</button>
-                        <button onClick={() => setActiveModal('support')} className="hover:text-amber-600 transition-colors">Contact Support</button>
+                        <button onClick={() => navigate('/privacy')} className="hover:text-amber-600 transition-colors">Privacy Policy</button>
+                        <button onClick={() => navigate('/terms')} className="hover:text-amber-600 transition-colors">Terms of Service</button>
+                        <button onClick={() => navigate('/contact')} className="hover:text-amber-600 transition-colors">Contact Support</button>
                     </div>
                     <p className="text-sm font-medium text-slate-400">© 2026 TaskMint. All rights reserved.</p>
                 </div>

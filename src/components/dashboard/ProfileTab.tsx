@@ -29,6 +29,8 @@ export default function ProfileTab({ name, email, status, role, accountNumber, a
     }
   };
 
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -38,6 +40,23 @@ export default function ProfileTab({ name, email, status, role, accountNumber, a
       navigate('/auth');
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      if (auth.currentUser) {
+        await auth.currentUser.delete();
+        localStorage.clear();
+        navigate('/auth');
+      }
+    } catch (error: any) {
+      console.error("Delete account error:", error);
+      if (error.code === 'auth/requires-recent-login') {
+        alert("Please log out and log back in to delete your account.");
+      } else {
+        alert("Failed to delete account. Please try again.");
+      }
     }
   };
 
@@ -169,7 +188,41 @@ export default function ProfileTab({ name, email, status, role, accountNumber, a
 
       <Section title="Support">
         <Item icon={<LogOut className="w-4 h-4" />} label="Log Out" isDestructive onClick={handleLogout} />
+        <Item icon={<AlertCircle className="w-4 h-4" />} label="Delete Account" isDestructive onClick={() => setShowDeleteModal(true)} />
       </Section>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl"
+          >
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-center text-slate-900 mb-2">Delete Account?</h3>
+            <p className="text-sm text-center text-slate-500 mb-6">
+              This action is permanent and cannot be undone. All your earnings, referrals, and data will be lost forever.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteAccount}
+                className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20"
+              >
+                Delete
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   );
 }
