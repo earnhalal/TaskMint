@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { PlayCircle, Clock, ArrowRight } from 'lucide-react';
+import { PlayCircle, Clock, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function WatchTab() {
   return (
@@ -13,28 +13,38 @@ export default function WatchTab() {
         <h2 className="text-2xl font-black mb-2">Watch & Earn</h2>
         <p className="text-sm text-red-100 mb-4">Watch short video ads to earn instant rewards.</p>
         <div className="flex items-center gap-2 bg-white/20 w-fit px-3 py-1.5 rounded-lg text-xs font-bold">
-          <Clock className="w-4 h-4" /> 10 Ads Available Today
+          <Clock className="w-4 h-4" /> Coming Soon
         </div>
       </div>
 
-      <div className="space-y-3">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
-                <PlayCircle className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm">Video Ad {i}</h3>
-                <p className="text-[10px] text-slate-500">Duration: 30s</p>
-              </div>
-            </div>
-            <button className="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 hover:bg-slate-800 transition-colors">
-              Watch <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-        ))}
-      </div>
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-10 text-center flex flex-col items-center justify-center min-h-[300px]"
+      >
+        <motion.div
+          animate={{ 
+            rotate: [0, 10, -10, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ repeat: Infinity, duration: 3 }}
+          className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6 relative"
+        >
+          <PlayCircle className="w-10 h-10 text-red-500" />
+          <motion.div
+            animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="absolute -top-2 -right-2"
+          >
+            <Sparkles className="w-6 h-6 text-amber-400" />
+          </motion.div>
+        </motion.div>
+        <h3 className="text-xl font-display font-bold text-slate-900 mb-2">Coming Soon!</h3>
+        <p className="text-sm text-slate-500 max-w-[250px] mx-auto">
+          We are currently partnering with top brands to bring you the best video ads. Stay tuned!
+        </p>
+      </motion.div>
     </motion.div>
   );
 }

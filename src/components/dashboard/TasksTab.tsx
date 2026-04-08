@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ClipboardList, Star, ArrowRight } from 'lucide-react';
+import { ClipboardList, Star, Sparkles } from 'lucide-react';
 
 export default function TasksTab({ tasks }: { tasks: any[] }) {
   return (
@@ -13,34 +13,38 @@ export default function TasksTab({ tasks }: { tasks: any[] }) {
         <h2 className="text-2xl font-black mb-2">Task Wall</h2>
         <p className="text-sm text-emerald-100 mb-4">Complete simple tasks to boost your earnings.</p>
         <div className="flex items-center gap-2 bg-white/20 w-fit px-3 py-1.5 rounded-lg text-xs font-bold">
-          <Star className="w-4 h-4" /> High Paying Tasks
+          <Star className="w-4 h-4" /> Coming Soon
         </div>
       </div>
 
-      <div className="space-y-3">
-        {tasks.map((task, i) => (
-          <div key={task.id ? `task-${task.id}` : `task-idx-${i}`} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500">
-                <ClipboardList className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm">{task.title}</h3>
-                <p className="text-[10px] text-slate-500">{task.desc}</p>
-                <span className="inline-block mt-1 text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase">
-                  {task.type}
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <span className="text-sm font-black text-emerald-600">{task.reward}</span>
-              <button className="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1 hover:bg-slate-800 transition-colors">
-                Start <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-10 text-center flex flex-col items-center justify-center min-h-[300px]"
+      >
+        <motion.div
+          animate={{ 
+            y: [0, -10, 0],
+            scale: [1, 1.05, 1]
+          }}
+          transition={{ repeat: Infinity, duration: 3 }}
+          className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-6 relative"
+        >
+          <ClipboardList className="w-10 h-10 text-emerald-500" />
+          <motion.div
+            animate={{ opacity: [0, 1, 0], rotate: [0, 90, 180] }}
+            transition={{ repeat: Infinity, duration: 2.5 }}
+            className="absolute -top-2 -right-2"
+          >
+            <Sparkles className="w-6 h-6 text-amber-400" />
+          </motion.div>
+        </motion.div>
+        <h3 className="text-xl font-display font-bold text-slate-900 mb-2">Coming Soon!</h3>
+        <p className="text-sm text-slate-500 max-w-[250px] mx-auto">
+          We are preparing high-paying tasks and surveys for you. They will be available here very soon!
+        </p>
+      </motion.div>
     </motion.div>
   );
 }

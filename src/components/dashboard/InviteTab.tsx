@@ -15,17 +15,55 @@ interface InviteTabProps {
 
 export default function InviteTab({ status, referralStats, referralCode, onActivateClick }: InviteTabProps) {
   const [copied, setCopied] = useState(false);
-  const referralLink = `https://taskmint.click/ref/${referralCode}`;
+  const referralLink = `https://taskmint.click/ref/${encodeURIComponent(referralCode)}`;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(referralLink);
+      } else {
+        // Fallback for older browsers or insecure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = referralLink;
+        textArea.style.position = "absolute";
+        textArea.style.left = "-999999px";
+        document.body.prepend(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+        } catch (error) {
+          console.error(error);
+        } finally {
+          textArea.remove();
+        }
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      alert("Could not copy text. Please try again.");
+    }
   };
 
   const handleShareWhatsApp = () => {
     const text = `Join TaskMint and start earning Rs 2000+ daily! Use my link to sign up: ${referralLink}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Join TaskMint',
+          text: 'Join TaskMint and start earning Rs 2000+ daily! Use my link to sign up:',
+          url: referralLink,
+        });
+      } catch (err) {
+        console.error('Share failed:', err);
+      }
+    } else {
+      handleCopy();
+    }
   };
 
   return (
@@ -130,7 +168,10 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
           <button className="w-12 h-12 rounded-full bg-[#00B2FF] flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg shadow-[#00B2FF]/20">
             <MessageCircle className="w-6 h-6" />
           </button>
-          <button className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:scale-110 transition-transform shadow-lg shadow-slate-200/50">
+          <button 
+            onClick={handleShare}
+            className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:scale-110 transition-transform shadow-lg shadow-slate-200/50"
+          >
             <Share2 className="w-6 h-6" />
           </button>
         </div>

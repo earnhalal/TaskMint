@@ -28,7 +28,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 const InviteRedirect = () => {
   const { username } = useParams();
-  return <Navigate to={`/auth?ref=${username}`} replace />;
+  return <Navigate to={`/auth?ref=${encodeURIComponent(username || '')}`} replace />;
 };
 
 function AppContent() {
