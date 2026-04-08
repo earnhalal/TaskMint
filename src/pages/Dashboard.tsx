@@ -212,7 +212,7 @@ export default function Dashboard() {
     }, (error) => console.error("Notifications Error:", error));
 
     // Listener for Referrals (from RTDB)
-    const referralsRef = ref(rtdb, `invites/${user.uid}/all_referrals`);
+    const referralsRef = ref(rtdb, `invites/${user.uid}/history`);
     const unsubscribeReferrals = onValue(referralsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -632,7 +632,7 @@ export default function Dashboard() {
           console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
           
           // Update referral status in RTDB
-          const referralStatusRef = ref(rtdb, `invites/${l1Uid}/all_referrals/${targetUserId}`);
+          const referralStatusRef = ref(rtdb, `invites/${l1Uid}/history/${targetUserId}`);
           await update(referralStatusRef, { status: 'paid' });
 
           // Use RTDB transaction for referral updates
