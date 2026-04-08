@@ -18,9 +18,6 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
   const [copied, setCopied] = useState(false);
   const referralLink = `https://taskmint.click/ref/${encodeURIComponent(referralCode)}`;
 
-  const pendingReferrals = referrals.filter(r => r.status === 'unpaid');
-  const completedReferrals = referrals.filter(r => r.status === 'paid');
-
   const handleCopy = async () => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
@@ -205,40 +202,39 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
         </div>
       </div>
 
-      {/* Referral History Section */}
+      {/* Referral History Table */}
       <div className="mt-8">
         <h3 className="text-sm font-bold text-slate-900 mb-4">My Referrals History</h3>
         
-        <div className="space-y-6">
-          {/* Pending List */}
-          <div>
-            <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Pending (Unpaid)</h4>
-            {pendingReferrals.length > 0 ? (
-              pendingReferrals.map(r => (
-                <div key={r.id} className="bg-white p-4 rounded-2xl border border-slate-100 mb-2 flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-900">{r.name}</span>
-                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">Fee Pending</span>
-                </div>
-              ))
-            ) : (
-              <p className="text-xs text-slate-400">No pending referrals.</p>
-            )}
-          </div>
-
-          {/* Completed List */}
-          <div>
-            <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Completed (Paid)</h4>
-            {completedReferrals.length > 0 ? (
-              completedReferrals.map(r => (
-                <div key={r.id} className="bg-white p-4 rounded-2xl border border-slate-100 mb-2 flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-900">{r.name}</span>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Success/Earned</span>
-                </div>
-              ))
-            ) : (
-              <p className="text-xs text-slate-400">No completed referrals.</p>
-            )}
-          </div>
+        <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
+          {referrals.length > 0 ? (
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 text-slate-500 uppercase font-bold">
+                <tr>
+                  <th className="px-4 py-3">User Name</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {referrals.map(r => (
+                  <tr key={r.id}>
+                    <td className="px-4 py-3 font-bold text-slate-900">{r.name}</td>
+                    <td className="px-4 py-3">
+                      <span className={`font-bold px-2 py-1 rounded-lg ${r.status === 'paid' ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
+                        {r.status === 'paid' ? 'Earned' : 'Pending'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-500">
+                      {r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'N/A'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="p-8 text-center text-slate-400 font-bold">No referrals yet</div>
+          )}
         </div>
       </div>
     </motion.div>
