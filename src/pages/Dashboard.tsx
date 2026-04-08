@@ -143,17 +143,6 @@ export default function Dashboard() {
       }
     });
 
-    // Listener for referral stats from RTDB
-    const referralRef = ref(rtdb, `invites/${user.uid}`);
-    const unsubscribeReferral = onValue(referralRef, (snapshot) => {
-      const data = snapshot.val();
-      setReferralStats(data || {
-        totalInvited: 0,
-        activeMembers: 0,
-        totalCommission: 0
-      });
-    });
-
     // Listener for user status from RTDB
     const statusRef = ref(rtdb, `users/${user.uid}/status`);
     const unsubscribeStatus = onValue(statusRef, (snapshot) => {
@@ -223,7 +212,7 @@ export default function Dashboard() {
     }, (error) => console.error("Notifications Error:", error));
 
     // Listener for Referrals (from RTDB)
-    const referralsRef = ref(rtdb, `referrals/${user.uid}`);
+    const referralsRef = ref(rtdb, `invites/${user.uid}/all_referrals`);
     const unsubscribeReferrals = onValue(referralsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -232,8 +221,15 @@ export default function Dashboard() {
           ...val
         }));
         setPartnerReferrals(referrals);
+        
+        const paidReferrals = referrals.filter(r => r.status === 'paid');
+        setReferralStats(prev => ({
+            ...prev,
+            totalInvited: paidReferrals.length
+        }));
       } else {
         setPartnerReferrals([]);
+        setReferralStats(prev => ({ ...prev, totalInvited: 0 }));
       }
     }, (error) => console.error("Referrals Error:", error));
 
@@ -268,7 +264,6 @@ export default function Dashboard() {
       unsubscribeDeposits();
       unsubscribeWithdrawals();
       unsubscribeSettings();
-      unsubscribeReferral();
       unsubscribeReferrals();
       unsubscribeStatus();
     };
@@ -636,6 +631,10 @@ export default function Dashboard() {
           const l1Uid = parentUsernameDoc.data().uid;
           console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
           
+          // Update referral status in RTDB
+          const referralStatusRef = ref(rtdb, `invites/${l1Uid}/all_referrals/${targetUserId}`);
+          await update(referralStatusRef, { status: 'paid' });
+
           // Use RTDB transaction for referral updates
           const l1ReferralRef = ref(rtdb, `invites/${l1Uid}`);
           await runTransaction(l1ReferralRef, (data) => {
@@ -784,6 +783,7 @@ export default function Dashboard() {
           referralStats={referralStats}
           referralCode={referralCode || userName || ''}
           onActivateClick={() => setActiveTab('activation')}
+          referrals={partnerReferrals}
         />;
       case 'activation':
         return <ActivationTab 

@@ -11,11 +11,15 @@ interface InviteTabProps {
   };
   referralCode: string;
   onActivateClick: () => void;
+  referrals: any[];
 }
 
-export default function InviteTab({ status, referralStats, referralCode, onActivateClick }: InviteTabProps) {
+export default function InviteTab({ status, referralStats, referralCode, onActivateClick, referrals }: InviteTabProps) {
   const [copied, setCopied] = useState(false);
   const referralLink = `https://taskmint.click/ref/${encodeURIComponent(referralCode)}`;
+
+  const pendingReferrals = referrals.filter(r => r.status === 'unpaid');
+  const completedReferrals = referrals.filter(r => r.status === 'paid');
 
   const handleCopy = async () => {
     try {
@@ -201,12 +205,41 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
         </div>
       </div>
 
-      {/* Referral Tracking */}
-      <div className="flex items-center justify-between px-1">
-        <h3 className="text-sm font-bold text-slate-900">Referral Tracking</h3>
-        <button className="text-xs font-bold text-yellow-600 flex items-center gap-1">
-          View List <ChevronRight className="w-3 h-3" />
-        </button>
+      {/* Referral History Section */}
+      <div className="mt-8">
+        <h3 className="text-sm font-bold text-slate-900 mb-4">My Referrals History</h3>
+        
+        <div className="space-y-6">
+          {/* Pending List */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Pending (Unpaid)</h4>
+            {pendingReferrals.length > 0 ? (
+              pendingReferrals.map(r => (
+                <div key={r.id} className="bg-white p-4 rounded-2xl border border-slate-100 mb-2 flex justify-between items-center">
+                  <span className="text-sm font-bold text-slate-900">{r.name}</span>
+                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">Fee Pending</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-400">No pending referrals.</p>
+            )}
+          </div>
+
+          {/* Completed List */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Completed (Paid)</h4>
+            {completedReferrals.length > 0 ? (
+              completedReferrals.map(r => (
+                <div key={r.id} className="bg-white p-4 rounded-2xl border border-slate-100 mb-2 flex justify-between items-center">
+                  <span className="text-sm font-bold text-slate-900">{r.name}</span>
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Success/Earned</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-400">No completed referrals.</p>
+            )}
+          </div>
+        </div>
       </div>
     </motion.div>
   );

@@ -81,11 +81,11 @@ export default function Auth() {
         }
 
         if (parentUid) {
-          // Save referral to RTDB: referrals/{parentUid}/{new_uid}
-          const referralRef = ref(rtdb, `referrals/${parentUid}/${user.uid}`);
+          // Save referral to RTDB: invites/{parentUid}/all_referrals/{new_uid}
+          const referralRef = ref(rtdb, `invites/${parentUid}/all_referrals/${user.uid}`);
           await set(referralRef, {
-            username: data.username,
-            status: 'Pending (Fee Not Paid)',
+            name: data.username,
+            status: 'unpaid',
             timestamp: serverTimestamp()
           });
         }
