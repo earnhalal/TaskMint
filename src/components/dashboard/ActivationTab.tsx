@@ -95,7 +95,13 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
       await update(statusRef, { status: 'pending' });
 
       setTransactionId('');
-      alert("Activation request submitted successfully!");
+      
+      // Redirect to WhatsApp
+      const whatsappNumber = "923299659585";
+      const message = `Hi Admin, maine ${appSettings.activationFee} PKR pay kar diye hain. Ye raha mera Payment Screenshot aur meri User ID: ${auth.currentUser.uid}. Please mera account active kar dein.`;
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+
     } catch (error) {
       console.error("Activation submission error:", error);
       alert("Something went wrong. Please try again.");
@@ -189,6 +195,9 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
                 <>Submit Verification <CheckCircle2 className="w-5 h-5" /></>
               )}
             </button>
+            <p className="text-[11px] text-red-500 font-bold text-center mt-2">
+              Submit dabane ke baad screenshot WhatsApp par lazmi bhejein warna account active nahi hoga.
+            </p>
           </form>
         </motion.div>
       )}
