@@ -60,9 +60,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
     return () => unsubscribe();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!transactionId.trim()) return;
+  const handleWhatsAppClick = async () => {
     if (!auth.currentUser) return;
 
     setIsSubmitting(true);
@@ -73,7 +71,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
         userName: userName,
         amount: appSettings.activationFee,
         method,
-        transactionId,
+        transactionId: 'Sent via WhatsApp', // Dummy value since we removed the input
         date: new Date().toISOString(),
         status: 'Pending',
         type: 'activation',
@@ -94,11 +92,9 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
       const statusRef = ref(rtdb, `users/${auth.currentUser.uid}`);
       await update(statusRef, { status: 'pending' });
 
-      setTransactionId('');
-      
       // Redirect to WhatsApp
       const whatsappNumber = "923299659585";
-      const message = `Hi Admin, maine ${appSettings.activationFee} PKR pay kar diye hain. Ye raha mera Payment Screenshot aur meri User ID: ${auth.currentUser.uid}. Please mera account active kar dein.`;
+      const message = `Hi Admin, mera naam ${userName} hai. Maine ${appSettings.activationFee} PKR pay kar diye hain. Ye raha mera Payment Screenshot. Meri ID: ${auth.currentUser.uid}. Please mera account active kar dein.`;
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
 
@@ -141,7 +137,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
           <div className="bg-amber-50 border-2 border-amber-100 rounded-2xl p-4 flex gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             <p className="text-[11px] font-bold text-amber-800 leading-relaxed">
-              Please pay the joining fee of <span className="text-amber-900 font-black">Rs {appSettings.activationFee}</span> to the account below to unlock all earning features.
+              Neeche diye gaye number par <span className="text-amber-900 font-black">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein. Aapka account foran active kar diya jayega.
             </p>
           </div>
 
@@ -171,34 +167,19 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1">Transaction ID (TID)</label>
-              <input
-                type="text"
-                value={transactionId}
-                onChange={(e) => setTransactionId(e.target.value)}
-                placeholder="Enter 10-12 digit TID"
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-6 py-4 font-bold text-slate-900 focus:outline-none focus:border-slate-900 transition-all"
-                required
-              />
-            </div>
-
+          <div className="space-y-4">
             <button
-              type="submit"
-              disabled={isSubmitting || !transactionId}
-              className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              onClick={handleWhatsAppClick}
+              disabled={isSubmitting}
+              className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
-                <>Submit Verification <CheckCircle2 className="w-5 h-5" /></>
+                <>Pay & Send Proof on WhatsApp <ExternalLink className="w-5 h-5" /></>
               )}
             </button>
-            <p className="text-[11px] text-red-500 font-bold text-center mt-2">
-              Submit dabane ke baad screenshot WhatsApp par lazmi bhejein warna account active nahi hoga.
-            </p>
-          </form>
+          </div>
         </motion.div>
       )}
 
