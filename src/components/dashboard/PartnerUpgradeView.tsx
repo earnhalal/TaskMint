@@ -102,7 +102,12 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
           <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-amber-500/20">
             <Crown className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-2xl font-black mb-2">Partner Program</h2>
+          <div className="flex items-center gap-2 mb-2">
+            <h2 className="text-2xl font-black">Partner Program</h2>
+            <span className="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter animate-pulse">
+              Special Discount
+            </span>
+          </div>
           <p className="text-slate-400 text-sm">Unlock premium benefits and earn massive team commissions.</p>
         </div>
       </div>

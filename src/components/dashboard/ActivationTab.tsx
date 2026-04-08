@@ -29,7 +29,7 @@ interface ActivationTabProps {
 
 export default function ActivationTab({ onBack, appSettings, userName }: ActivationTabProps) {
   const [transactionId, setTransactionId] = useState('');
-  const [method, setMethod] = useState<'EasyPaisa' | 'JazzCash'>('EasyPaisa');
+  const [method, setMethod] = useState<'EasyPaisa'>('EasyPaisa');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [activeRequest, setActiveRequest] = useState<any>(null);
@@ -139,20 +139,13 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             <button
               onClick={() => setMethod('EasyPaisa')}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${method === 'EasyPaisa' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-100 bg-slate-50'}`}
+              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 border-emerald-500 bg-emerald-50`}
             >
               <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-black text-[10px]">EP</div>
               <span className="text-xs font-bold">EasyPaisa</span>
-            </button>
-            <button
-              onClick={() => setMethod('JazzCash')}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${method === 'JazzCash' ? 'border-red-500 bg-red-50' : 'border-slate-100 bg-slate-50'}`}
-            >
-              <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white font-black text-[10px]">JC</div>
-              <span className="text-xs font-bold">JazzCash</span>
             </button>
           </div>
 

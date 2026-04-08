@@ -15,7 +15,8 @@ import {
     Trophy,
     AlertTriangle,
     Clock,
-    CheckCircle2
+    CheckCircle2,
+    MessageCircle
 } from 'lucide-react';
 
 interface HomeTabProps {
@@ -63,16 +64,17 @@ const QuickActionBtn: React.FC<{
     colorClass: string; 
     delay: number;
     isHighlight?: boolean;
-}> = ({ icon, label, onClick, colorClass, delay, isHighlight }) => (
+    isWhatsApp?: boolean;
+}> = ({ icon, label, onClick, colorClass, delay, isHighlight, isWhatsApp }) => (
     <button 
         onClick={onClick} 
-        className="flex flex-col items-center gap-2 group animate-fade-in-up w-full"
+        className={`flex flex-col items-center gap-2 group animate-fade-in-up w-full ${isWhatsApp ? 'animate-bounce-small' : ''}`}
         style={{ animationDelay: `${delay}ms` }}
     >
-        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-300 group-hover:scale-105 group-active:scale-95 ${colorClass} ${isHighlight ? 'ring-2 ring-red-100' : 'ring-2 ring-white ring-opacity-50'}`}>
+        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-300 group-hover:scale-105 group-active:scale-95 ${colorClass} ${isHighlight ? 'ring-2 ring-red-100' : 'ring-2 ring-white ring-opacity-50'} ${isWhatsApp ? 'shadow-green-500/50' : ''}`}>
             {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5 sm:w-6 sm:h-6" })}
         </div>
-        <span className={`text-[10px] sm:text-xs font-bold transition-colors ${isHighlight ? 'text-red-700' : 'text-slate-600 group-hover:text-slate-900'}`}>{label}</span>
+        <span className={`text-[10px] sm:text-xs font-bold transition-colors ${isHighlight ? 'text-red-700' : isWhatsApp ? 'text-green-600' : 'text-slate-600 group-hover:text-slate-900'}`}>{label}</span>
     </button>
 );
 
@@ -262,6 +264,14 @@ export default function HomeTab({
               Quick Actions
           </h2>
           <div className="grid grid-cols-4 gap-2 sm:gap-4">
+              <QuickActionBtn 
+                  icon={<MessageCircle />} 
+                  label="WhatsApp" 
+                  onClick={() => window.open('https://whatsapp.com/channel/0029VbCpKTp2P59cvqS4CL2L', '_blank')} 
+                  colorClass="bg-gradient-to-br from-green-400 to-green-600 shadow-green-500/40" 
+                  delay={25}
+                  isWhatsApp={true}
+              />
               <QuickActionBtn 
                   icon={<PlayCircleIcon />} 
                   label="Watch Ads" 

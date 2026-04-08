@@ -34,10 +34,15 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
     const [error, setError] = useState('');
 
     useEffect(() => {
-        setIsSignup(initialView === 'signup');
         const params = new URLSearchParams(window.location.search);
         const ref = params.get('ref');
-        if (ref) setReferralCode(ref);
+        
+        if (ref) {
+            setReferralCode(ref);
+            setIsSignup(true); // Force signup view if referred
+        } else {
+            setIsSignup(initialView === 'signup');
+        }
     }, [initialView]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -105,6 +110,12 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
 
                     <div className="px-8 pb-8 pt-6">
                         <div className="mb-8 text-center">
+                            {isSignup && referralCode && (
+                                <div className="mb-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-full text-xs font-bold animate-fade-in">
+                                    <SparklesIcon className="w-4 h-4 text-amber-500" />
+                                    You are invited by <span className="text-amber-900 font-black">{referralCode}</span>
+                                </div>
+                            )}
                             <h2 className="text-2xl font-bold text-gray-900">
                                 {isResetMode ? 'Reset Password' : isSignup ? 'Start your earning journey' : 'Welcome back, Hustler!'}
                             </h2>
@@ -119,9 +130,9 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
                                     <div>
                                         <input 
                                             type="text" 
-                                            placeholder="Full Name"
+                                            placeholder="Username (Unique)"
                                             value={name}
-                                            onChange={e => setName(e.target.value)}
+                                            onChange={e => setName(e.target.value.replace(/\s+/g, '').toLowerCase())}
                                             required
                                             className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
                                         />

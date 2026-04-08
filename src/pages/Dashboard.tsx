@@ -93,9 +93,9 @@ export default function Dashboard() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [appSettings, setAppSettings] = useState({
     activationFee: 100,
-    partnerFee: 2500,
-    paymentNumber: '0312-3456789',
-    paymentName: 'TaskMint Admin',
+    partnerFee: 1000,
+    paymentNumber: '03338739929',
+    paymentName: 'M-WASEEM',
     referralBonusBasic: 30,
     referralBonusPartner: 70,
     indirectReferralBonus: 10
@@ -662,7 +662,7 @@ export default function Dashboard() {
         return <InviteTab 
           status={status}
           referralStats={referralStats}
-          referralCode={user?.uid || ''}
+          referralCode={userName || ''}
           onActivateClick={() => setActiveTab('activation')}
         />;
       case 'activation':

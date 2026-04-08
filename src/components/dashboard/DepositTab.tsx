@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { ClipboardList, CheckCircle2, PlusCircle, Wallet, ArrowRight } from 'lucide-react';
 
-type DepositMethod = 'EasyPaisa' | 'JazzCash';
+type DepositMethod = 'EasyPaisa';
 
 interface Transaction {
   id: string;
@@ -110,8 +110,7 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
   };
 
   const accountDetails = {
-      EasyPaisa: { title: appSettings.paymentName, number: appSettings.paymentNumber, icon: <EasyPaisaIcon className="scale-150" /> },
-      JazzCash: { title: appSettings.paymentName, number: appSettings.paymentNumber, icon: <JazzCashIcon className="scale-150" /> } 
+      EasyPaisa: { title: appSettings.paymentName, number: appSettings.paymentNumber, icon: <EasyPaisaIcon className="scale-150" /> }
   };
 
   return (
@@ -155,24 +154,18 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
                     <span className="text-[10px] font-bold bg-gray-100 text-gray-500 px-2 py-1 rounded-md uppercase">Step 1</span>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="grid grid-cols-1 gap-3 mb-6">
                     {(Object.keys(accountDetails) as DepositMethod[]).map(methodKey => (
                          <button
                             key={methodKey}
                             onClick={() => setMethod(methodKey)}
-                            className={`relative flex flex-col items-center justify-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 ${
-                                method === methodKey 
-                                ? 'border-amber-500 bg-amber-50 shadow-sm' 
-                                : 'border-gray-100 bg-white hover:bg-gray-50 hover:border-gray-200'
-                            }`}
+                            className={`relative flex flex-col items-center justify-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 border-amber-500 bg-amber-50 shadow-sm`}
                          >
-                             {method === methodKey && (
-                                 <div className="absolute top-2 right-2 text-amber-600">
-                                     <CheckCircle2 className="w-4 h-4" />
-                                 </div>
-                             )}
+                             <div className="absolute top-2 right-2 text-amber-600">
+                                 <CheckCircle2 className="w-4 h-4" />
+                             </div>
                              <div className="h-8 flex items-center justify-center">{accountDetails[methodKey].icon}</div>
-                             <span className={`font-bold text-xs ${method === methodKey ? 'text-amber-900' : 'text-gray-500'}`}>{methodKey}</span>
+                             <span className={`font-bold text-xs text-amber-900`}>{methodKey}</span>
                          </button>
                     ))}
                 </div>

@@ -15,14 +15,30 @@ export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Determine initial view based on state passed during navigation, default to login
-  const initialView = location.state?.isLogin === false ? 'signup' : 'login';
+  // Check if there's a referral code in the URL
+  const queryParams = new URLSearchParams(location.search);
+  const hasRef = queryParams.has('ref');
+  
+  // Determine initial view based on state passed during navigation, or if referred
+  const initialView = (location.state?.isLogin === false || hasRef) ? 'signup' : 'login';
 
   const handleSignup = async (data: {username: string, email: string, phone: string, password: string, referralCode?: string}) => {
     try {
+      // Check if username is unique
+      const usernameDoc = await getDoc(doc(db, 'usernames', data.username.toLowerCase()));
+      if (usernameDoc.exists()) {
+        throw new Error("Username is already taken. Please choose another one.");
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
+      // Save username to usernames collection
+      await setDoc(doc(db, 'usernames', data.username.toLowerCase()), {
+        uid: user.uid,
+        username: data.username
+      });
+
       // Save user data to Firestore
       const userData = {
         uid: user.uid,
@@ -51,14 +67,19 @@ export default function Auth() {
 
       // If referred, update parent's totalInvited count
       if (data.referralCode) {
-        const parentRef = doc(db, 'users', data.referralCode);
-        const parentDoc = await getDoc(parentRef);
-        if (parentDoc.exists()) {
-          // Update invite count in RTDB
-          const parentReferralRef = ref(rtdb, `invites/${data.referralCode}`);
-          await update(parentReferralRef, {
-            totalInvited: rtdbIncrement(1)
-          });
+        // We need to find the parent's UID from their username
+        const parentUsernameDoc = await getDoc(doc(db, 'usernames', data.referralCode.toLowerCase()));
+        if (parentUsernameDoc.exists()) {
+          const parentUid = parentUsernameDoc.data().uid;
+          const parentRef = doc(db, 'users', parentUid);
+          const parentDoc = await getDoc(parentRef);
+          if (parentDoc.exists()) {
+            // Update invite count in RTDB
+            const parentReferralRef = ref(rtdb, `invites/${parentUid}`);
+            await update(parentReferralRef, {
+              totalInvited: rtdbIncrement(1)
+            });
+          }
         }
       }
 

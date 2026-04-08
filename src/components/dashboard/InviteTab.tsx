@@ -15,7 +15,7 @@ interface InviteTabProps {
 
 export default function InviteTab({ status, referralStats, referralCode, onActivateClick }: InviteTabProps) {
   const [copied, setCopied] = useState(false);
-  const referralLink = `${window.location.origin}/auth?ref=${referralCode}`;
+  const referralLink = `https://taskmint.click/ref/${referralCode}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
