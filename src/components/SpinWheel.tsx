@@ -278,17 +278,19 @@ export default function SpinWheel({
     switch(activeTier) {
       case 50: return {
         border: 'border-slate-300',
-        glow: 'shadow-[0_0_40px_rgba(226,232,240,0.5)] ring-4 ring-slate-200/20',
+        glow: 'shadow-[0_0_50px_rgba(226,232,240,0.4)] ring-8 ring-slate-200/10',
         wheelBg: 'conic-gradient(from -22.5deg, #E2E8F0 0deg 45deg, #1E293B 45deg 90deg, #E2E8F0 90deg 135deg, #1E293B 135deg 180deg, #E2E8F0 180deg 225deg, #1E293B 225deg 270deg, #E2E8F0 270deg 315deg, #1E293B 315deg 360deg)',
         pointer: '#E2E8F0',
-        sparkle: false
+        sparkle: false,
+        themeClass: 'silver-glow'
       };
       case 100: return {
         border: 'border-amber-500',
-        glow: 'shadow-[0_0_50px_rgba(245,158,11,0.6)] ring-4 ring-amber-500/30',
+        glow: 'shadow-[0_0_60px_rgba(245,158,11,0.5)] ring-8 ring-amber-500/20',
         wheelBg: 'conic-gradient(from -22.5deg, #F59E0B 0deg 45deg, #1A1A1A 45deg 90deg, #F59E0B 90deg 135deg, #1A1A1A 135deg 180deg, #F59E0B 180deg 225deg, #1A1A1A 225deg 270deg, #F59E0B 270deg 315deg, #1A1A1A 315deg 360deg)',
         pointer: '#F59E0B',
-        sparkle: true
+        sparkle: true,
+        themeClass: 'golden-sparkle'
       };
       default: return {
         border: 'border-yellow-500',
@@ -384,21 +386,46 @@ export default function SpinWheel({
           <div className="relative w-72 h-72 sm:w-80 sm:h-80">
             {/* Sparkles for Golden Tier */}
             {styles.sparkle && (
-              <div className="absolute inset-0 z-0">
-                {[...Array(6)].map((_, i) => (
+              <div className="absolute inset-0 z-0 pointer-events-none">
+                {[...Array(12)].map((_, i) => (
                   <motion.div
                     key={i}
-                    className="absolute w-1 h-1 bg-amber-200 rounded-full"
+                    className="absolute w-1.5 h-1.5 bg-amber-200 rounded-full blur-[1px]"
                     animate={{
                       scale: [0, 1.5, 0],
                       opacity: [0, 1, 0],
-                      x: [Math.random() * 300 - 150, Math.random() * 300 - 150],
-                      y: [Math.random() * 300 - 150, Math.random() * 300 - 150],
+                      x: [Math.random() * 400 - 200, Math.random() * 400 - 200],
+                      y: [Math.random() * 400 - 200, Math.random() * 400 - 200],
+                    }}
+                    transition={{
+                      duration: 1.5 + Math.random() * 2,
+                      repeat: Infinity,
+                      delay: Math.random() * 2,
+                      ease: "easeInOut"
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            {/* Silver Glow for Silver Tier */}
+            {activeTier === 50 && (
+              <div className="absolute inset-0 z-0 pointer-events-none">
+                {[...Array(8)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-2 h-2 bg-slate-200/30 rounded-full blur-[2px]"
+                    animate={{
+                      scale: [1, 2, 1],
+                      opacity: [0.2, 0.5, 0.2],
                     }}
                     transition={{
                       duration: 2 + Math.random() * 2,
                       repeat: Infinity,
                       delay: Math.random() * 2,
+                    }}
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
                     }}
                   />
                 ))}

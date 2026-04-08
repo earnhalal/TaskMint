@@ -150,9 +150,30 @@
         "indirectReferralBonus": { "type": "number" }
       },
       "required": ["activationFee", "partnerFee", "paymentNumber", "paymentName"]
+    },
+    "promotion_orders": {
+      "title": "Promotion Order",
+      "description": "Social media growth orders",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "platform": { "type": "string" },
+        "service": { "type": "string" },
+        "link": { "type": "string" },
+        "quantity": { "type": "number" },
+        "price": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "completed", "rejected"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "service", "link", "quantity", "price", "status"]
     }
   },
   "firestore": {
+    "/promotion_orders/{orderId}": {
+      "schema": "promotion_orders",
+      "description": "Collection for social media promotion orders"
+    },
     "/users/{userId}": {
       "schema": "User",
       "description": "User profile data"

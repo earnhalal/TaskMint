@@ -59,7 +59,9 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
   const displayHistory = history.map(h => ({
       id: h.id,
       title: `${h.method} Withdrawal`,
-      subtitle: new Date(h.date).toLocaleDateString(),
+      subtitle: h.status === 'Approved' && h.approvedAt 
+        ? `Approved: ${new Date(h.approvedAt).toLocaleString()}` 
+        : new Date(h.date).toLocaleDateString(),
       amount: `-${h.amount}`,
       status: h.status.toUpperCase(),
       type: 'withdraw'

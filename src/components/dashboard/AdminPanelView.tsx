@@ -13,7 +13,9 @@ import {
   Filter,
   Settings,
   Save,
-  Ticket
+  Ticket,
+  Zap,
+  ExternalLink
 } from 'lucide-react';
 import { 
   collection, 
@@ -312,8 +314,101 @@ function LotteriesAdminView() {
   );
 }
 
+function PromotionOrdersView() {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const q = query(collection(db, 'promotion_orders'), orderBy('timestamp', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    try {
+      await updateDoc(doc(db, 'promotion_orders', id), { status: newStatus });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-sm font-black text-slate-900 mb-4 flex items-center gap-2">
+        <Zap className="w-4 h-4 text-amber-500" /> Promotion Orders
+      </h3>
+      {loading ? (
+        <p className="text-xs text-slate-400 text-center py-4">Loading orders...</p>
+      ) : orders.length > 0 ? (
+        orders.map(order => (
+          <div key={order.id} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs font-black text-slate-900">{order.username}</p>
+                <p className="text-[10px] text-slate-500">{order.platform} • {order.service} • {order.quantity} Units</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-black text-emerald-600">Rs {order.price}</p>
+                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${
+                  order.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
+                  order.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {order.status}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 rounded-2xl p-3 flex items-center justify-between gap-2">
+              <p className="text-[10px] font-mono text-slate-600 truncate flex-1">{order.link}</p>
+              <button 
+                onClick={() => window.open(order.link, '_blank')}
+                className="p-1.5 bg-white rounded-lg border border-slate-100 text-slate-400 hover:text-slate-900 transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              {order.status === 'pending' && (
+                <>
+                  <button 
+                    onClick={() => handleStatusUpdate(order.id, 'rejected')}
+                    className="flex-1 bg-red-50 text-red-600 py-2.5 rounded-xl text-[10px] font-bold"
+                  >
+                    Reject
+                  </button>
+                  <button 
+                    onClick={() => handleStatusUpdate(order.id, 'completed')}
+                    className="flex-1 bg-emerald-600 text-white py-2.5 rounded-xl text-[10px] font-bold"
+                  >
+                    Mark Completed
+                  </button>
+                </>
+              )}
+              {order.status !== 'pending' && (
+                <button 
+                  onClick={() => handleStatusUpdate(order.id, 'pending')}
+                  className="flex-1 bg-slate-100 text-slate-600 py-2.5 rounded-xl text-[10px] font-bold"
+                >
+                  Reset to Pending
+                </button>
+              )}
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-xs text-slate-400 text-center py-4">No promotion orders found.</p>
+      )}
+    </div>
+  );
+}
+
 export default function AdminPanelView({ onBack, onApproveActivation, onApprovePartner, onApproveDeposit, onApproveWithdrawal }: AdminPanelViewProps) {
-  const [activeTab, setActiveTab] = useState<'activations' | 'partners' | 'deposits' | 'withdrawals' | 'settings' | 'lotteries'>('activations');
+  const [activeTab, setActiveTab] = useState<'activations' | 'partners' | 'deposits' | 'withdrawals' | 'settings' | 'lotteries' | 'promotions'>('activations');
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -390,6 +485,7 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
           { id: 'partners', label: 'Partners', icon: <Crown className="w-3.5 h-3.5" /> },
           { id: 'deposits', label: 'Deposits', icon: <Wallet className="w-3.5 h-3.5" /> },
           { id: 'withdrawals', label: 'Withdrawals', icon: <ArrowLeft className="w-3.5 h-3.5 rotate-180" /> },
+          { id: 'promotions', label: 'Promotions', icon: <Zap className="w-3.5 h-3.5" /> },
           { id: 'lotteries', label: 'Lotteries', icon: <Ticket className="w-3.5 h-3.5" /> },
           { id: 'settings', label: 'Settings', icon: <Settings className="w-3.5 h-3.5" /> },
         ].map((tab) => (
@@ -412,6 +508,8 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
         <SettingsView />
       ) : activeTab === 'lotteries' ? (
         <LotteriesAdminView />
+      ) : activeTab === 'promotions' ? (
+        <PromotionOrdersView />
       ) : (
         <>
           <div className="relative mb-6">

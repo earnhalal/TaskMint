@@ -16,8 +16,10 @@ import {
     AlertTriangle,
     Clock,
     CheckCircle2,
-    MessageCircle
+    MessageCircle,
+    Zap
 } from 'lucide-react';
+import QuickPromotions from './QuickPromotions';
 
 interface HomeTabProps {
   name: string;
@@ -38,6 +40,7 @@ interface HomeTabProps {
   onLeaderboardClick: () => void;
   onPartnerUpgradeClick: () => void;
   onActivateClick: () => void;
+  onUpdateBalance: (amount: number) => void;
   appSettings: {
     activationFee: number;
   };
@@ -98,6 +101,7 @@ export default function HomeTab({
   onLeaderboardClick,
   onPartnerUpgradeClick,
   onActivateClick,
+  onUpdateBalance,
   appSettings
 }: HomeTabProps) {
   const getGreeting = () => {
@@ -336,6 +340,9 @@ export default function HomeTab({
               />
           </div>
       </div>
+
+      {/* Quick Promotions Section */}
+      <QuickPromotions balance={balance} onUpdateBalance={onUpdateBalance} />
 
       {/* Top Earners Section */}
       <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>

@@ -274,14 +274,17 @@ export default function Dashboard() {
   }, [seenUpdates]);
 
   useEffect(() => {
+    // Real-time winners listener
     const winnersRef = ref(rtdb, 'spin_winners');
+    let realWinnerFound = false;
+
     const unsubscribe = onValue(winnersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const list = Object.values(data) as any[];
-        // Sort by timestamp desc and take the latest
         const sorted = list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         if (sorted.length > 0) {
+          realWinnerFound = true;
           const latest = sorted[0];
           setIsNotificationAnimating(false);
           setTimeout(() => {
@@ -292,7 +295,24 @@ export default function Dashboard() {
       }
     });
 
-    return () => unsubscribe();
+    // Fallback interval if no real winners exist yet or to keep it dynamic
+    const fallbackInterval = setInterval(() => {
+      if (!realWinnerFound || Math.random() > 0.7) { // 30% chance to show a fake one even if real ones exist, to keep it busy
+        setIsNotificationAnimating(false);
+        setTimeout(() => {
+          const randomName = names[Math.floor(Math.random() * names.length)];
+          const randomAmount = amounts[Math.floor(Math.random() * amounts.length)];
+          const randomEvent = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
+          setNotificationMessage(`${randomName} just ${randomEvent.action} <span class="font-bold">Rs ${randomAmount}</span> ${randomEvent.source}`);
+          setIsNotificationAnimating(true);
+        }, 500);
+      }
+    }, 10000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(fallbackInterval);
+    };
   }, []);
 
   useEffect(() => {
@@ -342,6 +362,37 @@ export default function Dashboard() {
       setBalance(prev => prev + amount);
     }
   };
+
+  useEffect(() => {
+    if (!user || lockedBalance <= 0) return;
+
+    const checkUnlock = async () => {
+      let shouldUnlock = false;
+      const invites = referralStats.activeMembers;
+
+      // Logic based on user requirements:
+      // 200 par 3, 300 par 5, 500 par 10, aur 1000+ par 15 active referrals
+      if (lockedBalance >= 1000 && invites >= 15) shouldUnlock = true;
+      else if (lockedBalance >= 500 && invites >= 10) shouldUnlock = true;
+      else if (lockedBalance >= 300 && invites >= 5) shouldUnlock = true;
+      else if (lockedBalance >= 200 && invites >= 3) shouldUnlock = true;
+      else if (lockedBalance < 200 && invites >= 3) shouldUnlock = true; // Safety for smaller locked amounts
+
+      if (shouldUnlock) {
+        try {
+          await updateDoc(doc(db, 'users', user.uid), {
+            balance: increment(lockedBalance),
+            lockedBalance: 0
+          });
+          console.log("Locked balance unlocked automatically!");
+        } catch (error) {
+          console.error("Unlock Error:", error);
+        }
+      }
+    };
+
+    checkUnlock();
+  }, [lockedBalance, referralStats.activeMembers, user]);
 
   const handleWinLockedPrize = async (amount: number, requiredInvites: number) => {
     if (!user) return;
@@ -424,10 +475,6 @@ export default function Dashboard() {
   };
 
   const handleWithdrawRequest = (amount: number, method: string) => {
-    if (user && !user.emailVerified) {
-      alert("Please verify your email address before making a withdrawal. Check your inbox for the verification link.");
-      return;
-    }
     if (userPin) {
       setPendingWithdrawal({ amount, method });
       setPinMode('enter');
@@ -484,7 +531,10 @@ export default function Dashboard() {
       if (!withdrawalDoc.exists()) return;
       const withdrawalData = withdrawalDoc.data();
 
-      await updateDoc(withdrawalRef, { status: 'Approved' });
+      await updateDoc(withdrawalRef, { 
+        status: 'Approved',
+        approvedAt: new Date().toISOString()
+      });
       await sendWithdrawalApprovedMail(targetUserId, withdrawalData.amount);
       alert("Withdrawal approved!");
     } catch (error) {
@@ -751,6 +801,7 @@ export default function Dashboard() {
               await updateDoc(doc(db, 'notifications', n.id), { status: 'read' });
             }
           }}
+          onBack={() => setActiveTab('home')}
         />;
       case 'spin':
         return <SpinWheel 
@@ -801,6 +852,7 @@ export default function Dashboard() {
           onLeaderboardClick={() => setActiveTab('leaderboard')}
           onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
           onActivateClick={() => setActiveTab('activation')}
+          onUpdateBalance={handleUpdateBalance}
           appSettings={appSettings}
         />;
     }
