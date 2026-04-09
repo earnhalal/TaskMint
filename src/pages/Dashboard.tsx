@@ -13,9 +13,9 @@ import {
   AlertTriangle,
   Crown
 } from 'lucide-react';
-import { doc, onSnapshot, collection, getDocs, query, orderBy, limit, updateDoc, increment, setDoc, getDoc, where } from 'firebase/firestore';
+import { doc, onSnapshot, collection, getDocs, query, orderBy, limit, updateDoc, increment, setDoc, getDoc, where, addDoc } from 'firebase/firestore';
 import { db, auth, rtdb } from '../firebase';
-import { ref, onValue, update, set, increment as rtdbIncrement, push, serverTimestamp, runTransaction } from 'firebase/database';
+import { ref, onValue, update, set, increment as rtdbIncrement, push, serverTimestamp, runTransaction, get } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { 
   sendDepositRequestMail, 
@@ -177,21 +177,35 @@ export default function Dashboard() {
       setDepositHistory(depositsData);
     }, (error) => console.error("Deposits Error:", error));
 
-    // Listener for withdrawals from RTDB
-    const withdrawalsRef = ref(rtdb, `withdrawals/pending/${user.uid}`);
-    const unsubscribeWithdrawals = onValue(withdrawalsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const withdrawalsData = Object.entries(data).map(([id, val]: [string, any]) => ({
-          id,
-          ...val
-        }));
-        withdrawalsData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        setWithdrawalHistory(withdrawalsData);
-      } else {
-        setWithdrawalHistory([]);
-      }
-    }, (error) => console.error("Withdrawals Error:", error));
+    // Listener for withdrawals from RTDB (Both pending and completed)
+    const pendingWithdrawalsRef = ref(rtdb, `withdrawals/pending/${user.uid}`);
+    const completedWithdrawalsRef = ref(rtdb, `withdrawals/completed/${user.uid}`);
+    
+    const unsubscribePending = onValue(pendingWithdrawalsRef, (pendingSnap) => {
+      const pendingData = pendingSnap.val() || {};
+      get(completedWithdrawalsRef).then(completedSnap => {
+        const completedData = completedSnap.val() || {};
+        const combined = [
+          ...Object.entries(pendingData).map(([id, val]: [string, any]) => ({ id, ...val, status: 'pending' })),
+          ...Object.entries(completedData).map(([id, val]: [string, any]) => ({ id, ...val, status: 'approved' }))
+        ];
+        combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        setWithdrawalHistory(combined);
+      });
+    });
+
+    const unsubscribeCompleted = onValue(completedWithdrawalsRef, (completedSnap) => {
+      const completedData = completedSnap.val() || {};
+      get(pendingWithdrawalsRef).then(pendingSnap => {
+        const pendingData = pendingSnap.val() || {};
+        const combined = [
+          ...Object.entries(pendingData).map(([id, val]: [string, any]) => ({ id, ...val, status: 'pending' })),
+          ...Object.entries(completedData).map(([id, val]: [string, any]) => ({ id, ...val, status: 'approved' }))
+        ];
+        combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        setWithdrawalHistory(combined);
+      });
+    });
 
     // Listener for notifications
     const qNotify = query(
@@ -269,7 +283,8 @@ export default function Dashboard() {
       unsubscribeNotify();
       unsubscribeEarners();
       unsubscribeDeposits();
-      unsubscribeWithdrawals();
+      unsubscribePending();
+      unsubscribeCompleted();
       unsubscribeSettings();
       unsubscribeReferrals();
       unsubscribeStats();
@@ -433,20 +448,30 @@ export default function Dashboard() {
   const handleWithdraw = async (amount: number, method: string) => {
     if (!user) return;
     
-    // 1. Balance Check (using local balance state which is synced with Firestore/RTDB)
+    // 1. Balance Check
     if (balance < amount) {
       alert("Insufficient balance!");
       return;
     }
 
     try {
-      // 2. Deduct/Lock amount in Firestore (assuming balance is still primarily in Firestore for now, 
-      // but user requested RTDB shift, so let's update both if needed or just Firestore if that's the source of truth)
+      // 2. Deduct balance
       await handleUpdateBalance(-amount);
 
-      // 3. Save to RTDB withdrawals/pending/{uid}/{requestId}
-      const withdrawalListRef = ref(rtdb, `withdrawals/pending/${user.uid}`);
-      const newWithdrawalRef = push(withdrawalListRef);
+      // 3. Save to Firestore (for Admin Panel)
+      const withdrawalDocRef = await addDoc(collection(db, 'withdrawals'), {
+        userId: user.uid,
+        userName: userName,
+        amount,
+        method,
+        status: 'Pending',
+        date: new Date().toISOString(),
+        timestamp: serverTimestamp()
+      });
+      const withdrawalId = withdrawalDocRef.id;
+
+      // 4. Save to RTDB (for User History)
+      const pendingRef = ref(rtdb, `withdrawals/pending/${user.uid}/${withdrawalId}`);
       
       const account = withdrawalAccounts[0] || {};
       
@@ -456,14 +481,14 @@ export default function Dashboard() {
         accountNumber: account.number || 'Not Set',
         accountName: account.title || 'Not Set',
         status: 'pending',
-        timestamp: serverTimestamp(),
+        timestamp: Date.now(),
         userId: user.uid,
         userName: userName
       };
       
-      await set(newWithdrawalRef, newTx);
+      await set(pendingRef, newTx);
       
-      // 4. Send internal notification
+      // 5. Send internal notification
       await sendWithdrawalRequestMail(user.uid, amount, method);
       
       alert("Withdrawal request submitted! It will be processed soon.");
@@ -573,16 +598,35 @@ export default function Dashboard() {
 
   const handleApproveWithdrawal = async (targetUserId: string, withdrawalId: string) => {
     try {
+      // 1. Update RTDB (Primary for History)
+      const pendingRef = ref(rtdb, `withdrawals/pending/${targetUserId}/${withdrawalId}`);
+      const completedRef = ref(rtdb, `withdrawals/completed/${targetUserId}/${withdrawalId}`);
+      
+      let amount = 0;
+      const snapshot = await get(pendingRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        amount = data.amount;
+        await set(completedRef, {
+          ...data,
+          status: 'approved',
+          approvedAt: Date.now()
+        });
+        await set(pendingRef, null); // Remove from pending
+      }
+
+      // 2. Update Firestore (Legacy/Backup)
       const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
       const withdrawalDoc = await getDoc(withdrawalRef);
-      if (!withdrawalDoc.exists()) return;
-      const withdrawalData = withdrawalDoc.data();
+      if (withdrawalDoc.exists()) {
+        if (amount === 0) amount = withdrawalDoc.data().amount;
+        await updateDoc(withdrawalRef, { 
+          status: 'Approved',
+          approvedAt: new Date().toISOString()
+        });
+      }
 
-      await updateDoc(withdrawalRef, { 
-        status: 'Approved',
-        approvedAt: new Date().toISOString()
-      });
-      await sendWithdrawalApprovedMail(targetUserId, withdrawalData.amount);
+      await sendWithdrawalApprovedMail(targetUserId, amount);
       alert("Withdrawal approved!");
     } catch (error) {
       console.error("Error approving withdrawal:", error);

@@ -168,12 +168,29 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "service", "link", "quantity", "price", "status"]
+    },
+    "Ad": {
+      "title": "Video Ad",
+      "description": "Available video ads for watching",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "reward": { "type": "number" },
+        "duration": { "type": "number" },
+        "videoUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive"] }
+      },
+      "required": ["title", "reward", "duration", "videoUrl", "status"]
     }
   },
   "firestore": {
     "/promotion_orders/{orderId}": {
       "schema": "promotion_orders",
       "description": "Collection for social media promotion orders"
+    },
+    "/ads/{adId}": {
+      "schema": "Ad",
+      "description": "Collection for available video ads"
     },
     "/users/{userId}": {
       "schema": "User",

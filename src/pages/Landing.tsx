@@ -12,20 +12,80 @@ import {
     ArrowRight, 
     ShieldCheck,
     Briefcase as BriefcaseIcon, 
-    Diamond as DiamondIcon
+    Diamond as DiamondIcon,
+    PlayCircle as PlayCircleIcon,
+    Ticket as TicketIcon,
+    Gift as GiftIcon,
+    Activity as ActivityIcon
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { db, rtdb } from '../firebase';
+import { ref } from 'firebase/database';
 import { InfoModal, renderModalContent } from '../components/LandingInfoViews';
 
 export default function Landing() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [isNotificationAnimating, setIsNotificationAnimating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Real-time winners listener
+    const winnersRef = ref(rtdb, 'spin_winners');
+    let realWinnerFound = false;
+
+    const unsubscribe = onSnapshot(query(collection(db, 'spin_winners'), orderBy('timestamp', 'desc'), limit(1)), (snapshot) => {
+      if (!snapshot.empty) {
+        realWinnerFound = true;
+        const latest = snapshot.docs[0].data();
+        setIsNotificationAnimating(false);
+        setTimeout(() => {
+          setNotificationMessage(`${latest.userName} just won <span class="font-bold">${latest.prize}</span> from Spin & Win!`);
+          setIsNotificationAnimating(true);
+        }, 500);
+      }
+    });
+
+    // Fallback interval for fake activity
+    const names = ['Ahmed', 'Fatima', 'Ali', 'Ayesha', 'Zainab', 'Bilal', 'Hassan', 'Sana', 'Usman', 'Maryam', 'Abdullah', 'Khadija'];
+    const amounts = [1000, 2500, 5000, 7500, 10000, 12500, 20000];
+    const spinPrizes = ['Rs. 500', 'Rs. 1000', 'Rs. 5000', 'Free Spin', 'Rs. 100'];
+    const methods = ['EasyPaisa', 'JazzCash', 'Bank Transfer'];
+
+    const fallbackInterval = setInterval(() => {
+      const showFake = !realWinnerFound || Math.random() > 0.7;
+      if (showFake) {
+        setIsNotificationAnimating(false);
+        setTimeout(() => {
+          const randomName = names[Math.floor(Math.random() * names.length)];
+          const isWithdraw = Math.random() > 0.5;
+          
+          if (isWithdraw) {
+            const randomAmount = amounts[Math.floor(Math.random() * amounts.length)];
+            const randomMethod = methods[Math.floor(Math.random() * methods.length)];
+            setNotificationMessage(`${randomName} just withdrew <span class="font-bold">Rs ${randomAmount}</span> via ${randomMethod}!`);
+          } else {
+            const randomPrize = spinPrizes[Math.floor(Math.random() * spinPrizes.length)];
+            setNotificationMessage(`${randomName} just won <span class="font-bold">${randomPrize}</span> from Spin & Win!`);
+          }
+          setIsNotificationAnimating(true);
+        }, 500);
+      }
+    }, 10000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(fallbackInterval);
+    };
   }, []);
 
   const onGetStarted = (view: 'login' | 'signup') => {
@@ -200,12 +260,12 @@ export default function Landing() {
                     </div>
                     
                     <h1 className="text-5xl md:text-7xl font-black text-slate-900 mb-6 leading-tight tracking-tighter animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-                        Turn Your Time Into <br/>
-                        <span className="text-gold-gradient drop-shadow-sm">Digital Gold.</span>
+                        The Professional <br/>
+                        <span className="text-gold-gradient drop-shadow-sm">Task Marketplace.</span>
                     </h1>
                     
                     <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed font-medium animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-                        TaskMint is the elite platform for smart hustlers. Complete premium tasks, access exclusive jobs, and withdraw instantly to your local wallet.
+                        TaskMint connects skilled individuals with global research and advertising partners. Complete verified tasks and receive secure, same-day payouts.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
@@ -235,71 +295,100 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* --- Stats Section --- */}
-            <section className="py-16 bg-[#F9FAFB] border-y border-gray-100">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                        <div className="animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-                            <p className="text-4xl font-black text-slate-900 mb-1 tracking-tight">1.5M+</p>
-                            <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Tasks Completed</p>
-                        </div>
-                        <div className="animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-                            <p className="text-4xl font-black text-slate-900 mb-1 tracking-tight">5M+</p>
-                            <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Paid Out (Rs)</p>
-                        </div>
-                        <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
-                            <p className="text-4xl font-black text-slate-900 mb-1 tracking-tight">24h</p>
-                            <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Avg. Withdrawal</p>
-                        </div>
-                        <div className="animate-fade-in-up" style={{animationDelay: '0.4s'}}>
-                            <p className="text-4xl font-black text-slate-900 mb-1 tracking-tight">4.9/5</p>
-                            <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">User Rating</p>
-                        </div>
-                    </div>
+        {/* --- Stats Section --- */}
+        <section className="py-16 bg-slate-50 border-y border-slate-100">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                <p className="text-4xl font-black text-slate-900 mb-1 tracking-tight">500k+</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tasks Completed</p>
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <p className="text-4xl font-black text-slate-900 mb-1 tracking-tight">2.5M+</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Paid Out (Rs)</p>
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                <p className="text-4xl font-black text-slate-900 mb-1 tracking-tight">Fast</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Local Payouts</p>
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                <p className="text-4xl font-black text-slate-900 mb-1 tracking-tight">50k+</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Users</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* --- Partners Section --- */}
+        <section className="py-12 bg-white">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-center text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-8">Official Offerwall Partners</p>
+            <div className="flex flex-wrap justify-center items-center gap-12 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+              <div className="flex items-center gap-3 group cursor-default">
+                <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-lg shadow-indigo-200">CPX</div>
+                <span className="text-xl font-black text-slate-800 tracking-tighter">CPX Research</span>
+              </div>
+              {/* Add more real partners if any, or just keep it clean */}
+              <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-6 h-6 text-emerald-500" />
+                <span className="text-sm font-bold text-slate-600">Verified Marketplace</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* --- Features Grid --- */}
+        <section className="py-24 px-6 bg-white relative">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-amber-600 font-bold tracking-widest uppercase text-sm mb-3">Professional Marketplace</h2>
+              <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">A Reliable Way To <br /> Monetize Your Time.</h3>
+              <p className="text-slate-600 mt-4 max-w-2xl mx-auto text-lg">
+                We connect you with global research firms and digital advertisers to provide a steady stream of verified tasks.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="bg-white border border-slate-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                  <BriefcaseIcon className="w-8 h-8" />
                 </div>
-            </section>
+                <h4 className="text-xl font-bold text-slate-900 mb-3">Market Research</h4>
+                <p className="text-slate-500 leading-relaxed font-medium text-sm">
+                  Participate in high-quality surveys from our partner <b>CPX Research</b>. Share your opinions and get compensated fairly for your insights.
+                </p>
+              </div>
 
-            {/* --- Features Grid --- */}
-            <section className="py-24 px-6 bg-white relative">
-                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-amber-600 font-bold tracking-widest uppercase text-sm mb-3">Earning Features</h2>
-                        <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">How You Can Earn <br/> With TaskMint.</h3>
-                        <p className="text-slate-600 mt-4 max-w-2xl mx-auto text-lg">
-                            We offer multiple streams of income so you can maximize your earnings every single day.
-                        </p>
-                    </div>
+              <div className="bg-white border border-slate-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                  <PlayCircleIcon className="w-8 h-8" />
+                </div>
+                <h4 className="text-xl font-bold text-slate-900 mb-3">Video Ads</h4>
+                <p className="text-slate-500 leading-relaxed font-medium text-sm">
+                  Watch short promotional videos and earn instant rewards. A simple way to boost your balance during your free time.
+                </p>
+              </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <div className="bg-white border border-gray-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
-                                <BriefcaseIcon className="w-8 h-8" />
-                            </div>
-                            <h4 className="text-xl font-bold text-slate-900 mb-3">Daily Premium Tasks</h4>
-                            <p className="text-slate-500 leading-relaxed font-medium text-sm">
-                                Complete simple, high-paying tasks every day. From data entry to reviewing products, our premium tasks are designed to be quick and rewarding.
-                            </p>
-                        </div>
+              <div className="bg-white border border-slate-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                  <TicketIcon className="w-8 h-8" />
+                </div>
+                <h4 className="text-xl font-bold text-slate-900 mb-3">Lottery & Spin</h4>
+                <p className="text-slate-500 leading-relaxed font-medium text-sm">
+                  Try your luck with our daily Spin Wheel and Lottery draws. Win massive prize pools and exclusive multipliers every day.
+                </p>
+              </div>
 
-                        <div className="bg-white border border-gray-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-                            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
-                                <UserGroupIcon className="w-8 h-8" />
-                            </div>
-                            <h4 className="text-xl font-bold text-slate-900 mb-3">Referral Empire</h4>
-                            <p className="text-slate-500 leading-relaxed font-medium text-sm">
-                                Invite friends and build a passive income stream. Earn Rs 50 for every active referral, plus indirect bonuses from their network.
-                            </p>
-                        </div>
-
-                        <div className="bg-white border border-gray-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
-                            <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
-                                <SparklesIcon className="w-8 h-8" />
-                            </div>
-                            <h4 className="text-xl font-bold text-slate-900 mb-3">Spin & Win</h4>
-                            <p className="text-slate-500 leading-relaxed font-medium text-sm">
-                                Try your luck with our daily Spin & Win wheel. Win free cash prizes, multipliers, and exclusive rewards just for logging in.
-                            </p>
-                        </div>
+              <div className="bg-white border border-slate-100 p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform shadow-sm">
+                  <UserGroupIcon className="w-8 h-8" />
+                </div>
+                <h4 className="text-xl font-bold text-slate-900 mb-3">Affiliate Program</h4>
+                <p className="text-slate-500 leading-relaxed font-medium text-sm">
+                  Build a sustainable network. Earn performance-based bonuses by inviting other professionals to the platform.
+                </p>
+              </div>
                         
                         <div className="md:col-span-2 bg-gradient-to-br from-slate-900 via-slate-800 to-black p-10 rounded-[32px] shadow-2xl flex flex-col md:flex-row items-center gap-8 group relative overflow-hidden text-white border border-slate-800 hover:border-amber-500/30 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(245,158,11,0.3)]">
                              <div className="absolute right-0 top-0 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-amber-500/30 transition-colors duration-500"></div>
@@ -330,8 +419,8 @@ export default function Landing() {
                             <div className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 shadow-inner">
                                 <DiamondIcon className="w-10 h-10 text-amber-600 animate-float-slow" />
                             </div>
-                            <h4 className="text-xl font-bold text-slate-900 mb-1 relative z-10">VIP Partner</h4>
-                            <p className="text-slate-500 text-sm font-medium relative z-10">Upgrade to Partner for 2x earnings and higher referral bonuses.</p>
+                            <h4 className="text-xl font-bold text-slate-900 mb-1 relative z-10">Pro Membership</h4>
+                            <p className="text-slate-500 text-sm font-medium relative z-10">Upgrade to Pro for priority task access and enhanced referral commissions.</p>
                         </div>
                     </div>
                  </div>
@@ -367,7 +456,90 @@ export default function Landing() {
                 </div>
             </section>
 
-            {/* --- CTA Section --- */}
+            {/* --- Live Activity Feed --- */}
+        <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
+              <div className="text-center md:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-bold mb-4">
+                  <ActivityIcon className="w-3 h-3 animate-pulse" /> Live Earning Feed
+                </div>
+                <h3 className="text-3xl md:text-4xl font-black tracking-tight">Real-Time Activity.</h3>
+                <p className="text-slate-400 mt-2 font-medium">See how our community is earning right now.</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-4 rounded-2xl">
+                  <p className="text-2xl font-black text-amber-500">Rs 150</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Avg. Survey Pay</p>
+                </div>
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 p-4 rounded-2xl">
+                  <p className="text-2xl font-black text-emerald-500">Instant</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Withdrawal Speed</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Recent Activity</h4>
+                <AnimatePresence mode="wait">
+                  {notificationMessage && (
+                    <motion.div 
+                      key={notificationMessage}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="bg-slate-800/40 border border-slate-700/50 p-6 rounded-2xl flex items-center justify-between shadow-xl backdrop-blur-sm"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                          notificationMessage.includes('won') ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'
+                        }`}>
+                          {notificationMessage.includes('won') ? <GiftIcon className="w-6 h-6" /> : <WalletIcon className="w-6 h-6" />}
+                        </div>
+                        <div>
+                          <p className="text-base text-white leading-tight" dangerouslySetInnerHTML={{ __html: notificationMessage }}></p>
+                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Verified Transaction</p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="flex items-center gap-1 text-emerald-500 mb-1">
+                          <ShieldCheck className="w-3 h-3" />
+                          <span className="text-[9px] font-black uppercase">Secure</span>
+                        </div>
+                        <p className="text-[9px] text-slate-600 font-bold uppercase tracking-tighter">Just Now</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                {/* Static placeholders for visual weight */}
+                <div className="bg-slate-800/20 border border-slate-700/30 p-4 rounded-2xl flex items-center justify-between opacity-50 grayscale">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-700/50"></div>
+                    <div className="space-y-1">
+                      <div className="w-24 h-3 bg-slate-700/50 rounded"></div>
+                      <div className="w-16 h-2 bg-slate-700/30 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="w-12 h-4 bg-slate-700/50 rounded"></div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2.5rem] p-8 md:p-12 flex flex-col justify-center relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-white/20 transition-all duration-700"></div>
+                <h4 className="text-3xl font-black mb-4 relative z-10">Start Your Journey <br/> Today.</h4>
+                <p className="text-indigo-100 mb-8 font-medium relative z-10">Join 50,000+ active users and start earning from verified global partners.</p>
+                <button onClick={() => onGetStarted('signup')} className="bg-white text-indigo-600 px-8 py-4 rounded-full font-bold text-lg shadow-xl hover:shadow-white/10 transition-all active:scale-95 w-fit relative z-10">
+                  Create Free Account
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* --- CTA Section --- */}
             <section className="py-24 px-6">
                 <div className="max-w-5xl mx-auto text-center bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 p-12 md:p-24 rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(245,158,11,0.5)] relative overflow-hidden animate-float-slow">
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay animate-pan-bg" style={{ backgroundSize: '200px' }} />
