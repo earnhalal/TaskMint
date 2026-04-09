@@ -41,6 +41,7 @@ import ActivationTab from '../components/dashboard/ActivationTab';
 
 import EditProfileView from '../components/dashboard/EditProfileView';
 
+import TaskWall from '../components/dashboard/TaskWall';
 import WatchTab from '../components/dashboard/WatchTab';
 import TasksTab from '../components/dashboard/TasksTab';
 import ManageWalletView from '../components/dashboard/ManageWalletView';
@@ -221,17 +222,23 @@ export default function Dashboard() {
           ...val
         }));
         setPartnerReferrals(referrals);
-        
-        const paidReferrals = referrals.filter(r => r.status === 'paid');
-        setReferralStats(prev => ({
-            ...prev,
-            totalInvited: paidReferrals.length
-        }));
       } else {
         setPartnerReferrals([]);
-        setReferralStats(prev => ({ ...prev, totalInvited: 0 }));
       }
     }, (error) => console.error("Referrals Error:", error));
+
+    // Listener for Referral Stats (from RTDB)
+    const statsRef = ref(rtdb, `users/${user.uid}`);
+    const unsubscribeStats = onValue(statsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setReferralStats({
+          totalInvited: data.totalInvited || 0,
+          activeMembers: data.activeMembers || 0,
+          totalCommission: data.totalCommission || 0
+        });
+      }
+    }, (error) => console.error("Referral Stats Error:", error));
 
     const fetchTasks = async () => {
       const tasksSnapshot = await getDocs(collection(db, 'tasks'));
@@ -265,6 +272,7 @@ export default function Dashboard() {
       unsubscribeWithdrawals();
       unsubscribeSettings();
       unsubscribeReferrals();
+      unsubscribeStats();
       unsubscribeStatus();
     };
   }, [user, role]);
@@ -635,16 +643,11 @@ export default function Dashboard() {
           const referralStatusRef = ref(rtdb, `invites/${l1Uid}/history/${targetUserId}`);
           await update(referralStatusRef, { status: 'paid' });
 
-          // Use RTDB transaction for referral updates
-          const l1ReferralRef = ref(rtdb, `invites/${l1Uid}`);
-          await runTransaction(l1ReferralRef, (data) => {
-            if (data) {
-              const bonus = 70; // Assuming partner bonus for now, need to fetch role from RTDB or Firestore
-              data.activeMembers = (data.activeMembers || 0) + 1;
-              data.totalCommission = (data.totalCommission || 0) + bonus;
-              return data;
-            }
-            return { activeMembers: 1, totalCommission: 70 };
+          // Update referrer stats in RTDB: users/${l1Uid}
+          const referrerStatsRef = ref(rtdb, `users/${l1Uid}`);
+          await update(referrerStatsRef, {
+            activeMembers: rtdbIncrement(1),
+            totalCommission: rtdbIncrement(70)
           });
 
           // Update balance in Firestore (still need to keep Firestore balance updated)
@@ -859,6 +862,8 @@ export default function Dashboard() {
         return <WatchTab />;
       case 'tasks':
         return <TasksTab tasks={tasks} />;
+      case 'task_wall':
+        return <TaskWall />;
       case 'leaderboard':
         return <LeaderboardView earners={topEarners} onBack={() => setActiveTab('home')} />;
       // Add other tabs as needed
@@ -882,6 +887,7 @@ export default function Dashboard() {
           onLeaderboardClick={() => setActiveTab('leaderboard')}
           onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
           onActivateClick={() => setActiveTab('activation')}
+          onTaskWallClick={() => setActiveTab('task_wall')}
           onUpdateBalance={handleUpdateBalance}
           appSettings={appSettings}
         />;

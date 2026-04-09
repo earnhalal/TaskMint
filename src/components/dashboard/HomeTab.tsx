@@ -40,6 +40,7 @@ interface HomeTabProps {
   onLeaderboardClick: () => void;
   onPartnerUpgradeClick: () => void;
   onActivateClick: () => void;
+  onTaskWallClick: () => void;
   onUpdateBalance: (amount: number) => void;
   appSettings: {
     activationFee: number;
@@ -101,6 +102,7 @@ export default function HomeTab({
   onLeaderboardClick,
   onPartnerUpgradeClick,
   onActivateClick,
+  onTaskWallClick,
   onUpdateBalance,
   appSettings
 }: HomeTabProps) {
@@ -309,6 +311,13 @@ export default function HomeTab({
                   onClick={onTasksClick} 
                   colorClass="bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-emerald-500/40" 
                   delay={100}
+              />
+              <QuickActionBtn 
+                  icon={<Zap />} 
+                  label="Task Wall" 
+                  onClick={onTaskWallClick} 
+                  colorClass="bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-indigo-500/40" 
+                  delay={110}
               />
               <QuickActionBtn 
                   icon={<CalendarIcon />} 
