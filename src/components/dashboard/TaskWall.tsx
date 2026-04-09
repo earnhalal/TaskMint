@@ -10,8 +10,8 @@ export default function TaskWall() {
   const appId = "32325";
   const userId = user?.uid || "";
   
-  // CPX Research URL
-  const cpxUrl = `https://www.cpx-research.com/index.php?app_id=${appId}&user_id=${userId}`;
+  // CPX Research URL - Updated to offers.cpx-research.com with ext_user_id
+  const cpxUrl = `https://offers.cpx-research.com/index.php?app_id=${appId}&ext_user_id=${userId}`;
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2000);
@@ -36,7 +36,7 @@ export default function TaskWall() {
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden relative">
           <iframe
             src={cpxUrl}
-            className="w-full h-[600px] border-none"
+            className="w-full h-[800px] border-none"
             title="Task Wall"
             onLoad={() => setIsLoading(false)}
           />
