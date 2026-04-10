@@ -17,7 +17,8 @@ import {
     Clock,
     CheckCircle2,
     MessageCircle,
-    Zap
+    Zap,
+    Download
 } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
 
@@ -115,6 +116,11 @@ export default function HomeTab({
 
   const [avatar, setAvatar] = React.useState<string | null>(null);
 
+  const isApp = useMemo(() => {
+    const ua = navigator.userAgent || '';
+    return ua.includes('AppCreator24') || ua.includes('WebView');
+  }, []);
+
   React.useEffect(() => {
     setAvatar(localStorage.getItem('taskmint_avatar'));
   }, []);
@@ -177,6 +183,31 @@ export default function HomeTab({
             <ArrowRight className="w-4 h-4 text-amber-500 group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
+      )}
+
+      {/* Download App Button - Hero Section */}
+      {!isApp && (
+        <a 
+          href="https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4" 
+          download 
+          className="block w-full bg-gradient-to-r from-emerald-500 to-emerald-800 p-4 rounded-2xl shadow-lg shadow-emerald-500/30 border border-emerald-400/30 relative overflow-hidden group animate-pulse-emerald"
+        >
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                <Download className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-white">Download TaskMint App & Earn Daily</p>
+                <p className="text-[10px] text-emerald-100 font-bold">Get the best experience on mobile!</p>
+              </div>
+            </div>
+            <div className="bg-white/20 px-3 py-1 rounded-lg">
+               <span className="text-[10px] font-black text-white uppercase">APK</span>
+            </div>
+          </div>
+        </a>
       )}
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
@@ -401,6 +432,13 @@ export default function HomeTab({
         .animate-bounce-small { animation: bounce-small 2s infinite; }
         @keyframes bounce-small { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         
+        .animate-pulse-emerald { animation: pulse-emerald 2s infinite; }
+        @keyframes pulse-emerald {
+          0% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); }
+          50% { transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4); }
+          100% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); }
+        }
+
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

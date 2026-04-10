@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, 
@@ -13,7 +13,22 @@ import {
   AlertTriangle,
   Crown
 } from 'lucide-react';
-import { doc, onSnapshot, collection, getDocs, query, orderBy, limit, updateDoc, increment, setDoc, getDoc, where, addDoc } from 'firebase/firestore';
+import { 
+  doc, 
+  onSnapshot, 
+  collection, 
+  getDocs, 
+  query, 
+  orderBy, 
+  limit, 
+  updateDoc, 
+  increment, 
+  setDoc, 
+  getDoc, 
+  where, 
+  addDoc,
+  serverTimestamp as firestoreServerTimestamp 
+} from 'firebase/firestore';
 import { db, auth, rtdb } from '../firebase';
 import { ref, onValue, update, set, increment as rtdbIncrement, push, serverTimestamp, runTransaction, get } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
@@ -91,7 +106,13 @@ export default function Dashboard() {
   const [balance, setBalance] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
   const [freeSpins, setFreeSpins] = useState(0);
-  const [withdrawalHistory, setWithdrawalHistory] = useState<any[]>([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState<any[]>([]);
+  const [completedWithdrawals, setCompletedWithdrawals] = useState<any[]>([]);
+
+  const withdrawalHistory = useMemo(() => {
+    const combined = [...pendingWithdrawals, ...completedWithdrawals];
+    return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  }, [pendingWithdrawals, completedWithdrawals]);
   const [depositHistory, setDepositHistory] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [topEarners, setTopEarners] = useState<any[]>([]);
@@ -115,7 +136,6 @@ export default function Dashboard() {
         const data = snapshot.data();
         setBalance(data.balance || 0);
         setLockedBalance(data.lockedBalance || 0);
-        setWithdrawalHistory(data.withdrawalHistory || []);
         setUserPin(data.pin || '');
         setSeenUpdates(data.seenUpdates || []);
         setUserName(data.username || '');
@@ -181,30 +201,16 @@ export default function Dashboard() {
     const pendingWithdrawalsRef = ref(rtdb, `withdrawals/pending/${user.uid}`);
     const completedWithdrawalsRef = ref(rtdb, `withdrawals/completed/${user.uid}`);
     
-    const unsubscribePending = onValue(pendingWithdrawalsRef, (pendingSnap) => {
-      const pendingData = pendingSnap.val() || {};
-      get(completedWithdrawalsRef).then(completedSnap => {
-        const completedData = completedSnap.val() || {};
-        const combined = [
-          ...Object.entries(pendingData).map(([id, val]: [string, any]) => ({ id, ...val, status: 'pending' })),
-          ...Object.entries(completedData).map(([id, val]: [string, any]) => ({ id, ...val, status: 'approved' }))
-        ];
-        combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        setWithdrawalHistory(combined);
-      });
+    const unsubscribePending = onValue(pendingWithdrawalsRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      const list = Object.entries(data).map(([id, val]: [string, any]) => ({ id, ...val, status: 'pending' }));
+      setPendingWithdrawals(list);
     });
 
-    const unsubscribeCompleted = onValue(completedWithdrawalsRef, (completedSnap) => {
-      const completedData = completedSnap.val() || {};
-      get(pendingWithdrawalsRef).then(pendingSnap => {
-        const pendingData = pendingSnap.val() || {};
-        const combined = [
-          ...Object.entries(pendingData).map(([id, val]: [string, any]) => ({ id, ...val, status: 'pending' })),
-          ...Object.entries(completedData).map(([id, val]: [string, any]) => ({ id, ...val, status: 'approved' }))
-        ];
-        combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        setWithdrawalHistory(combined);
-      });
+    const unsubscribeCompleted = onValue(completedWithdrawalsRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      const list = Object.entries(data).map(([id, val]: [string, any]) => ({ id, ...val, status: 'approved' }));
+      setCompletedWithdrawals(list);
     });
 
     // Listener for notifications
@@ -377,9 +383,18 @@ export default function Dashboard() {
   const handleUpdateBalance = async (amount: number) => {
     if (!user) return;
     try {
+      // 1. Update Firestore
       await updateDoc(doc(db, 'users', user.uid), {
         balance: increment(amount)
       });
+
+      // 2. Update RTDB for real-time sync
+      const userStatusRef = ref(rtdb, `users/${user.uid}`);
+      await update(userStatusRef, { 
+        balance: rtdbIncrement(amount)
+      });
+      
+      console.log(`[BALANCE_SYNC] Updated balance by ${amount} in Firestore and RTDB`);
 
       // Team Commission Logic: If user has a referrer who is a Partner, give them 10%
       if (amount > 0 && referredBy) {
@@ -389,10 +404,18 @@ export default function Dashboard() {
           const referrerData = referrerDoc.data();
           if (referrerData.role === 'partner') {
             const commission = amount * 0.1;
+            // Update Referrer Firestore
             await updateDoc(referrerRef, {
               balance: increment(commission),
               totalTeamEarnings: increment(commission)
             });
+            // Update Referrer RTDB
+            const referrerRtdbRef = ref(rtdb, `users/${referredBy}`);
+            await update(referrerRtdbRef, {
+              balance: rtdbIncrement(commission),
+              totalTeamEarnings: rtdbIncrement(commission)
+            });
+            console.log(`[COMMISSION_SYNC] Paid ${commission} commission to partner ${referredBy}`);
           }
         }
       }
@@ -455,10 +478,12 @@ export default function Dashboard() {
     }
 
     try {
-      // 2. Deduct balance
+      console.log(`[WITHDRAWAL_START] Amount: ${amount}, Method: ${method}, User: ${user.uid}`);
+      // 2. Deduct balance in Firestore
       await handleUpdateBalance(-amount);
 
       // 3. Save to Firestore (for Admin Panel)
+      console.log("[WITHDRAWAL_FIRESTORE] Attempting to save to Firestore...");
       const withdrawalDocRef = await addDoc(collection(db, 'withdrawals'), {
         userId: user.uid,
         userName: userName,
@@ -466,11 +491,13 @@ export default function Dashboard() {
         method,
         status: 'Pending',
         date: new Date().toISOString(),
-        timestamp: serverTimestamp()
+        timestamp: firestoreServerTimestamp()
       });
       const withdrawalId = withdrawalDocRef.id;
+      console.log("[WITHDRAWAL_FIRESTORE_SUCCESS] Saved with ID:", withdrawalId);
 
       // 4. Save to RTDB (for User History)
+      console.log("[WITHDRAWAL_RTDB] Attempting to save to RTDB...");
       const pendingRef = ref(rtdb, `withdrawals/pending/${user.uid}/${withdrawalId}`);
       
       const account = withdrawalAccounts[0] || {};
@@ -483,10 +510,12 @@ export default function Dashboard() {
         status: 'pending',
         timestamp: Date.now(),
         userId: user.uid,
-        userName: userName
+        userName: userName,
+        firestoreId: withdrawalId
       };
       
       await set(pendingRef, newTx);
+      console.log("[WITHDRAWAL_RTDB_SUCCESS] Saved to pending list");
       
       // 5. Send internal notification
       await sendWithdrawalRequestMail(user.uid, amount, method);
@@ -494,7 +523,7 @@ export default function Dashboard() {
       alert("Withdrawal request submitted! It will be processed soon.");
     } catch (error) {
       console.error("Withdrawal Error:", error);
-      alert("Failed to submit withdrawal request.");
+      alert("Failed to submit withdrawal request. Please check your connection.");
     }
   };
 
@@ -585,51 +614,127 @@ export default function Dashboard() {
 
   const handleApproveDeposit = async (targetUserId: string, depositId: string, amount: number) => {
     try {
-      await updateDoc(doc(db, 'users', targetUserId), { 
+      console.log(`[ADMIN_ACTION] Approving deposit: ${depositId} for user: ${targetUserId}, amount: ${amount}`);
+      
+      const userRef = doc(db, 'users', targetUserId);
+      const depositRef = doc(db, 'deposits', depositId);
+      const userRtdbRef = ref(rtdb, `users/${targetUserId}`);
+
+      // 1. Update User Balance (Firestore)
+      await updateDoc(userRef, { 
         balance: increment(amount)
       });
-      await updateDoc(doc(db, 'deposits', depositId), { status: 'Approved' });
+      
+      // 2. Update User Balance (RTDB)
+      await update(userRtdbRef, {
+        balance: rtdbIncrement(amount)
+      });
+      console.log(`[ADMIN_ACTION_SUCCESS] User balance incremented by ${amount} in Firestore and RTDB`);
+
+      // 3. Update Deposit Status
+      await updateDoc(depositRef, { 
+        status: 'Approved',
+        approvedAt: new Date().toISOString()
+      });
+      console.log(`[ADMIN_ACTION_SUCCESS] Deposit status updated to Approved`);
+
+      // 4. Notify User
       await sendDepositApprovedMail(targetUserId, amount);
-      alert("Deposit approved!");
+      
+      alert("Deposit approved successfully! Balance added to user account.");
     } catch (error) {
-      console.error("Error approving deposit:", error);
+      console.error("[ADMIN_ACTION_FAILURE] Error approving deposit:", error);
+      alert("Failed to approve deposit. Check console for details.");
     }
   };
 
   const handleApproveWithdrawal = async (targetUserId: string, withdrawalId: string) => {
     try {
-      // 1. Update RTDB (Primary for History)
-      const pendingRef = ref(rtdb, `withdrawals/pending/${targetUserId}/${withdrawalId}`);
-      const completedRef = ref(rtdb, `withdrawals/completed/${targetUserId}/${withdrawalId}`);
+      console.log(`[ADMIN_ACTION] Approving withdrawal: ${withdrawalId} for user: ${targetUserId}`);
       
-      let amount = 0;
-      const snapshot = await get(pendingRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        amount = data.amount;
-        await set(completedRef, {
-          ...data,
-          status: 'approved',
-          approvedAt: Date.now()
-        });
-        await set(pendingRef, null); // Remove from pending
-      }
-
-      // 2. Update Firestore (Legacy/Backup)
+      // 1. Update Firestore
       const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
       const withdrawalDoc = await getDoc(withdrawalRef);
+      let amount = 0;
+      let method = 'Withdrawal';
+      
       if (withdrawalDoc.exists()) {
-        if (amount === 0) amount = withdrawalDoc.data().amount;
+        const wData = withdrawalDoc.data();
+        amount = wData.amount;
+        method = wData.method || 'Withdrawal';
         await updateDoc(withdrawalRef, { 
           status: 'Approved',
           approvedAt: new Date().toISOString()
         });
+        console.log("[ADMIN_ACTION_SUCCESS] Firestore withdrawal status updated to Approved");
+      } else {
+        console.warn("[ADMIN_ACTION_WARNING] Withdrawal document not found in Firestore. ID:", withdrawalId);
+        // We still proceed to update RTDB if possible
+      }
+
+      // 2. Update RTDB (Primary for History)
+      const pendingRef = ref(rtdb, `withdrawals/pending/${targetUserId}/${withdrawalId}`);
+      const completedRef = ref(rtdb, `withdrawals/completed/${targetUserId}/${withdrawalId}`);
+      
+      const snapshot = await get(pendingRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const updates: any = {};
+        updates[`withdrawals/pending/${targetUserId}/${withdrawalId}`] = null;
+        updates[`withdrawals/completed/${targetUserId}/${withdrawalId}`] = {
+          ...data,
+          status: 'approved',
+          approvedAt: Date.now()
+        };
+        await update(ref(rtdb), updates);
+        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal moved from pending to completed");
+      } else {
+        console.log("[ADMIN_ACTION] Withdrawal not found in RTDB pending by ID. Searching by amount fallback...");
+        const allPendingRef = ref(rtdb, `withdrawals/pending/${targetUserId}`);
+        const allPendingSnap = await get(allPendingRef);
+        if (allPendingSnap.exists()) {
+          const pendingData = allPendingSnap.val();
+          const matchEntry = Object.entries(pendingData).find(([_, val]: [string, any]) => val.amount === amount);
+          if (matchEntry) {
+            const [oldId, oldData] = matchEntry as [string, any];
+            const updates: any = {};
+            updates[`withdrawals/pending/${targetUserId}/${oldId}`] = null;
+            updates[`withdrawals/completed/${targetUserId}/${withdrawalId}`] = {
+              ...oldData,
+              status: 'approved',
+              approvedAt: Date.now()
+            };
+            await update(ref(rtdb), updates);
+            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal found by amount and moved to completed");
+          } else {
+            await set(completedRef, {
+              amount,
+              method,
+              status: 'approved',
+              timestamp: Date.now(),
+              approvedAt: Date.now(),
+              userId: targetUserId
+            });
+            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created in completed as last resort");
+          }
+        } else {
+          await set(completedRef, {
+            amount,
+            method,
+            status: 'approved',
+            timestamp: Date.now(),
+            approvedAt: Date.now(),
+            userId: targetUserId
+          });
+          console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created in completed (no pending data found)");
+        }
       }
 
       await sendWithdrawalApprovedMail(targetUserId, amount);
-      alert("Withdrawal approved!");
+      alert("Withdrawal approved successfully!");
     } catch (error) {
-      console.error("Error approving withdrawal:", error);
+      console.error("[ADMIN_ACTION_FAILURE] Error approving withdrawal:", error);
+      alert("Failed to approve withdrawal. Error: " + (error instanceof Error ? error.message : String(error)));
     }
   };
 
@@ -691,13 +796,15 @@ export default function Dashboard() {
           const referrerStatsRef = ref(rtdb, `users/${l1Uid}`);
           await update(referrerStatsRef, {
             activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(70)
+            totalCommission: rtdbIncrement(70),
+            balance: rtdbIncrement(70)
           });
 
-          // Update balance in Firestore (still need to keep Firestore balance updated)
+          // Update balance in Firestore
           await updateDoc(doc(db, 'users', l1Uid), {
             balance: increment(70)
           });
+          console.log(`[REFERRAL_LOG] Commission of 70 added to referrer ${l1Uid} in Firestore and RTDB`);
         }
       }
       
