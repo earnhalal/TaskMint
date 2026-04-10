@@ -193,9 +193,21 @@
         "lastUpdated": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "date", "counts"]
+    },
+    "UserAdLocks": {
+      "title": "User Ad Locks",
+      "description": "Tracking of 24h locks for video ads",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" }
+      }
     }
   },
   "firestore": {
+    "/user_ad_locks/{userId}": {
+      "schema": "UserAdLocks",
+      "description": "24h locks for video ads per user"
+    },
     "/user_ad_stats/{statId}": {
       "schema": "UserAdStats",
       "description": "Daily ad watch statistics for users"

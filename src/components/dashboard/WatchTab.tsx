@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock } from 'lucide-react';
 import { doc, updateDoc, increment, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
@@ -10,30 +10,40 @@ interface WatchTabProps {
   onUpdateBalance: (amount: number) => void;
 }
 
-const VIDEO_ADS = [
-  { id: 'ad_1', title: 'Video Ad #1', reward: 0.20, limit: 5 },
-  { id: 'ad_2', title: 'Video Ad #2', reward: 0.20, limit: 5 },
-  { id: 'ad_3', title: 'Video Ad #3', reward: 0.20, limit: 5 },
-  { id: 'ad_4', title: 'Video Ad #4', reward: 0.20, limit: 5 },
-  { id: 'ad_5', title: 'Video Ad #5', reward: 0.20, limit: 5 },
-];
+const VIDEO_ADS = Array.from({ length: 10 }, (_, i) => ({
+  id: `ad_${i + 1}`,
+  title: `Video Ad #${i + 1}`,
+  reward: 0.20,
+  limit: 1 // 1 watch per 24 hours
+}));
 
 export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabProps) {
-  const [adStats, setAdStats] = useState<Record<string, number>>({});
+  const [adStats, setAdStats] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isWatching, setIsWatching] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  const today = new Date().toISOString().split('T')[0];
+  // App Detection Logic
+  const isApp = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+    return (
+      ua.includes('wv') || 
+      ua.includes('WebView') || 
+      (ua.includes('Android') && ua.includes('Version/')) ||
+      ua.includes('AppCreator24') ||
+      window.location.search.includes('isApp=true')
+    );
+  }, []);
 
   useEffect(() => {
     const fetchStats = async () => {
       if (!auth.currentUser) return;
       try {
-        const statsRef = doc(db, 'user_ad_stats', `${auth.currentUser.uid}_${today}`);
+        const statsRef = doc(db, 'user_ad_locks', auth.currentUser.uid);
         const statsSnap = await getDoc(statsRef);
         if (statsSnap.exists()) {
-          setAdStats(statsSnap.data().counts || {});
+          setAdStats(statsSnap.data() || {});
         }
       } catch (error) {
         console.error("Error fetching ad stats:", error);
@@ -42,12 +52,26 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
       }
     };
     fetchStats();
-  }, [today]);
+  }, []);
 
   const handleWatchAd = async (ad: typeof VIDEO_ADS[0]) => {
-    const currentCount = adStats[ad.id] || 0;
-    if (currentCount >= ad.limit) {
-      alert("Daily limit reached for this video!");
+    // Check if locked
+    const lastWatched = adStats[ad.id];
+    if (lastWatched) {
+      const lastTime = lastWatched.toDate ? lastWatched.toDate().getTime() : new Date(lastWatched).getTime();
+      const now = new Date().getTime();
+      const hoursPassed = (now - lastTime) / (1000 * 60 * 60);
+      
+      if (hoursPassed < 24) {
+        const remainingHours = Math.ceil(24 - hoursPassed);
+        alert(`Ye video locked hai. Aap isay ${remainingHours} ghantay baad dobara dekh saktay hain.`);
+        return;
+      }
+    }
+
+    if (!isApp) {
+      alert("Video Ads sirf TaskMint App mein chalte hain. Bonus lene ke liye App download karein!");
+      window.open('https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4', '_blank');
       return;
     }
 
@@ -55,35 +79,29 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
     setMessage(null);
 
     // Trigger AppCreator24 Rewarded Video Intent
-    // Note: This works inside the APK
     try {
       window.location.href = 'appcreator24://rewarded/video';
     } catch (e) {
-      console.log("Not in APK or intent failed");
+      console.error("Intent failed:", e);
     }
 
-    // Simulate ad watching delay (e.g. 15 seconds)
-    // In a real scenario, AppCreator24 would call a callback
-    // For this implementation, we'll reward after a delay to simulate the process
+    // Simulate ad watching delay
     setTimeout(async () => {
       if (!auth.currentUser) return;
 
       try {
-        const statsRef = doc(db, 'user_ad_stats', `${auth.currentUser.uid}_${today}`);
-        const newCounts = { ...adStats, [ad.id]: currentCount + 1 };
+        const statsRef = doc(db, 'user_ad_locks', auth.currentUser.uid);
         
         await setDoc(statsRef, {
-          userId: auth.currentUser.uid,
-          date: today,
-          counts: newCounts,
-          lastUpdated: serverTimestamp()
+          [ad.id]: serverTimestamp()
         }, { merge: true });
 
         await updateDoc(doc(db, 'users', auth.currentUser.uid), {
           balance: increment(ad.reward)
         });
 
-        setAdStats(newCounts);
+        // Update local state
+        setAdStats(prev => ({ ...prev, [ad.id]: new Date() }));
         onUpdateBalance(ad.reward);
         setMessage({ type: 'success', text: `Mubarak ho! Rs. ${ad.reward} aapke wallet mein add ho gaye hain.` });
       } catch (error) {
@@ -92,7 +110,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
       } finally {
         setIsWatching(null);
       }
-    }, 5000); // 5 seconds simulation for demo, usually ads are 15-30s
+    }, 5000); 
   };
 
   if (isLoading) {
@@ -148,8 +166,20 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
       <div className="grid gap-3">
         {VIDEO_ADS.map((ad, index) => {
-          const count = adStats[ad.id] || 0;
-          const isFull = count >= ad.limit;
+          const lastWatched = adStats[ad.id];
+          let isLocked = false;
+          let remainingHours = 0;
+
+          if (lastWatched) {
+            const lastTime = lastWatched.toDate ? lastWatched.toDate().getTime() : new Date(lastWatched).getTime();
+            const now = new Date().getTime();
+            const hoursPassed = (now - lastTime) / (1000 * 60 * 60);
+            if (hoursPassed < 24) {
+              isLocked = true;
+              remainingHours = Math.ceil(24 - hoursPassed);
+            }
+          }
+
           const isThisWatching = isWatching === ad.id;
 
           return (
@@ -158,11 +188,11 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={`bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between transition-all ${isFull ? 'opacity-60' : 'hover:border-red-200'}`}
+              className={`bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between transition-all ${isLocked ? 'opacity-60 bg-slate-50' : 'hover:border-red-200'}`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isFull ? 'bg-slate-100 text-slate-400' : 'bg-red-50 text-red-500'}`}>
-                  <PlayCircle className="w-6 h-6" />
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isLocked ? 'bg-slate-200 text-slate-400' : 'bg-red-50 text-red-500'}`}>
+                  {isLocked ? <Lock className="w-5 h-5" /> : <PlayCircle className="w-6 h-6" />}
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900">{ad.title}</h4>
@@ -170,18 +200,20 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                     <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
                       Earn Rs {ad.reward.toFixed(2)}
                     </span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      {count}/{ad.limit} Today
-                    </span>
+                    {isLocked && (
+                      <span className="text-[9px] font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {remainingHours}h left
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
               <button 
                 onClick={() => handleWatchAd(ad)}
-                disabled={!!isWatching || isFull}
+                disabled={!!isWatching || isLocked}
                 className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md ${
-                  isFull 
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                  isLocked 
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
                     : isThisWatching 
                       ? 'bg-slate-900 text-white'
                       : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/20'
@@ -191,7 +223,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-3 h-3 animate-spin" /> Loading...
                   </div>
-                ) : isFull ? 'Limit Reached' : 'Watch Now'}
+                ) : isLocked ? 'Locked' : 'Watch Now'}
               </button>
             </motion.div>
           );
