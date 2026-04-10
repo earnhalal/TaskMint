@@ -1,50 +1,101 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ClipboardList, Star, Sparkles } from 'lucide-react';
+import { Layout, Star, Info, ArrowLeft } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
-export default function TasksTab({ tasks }: { tasks: any[] }) {
+interface TasksTabProps {
+  onBack: () => void;
+}
+
+export default function TasksTab({ onBack }: TasksTabProps) {
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+
+  const userId = user?.uid || "";
+  const wannadsUrl = `https://earn.wannads.com/wall?apiKey=69d9648474a17761405810&userId=${userId}`;
+
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="pb-24 px-4 pt-4"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="pb-24 px-4 pt-2"
     >
-      <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-6 text-white shadow-lg shadow-emerald-500/30 mb-6">
-        <h2 className="text-2xl font-black mb-2">Task Wall</h2>
-        <p className="text-sm text-emerald-100 mb-4">Complete simple tasks to boost your earnings.</p>
-        <div className="flex items-center gap-2 bg-white/20 w-fit px-3 py-1.5 rounded-lg text-xs font-bold">
-          <Star className="w-4 h-4" /> Coming Soon
+      {/* Top Navigation */}
+      <div className="flex items-center gap-4 mb-6">
+        <button 
+          onClick={onBack}
+          className="w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-600 shadow-sm active:scale-95 transition-all"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h2 className="text-lg font-black text-slate-900">Offer Wall</h2>
+      </div>
+
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-500/30 mb-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+        <h2 className="text-2xl font-black mb-2 flex items-center gap-2">
+          Tasks <Star className="w-5 h-5 text-amber-300 fill-amber-300" />
+        </h2>
+        <p className="text-sm text-indigo-100 font-medium">Complete high-paying offers and apps to boost your earnings.</p>
+      </div>
+
+      {/* Wall Container */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden relative min-h-[800px]">
+        {isLoading && (
+          <div className="absolute inset-0 z-20 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center">
+            <div className="w-12 h-12 border-4 border-slate-100 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+            <p className="text-sm font-black text-slate-900 animate-pulse">Loading OfferWall...</p>
+            <p className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-widest">Please wait a moment</p>
+          </div>
+        )}
+        
+        <div className="w-full h-[800px] overflow-y-auto no-scrollbar">
+          <iframe
+            src={wannadsUrl}
+            className="w-full h-full border-none"
+            title="Wannads OfferWall"
+            onLoad={() => setIsLoading(false)}
+            style={{ width: '100%', height: '800px', border: '0' }}
+          />
         </div>
       </div>
 
-      <motion.div 
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-10 text-center flex flex-col items-center justify-center min-h-[300px]"
-      >
-        <motion.div
-          animate={{ 
-            y: [0, -10, 0],
-            scale: [1, 1.05, 1]
-          }}
-          transition={{ repeat: Infinity, duration: 3 }}
-          className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-6 relative"
-        >
-          <ClipboardList className="w-10 h-10 text-emerald-500" />
-          <motion.div
-            animate={{ opacity: [0, 1, 0], rotate: [0, 90, 180] }}
-            transition={{ repeat: Infinity, duration: 2.5 }}
-            className="absolute -top-2 -right-2"
-          >
-            <Sparkles className="w-6 h-6 text-amber-400" />
-          </motion.div>
-        </motion.div>
-        <h3 className="text-xl font-display font-bold text-slate-900 mb-2">Coming Soon!</h3>
-        <p className="text-sm text-slate-500 max-w-[250px] mx-auto">
-          We are preparing high-paying tasks and surveys for you. They will be available here very soon!
-        </p>
-      </motion.div>
+      {/* Pro Tips */}
+      <div className="mt-6 p-5 bg-slate-900 rounded-3xl border border-slate-800 shadow-lg">
+        <div className="flex items-center gap-2 mb-3">
+          <Info className="w-4 h-4 text-indigo-400" />
+          <p className="text-[10px] font-black text-white uppercase tracking-widest">Pro Tips for Earning</p>
+        </div>
+        <ul className="space-y-3">
+          <li className="flex gap-3 items-start">
+            <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+            </div>
+            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">
+              Offers mukammal karne ke baad instructions zaroor parhein taake reward mil sake.
+            </p>
+          </li>
+          <li className="flex gap-3 items-start">
+            <div className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+            </div>
+            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">
+              Wannads rewards aksar 24 ghanton ke andar aapke wallet mein add ho jate hain.
+            </p>
+          </li>
+        </ul>
+      </div>
+
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </motion.div>
   );
 }

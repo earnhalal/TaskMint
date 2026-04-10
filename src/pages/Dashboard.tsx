@@ -11,7 +11,9 @@ import {
   Sparkles,
   Mail,
   AlertTriangle,
-  Crown
+  Crown,
+  Search,
+  Layout
 } from 'lucide-react';
 import { 
   doc, 
@@ -1012,9 +1014,9 @@ export default function Dashboard() {
       case 'watch':
         return <WatchTab />;
       case 'tasks':
-        return <TasksTab tasks={tasks} />;
+        return <TasksTab onBack={() => setActiveTab('home')} />;
       case 'task_wall':
-        return <TaskWall />;
+        return <TaskWall onBack={() => setActiveTab('home')} />;
       case 'leaderboard':
         return <LeaderboardView earners={topEarners} onBack={() => setActiveTab('home')} />;
       // Add other tabs as needed
@@ -1235,23 +1237,24 @@ export default function Dashboard() {
         <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-3 pb-6 sm:pb-4 z-20">
           <div className="flex items-center justify-between max-w-md mx-auto">
             {[
-              { id: 'home', icon: <Home className="w-6 h-6" />, label: 'HOME' },
-              { id: 'watch', icon: <PlaySquare className="w-6 h-6" />, label: 'WATCH' },
-              { id: 'tasks', icon: <ClipboardList className="w-6 h-6" />, label: 'TASK WALL' },
-              { id: 'premium', icon: <Briefcase className="w-6 h-6" />, label: 'PREMIUM' },
-              { id: 'profile', icon: <User className="w-6 h-6" />, label: 'PROFILE' },
+              { id: 'home', icon: <Home className="w-5 h-5" />, label: 'HOME' },
+              { id: 'watch', icon: <PlaySquare className="w-5 h-5" />, label: 'WATCH' },
+              { id: 'task_wall', icon: <Search className="w-5 h-5" />, label: 'SURVEYS' },
+              { id: 'tasks', icon: <Layout className="w-5 h-5" />, label: 'TASKS' },
+              { id: 'premium', icon: <Briefcase className="w-5 h-5" />, label: 'PREMIUM' },
+              { id: 'profile', icon: <User className="w-5 h-5" />, label: 'PROFILE' },
             ].map((tab) => (
               <button 
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1.5 w-16 ${activeTab === tab.id ? 'text-yellow-600' : 'text-slate-400 hover:text-slate-600'} transition-colors`}
+                className={`flex flex-col items-center gap-1 w-14 ${activeTab === tab.id ? 'text-yellow-600' : 'text-slate-400 hover:text-slate-600'} transition-colors relative`}
               >
                 <div className={`transition-transform ${activeTab === tab.id ? 'scale-110' : ''}`}>
                   {tab.icon}
                 </div>
-                <span className="text-[9px] font-bold tracking-wider">{tab.label}</span>
+                <span className="text-[8px] font-black tracking-tighter text-center leading-none">{tab.label}</span>
                 {activeTab === tab.id && (
-                  <div className="absolute -top-3 w-8 h-1 bg-yellow-500 rounded-b-full"></div>
+                  <div className="absolute -top-3 w-6 h-1 bg-yellow-500 rounded-b-full"></div>
                 )}
               </button>
             ))}
