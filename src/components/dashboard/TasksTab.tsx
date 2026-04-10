@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Layout, Star, Info, ArrowLeft } from 'lucide-react';
+import { Layout, Star, Info, ArrowLeft, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface TasksTabProps {
   onBack: () => void;
+  accountStatus: string;
+  onPayClick: () => void;
 }
 
-export default function TasksTab({ onBack }: TasksTabProps) {
+export default function TasksTab({ onBack, accountStatus, onPayClick }: TasksTabProps) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+
+  const isApproved = accountStatus.toLowerCase() === 'active';
 
   const userId = user?.uid || "";
   const wannadsUrl = `https://earn.wannads.com/wall?apiKey=69d9648474a17761405810&userId=${userId}`;
@@ -47,6 +51,25 @@ export default function TasksTab({ onBack }: TasksTabProps) {
             <div className="w-12 h-12 border-4 border-slate-100 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
             <p className="text-sm font-black text-slate-900 animate-pulse">Loading OfferWall...</p>
             <p className="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-widest">Please wait a moment</p>
+          </div>
+        )}
+
+        {/* Paywall Overlay */}
+        {!isApproved && (
+          <div className="absolute inset-0 z-30 backdrop-blur-md bg-white/40 flex flex-col items-center justify-center p-6 text-center">
+            <div className="w-20 h-20 bg-white rounded-full shadow-2xl flex items-center justify-center mb-6 animate-bounce">
+              <Lock className="w-10 h-10 text-amber-600" />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900 mb-4 leading-tight">Unlock Premium Tasks!</h3>
+            <p className="text-sm text-slate-600 font-bold mb-8 max-w-[280px]">
+              In High-paying tasks ko shuru karne ke liye Rs. 100 Joining Fee jama karwayein.
+            </p>
+            <button 
+              onClick={onPayClick}
+              className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-10 py-4 rounded-2xl font-black text-sm shadow-xl shadow-amber-500/30 active:scale-95 transition-all"
+            >
+              Pay Now
+            </button>
           </div>
         )}
         

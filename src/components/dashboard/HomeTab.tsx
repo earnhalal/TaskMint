@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
     UserPlus as InviteIcon, 
     CheckSquare as DocumentCheckIcon, 
@@ -18,9 +18,14 @@ import {
     CheckCircle2,
     MessageCircle,
     Zap,
-    Download
+    Download,
+    Lock,
+    Gift
 } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
+import { db, auth, rtdb } from '../../firebase';
+import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { ref, update } from 'firebase/database';
 
 interface HomeTabProps {
   name: string;
@@ -46,6 +51,8 @@ interface HomeTabProps {
   appSettings: {
     activationFee: number;
   };
+  appBonusClaimed: boolean;
+  lastDailyCheckin: any;
 }
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; bgClass: string; iconColor: string; delay: number }> = ({ icon, label, value, bgClass, iconColor, delay }) => (
@@ -71,10 +78,11 @@ const QuickActionBtn: React.FC<{
     delay: number;
     isHighlight?: boolean;
     isWhatsApp?: boolean;
-}> = ({ icon, label, onClick, colorClass, delay, isHighlight, isWhatsApp }) => (
+    isShaking?: boolean;
+}> = ({ icon, label, onClick, colorClass, delay, isHighlight, isWhatsApp, isShaking }) => (
     <button 
         onClick={onClick} 
-        className={`flex flex-col items-center gap-2 group animate-fade-in-up w-full ${isWhatsApp ? 'animate-bounce-small' : ''}`}
+        className={`flex flex-col items-center gap-2 group animate-fade-in-up w-full ${isWhatsApp ? 'animate-bounce-small' : ''} ${isShaking ? 'animate-shaking' : ''}`}
         style={{ animationDelay: `${delay}ms` }}
     >
         <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-300 group-hover:scale-105 group-active:scale-95 ${colorClass} ${isHighlight ? 'ring-2 ring-red-100' : 'ring-2 ring-white ring-opacity-50'} ${isWhatsApp ? 'shadow-green-500/50' : ''}`}>
@@ -105,7 +113,9 @@ export default function HomeTab({
   onActivateClick,
   onTaskWallClick,
   onUpdateBalance,
-  appSettings
+  appSettings,
+  appBonusClaimed,
+  lastDailyCheckin
 }: HomeTabProps) {
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -115,6 +125,7 @@ export default function HomeTab({
   };
 
   const [avatar, setAvatar] = React.useState<string | null>(null);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   const isApp = useMemo(() => {
     if (typeof window === 'undefined') return false;
@@ -129,6 +140,84 @@ export default function HomeTab({
     );
   }, []);
 
+  const handleClaimAppBonus = async () => {
+    if (!auth.currentUser || isClaiming) return;
+    setIsClaiming(true);
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const rtdbRef = ref(rtdb, `users/${auth.currentUser.uid}`);
+      
+      await updateDoc(userRef, {
+        balance: increment(100),
+        appBonusClaimed: true
+      });
+      
+      await update(rtdbRef, {
+        balance: balance + 100
+      });
+
+      alert("Mubarak ho! Rs. 100 App Welcome Bonus aapke wallet mein add kar diya gaya hai.");
+    } catch (error) {
+      console.error("Error claiming app bonus:", error);
+      alert("Bonus claim karne mein masla hua. Dobara koshish karein.");
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  const handleDailyCheckin = async () => {
+    if (!isApp) {
+      alert("Ye reward sirf TaskMint App par milta hai. Bonus lene ke liye App download karein!");
+      window.open('https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4', '_blank');
+      return;
+    }
+
+    if (!auth.currentUser || isClaiming) return;
+
+    // Check if 24 hours passed
+    if (lastDailyCheckin) {
+      const lastTime = lastDailyCheckin.toDate ? lastDailyCheckin.toDate().getTime() : new Date(lastDailyCheckin).getTime();
+      const now = new Date().getTime();
+      const hoursPassed = (now - lastTime) / (1000 * 60 * 60);
+      
+      if (hoursPassed < 24) {
+        const remainingHours = Math.ceil(24 - hoursPassed);
+        alert(`Aap pehle hi aaj ka reward claim kar chuke hain. Agla reward ${remainingHours} ghantay baad milega.`);
+        return;
+      }
+    }
+
+    setIsClaiming(true);
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const rtdbRef = ref(rtdb, `users/${auth.currentUser.uid}`);
+      
+      await updateDoc(userRef, {
+        balance: increment(10),
+        lastDailyCheckin: serverTimestamp()
+      });
+      
+      await update(rtdbRef, {
+        balance: balance + 10
+      });
+
+      alert("Mubarak ho! Rs. 10 Daily Reward aapke wallet mein add kar diya gaya hai. Agla reward 24 ghante baad milega.");
+    } catch (error) {
+      console.error("Error daily checkin:", error);
+      alert("Reward claim karne mein masla hua.");
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  const isDailyClaimable = useMemo(() => {
+    if (!lastDailyCheckin) return true;
+    const lastTime = lastDailyCheckin.toDate ? lastDailyCheckin.toDate().getTime() : new Date(lastDailyCheckin).getTime();
+    const now = new Date().getTime();
+    const hoursPassed = (now - lastTime) / (1000 * 60 * 60);
+    return hoursPassed >= 24;
+  }, [lastDailyCheckin]);
+
   React.useEffect(() => {
     setAvatar(localStorage.getItem('taskmint_avatar'));
   }, []);
@@ -136,6 +225,51 @@ export default function HomeTab({
   return (
     <div className="space-y-6 animate-fade-in pb-24 font-sans">
       
+      {/* APK Welcome Bonus - Only in App and if not claimed */}
+      {isApp && !appBonusClaimed && (
+        <div className="animate-fade-in-up">
+          <button 
+            onClick={handleClaimAppBonus}
+            disabled={isClaiming}
+            className="block w-full bg-gradient-to-r from-amber-400 to-orange-600 p-6 rounded-3xl shadow-2xl shadow-amber-500/40 border-4 border-white/40 relative overflow-hidden group animate-bounce-small"
+          >
+            <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+            <div className="flex flex-col items-center justify-center gap-2 relative z-10">
+              <div className="flex items-center gap-3">
+                <Gift className="w-8 h-8 text-white" />
+                <span className="text-xl font-black text-white uppercase tracking-tighter">Claim Rs. 100 APK Bonus</span>
+              </div>
+              <p className="text-[10px] text-amber-50 font-bold uppercase tracking-widest opacity-80">One-time App Exclusive Reward</p>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* Download App Button - Hero Section */}
+      {!isApp && (
+        <a 
+          href="https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4" 
+          download 
+          className="block w-full bg-gradient-to-r from-emerald-500 to-emerald-800 p-4 rounded-2xl shadow-lg shadow-emerald-500/30 border border-emerald-400/30 relative overflow-hidden group animate-pulse-emerald"
+        >
+          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                <Download className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-white">Download TaskMint App & Earn Daily</p>
+                <p className="text-[10px] text-emerald-100 font-bold">Get Rs. 100 Welcome Bonus in App!</p>
+              </div>
+            </div>
+            <div className="bg-white/20 px-3 py-1 rounded-lg">
+               <span className="text-[10px] font-black text-white uppercase">APK</span>
+            </div>
+          </div>
+        </a>
+      )}
+
       {/* Account Status Alert for Inactive Users */}
       {accountStatus.toLowerCase() === 'inactive' && (
         <div 
@@ -193,37 +327,13 @@ export default function HomeTab({
         </div>
       )}
 
-      {/* Download App Button - Hero Section */}
-      {!isApp && (
-        <a 
-          href="https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4" 
-          download 
-          className="block w-full bg-gradient-to-r from-emerald-500 to-emerald-800 p-4 rounded-2xl shadow-lg shadow-emerald-500/30 border border-emerald-400/30 relative overflow-hidden group animate-pulse-emerald"
-        >
-          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
-                <Download className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-xs font-black text-white">Download TaskMint App & Earn Daily</p>
-                <p className="text-[10px] text-emerald-100 font-bold">Get the best experience on mobile!</p>
-              </div>
-            </div>
-            <div className="bg-white/20 px-3 py-1 rounded-lg">
-               <span className="text-[10px] font-black text-white uppercase">APK</span>
-            </div>
-          </div>
-        </a>
-      )}
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
           <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">{getGreeting()},</p>
               <div className="flex items-center gap-1.5">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tighter">{name}</h1>
-                {status === 'Active' && (
+                {accountStatus === 'Active' && (
                   <CheckCircle2 className="w-5 h-5 text-blue-600 fill-blue-600/10" />
                 )}
               </div>
@@ -358,12 +468,15 @@ export default function HomeTab({
                   colorClass="bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-indigo-500/40" 
                   delay={110}
               />
+              {/* Daily Gift Logic */}
               <QuickActionBtn 
                   icon={<CalendarIcon />} 
-                  label="Streak" 
-                  onClick={onStreakClick} 
+                  label="Daily Gift" 
+                  onClick={handleDailyCheckin} 
                   colorClass="bg-gradient-to-br from-yellow-400 to-amber-600 shadow-yellow-500/40" 
                   delay={125}
+                  isHighlight={true}
+                  isShaking={isDailyClaimable}
               />
               <QuickActionBtn 
                   icon={<TicketIcon />} 
@@ -445,6 +558,15 @@ export default function HomeTab({
           0% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); }
           50% { transform: scale(1.02); box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4); }
           100% { transform: scale(1); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); }
+        }
+
+        .animate-shaking { animation: shaking 0.5s infinite ease-in-out; }
+        @keyframes shaking {
+          0% { transform: rotate(0deg); }
+          25% { transform: rotate(5deg); }
+          50% { transform: rotate(0deg); }
+          75% { transform: rotate(-5deg); }
+          100% { transform: rotate(0deg); }
         }
 
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }

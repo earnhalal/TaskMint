@@ -107,6 +107,8 @@ export default function Dashboard() {
 
   const [balance, setBalance] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
+  const [appBonusClaimed, setAppBonusClaimed] = useState(false);
+  const [lastDailyCheckin, setLastDailyCheckin] = useState<any>(null);
   const [freeSpins, setFreeSpins] = useState(0);
   const [pendingWithdrawals, setPendingWithdrawals] = useState<any[]>([]);
   const [completedWithdrawals, setCompletedWithdrawals] = useState<any[]>([]);
@@ -151,6 +153,8 @@ export default function Dashboard() {
         setTotalTeamEarnings(data.totalTeamEarnings || 0);
         setReferredBy(data.referredBy || null);
         setReferralCode(data.referralCode || '');
+        setAppBonusClaimed(data.appBonusClaimed || false);
+        setLastDailyCheckin(data.lastDailyCheckin || null);
 
         // Migration logic for old users
         if (!data.referralCode && data.username) {
@@ -1014,9 +1018,17 @@ export default function Dashboard() {
       case 'watch':
         return <WatchTab />;
       case 'tasks':
-        return <TasksTab onBack={() => setActiveTab('home')} />;
+        return <TasksTab 
+          onBack={() => setActiveTab('home')} 
+          accountStatus={accountStatus}
+          onPayClick={() => setActiveTab('deposit')}
+        />;
       case 'task_wall':
-        return <TaskWall onBack={() => setActiveTab('home')} />;
+        return <TaskWall 
+          onBack={() => setActiveTab('home')} 
+          accountStatus={accountStatus}
+          onPayClick={() => setActiveTab('deposit')}
+        />;
       case 'leaderboard':
         return <LeaderboardView earners={topEarners} onBack={() => setActiveTab('home')} />;
       // Add other tabs as needed
@@ -1043,6 +1055,8 @@ export default function Dashboard() {
           onTaskWallClick={() => setActiveTab('task_wall')}
           onUpdateBalance={handleUpdateBalance}
           appSettings={appSettings}
+          appBonusClaimed={appBonusClaimed}
+          lastDailyCheckin={lastDailyCheckin}
         />;
     }
   };

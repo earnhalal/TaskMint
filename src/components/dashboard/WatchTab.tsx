@@ -33,11 +33,8 @@ export default function WatchTab() {
       className="pb-24 px-4 pt-4"
     >
       <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-3xl p-6 text-white shadow-lg shadow-red-500/30 mb-6">
-        <h2 className="text-2xl font-black mb-2">Watch & Earn</h2>
-        <p className="text-sm text-red-100 mb-4">Watch short video ads to earn instant rewards.</p>
-        <div className="flex items-center gap-2 bg-white/20 w-fit px-3 py-1.5 rounded-lg text-xs font-bold">
-          <Clock className="w-4 h-4" /> Live Rewards
-        </div>
+        <h2 className="text-2xl font-black mb-2 tracking-tighter">Watch & Earn</h2>
+        <p className="text-xs text-red-100 font-bold opacity-90">Watch ads, get instant PKR.</p>
       </div>
 
       {ads.length > 0 ? (

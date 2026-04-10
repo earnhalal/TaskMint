@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Loader from '../Loader';
-import { ArrowLeft, Star, Info } from 'lucide-react';
+import { ArrowLeft, Star, Info, Lock } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface TaskWallProps {
   onBack: () => void;
+  accountStatus: string;
+  onPayClick: () => void;
 }
 
-export default function TaskWall({ onBack }: TaskWallProps) {
+export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWallProps) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+
+  const isApproved = accountStatus.toLowerCase() === 'active';
 
   // CPX Research App ID
   const appId = "32325";
@@ -55,6 +59,25 @@ export default function TaskWall({ onBack }: TaskWallProps) {
       </div>
 
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden relative min-h-[800px]">
+        {/* Paywall Overlay */}
+        {!isApproved && (
+          <div className="absolute inset-0 z-30 backdrop-blur-md bg-white/40 flex flex-col items-center justify-center p-6 text-center">
+            <div className="w-20 h-20 bg-white rounded-full shadow-2xl flex items-center justify-center mb-6 animate-bounce">
+              <Lock className="w-10 h-10 text-amber-600" />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900 mb-4 leading-tight">Unlock Premium Tasks!</h3>
+            <p className="text-sm text-slate-600 font-bold mb-8 max-w-[280px]">
+              In High-paying tasks ko shuru karne ke liye Rs. 100 Joining Fee jama karwayein.
+            </p>
+            <button 
+              onClick={onPayClick}
+              className="bg-gradient-to-r from-amber-500 to-amber-700 text-white px-10 py-4 rounded-2xl font-black text-sm shadow-xl shadow-amber-500/30 active:scale-95 transition-all"
+            >
+              Pay Now
+            </button>
+          </div>
+        )}
+        
         <iframe
           src={cpxUrl}
           className="w-full h-[800px] border-none"
