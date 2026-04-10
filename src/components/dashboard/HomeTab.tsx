@@ -117,8 +117,16 @@ export default function HomeTab({
   const [avatar, setAvatar] = React.useState<string | null>(null);
 
   const isApp = useMemo(() => {
-    const ua = navigator.userAgent || '';
-    return ua.includes('AppCreator24') || ua.includes('WebView');
+    if (typeof window === 'undefined') return false;
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+    // Check for common WebView keywords and URL parameter
+    return (
+      ua.includes('wv') || 
+      ua.includes('WebView') || 
+      (ua.includes('Android') && ua.includes('Version/')) ||
+      ua.includes('AppCreator24') ||
+      window.location.search.includes('isApp=true')
+    );
   }, []);
 
   React.useEffect(() => {
