@@ -1019,7 +1019,11 @@ export default function Dashboard() {
         if (accountStatus.toLowerCase() !== 'active') {
           return <ActivationTab onBack={() => setActiveTab('home')} appSettings={appSettings} userName={userName} />;
         }
-        return <WatchTab />;
+        return <WatchTab 
+          onBack={() => setActiveTab('home')}
+          balance={balance}
+          onUpdateBalance={handleUpdateBalance}
+        />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {
           return <ActivationTab onBack={() => setActiveTab('home')} appSettings={appSettings} userName={userName} />;

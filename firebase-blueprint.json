@@ -181,9 +181,25 @@
         "status": { "type": "string", "enum": ["active", "inactive"] }
       },
       "required": ["title", "reward", "duration", "videoUrl", "status"]
+    },
+    "UserAdStats": {
+      "title": "User Ad Stats",
+      "description": "Daily tracking of ad watches per user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string" },
+        "counts": { "type": "object" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "counts"]
     }
   },
   "firestore": {
+    "/user_ad_stats/{statId}": {
+      "schema": "UserAdStats",
+      "description": "Daily ad watch statistics for users"
+    },
     "/promotion_orders/{orderId}": {
       "schema": "promotion_orders",
       "description": "Collection for social media promotion orders"
