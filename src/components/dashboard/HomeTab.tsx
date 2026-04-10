@@ -79,15 +79,21 @@ const QuickActionBtn: React.FC<{
     isHighlight?: boolean;
     isWhatsApp?: boolean;
     isShaking?: boolean;
-}> = ({ icon, label, onClick, colorClass, delay, isHighlight, isWhatsApp, isShaking }) => (
+    isLocked?: boolean;
+}> = ({ icon, label, onClick, colorClass, delay, isHighlight, isWhatsApp, isShaking, isLocked }) => (
     <button 
         onClick={onClick} 
-        className={`flex flex-col items-center gap-2 group animate-fade-in-up w-full ${isWhatsApp ? 'animate-bounce-small' : ''} ${isShaking ? 'animate-shaking' : ''}`}
+        className={`flex flex-col items-center gap-2 group animate-fade-in-up w-full ${isWhatsApp ? 'animate-bounce-small' : ''} ${isShaking ? 'animate-shaking' : ''} relative`}
         style={{ animationDelay: `${delay}ms` }}
     >
         <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-300 group-hover:scale-105 group-active:scale-95 ${colorClass} ${isHighlight ? 'ring-2 ring-red-100' : 'ring-2 ring-white ring-opacity-50'} ${isWhatsApp ? 'shadow-green-500/50' : ''}`}>
             {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5 sm:w-6 sm:h-6" })}
         </div>
+        {isLocked && (
+          <div className="absolute top-0 right-0 -mt-1 -mr-1 bg-white rounded-full p-1 shadow-md border border-slate-100 z-10">
+            <Lock className="w-2.5 h-2.5 text-amber-600" />
+          </div>
+        )}
         <span className={`text-[10px] sm:text-xs font-bold transition-colors ${isHighlight ? 'text-red-700' : isWhatsApp ? 'text-green-600' : 'text-slate-600 group-hover:text-slate-900'}`}>{label}</span>
     </button>
 );
@@ -453,6 +459,7 @@ export default function HomeTab({
                   colorClass="bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/40" 
                   delay={50}
                   isHighlight={true}
+                  isLocked={accountStatus.toLowerCase() !== 'active'}
               />
               <QuickActionBtn 
                   icon={<EarnIcon />} 
@@ -460,13 +467,15 @@ export default function HomeTab({
                   onClick={onTasksClick} 
                   colorClass="bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-emerald-500/40" 
                   delay={100}
+                  isLocked={accountStatus.toLowerCase() !== 'active'}
               />
               <QuickActionBtn 
                   icon={<Zap />} 
-                  label="Task Wall" 
+                  label="Surveys" 
                   onClick={onTaskWallClick} 
                   colorClass="bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-indigo-500/40" 
                   delay={110}
+                  isLocked={accountStatus.toLowerCase() !== 'active'}
               />
               {/* Daily Gift Logic */}
               <QuickActionBtn 

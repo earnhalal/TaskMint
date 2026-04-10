@@ -1016,14 +1016,23 @@ export default function Dashboard() {
           onSkip={() => setActiveTab('withdraw')}
         />;
       case 'watch':
+        if (accountStatus.toLowerCase() !== 'active') {
+          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={appSettings} userName={userName} />;
+        }
         return <WatchTab />;
       case 'tasks':
+        if (accountStatus.toLowerCase() !== 'active') {
+          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={appSettings} userName={userName} />;
+        }
         return <TasksTab 
           onBack={() => setActiveTab('home')} 
           accountStatus={accountStatus}
           onPayClick={() => setActiveTab('deposit')}
         />;
       case 'task_wall':
+        if (accountStatus.toLowerCase() !== 'active') {
+          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={appSettings} userName={userName} />;
+        }
         return <TaskWall 
           onBack={() => setActiveTab('home')} 
           accountStatus={accountStatus}
