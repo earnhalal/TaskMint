@@ -27,13 +27,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   const isApp = useMemo(() => {
     if (typeof window === 'undefined') return false;
     const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
-    return (
-      ua.includes('wv') || 
-      ua.includes('WebView') || 
-      (ua.includes('Android') && ua.includes('Version/')) ||
-      ua.includes('AppCreator24') ||
-      window.location.search.includes('isApp=true')
-    );
+    const isWebView = ua.includes('wv') || ua.includes('WebView') || (ua.includes('Android') && ua.includes('Version/'));
+    const isAC24 = ua.includes('AppCreator24');
+    const isParam = window.location.search.includes('isApp=true');
+    
+    // Check if the scheme is likely supported or if we are definitely in the app
+    return isWebView || isAC24 || isParam;
   }, []);
 
   useEffect(() => {
@@ -80,7 +79,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
     // Trigger AppCreator24 Rewarded Video Intent
     try {
-      window.location.href = 'appcreator24://rewarded/video';
+      // Use location.href as requested
+      (window as any).location.href = 'appcreator24://rewarded/video';
     } catch (e) {
       console.error("Intent failed:", e);
     }
@@ -208,10 +208,17 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                   </div>
                 </div>
               </div>
-              <button 
-                onClick={() => handleWatchAd(ad)}
-                disabled={!!isWatching || isLocked}
-                className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md ${
+              <a
+                href={isLocked || isWatching ? undefined : "appcreator24://rewarded/video"}
+                onClick={(e) => {
+                  if (isLocked || isWatching) {
+                    e.preventDefault();
+                    return;
+                  }
+                  // Still call handleWatchAd for reward logic and state management
+                  handleWatchAd(ad);
+                }}
+                className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md flex items-center justify-center min-w-[100px] ${
                   isLocked 
                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
                     : isThisWatching 
@@ -224,7 +231,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                     <Loader2 className="w-3 h-3 animate-spin" /> Loading...
                   </div>
                 ) : isLocked ? 'Locked' : 'Watch Now'}
-              </button>
+              </a>
             </motion.div>
           );
         })}

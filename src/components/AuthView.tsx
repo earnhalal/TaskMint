@@ -33,6 +33,42 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
     const [agree, setAgree] = useState(false);
     const [error, setError] = useState('');
 
+    // Dynamic SEO Titles and Meta Descriptions
+    useEffect(() => {
+        if (isResetMode) {
+            document.title = 'Reset Password - TaskMint';
+        } else if (isSignup) {
+            document.title = 'Create Account - Get Rs. 100 Bonus | TaskMint';
+            updateMetaDescription("Join TaskMint today and get a Rs. 100 welcome bonus! Start earning money online in Pakistan by completing simple tasks and surveys.");
+        } else {
+            document.title = 'Login - TaskMint Earn Money Online Pakistan';
+            updateMetaDescription("Login to your TaskMint account to access premium tasks, surveys, and withdraw your earnings via JazzCash and EasyPaisa.");
+        }
+
+        // Ensure robots tag is index, follow
+        let robots = document.querySelector('meta[name="robots"]');
+        if (robots) {
+            robots.setAttribute('content', 'index, follow');
+        } else {
+            const meta = document.createElement('meta');
+            meta.name = "robots";
+            meta.content = "index, follow";
+            document.getElementsByTagName('head')[0].appendChild(meta);
+        }
+    }, [isSignup, isResetMode]);
+
+    const updateMetaDescription = (description: string) => {
+        let meta = document.querySelector('meta[name="description"]');
+        if (meta) {
+            meta.setAttribute('content', description);
+        } else {
+            const newMeta = document.createElement('meta');
+            newMeta.name = "description";
+            newMeta.content = description;
+            document.getElementsByTagName('head')[0].appendChild(newMeta);
+        }
+    };
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const ref = params.get('ref');

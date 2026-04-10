@@ -132,6 +132,7 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
+    document.title = 'Dashboard - TaskMint';
     if (!user) return;
 
     // Listener for user profile

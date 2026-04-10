@@ -33,6 +33,11 @@ export default function Landing() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = 'TaskMint - Earn Money Online in Pakistan | Premium Earning Platform';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) {
+      meta.setAttribute('content', "TaskMint is Pakistan's leading premium earning platform. Complete simple tasks, watch videos, participate in surveys, and earn real money. Withdraw via JazzCash, EasyPaisa, and Bank Transfer.");
+    }
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
