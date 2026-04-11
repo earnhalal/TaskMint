@@ -37,7 +37,7 @@ export default function ProfileTab({ name, email, status, role, balance, lockedB
       localStorage.removeItem('taskmint_is_logged_in');
       localStorage.removeItem('taskmint_name');
       localStorage.removeItem('taskmint_email');
-      navigate('/auth');
+      navigate('/login');
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -48,7 +48,7 @@ export default function ProfileTab({ name, email, status, role, balance, lockedB
       if (auth.currentUser) {
         await auth.currentUser.delete();
         localStorage.clear();
-        navigate('/auth');
+        navigate('/login');
       }
     } catch (error: any) {
       console.error("Delete account error:", error);

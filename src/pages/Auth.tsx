@@ -11,7 +11,7 @@ import { sendWelcomeMail } from '../services/notificationService';
 
 const auth = getAuth(app);
 
-export default function Auth() {
+export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -19,8 +19,8 @@ export default function Auth() {
   const queryParams = new URLSearchParams(location.search);
   const hasRef = queryParams.has('ref');
   
-  // Determine initial view based on state passed during navigation, or if referred
-  const initialView = (location.state?.isLogin === false || hasRef) ? 'signup' : 'login';
+  // Determine initial view based on mode prop
+  const initialView = mode;
 
   const handleSignup = async (data: {username: string, email: string, phone: string, password: string, referralCode?: string}) => {
     try {

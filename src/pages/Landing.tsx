@@ -94,7 +94,7 @@ export default function Landing() {
   }, []);
 
   const onGetStarted = (view: 'login' | 'signup') => {
-    navigate('/auth');
+    navigate(`/${view}`);
   };
 
   const getModalTitle = (key: string) => {

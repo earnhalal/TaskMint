@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Eye as EyeIcon, EyeOff as EyeSlashIcon, CheckCircle2 as CheckCircleIcon, ArrowRight, Sparkles as SparklesIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Eye as EyeIcon, EyeOff as EyeSlashIcon, CheckCircle2 as CheckCircleIcon, ArrowRight, Sparkles as SparklesIcon, ShieldCheck } from 'lucide-react';
 
 interface AuthViewProps {
     onSignup: (data: {username: string, email: string, phone: string, password: string, referralCode?: string}) => void;
@@ -19,6 +20,7 @@ const GoogleIcon = ({ className }: { className?: string }) => (
 );
 
 const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword, initialView }) => {
+    const navigate = useNavigate();
     const [isSignup, setIsSignup] = useState(initialView === 'signup');
     const [isResetMode, setIsResetMode] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -38,11 +40,11 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
         if (isResetMode) {
             document.title = 'Reset Password - TaskMint';
         } else if (isSignup) {
-            document.title = 'Create Account - Get Rs. 100 Bonus | TaskMint';
-            updateMetaDescription("Join TaskMint today and get a Rs. 100 welcome bonus! Start earning money online in Pakistan by completing simple tasks and surveys.");
+            document.title = 'Create Account | Get Rs. 100 Bonus - TaskMint';
+            updateMetaDescription("Join TaskMint Pakistan. Watch ads, complete surveys, and earn daily rewards with fast JazzCash and Easypaisa withdrawals.");
         } else {
-            document.title = 'Login - TaskMint Earn Money Online Pakistan';
-            updateMetaDescription("Login to your TaskMint account to access premium tasks, surveys, and withdraw your earnings via JazzCash and EasyPaisa.");
+            document.title = 'Login | TaskMint - Earn Money Online Pakistan';
+            updateMetaDescription("Join TaskMint Pakistan. Watch ads, complete surveys, and earn daily rewards with fast JazzCash and Easypaisa withdrawals.");
         }
 
         // Ensure robots tag is index, follow
@@ -129,13 +131,13 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
                                 ></div>
                                 
                                 <button 
-                                    onClick={() => { setIsSignup(false); setError(''); }}
+                                    onClick={() => { navigate('/login'); setError(''); }}
                                     className={`flex-1 py-3 text-sm font-bold rounded-xl transition-colors relative z-10 ${!isSignup ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                                 >
                                     Log In
                                 </button>
                                 <button 
-                                    onClick={() => { setIsSignup(true); setError(''); }}
+                                    onClick={() => { navigate('/signup'); setError(''); }}
                                     className={`flex-1 py-3 text-sm font-bold rounded-xl transition-colors relative z-10 ${isSignup ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                                 >
                                     Create Account
@@ -297,6 +299,18 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
                                     <GoogleIcon className="w-5 h-5" />
                                     Continue with Google
                                 </button>
+
+                                {/* About Section for SEO */}
+                                <div className="mt-10 pt-8 border-t border-gray-100 text-center animate-fade-in" style={{animationDelay: '0.4s'}}>
+                                    <div className="flex items-center justify-center gap-2 text-amber-600 mb-3">
+                                        <ShieldCheck className="w-4 h-4" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Secure Platform</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 leading-relaxed font-medium">
+                                        TaskMint is a secure platform for Pakistani users to earn real money online. 
+                                        Register today to claim your <span className="text-amber-600 font-bold">Rs. 100 APK install bonus</span> and start earning.
+                                    </p>
+                                </div>
                             </>
                         )}
                     </div>

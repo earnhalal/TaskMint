@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading) return null; // Let the main App handle the loader
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
 };
@@ -28,7 +28,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 const InviteRedirect = () => {
   const { username } = useParams();
-  return <Navigate to={`/auth?ref=${encodeURIComponent(username || '')}`} replace />;
+  return <Navigate to={`/signup?ref=${encodeURIComponent(username || '')}`} replace />;
 };
 
 function AppContent() {
@@ -60,11 +60,17 @@ function AppContent() {
             <Landing />
           </PublicRoute>
         } />
-        <Route path="/auth" element={
+        <Route path="/login" element={
           <PublicRoute>
-            <Auth />
+            <Auth mode="login" />
           </PublicRoute>
         } />
+        <Route path="/signup" element={
+          <PublicRoute>
+            <Auth mode="signup" />
+          </PublicRoute>
+        } />
+        <Route path="/auth" element={<Navigate to="/login" replace />} />
         <Route path="/ref/:username" element={<InviteRedirect />} />
         <Route path="/dashboard" element={
           <ProtectedRoute>
