@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, X, Construction, Info } from 'lucide-react';
 import { doc, updateDoc, increment, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
@@ -23,6 +23,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   const [isLoading, setIsLoading] = useState(true);
   const [isWatching, setIsWatching] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showComingSoon, setShowComingSoon] = useState(false);
   const navigate = useNavigate();
 
   // App Detection Logic
@@ -60,6 +61,11 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   }, []);
 
   const handleWatchAd = async (ad: typeof VIDEO_ADS[0]) => {
+    // Intercept with Coming Soon as requested
+    setShowComingSoon(true);
+    return;
+
+    /* Original logic commented out for future use
     // Check if locked
     const lastWatched = adStats[ad.id];
     if (lastWatched) {
@@ -115,6 +121,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
         setIsWatching(null);
       }
     }, 5000); 
+    */
   };
 
   if (isLoading) {
@@ -148,10 +155,15 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
       <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-3xl p-6 text-white shadow-lg shadow-red-500/30 mb-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-        <h2 className="text-2xl font-black mb-2 tracking-tighter">Watch & Earn</h2>
-        <p className="text-xs text-red-100 font-bold opacity-90">Watch short video ads to get instant rewards.</p>
-        <div className="mt-4 flex items-center gap-2 bg-white/20 w-fit px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
-          <Sparkles className="w-3 h-3 text-amber-300" /> High Paying Ads
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-2">
+            <h2 className="text-2xl font-black tracking-tighter">Watch & Earn</h2>
+            <span className="bg-white/20 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border border-white/30">Coming Soon</span>
+          </div>
+          <p className="text-xs text-red-100 font-bold opacity-90">Watch short video ads to get instant rewards.</p>
+          <div className="mt-4 flex items-center gap-2 bg-white/20 w-fit px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
+            <Sparkles className="w-3 h-3 text-amber-300" /> High Paying Ads
+          </div>
         </div>
       </div>
 
@@ -212,16 +224,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                   </div>
                 </div>
               </div>
-              <a
-                href={isLocked || isWatching ? undefined : "appcreator24://rewarded/video"}
-                onClick={(e) => {
-                  if (isLocked || isWatching) {
-                    e.preventDefault();
-                    return;
-                  }
-                  // Still call handleWatchAd for reward logic and state management
-                  handleWatchAd(ad);
-                }}
+              <button
+                onClick={() => handleWatchAd(ad)}
                 className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-md flex items-center justify-center min-w-[100px] ${
                   isLocked 
                     ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
@@ -235,7 +239,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                     <Loader2 className="w-3 h-3 animate-spin" /> Loading...
                   </div>
                 ) : isLocked ? 'Locked' : 'Watch Now'}
-              </a>
+              </button>
             </motion.div>
           );
         })}
@@ -247,6 +251,54 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
           Please wait for the ad to finish to receive your reward.
         </p>
       </div>
+
+      {/* Coming Soon Modal */}
+      <AnimatePresence>
+        {showComingSoon && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowComingSoon(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+              
+              <div className="flex flex-col items-center text-center relative z-10">
+                <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-amber-500 mb-6 shadow-sm">
+                  <Construction className="w-10 h-10" />
+                </div>
+                
+                <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Coming Soon!</h3>
+                <p className="text-amber-600 font-black text-[10px] uppercase tracking-[0.2em] mb-4">Under Maintenance</p>
+                
+                <div className="bg-slate-50 p-6 rounded-3xl mb-8 w-full border border-slate-100">
+                  <p className="text-slate-700 font-bold text-lg leading-relaxed mb-2">
+                    Is feature par kaam ho raha hai.
+                  </p>
+                  <p className="text-slate-500 font-medium text-sm">
+                    Thora intezar karein, jald hi high-paying ads active kar diye jayenge. Shukriya!
+                  </p>
+                </div>
+                
+                <button 
+                  onClick={() => setShowComingSoon(false)}
+                  className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-900/20"
+                >
+                  Theek Hai
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
