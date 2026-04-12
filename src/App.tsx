@@ -5,6 +5,7 @@ import Landing from './pages/Landing';
 import Auth from './pages/Auth';
 import Legal from './pages/Legal';
 import Dashboard from './pages/Dashboard';
+import Download from './pages/Download';
 import Loader from './components/Loader';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -77,6 +78,7 @@ function AppContent() {
             <Dashboard />
           </ProtectedRoute>
         } />
+        <Route path="/download" element={<Download />} />
         <Route path="/privacy" element={<Legal />} />
         <Route path="/terms" element={<Legal />} />
         <Route path="/contact" element={<Legal />} />

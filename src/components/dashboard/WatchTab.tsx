@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock } from 'lucide-react';
 import { doc, updateDoc, increment, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -22,6 +23,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   const [isLoading, setIsLoading] = useState(true);
   const [isWatching, setIsWatching] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const navigate = useNavigate();
 
   // App Detection Logic
   const isApp = useMemo(() => {
@@ -70,7 +72,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
     if (!isApp) {
       alert("Video Ads sirf TaskMint App mein chalte hain. Bonus lene ke liye App download karein!");
-      window.open('https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4', '_blank');
+      navigate('/download');
       return;
     }
 

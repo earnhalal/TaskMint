@@ -575,6 +575,7 @@ export default function Landing() {
                         <span className="font-display font-bold text-xl tracking-tight text-slate-900">TaskMint</span>
                     </div>
                     <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-500">
+                        <button onClick={() => navigate('/download')} className="text-amber-600 hover:text-amber-700 transition-colors">Download App</button>
                         <button onClick={() => navigate('/privacy')} className="hover:text-amber-600 transition-colors">Privacy Policy</button>
                         <button onClick={() => navigate('/terms')} className="hover:text-amber-600 transition-colors">Terms of Service</button>
                         <button onClick={() => navigate('/contact')} className="hover:text-amber-600 transition-colors">Contact Support</button>

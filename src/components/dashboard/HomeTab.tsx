@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
     UserPlus as InviteIcon, 
     CheckSquare as DocumentCheckIcon, 
@@ -132,6 +133,7 @@ export default function HomeTab({
 
   const [avatar, setAvatar] = React.useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
+  const navigate = useNavigate();
 
   const isApp = useMemo(() => {
     if (typeof window === 'undefined') return false;
@@ -174,7 +176,7 @@ export default function HomeTab({
   const handleDailyCheckin = async () => {
     if (!isApp) {
       alert("Ye reward sirf TaskMint App par milta hai. Bonus lene ke liye App download karein!");
-      window.open('https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4', '_blank');
+      navigate('/download');
       return;
     }
 
@@ -253,10 +255,9 @@ export default function HomeTab({
 
       {/* Download App Button - Hero Section */}
       {!isApp && (
-        <a 
-          href="https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4" 
-          download 
-          className="block w-full bg-gradient-to-r from-emerald-500 to-emerald-800 p-4 rounded-2xl shadow-lg shadow-emerald-500/30 border border-emerald-400/30 relative overflow-hidden group animate-pulse-emerald"
+        <div 
+          onClick={() => navigate('/download')}
+          className="block w-full bg-gradient-to-r from-emerald-500 to-emerald-800 p-4 rounded-2xl shadow-lg shadow-emerald-500/30 border border-emerald-400/30 relative overflow-hidden group animate-pulse-emerald cursor-pointer"
         >
           <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <div className="flex items-center justify-between relative z-10">
@@ -273,7 +274,7 @@ export default function HomeTab({
                <span className="text-[10px] font-black text-white uppercase">APK</span>
             </div>
           </div>
-        </a>
+        </div>
       )}
 
       {/* Account Status Alert for Inactive Users */}
