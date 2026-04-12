@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
 import { db, auth, rtdb } from '../../firebase';
-import { doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, increment, serverTimestamp, setDoc } from 'firebase/firestore';
 import { ref, update } from 'firebase/database';
 
 interface HomeTabProps {
@@ -159,9 +159,9 @@ export default function HomeTab({
       const userRef = doc(db, 'users', auth.currentUser.uid);
       
       // 1. Update the flag in Firestore first
-      await updateDoc(userRef, {
+      await setDoc(userRef, {
         appBonusClaimed: true
-      });
+      }, { merge: true });
       console.log("[BONUS_CLAIM] Flag updated in Firestore");
       
       // 2. Use the centralized balance update logic which handles both DBs and commissions
@@ -206,9 +206,9 @@ export default function HomeTab({
       const userRef = doc(db, 'users', auth.currentUser.uid);
       
       // 1. Update the timestamp in Firestore
-      await updateDoc(userRef, {
+      await setDoc(userRef, {
         lastDailyCheckin: serverTimestamp()
-      });
+      }, { merge: true });
       console.log("[DAILY_CHECKIN] Timestamp updated in Firestore");
       
       // 2. Use the centralized balance update logic

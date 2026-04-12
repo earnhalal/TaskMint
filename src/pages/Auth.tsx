@@ -39,7 +39,7 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
 
       // Save user data to RTDB
       const userRef = ref(rtdb, `users/${user.uid}`);
-      await set(userRef, {
+      const userData = {
         uid: user.uid,
         username: data.username,
         email: data.email,
@@ -51,6 +51,19 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
         referredBy: data.referralCode || null,
         feeStatus: 'unpaid',
         referralCode: uniqueReferralCode
+      };
+      
+      await set(userRef, userData);
+
+      // Save user data to Firestore 'users' collection
+      await setDoc(doc(db, 'users', user.uid), {
+        ...userData,
+        lockedBalance: 0,
+        appBonusClaimed: false,
+        lastDailyCheckin: null,
+        pin: '',
+        withdrawalAccounts: [],
+        seenUpdates: []
       });
 
       // Save username to usernames collection (Firestore)

@@ -136,7 +136,7 @@ export default function Dashboard() {
     if (!user) return;
 
     // Listener for user profile
-    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (snapshot) => {
+    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setBalance(data.balance || 0);
@@ -162,11 +162,29 @@ export default function Dashboard() {
           const generateCode = async () => {
             const phoneSuffix = (data.phone || '').slice(-3) || Math.floor(100 + Math.random() * 900).toString();
             const newCode = `${data.username.toLowerCase()}_${phoneSuffix}`;
-            await updateDoc(doc(db, 'users', user.uid), { referralCode: newCode });
+            await setDoc(doc(db, 'users', user.uid), { referralCode: newCode }, { merge: true });
             setReferralCode(newCode);
             setShowReferralUpdateNotify(true);
           };
           generateCode();
+        }
+      } else {
+        // If Firestore doc doesn't exist, try to recover from RTDB
+        console.log("[MIGRATION] Firestore document missing for user:", user.uid);
+        const rtdbRef = ref(rtdb, `users/${user.uid}`);
+        const rtdbSnap = await get(rtdbRef);
+        if (rtdbSnap.exists()) {
+          const rtdbData = rtdbSnap.val();
+          await setDoc(doc(db, 'users', user.uid), {
+            ...rtdbData,
+            lockedBalance: 0,
+            appBonusClaimed: false,
+            lastDailyCheckin: null,
+            pin: '',
+            withdrawalAccounts: [],
+            seenUpdates: []
+          });
+          console.log("[MIGRATION] Firestore document created from RTDB data");
         }
       }
     });
@@ -391,9 +409,9 @@ export default function Dashboard() {
     if (!user) return;
     try {
       // 1. Update Firestore
-      await updateDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, 'users', user.uid), {
         balance: increment(amount)
-      });
+      }, { merge: true });
 
       // 2. Update RTDB for real-time sync
       const userStatusRef = ref(rtdb, `users/${user.uid}`);
