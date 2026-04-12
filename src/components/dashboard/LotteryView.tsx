@@ -8,7 +8,7 @@ import { ref, update, increment as rtdbIncrement } from 'firebase/database';
 interface LotteryViewProps {
   onBack: () => void;
   balance: number;
-  onUpdateBalance: (amount: number) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
 }
 
 interface Lottery {
@@ -130,6 +130,15 @@ export default function LotteryView({ onBack, balance, onUpdateBalance }: Lotter
           const winnerRtdbRef = ref(rtdb, `users/${winner.userId}`);
           await update(winnerRtdbRef, {
             balance: rtdbIncrement(lottery.prizePool)
+          });
+
+          // Record in Earning History
+          await addDoc(collection(db, 'earning_history'), {
+            userId: winner.userId,
+            amount: lottery.prizePool,
+            source: 'lottery',
+            description: `Won Mega Draw Lottery (Rs ${lottery.prizePool})`,
+            timestamp: serverTimestamp()
           });
 
           // Record winner

@@ -4,9 +4,43 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History } from 'lucide-react';
 
-export default function ProfileTab({ name, email, status, role, balance, lockedBalance, accountNumber, accountTitle, joiningDate, referralCode, onEditProfile, onLeaderboardClick, onManageWalletClick, onPartnerUpgradeClick, onAdminPanelClick }: { name: string, email: string, status: string, role: string, balance: number, lockedBalance: number, accountNumber: string, accountTitle: string, joiningDate: string, referralCode: string, onEditProfile?: () => void, onLeaderboardClick?: () => void, onManageWalletClick?: () => void, onPartnerUpgradeClick?: () => void, onAdminPanelClick?: () => void }) {
+export default function ProfileTab({ 
+  name, 
+  email, 
+  status, 
+  role, 
+  balance, 
+  lockedBalance, 
+  accountNumber, 
+  accountTitle, 
+  joiningDate, 
+  referralCode, 
+  onEditProfile, 
+  onLeaderboardClick, 
+  onManageWalletClick, 
+  onPartnerUpgradeClick, 
+  onAdminPanelClick,
+  onEarningHistoryClick
+}: { 
+  name: string, 
+  email: string, 
+  status: string, 
+  role: string, 
+  balance: number, 
+  lockedBalance: number, 
+  accountNumber: string, 
+  accountTitle: string, 
+  joiningDate: string, 
+  referralCode: string, 
+  onEditProfile?: () => void, 
+  onLeaderboardClick?: () => void, 
+  onManageWalletClick?: () => void, 
+  onPartnerUpgradeClick?: () => void, 
+  onAdminPanelClick?: () => void,
+  onEarningHistoryClick?: () => void
+}) {
   const { user } = useAuth();
   const [avatar, setAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -156,6 +190,7 @@ export default function ProfileTab({ name, email, status, role, balance, lockedB
             </div>
             <Wallet className="w-5 h-5 text-emerald-500" />
         </div>
+        <Item icon={<History className="w-4 h-4 text-slate-600" />} label="Earning History" onClick={onEarningHistoryClick} />
         {lockedBalance > 0 && (
           <div className="p-4 flex justify-between items-center bg-amber-50/30">
               <div>

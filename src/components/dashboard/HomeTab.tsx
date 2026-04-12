@@ -48,7 +48,7 @@ interface HomeTabProps {
   onPartnerUpgradeClick: () => void;
   onActivateClick: () => void;
   onTaskWallClick: () => void;
-  onUpdateBalance: (amount: number) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
   appSettings: {
     activationFee: number;
   };
@@ -165,7 +165,7 @@ export default function HomeTab({
       console.log("[BONUS_CLAIM] Flag updated in Firestore");
       
       // 2. Use the centralized balance update logic which handles both DBs and commissions
-      await onUpdateBalance(100);
+      await onUpdateBalance(100, 'app_bonus', 'APK Install Welcome Bonus');
       console.log("[BONUS_CLAIM] Balance updated successfully");
 
       alert("Mubarak ho! Rs. 100 App Welcome Bonus aapke wallet mein add kar diya gaya hai.");
@@ -212,7 +212,7 @@ export default function HomeTab({
       console.log("[DAILY_CHECKIN] Timestamp updated in Firestore");
       
       // 2. Use the centralized balance update logic
-      await onUpdateBalance(10);
+      await onUpdateBalance(10, 'daily_reward', 'Daily Attendance Reward');
       console.log("[DAILY_CHECKIN] Balance updated successfully");
 
       alert("Mubarak ho! Rs. 10 Daily Reward aapke wallet mein add kar diya gaya hai. Agla reward 24 ghante baad milega.");

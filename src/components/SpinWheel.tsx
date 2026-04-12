@@ -56,7 +56,7 @@ export default function SpinWheel({
 }: { 
   onClose: () => void;
   balance: number;
-  onUpdateBalance: (amount: number) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
   freeSpins: number;
   onUseFreeSpin: () => void;
   onGoToDeposit?: () => void;
@@ -271,7 +271,7 @@ export default function SpinWheel({
             if (onWinLockedPrize) onWinLockedPrize(won.value, requiredInvites);
           } else {
             // Normal win
-            onUpdateBalance(won.value);
+            onUpdateBalance(won.value, 'spin', `Won ${won.label} from ${activeTier} PKR Spin`);
           }
         } catch (error) {
           console.error("Error updating spin win:", error);

@@ -48,6 +48,7 @@ import ProfileTab from '../components/dashboard/ProfileTab';
 import InviteTab from '../components/dashboard/InviteTab';
 import WithdrawTab from '../components/dashboard/WithdrawTab';
 import DepositTab from '../components/dashboard/DepositTab';
+import EarningHistoryView from '../components/dashboard/EarningHistoryView';
 import PremiumModal from '../components/dashboard/PremiumModal';
 import LeaderboardView from '../components/dashboard/LeaderboardView';
 import PinLockView from '../components/PinLockView';
@@ -405,7 +406,7 @@ export default function Dashboard() {
     localStorage.setItem('taskmint_last_spin', Date.now().toString());
   };
 
-  const handleUpdateBalance = async (amount: number) => {
+  const handleUpdateBalance = async (amount: number, source: string = 'system', description: string = '') => {
     if (!user) return;
     try {
       // 1. Update Firestore
@@ -418,8 +419,19 @@ export default function Dashboard() {
       await update(userStatusRef, { 
         balance: rtdbIncrement(amount)
       });
+
+      // 3. Record Earning History if amount > 0
+      if (amount > 0) {
+        await addDoc(collection(db, 'earning_history'), {
+          userId: user.uid,
+          amount: amount,
+          source: source,
+          description: description || `Earned from ${source.replace('_', ' ')}`,
+          timestamp: firestoreServerTimestamp()
+        });
+      }
       
-      console.log(`[BALANCE_SYNC] Updated balance by ${amount} in Firestore and RTDB`);
+      console.log(`[BALANCE_SYNC] Updated balance by ${amount} from ${source} in Firestore and RTDB`);
 
       // Team Commission Logic: If user has a referrer who is a Partner, give them 10%
       if (amount > 0 && referredBy) {
@@ -461,6 +473,16 @@ export default function Dashboard() {
                 balance: rtdbIncrement(commission),
                 totalTeamEarnings: rtdbIncrement(commission)
               });
+
+              // Record Commission in Referrer's History
+              await addDoc(collection(db, 'earning_history'), {
+                userId: referrerUid,
+                amount: commission,
+                source: 'commission',
+                description: `Team commission from ${userName || 'Downline Member'}`,
+                timestamp: firestoreServerTimestamp()
+              });
+
               console.log(`[COMMISSION_SYNC] Paid ${commission} commission to partner ${referrerUid}`);
             }
           }
@@ -946,6 +968,7 @@ export default function Dashboard() {
                  onManageWalletClick={() => setActiveTab('manage_wallet')}
                  onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
                  onAdminPanelClick={() => setActiveTab('admin')}
+                 onEarningHistoryClick={() => setActiveTab('earning_history')}
                />;
       case 'admin':
         return <AdminPanelView 
@@ -978,6 +1001,8 @@ export default function Dashboard() {
                  accounts={withdrawalAccounts}
                  onBack={() => setActiveTab('profile')} 
                />;
+      case 'earning_history':
+        return <EarningHistoryView onBack={() => setActiveTab('profile')} />;
       case 'invite':
         return <InviteTab 
           status={status}

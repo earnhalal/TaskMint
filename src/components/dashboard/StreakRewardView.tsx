@@ -4,7 +4,7 @@ import { Check, Lock, ArrowLeft, Calendar, Gift } from 'lucide-react';
 
 interface StreakRewardViewProps {
   onBack: () => void;
-  onUpdateBalance: (amount: number) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
 }
 
 export default function StreakRewardView({ onBack, onUpdateBalance }: StreakRewardViewProps) {
@@ -75,7 +75,7 @@ export default function StreakRewardView({ onBack, onUpdateBalance }: StreakRewa
     if (newStreak === 30) {
       // 30th day claim
       const finalVault = vaultBalance + 5;
-      onUpdateBalance(finalVault);
+      onUpdateBalance(finalVault, 'task', 'Completed 30-Day Streak Challenge');
       
       // Reset
       setStreakCount(0);

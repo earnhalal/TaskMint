@@ -8,7 +8,7 @@ import { db, auth } from '../../firebase';
 interface WatchTabProps {
   onBack: () => void;
   balance: number;
-  onUpdateBalance: (amount: number) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
 }
 
 const VIDEO_ADS = Array.from({ length: 10 }, (_, i) => ({
@@ -109,7 +109,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
         }, { merge: true });
 
         // 2. Use the centralized balance update logic
-        await onUpdateBalance(ad.reward);
+        await onUpdateBalance(ad.reward, 'ad_watch', `Watched ${ad.title}`);
 
         // Update local state
         setAdStats(prev => ({ ...prev, [ad.id]: new Date() }));

@@ -22,7 +22,7 @@ import { db, auth } from '../../firebase';
 
 interface QuickPromotionsProps {
     balance: number;
-    onUpdateBalance: (amount: number) => void;
+    onUpdateBalance: (amount: number, source?: string, description?: string) => void;
 }
 
 const platforms = [
@@ -148,7 +148,7 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
 
         try {
             // 1. Deduct Balance using centralized logic
-            await onUpdateBalance(-totalPrice);
+            await onUpdateBalance(-totalPrice, 'promotion_order', `Ordered ${quantity} ${selectedService.name}`);
 
             // 2. Create Order
             await addDoc(collection(db, 'promotion_orders'), {

@@ -203,9 +203,26 @@
       "properties": {
         "userId": { "type": "string" }
       }
+    },
+    "EarningTransaction": {
+      "title": "Earning Transaction",
+      "description": "Record of a user's earning activity",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "source": { "type": "string", "enum": ["ad_watch", "task", "spin", "lottery", "referral", "app_bonus", "daily_reward", "commission"] },
+        "description": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "source", "timestamp"]
     }
   },
   "firestore": {
+    "/earning_history/{transactionId}": {
+      "schema": "EarningTransaction",
+      "description": "History of all user earning activities"
+    },
     "/user_ad_locks/{userId}": {
       "schema": "UserAdLocks",
       "description": "24h locks for video ads per user"
