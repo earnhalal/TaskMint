@@ -147,6 +147,12 @@ export default function SpinWheel({
     if (isSpinning || !auth.currentUser) return;
     setErrorMsg('');
 
+    // Lock 50 and 100 PKR tiers as requested
+    if (activeTier === 50 || activeTier === 100) {
+      setErrorMsg("Currently unavailable. Please try again later!");
+      return;
+    }
+
     const cost = isPaid ? activeTier : 0;
 
     if (isPaid) {
@@ -338,13 +344,14 @@ export default function SpinWheel({
             <button
               key={tier.id}
               onClick={() => !isSpinning && setActiveTier(tier.id)}
-              className={`px-6 py-2 rounded-xl text-xs font-black transition-all ${
+              className={`px-6 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
                 activeTier === tier.id 
                   ? 'bg-white text-black shadow-lg scale-105' 
                   : 'text-white/60 hover:text-white'
               }`}
             >
               {tier.label}
+              {(tier.id === 50 || tier.id === 100) && <Lock className="w-3 h-3" />}
             </button>
           ))}
         </div>
@@ -468,20 +475,22 @@ export default function SpinWheel({
           <div className="mt-12 w-full max-w-sm flex flex-col gap-4">
             <button 
               onClick={() => spinWheel(true)}
-              disabled={isSpinning}
+              disabled={isSpinning || activeTier === 50 || activeTier === 100}
               className={`w-full py-4 rounded-2xl font-black text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex flex-col items-center justify-center leading-none ${
                 activeTier === 100 ? 'bg-amber-500 text-black' : 
                 activeTier === 50 ? 'bg-slate-200 text-black' : 
                 'bg-yellow-500 text-black'
               }`}
             >
-              <span>SPIN NOW</span>
-              <span className="text-[10px] opacity-60 mt-1">Cost: Rs. {activeTier}</span>
+              <span>{(activeTier === 50 || activeTier === 100) ? 'LOCKED' : 'SPIN NOW'}</span>
+              <span className="text-[10px] opacity-60 mt-1">
+                {(activeTier === 50 || activeTier === 100) ? 'Currently Unavailable' : `Cost: Rs. ${activeTier}`}
+              </span>
             </button>
             
             <button 
               onClick={() => spinWheel(false)}
-              disabled={isSpinning || freeSpins <= 0}
+              disabled={isSpinning || freeSpins <= 0 || activeTier === 50 || activeTier === 100}
               className="w-full bg-white/10 text-white font-bold py-3 rounded-2xl hover:bg-white/20 transition-all disabled:opacity-30 text-sm"
             >
               Use Free Spin ({freeSpins})
