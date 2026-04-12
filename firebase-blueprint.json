@@ -17,6 +17,8 @@
         "status": { "type": "string", "enum": ["Active", "Inactive"] },
         "referredBy": { "type": "string" },
         "referralCode": { "type": "string" },
+        "appBonusClaimed": { "type": "boolean" },
+        "lastDailyCheckin": { "type": "string", "format": "date-time" },
         "referralStats": {
           "type": "object",
           "properties": {

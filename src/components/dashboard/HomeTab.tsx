@@ -140,10 +140,13 @@ export default function HomeTab({
     const ua = (navigator.userAgent || navigator.vendor || (window as any).opera || '').toLowerCase();
     
     // Comprehensive check for AppCreator24 and other WebViews
-    const isWebView = ua.includes('wv') || ua.includes('webview') || (ua.includes('android') && ua.includes('version/'));
-    const isAC24 = ua.includes('appcreator24');
+    const isWebView = ua.includes('wv') || ua.includes('webview') || (ua.includes('android') && ua.includes('version/')) || ua.includes('appcreator24') || !!(window as any).AppCreator24;
+    const isAC24 = ua.includes('appcreator24') || !!(window as any).AppCreator24;
     const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
-    const isParam = window.location.search.includes('isApp=true');
+    const isParam = window.location.search.includes('isApp=true') || window.location.search.includes('app=true');
+    
+    // Log for debugging (only in development or if needed)
+    console.log("[APP_DETECTION]", { ua, isWebView, isAC24, isStandalone, isParam });
     
     return isWebView || isAC24 || isStandalone || isParam;
   }, []);
@@ -152,20 +155,23 @@ export default function HomeTab({
     if (!auth.currentUser || isClaiming) return;
     setIsClaiming(true);
     try {
+      console.log("[BONUS_CLAIM] Starting APK Bonus Claim...");
       const userRef = doc(db, 'users', auth.currentUser.uid);
       
       // 1. Update the flag in Firestore first
       await updateDoc(userRef, {
         appBonusClaimed: true
       });
+      console.log("[BONUS_CLAIM] Flag updated in Firestore");
       
       // 2. Use the centralized balance update logic which handles both DBs and commissions
       await onUpdateBalance(100);
+      console.log("[BONUS_CLAIM] Balance updated successfully");
 
       alert("Mubarak ho! Rs. 100 App Welcome Bonus aapke wallet mein add kar diya gaya hai.");
     } catch (error) {
       console.error("Error claiming app bonus:", error);
-      alert("Bonus claim karne mein masla hua. Dobara koshish karein.");
+      alert("Bonus claim karne mein masla hua. Dobara koshish karein. Error: " + (error instanceof Error ? error.message : String(error)));
     } finally {
       setIsClaiming(false);
     }
@@ -173,6 +179,7 @@ export default function HomeTab({
 
   const handleDailyCheckin = async () => {
     if (!isApp) {
+      console.log("[DAILY_CHECKIN] Not in App, redirecting...");
       alert("Ye reward sirf TaskMint App par milta hai. Bonus lene ke liye App download karein!");
       navigate('/download');
       return;
@@ -195,20 +202,23 @@ export default function HomeTab({
 
     setIsClaiming(true);
     try {
+      console.log("[DAILY_CHECKIN] Starting Daily Checkin...");
       const userRef = doc(db, 'users', auth.currentUser.uid);
       
       // 1. Update the timestamp in Firestore
       await updateDoc(userRef, {
         lastDailyCheckin: serverTimestamp()
       });
+      console.log("[DAILY_CHECKIN] Timestamp updated in Firestore");
       
       // 2. Use the centralized balance update logic
       await onUpdateBalance(10);
+      console.log("[DAILY_CHECKIN] Balance updated successfully");
 
       alert("Mubarak ho! Rs. 10 Daily Reward aapke wallet mein add kar diya gaya hai. Agla reward 24 ghante baad milega.");
     } catch (error) {
       console.error("Error daily checkin:", error);
-      alert("Reward claim karne mein masla hua.");
+      alert("Reward claim karne mein masla hua. Error: " + (error instanceof Error ? error.message : String(error)));
     } finally {
       setIsClaiming(false);
     }

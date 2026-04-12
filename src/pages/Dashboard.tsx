@@ -405,24 +405,46 @@ export default function Dashboard() {
 
       // Team Commission Logic: If user has a referrer who is a Partner, give them 10%
       if (amount > 0 && referredBy) {
-        const referrerRef = doc(db, 'users', referredBy);
-        const referrerDoc = await getDoc(referrerRef);
-        if (referrerDoc.exists()) {
-          const referrerData = referrerDoc.data();
-          if (referrerData.role === 'partner') {
-            const commission = amount * 0.1;
-            // Update Referrer Firestore
-            await updateDoc(referrerRef, {
-              balance: increment(commission),
-              totalTeamEarnings: increment(commission)
-            });
-            // Update Referrer RTDB
-            const referrerRtdbRef = ref(rtdb, `users/${referredBy}`);
-            await update(referrerRtdbRef, {
-              balance: rtdbIncrement(commission),
-              totalTeamEarnings: rtdbIncrement(commission)
-            });
-            console.log(`[COMMISSION_SYNC] Paid ${commission} commission to partner ${referredBy}`);
+        let referrerUid = null;
+        const sanitizedRef = referredBy.trim().toLowerCase();
+
+        // 1. Try to find by referralCode
+        const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          referrerUid = querySnapshot.docs[0].id;
+        } else {
+          // 2. Try to find by username
+          const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
+          if (parentUsernameDoc.exists()) {
+            referrerUid = parentUsernameDoc.data().uid;
+          } else {
+            // 3. Maybe it's already a UID
+            referrerUid = referredBy;
+          }
+        }
+
+        if (referrerUid) {
+          const referrerRef = doc(db, 'users', referrerUid);
+          const referrerDoc = await getDoc(referrerRef);
+          if (referrerDoc.exists()) {
+            const referrerData = referrerDoc.data();
+            if (referrerData.role === 'partner') {
+              const commission = amount * 0.1;
+              // Update Referrer Firestore
+              await updateDoc(referrerRef, {
+                balance: increment(commission),
+                totalTeamEarnings: increment(commission)
+              });
+              // Update Referrer RTDB
+              const referrerRtdbRef = ref(rtdb, `users/${referrerUid}`);
+              await update(referrerRtdbRef, {
+                balance: rtdbIncrement(commission),
+                totalTeamEarnings: rtdbIncrement(commission)
+              });
+              console.log(`[COMMISSION_SYNC] Paid ${commission} commission to partner ${referrerUid}`);
+            }
           }
         }
       }

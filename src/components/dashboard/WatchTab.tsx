@@ -31,10 +31,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
     const ua = (navigator.userAgent || navigator.vendor || (window as any).opera || '').toLowerCase();
     
     // Comprehensive check for AppCreator24 and other WebViews
-    const isWebView = ua.includes('wv') || ua.includes('webview') || (ua.includes('android') && ua.includes('version/'));
-    const isAC24 = ua.includes('appcreator24');
+    const isWebView = ua.includes('wv') || ua.includes('webview') || (ua.includes('android') && ua.includes('version/')) || ua.includes('appcreator24') || !!(window as any).AppCreator24;
+    const isAC24 = ua.includes('appcreator24') || !!(window as any).AppCreator24;
     const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
-    const isParam = window.location.search.includes('isApp=true');
+    const isParam = window.location.search.includes('isApp=true') || window.location.search.includes('app=true');
+    
+    console.log("[WATCH_APP_DETECTION]", { ua, isWebView, isAC24, isStandalone, isParam });
     
     return isWebView || isAC24 || isStandalone || isParam;
   }, []);
