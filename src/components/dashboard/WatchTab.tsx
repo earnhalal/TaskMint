@@ -28,13 +28,15 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   // App Detection Logic
   const isApp = useMemo(() => {
     if (typeof window === 'undefined') return false;
-    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
-    const isWebView = ua.includes('wv') || ua.includes('WebView') || (ua.includes('Android') && ua.includes('Version/'));
-    const isAC24 = ua.includes('AppCreator24');
+    const ua = (navigator.userAgent || navigator.vendor || (window as any).opera || '').toLowerCase();
+    
+    // Comprehensive check for AppCreator24 and other WebViews
+    const isWebView = ua.includes('wv') || ua.includes('webview') || (ua.includes('android') && ua.includes('version/'));
+    const isAC24 = ua.includes('appcreator24');
+    const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
     const isParam = window.location.search.includes('isApp=true');
     
-    // Check if the scheme is likely supported or if we are definitely in the app
-    return isWebView || isAC24 || isParam;
+    return isWebView || isAC24 || isStandalone || isParam;
   }, []);
 
   useEffect(() => {
@@ -98,13 +100,11 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
           [ad.id]: serverTimestamp()
         }, { merge: true });
 
-        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-          balance: increment(ad.reward)
-        });
+        // 2. Use the centralized balance update logic
+        await onUpdateBalance(ad.reward);
 
         // Update local state
         setAdStats(prev => ({ ...prev, [ad.id]: new Date() }));
-        onUpdateBalance(ad.reward);
         setMessage({ type: 'success', text: `Mubarak ho! Rs. ${ad.reward} aapke wallet mein add ho gaye hain.` });
       } catch (error) {
         console.error("Error rewarding ad:", error);

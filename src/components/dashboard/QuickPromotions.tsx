@@ -147,11 +147,8 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
         setStatus('idle');
 
         try {
-            // 1. Deduct Balance
-            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-                balance: increment(-totalPrice)
-            });
-            onUpdateBalance(-totalPrice);
+            // 1. Deduct Balance using centralized logic
+            await onUpdateBalance(-totalPrice);
 
             // 2. Create Order
             await addDoc(collection(db, 'promotion_orders'), {

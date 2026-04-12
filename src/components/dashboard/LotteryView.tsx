@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Ticket, Trophy, Users, Clock, CheckCircle2, AlertCircle, Sparkles, Star, Crown, Flame } from 'lucide-react';
 import { collection, onSnapshot, query, where, addDoc, serverTimestamp, doc, updateDoc, increment, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db, auth } from '../../firebase';
+import { db, auth, rtdb } from '../../firebase';
+import { ref, update, increment as rtdbIncrement } from 'firebase/database';
 
 interface LotteryViewProps {
   onBack: () => void;
@@ -100,13 +101,8 @@ export default function LotteryView({ onBack, balance, onUpdateBalance }: Lotter
         timestamp: serverTimestamp()
       });
 
-      // 2. Update user balance in Firestore
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-        balance: increment(-lottery.fee)
-      });
-
-      // 3. Update local state balance (via prop)
-      onUpdateBalance(-lottery.fee);
+      // 2. Update user balance using centralized logic
+      await onUpdateBalance(-lottery.fee);
       
       const newMemberCount = lottery.currentMembers + 1;
 
@@ -126,9 +122,14 @@ export default function LotteryView({ onBack, balance, onUpdateBalance }: Lotter
           const winnerIndex = Math.floor(Math.random() * entries.length);
           const winner = entries[winnerIndex];
 
-          // Award prize to winner
+          // Award prize to winner in both DBs
           await updateDoc(doc(db, 'users', winner.userId), {
             balance: increment(lottery.prizePool)
+          });
+          
+          const winnerRtdbRef = ref(rtdb, `users/${winner.userId}`);
+          await update(winnerRtdbRef, {
+            balance: rtdbIncrement(lottery.prizePool)
           });
 
           // Record winner

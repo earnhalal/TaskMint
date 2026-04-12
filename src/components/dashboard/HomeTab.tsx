@@ -137,15 +137,15 @@ export default function HomeTab({
 
   const isApp = useMemo(() => {
     if (typeof window === 'undefined') return false;
-    const ua = navigator.userAgent || navigator.vendor || (window as any).opera || '';
-    // Check for common WebView keywords and URL parameter
-    return (
-      ua.includes('wv') || 
-      ua.includes('WebView') || 
-      (ua.includes('Android') && ua.includes('Version/')) ||
-      ua.includes('AppCreator24') ||
-      window.location.search.includes('isApp=true')
-    );
+    const ua = (navigator.userAgent || navigator.vendor || (window as any).opera || '').toLowerCase();
+    
+    // Comprehensive check for AppCreator24 and other WebViews
+    const isWebView = ua.includes('wv') || ua.includes('webview') || (ua.includes('android') && ua.includes('version/'));
+    const isAC24 = ua.includes('appcreator24');
+    const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
+    const isParam = window.location.search.includes('isApp=true');
+    
+    return isWebView || isAC24 || isStandalone || isParam;
   }, []);
 
   const handleClaimAppBonus = async () => {
@@ -153,16 +153,14 @@ export default function HomeTab({
     setIsClaiming(true);
     try {
       const userRef = doc(db, 'users', auth.currentUser.uid);
-      const rtdbRef = ref(rtdb, `users/${auth.currentUser.uid}`);
       
+      // 1. Update the flag in Firestore first
       await updateDoc(userRef, {
-        balance: increment(100),
         appBonusClaimed: true
       });
       
-      await update(rtdbRef, {
-        balance: balance + 100
-      });
+      // 2. Use the centralized balance update logic which handles both DBs and commissions
+      await onUpdateBalance(100);
 
       alert("Mubarak ho! Rs. 100 App Welcome Bonus aapke wallet mein add kar diya gaya hai.");
     } catch (error) {
@@ -198,16 +196,14 @@ export default function HomeTab({
     setIsClaiming(true);
     try {
       const userRef = doc(db, 'users', auth.currentUser.uid);
-      const rtdbRef = ref(rtdb, `users/${auth.currentUser.uid}`);
       
+      // 1. Update the timestamp in Firestore
       await updateDoc(userRef, {
-        balance: increment(10),
         lastDailyCheckin: serverTimestamp()
       });
       
-      await update(rtdbRef, {
-        balance: balance + 10
-      });
+      // 2. Use the centralized balance update logic
+      await onUpdateBalance(10);
 
       alert("Mubarak ho! Rs. 10 Daily Reward aapke wallet mein add kar diya gaya hai. Agla reward 24 ghante baad milega.");
     } catch (error) {
