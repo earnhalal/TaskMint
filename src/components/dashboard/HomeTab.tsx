@@ -121,6 +121,32 @@ const QuickActionBtn: React.FC<{
     </button>
 );
 
+const AnimatedCounter = ({ value, trigger }: { value: number, trigger: number }) => {
+  const [displayValue, setDisplayValue] = React.useState(0);
+
+  React.useEffect(() => {
+    let startTimestamp: number;
+    const duration = 1500; // 1.5 seconds
+    const startValue = 0; // Always start from 0 on trigger
+    const endValue = value;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 4);
+      setDisplayValue(startValue + (endValue - startValue) * easeProgress);
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      } else {
+        setDisplayValue(endValue);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }, [value, trigger]);
+
+  return <>{displayValue.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
+};
+
 export default function HomeTab({ 
   name, 
   balance, 
@@ -156,7 +182,15 @@ export default function HomeTab({
 
   const [avatar, setAvatar] = React.useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
+  const [reloadTrigger, setReloadTrigger] = useState(0);
+  const [isReloading, setIsReloading] = useState(false);
   const navigate = useNavigate();
+
+  const handleReloadBalance = () => {
+    setIsReloading(true);
+    setReloadTrigger(prev => prev + 1);
+    setTimeout(() => setIsReloading(false), 1500);
+  };
 
   const isApp = useMemo(() => {
     if (typeof window === 'undefined') return false;
@@ -385,10 +419,11 @@ export default function HomeTab({
               {/* Leaderboard Button */}
               <button 
                   onClick={onLeaderboardClick}
-                  className="flex-1 md:flex-none bg-amber-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-amber-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 border border-amber-400"
+                  className="relative flex-1 md:flex-none bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-white text-xs font-black px-5 py-2.5 rounded-xl hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.5)] hover:shadow-[0_0_25px_rgba(245,158,11,0.7)] active:scale-95 border border-yellow-300/50 overflow-hidden group"
               >
-                  <Trophy className="w-4 h-4 text-white"/> 
-                  Leaderboard
+                  <div className="absolute inset-0 bg-white/20 blur-md group-hover:opacity-100 opacity-0 transition-opacity"></div>
+                  <Trophy className="w-4 h-4 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] relative z-10"/> 
+                  <span className="relative z-10 drop-shadow-md tracking-wide">LEADERBOARD</span>
               </button>
 
               {/* Profile Pic */}
@@ -410,64 +445,71 @@ export default function HomeTab({
           </div>
       </div>
 
-      {/* Compact Premium Balance Card */}
-      <div className="relative w-full rounded-[24px] p-5 text-white shadow-xl overflow-hidden group transform transition-transform hover:scale-[1.01]">
-        {/* Main Dark Metallic Background */}
-        <div className="absolute inset-0 bg-[#0f0f0f]"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-[#222] via-[#111] to-[#000]"></div>
+      {/* Enhanced Premium Balance Card */}
+      <div className="relative w-full rounded-[28px] p-6 text-white shadow-[0_0_40px_rgba(16,185,129,0.15)] overflow-hidden group transform transition-transform hover:scale-[1.02] border border-emerald-500/20">
+        {/* Main Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-[#1a1c29] to-slate-900"></div>
         
-        {/* Gold Accents */}
-        <div className="absolute top-[-50%] right-[-10%] w-[200px] h-[200px] bg-amber-500/20 rounded-full blur-[60px]"></div>
-        <div className="absolute bottom-[-20%] left-[-10%] w-[150px] h-[150px] bg-yellow-600/10 rounded-full blur-[50px]"></div>
+        {/* Glow Effects */}
+        <div className="absolute top-[-30%] right-[-10%] w-[250px] h-[250px] bg-emerald-500/40 rounded-full blur-[80px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[-30%] left-[-10%] w-[200px] h-[200px] bg-blue-500/40 rounded-full blur-[70px] animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
         
         {/* Texture & Border */}
-        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-overlay"></div>
-        <div className="absolute inset-0 rounded-[24px] border border-white/10 shadow-[inset_0_0_15px_rgba(255,255,255,0.05)]"></div>
+        <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-overlay"></div>
+        <div className="absolute inset-0 rounded-[28px] border border-white/10 shadow-[inset_0_0_30px_rgba(255,255,255,0.05)]"></div>
 
-        {/* Content - Horizontal Layout */}
-        <div className="relative z-10 flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-4">
-                <div>
-                    <div className="flex items-center gap-1.5 mb-1 opacity-80">
-                        <WalletIcon className="w-3 h-3 text-amber-400" />
-                        <span className="text-[9px] font-bold tracking-widest uppercase text-amber-100">Balance</span>
+        {/* Content */}
+        <div className="relative z-10 flex flex-col gap-5">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 opacity-90">
+                    <div className="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                        <WalletIcon className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
                     </div>
-                    <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-amber-100 via-amber-200 to-amber-500 drop-shadow-sm">
-                            {balance.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
-                        </span>
-                        <span className="text-xs font-bold text-amber-600/80 font-mono">PKR</span>
-                    </div>
+                    <span className="text-[11px] font-black tracking-widest uppercase text-slate-300 drop-shadow-md">Available Balance</span>
                 </div>
-
-                {lockedBalance > 0 && (
-                  <div className="bg-white/5 rounded-xl p-2 border border-white/5">
-                    <div className="flex items-center gap-1.5 mb-0.5 opacity-60">
-                        <Clock className="w-2.5 h-2.5 text-amber-200" />
-                        <span className="text-[8px] font-bold tracking-widest uppercase text-amber-50">Locked Balance</span>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                        <span className="text-sm font-black text-amber-200">
-                            {lockedBalance.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
-                        </span>
-                        <span className="text-[8px] font-bold text-amber-400/60 font-mono">PKR</span>
-                    </div>
-                  </div>
-                )}
+                <button 
+                  onClick={handleReloadBalance}
+                  className={`p-2 bg-white/5 hover:bg-white/10 rounded-full backdrop-blur-sm transition-all shadow-[0_0_10px_rgba(255,255,255,0.05)] hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] ${isReloading ? 'animate-spin text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <ExchangeIcon className="w-4 h-4" />
+                </button>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex items-baseline gap-2">
+                <span className="text-4xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]">
+                    <AnimatedCounter value={balance} trigger={reloadTrigger} />
+                </span>
+                <span className="text-sm font-bold text-amber-400 font-mono tracking-widest drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]">PKR</span>
+            </div>
+
+            {lockedBalance > 0 && (
+              <div className="inline-flex items-center gap-2 bg-white/5 rounded-xl p-2.5 border border-white/5 w-fit shadow-[0_0_15px_rgba(251,191,36,0.15)]">
+                <Clock className="w-3.5 h-3.5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                <div className="flex items-baseline gap-1.5">
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400">Locked:</span>
+                    <span className="text-sm font-black text-amber-100 drop-shadow-[0_0_10px_rgba(251,191,36,0.4)]">
+                        {lockedBalance.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
+                    </span>
+                    <span className="text-[9px] font-bold text-amber-400/60 font-mono">PKR</span>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3 mt-2">
                 <button 
                     onClick={onDepositClick}
-                    className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 text-white text-[10px] font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                    className="flex-1 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-white text-xs font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all active:scale-95 border border-emerald-300/50 relative overflow-hidden group"
                 >
-                    <PlusCircleIcon className="w-3 h-3 text-amber-300" /> Deposit
+                    <div className="absolute inset-0 bg-white/20 blur-md group-hover:opacity-100 opacity-0 transition-opacity"></div>
+                    <PlusCircleIcon className="w-4 h-4 relative z-10 drop-shadow-md" /> <span className="relative z-10 drop-shadow-md">DEPOSIT</span>
                 </button>
                 <button 
                     onClick={onWithdrawClick}
-                    className="bg-gradient-to-r from-amber-600 to-amber-700 text-white text-[10px] font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-lg transition-all active:scale-95 hover:brightness-110"
+                    className="flex-1 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-400 hover:to-red-400 text-white text-xs font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:shadow-[0_0_30px_rgba(244,63,94,0.6)] transition-all active:scale-95 border border-rose-400/50 relative overflow-hidden group"
                 >
-                    Withdraw <ArrowRight className="w-3 h-3" />
+                    <div className="absolute inset-0 bg-white/20 blur-md group-hover:opacity-100 opacity-0 transition-opacity"></div>
+                    <ArrowRight className="w-4 h-4 relative z-10 drop-shadow-md" /> <span className="relative z-10 drop-shadow-md">WITHDRAW</span>
                 </button>
             </div>
         </div>
@@ -575,35 +617,47 @@ export default function HomeTab({
       <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
           <div 
             onClick={onInviteClick}
-            className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-[24px] p-6 text-white shadow-xl shadow-indigo-500/30 relative overflow-hidden cursor-pointer group transform transition-transform hover:scale-[1.02]"
+            className="bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 rounded-[32px] p-1 text-white shadow-2xl shadow-purple-500/20 relative overflow-hidden cursor-pointer group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-purple-500/40"
           >
-            {/* Background elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-400/20 rounded-full -ml-8 -mb-8 blur-xl"></div>
+            {/* Animated Border Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-slow"></div>
             
-            <div className="relative z-10 flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                  <InviteIcon className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xs font-black uppercase tracking-widest text-blue-100">Mega Referral Bonus</span>
-              </div>
-              
-              <div>
-                <h3 className="text-2xl font-black leading-tight mb-1">
-                  Invite & Earn <br/>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-400 text-4xl drop-shadow-sm">Rs 250</span>
-                </h3>
-                <p className="text-sm text-blue-100 font-medium leading-relaxed">
-                  Get <strong className="text-white">Rs 125</strong> for every friend you invite. Just 2 friends = Rs 250 instantly!
-                </p>
-              </div>
+            {/* Inner Card */}
+            <div className="relative bg-slate-900/90 backdrop-blur-xl rounded-[28px] p-6 h-full overflow-hidden">
+                {/* Floating Elements */}
+                <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/20 rounded-full -mr-10 -mt-10 blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-500/20 rounded-full -ml-10 -mb-10 blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                
+                <div className="relative z-10 flex flex-col gap-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-2.5 rounded-2xl shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform duration-300">
+                        <InviteIcon className="w-6 h-6 text-white" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-purple-200 bg-purple-500/20 px-3 py-1 rounded-full border border-purple-500/30">Mega Bonus</span>
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30 animate-bounce-small">
+                        <span className="text-xl">🎁</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-3xl font-black leading-tight mb-2">
+                      Invite & Earn <br/>
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-5xl drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">Rs 250</span>
+                    </h3>
+                    <p className="text-sm text-slate-300 font-medium leading-relaxed">
+                      Get <strong className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 text-base font-black">Rs 125</strong> for every friend you invite. Just 2 friends = Rs 250 instantly!
+                    </p>
+                  </div>
 
-              <button 
-                className="mt-2 bg-white text-indigo-600 font-black py-3 px-6 rounded-xl shadow-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-2 active:scale-95 group-hover:shadow-xl"
-              >
-                Invite Friends Now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+                  <button 
+                    className="mt-2 w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition-all flex items-center justify-center gap-2 active:scale-95 group-hover:from-pink-400 group-hover:to-purple-500 relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                    <span className="relative z-10 flex items-center gap-2">Invite Friends Now <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></span>
+                  </button>
+                </div>
             </div>
           </div>
       </div>

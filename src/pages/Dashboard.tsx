@@ -1279,7 +1279,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans">
+    <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans overflow-x-hidden w-full max-w-[100vw]">
       {!isProfileLoaded && (
         <div className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center">
           <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mb-4"></div>
@@ -1394,12 +1394,16 @@ export default function Dashboard() {
 
         {/* Header */}
         <div className={`px-5 py-4 ${role === 'partner' ? 'bg-gradient-to-r from-amber-500 to-yellow-600' : 'bg-white/95 backdrop-blur-md'} flex items-center justify-between sticky top-0 z-10 shadow-sm border-b border-gray-100`}>
-          <div className="flex items-center gap-2 cursor-pointer group" onClick={() => setActiveTab('home')}>
-            <div className={`w-9 h-9 rounded-xl ${role === 'partner' ? 'bg-white/20' : 'bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600'} flex items-center justify-center text-white shadow-lg shadow-amber-500/30 transition-transform group-hover:scale-105`}>
-              <Sparkles className="w-5 h-5" />
+          <div className="flex items-center gap-2 cursor-pointer group relative" onClick={() => setActiveTab('home')}>
+            {role !== 'partner' && (
+              <div className="absolute -inset-2 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition duration-500"></div>
+            )}
+            <div className={`relative w-10 h-10 rounded-xl ${role === 'partner' ? 'bg-white/20 backdrop-blur-md' : 'bg-gradient-to-br from-blue-600 to-indigo-700'} flex items-center justify-center text-white shadow-xl ${role === 'partner' ? 'shadow-black/10' : 'shadow-blue-500/30'} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+              <Sparkles className="w-6 h-6 animate-pulse" />
             </div>
-            <h1 className={`font-black text-xl sm:text-2xl ${role === 'partner' ? 'text-white' : 'text-slate-900'} tracking-tighter`}>
-              Task<span className={role === 'partner' ? 'text-white/80' : 'text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-600'}>Mint</span>
+            <h1 className={`relative font-display font-black text-2xl sm:text-3xl tracking-tighter drop-shadow-sm`}>
+              <span className={role === 'partner' ? 'text-white' : 'text-blue-900'}>Task</span>
+              <span className={role === 'partner' ? 'text-white/80' : 'text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500'}>Mint</span>
             </h1>
           </div>
           <button 
