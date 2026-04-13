@@ -19,9 +19,10 @@ import { db, auth } from '../../firebase';
 
 interface EarningHistoryViewProps {
   onBack: () => void;
+  totalEarnings?: number;
 }
 
-export default function EarningHistoryView({ onBack }: EarningHistoryViewProps) {
+export default function EarningHistoryView({ onBack, totalEarnings = 0 }: EarningHistoryViewProps) {
   const [history, setHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -29,19 +30,28 @@ export default function EarningHistoryView({ onBack }: EarningHistoryViewProps) 
   useEffect(() => {
     if (!auth.currentUser) return;
 
+    // Simplified query to avoid composite index.
+    // We filter by userId and then sort/limit in JavaScript.
     const q = query(
       collection(db, 'earning_history'),
-      where('userId', '==', auth.currentUser.uid),
-      orderBy('timestamp', 'desc'),
-      limit(50)
+      where('userId', '==', auth.currentUser.uid)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
-      setHistory(data);
+      })) as any[];
+      
+      // Sort by timestamp descending
+      const sortedData = data.sort((a, b) => {
+        const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
+        const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;
+        return timeB - timeA;
+      });
+
+      // Limit to 100
+      setHistory(sortedData.slice(0, 100));
       setIsLoading(false);
     }, (error) => {
       console.error("Error fetching earning history:", error);
@@ -73,8 +83,6 @@ export default function EarningHistoryView({ onBack }: EarningHistoryViewProps) 
     ? history 
     : history.filter(item => item.source === filter);
 
-  const totalEarned = history.reduce((acc, item) => acc + (item.amount || 0), 0);
-
   return (
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
@@ -99,9 +107,9 @@ export default function EarningHistoryView({ onBack }: EarningHistoryViewProps) 
       <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white mb-6 relative overflow-hidden shadow-2xl shadow-slate-900/20">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
         <div className="relative z-10">
-          <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total Rewards Tracked</p>
+          <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Lifetime Rewards Earned</p>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black tracking-tighter">Rs. {totalEarned.toFixed(2)}</span>
+            <span className="text-4xl font-black tracking-tighter">Rs. {totalEarnings.toFixed(2)}</span>
             <span className="text-emerald-400 text-xs font-bold flex items-center gap-1">
               <TrendingUp className="w-3 h-3" /> Lifetime
             </span>

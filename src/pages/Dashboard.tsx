@@ -28,6 +28,7 @@ import {
   setDoc, 
   getDoc, 
   where, 
+  writeBatch,
   addDoc,
   serverTimestamp as firestoreServerTimestamp 
 } from 'firebase/firestore';
@@ -109,6 +110,7 @@ export default function Dashboard() {
   ];
 
   const [balance, setBalance] = useState(0);
+  const [totalEarnings, setTotalEarnings] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
   const [appBonusClaimed, setAppBonusClaimed] = useState(false);
   const [lastDailyCheckin, setLastDailyCheckin] = useState<any>(null);
@@ -141,6 +143,7 @@ export default function Dashboard() {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setBalance(data.balance || 0);
+        setTotalEarnings(data.totalEarnings || 0);
         setLockedBalance(data.lockedBalance || 0);
         setUserPin(data.pin || '');
         setSeenUpdates(data.seenUpdates || []);
@@ -158,6 +161,42 @@ export default function Dashboard() {
         setAppBonusClaimed(data.appBonusClaimed || false);
         setLastDailyCheckin(data.lastDailyCheckin || null);
         setIsProfileLoaded(true);
+
+        // Cleanup Earning History (Older than 30 days)
+        const cleanupHistory = async () => {
+          try {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            // Simplified query to avoid composite index
+            const q = query(
+              collection(db, 'earning_history'),
+              where('userId', '==', user.uid)
+            );
+            
+            const snapshot = await getDocs(q);
+            if (!snapshot.empty) {
+              const oldDocs = snapshot.docs.filter(doc => {
+                const data = doc.data();
+                const ts = data.timestamp?.toDate ? data.timestamp.toDate() : null;
+                return ts && ts < thirtyDaysAgo;
+              });
+
+              if (oldDocs.length > 0) {
+                console.log(`[CLEANUP] Found ${oldDocs.length} old earning history records. Deleting...`);
+                const batch = writeBatch(db);
+                oldDocs.forEach(doc => {
+                  batch.delete(doc.ref);
+                });
+                await batch.commit();
+                console.log("[CLEANUP] Old earning history deleted successfully.");
+              }
+            }
+          } catch (error) {
+            console.error("Error cleaning up earning history:", error);
+          }
+        };
+        cleanupHistory();
 
         // Migration logic for old users
         if (!data.referralCode && data.username) {
@@ -407,13 +446,15 @@ export default function Dashboard() {
     try {
       // 1. Update Firestore
       await setDoc(doc(db, 'users', user.uid), {
-        balance: increment(amount)
+        balance: increment(amount),
+        totalEarnings: amount > 0 ? increment(amount) : increment(0)
       }, { merge: true });
 
       // 2. Update RTDB for real-time sync
       const userStatusRef = ref(rtdb, `users/${user.uid}`);
       await update(userStatusRef, { 
-        balance: rtdbIncrement(amount)
+        balance: rtdbIncrement(amount),
+        totalEarnings: amount > 0 ? rtdbIncrement(amount) : rtdbIncrement(0)
       });
 
       // 3. Record Earning History if amount > 0
@@ -1019,7 +1060,7 @@ export default function Dashboard() {
                  onBack={() => setActiveTab('profile')} 
                />;
       case 'earning_history':
-        return <EarningHistoryView onBack={() => setActiveTab('profile')} />;
+        return <EarningHistoryView onBack={() => setActiveTab('profile')} totalEarnings={totalEarnings} />;
       case 'social_task_plus':
         return <SocialTaskPlusView onBack={() => setActiveTab('home')} userName={userName} />;
       case 'invite':

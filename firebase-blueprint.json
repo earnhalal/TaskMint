@@ -9,6 +9,7 @@
         "name": { "type": "string" },
         "email": { "type": "string" },
         "balance": { "type": "number" },
+        "totalEarnings": { "type": "number" },
         "lockedBalance": { "type": "number" },
         "withdrawalAccounts": { "type": "array" },
         "pin": { "type": "string" },
