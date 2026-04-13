@@ -576,6 +576,17 @@ export default function Dashboard() {
 
   const handleWithdraw = async (amount: number, method: string) => {
     if (!user) return;
+
+    // Withdrawal Window Logic
+    const now = new Date();
+    const day = now.getDate();
+    const isWindow1 = day >= 1 && day <= 3;
+    const isWindow2 = day >= 16 && day <= 18;
+    
+    if (!isWindow1 && !isWindow2) {
+      alert("Withdrawal window is currently closed. Please check the withdrawal tab for next window dates.");
+      return;
+    }
     
     // 1. Balance Check
     if (balance < amount) {

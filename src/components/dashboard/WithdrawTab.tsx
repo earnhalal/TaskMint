@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wallet, ArrowRight, ArrowDownCircle, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Wallet, ArrowRight, ArrowDownCircle, Sparkles, CheckCircle2, AlertCircle, Lock, Calendar, TrendingUp } from 'lucide-react';
 
 interface Account {
   id: string;
@@ -34,19 +34,48 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
   const [amount, setAmount] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
   const [error, setError] = useState('');
-
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const minWithdrawal = 500;
+
+  // Withdrawal Window Logic
+  const windowInfo = useMemo(() => {
+    const now = new Date();
+    const day = now.getDate();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+
+    const isWindow1 = day >= 1 && day <= 3;
+    const isWindow2 = day >= 16 && day <= 18;
+    const isOpen = isWindow1 || isWindow2;
+
+    let nextWindowText = "";
+    if (day <= 3) {
+      nextWindowText = "1st to 3rd " + now.toLocaleString('default', { month: 'long' });
+    } else if (day <= 18) {
+      nextWindowText = "16th to 18th " + now.toLocaleString('default', { month: 'long' });
+    } else {
+      const nextMonth = new Date(year, month + 1, 1);
+      nextWindowText = "1st to 3rd " + nextMonth.toLocaleString('default', { month: 'long' });
+    }
+
+    return { isOpen, nextWindowText };
+  }, []);
 
   const selectedAccount = accounts.find(a => a.id === selectedAccountId);
 
   const handleWithdraw = () => {
+    if (!windowInfo.isOpen) {
+      setError('Withdrawal window is currently closed.');
+      return;
+    }
     if (!selectedAccount) {
       setError('Please select or add a withdrawal account');
       return;
     }
     const val = parseFloat(amount);
-    if (isNaN(val) || val < 1000) {
-      setError('Minimum withdrawal is Rs. 1000');
+    if (isNaN(val) || val < minWithdrawal) {
+      setError(`Minimum withdrawal is Rs. ${minWithdrawal}`);
       return;
     }
     if (val > balance) {
@@ -74,6 +103,8 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
       type: 'withdraw'
     }));
 
+  const progress = Math.min((balance / minWithdrawal) * 100, 100);
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -83,8 +114,8 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
       {/* Header Section */}
       <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-black text-2xl text-slate-900">Withdraw Funds</h2>
-            <p className="text-xs text-slate-500 font-medium">Select an account to proceed</p>
+            <h2 className="font-black text-2xl text-slate-900 tracking-tight">Withdraw Funds</h2>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Manage your earnings</p>
           </div>
           <button 
             onClick={onEditAccount}
@@ -92,6 +123,56 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
           >
             <Sparkles className="w-5 h-5 text-amber-500" />
           </button>
+      </div>
+
+      {/* Dynamic Status Card */}
+      <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full -ml-16 -mb-16 blur-2xl"></div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <div className={`w-2 h-2 rounded-full ${windowInfo.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">
+              {windowInfo.isOpen ? 'Withdrawal Window Open' : 'Withdrawal Window Closed'}
+            </span>
+          </div>
+
+          <h3 className="text-xl font-black mb-1 tracking-tight">
+            Next Withdrawal Window: <span className="text-amber-400">{windowInfo.nextWindowText}</span>
+          </h3>
+          <p className="text-xs text-white/50 font-medium mb-8">
+            {windowInfo.isOpen 
+              ? "You can now request your withdrawal. Requests are processed within 24 hours."
+              : "Abhi kaam jari rakhein, aapka balance mehfooz hai. Withdrawal window mein khulega."}
+          </p>
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-end">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Cycle Earnings</span>
+                <span className="text-2xl font-black tracking-tighter">Rs. {balance.toFixed(2)}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Target</span>
+                <span className="text-sm font-bold text-amber-400">Rs. {minWithdrawal}</span>
+              </div>
+            </div>
+            
+            <div className="h-3 bg-white/10 rounded-full overflow-hidden p-0.5">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                className={`h-full rounded-full ${progress >= 100 ? 'bg-gradient-to-r from-emerald-400 to-teal-500' : 'bg-gradient-to-r from-amber-400 to-orange-500'}`}
+              />
+            </div>
+            <p className="text-[10px] font-bold text-white/40 text-center italic">
+              {progress >= 100 
+                ? "Target achieved! You are eligible for withdrawal." 
+                : `Aapne is cycle mein Rs ${balance.toFixed(0)} kamaye hain. Minimum Rs ${minWithdrawal} chahiye.`}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* PREMIUM CARDS SLIDER */}
@@ -182,8 +263,8 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             </div>
 
             <div className="flex items-center gap-2 mb-8">
-              <div className={`w-2 h-2 rounded-full ${parseFloat(amount) >= 1000 ? 'bg-emerald-500' : 'bg-slate-200'}`}></div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Minimum Withdrawal: Rs 1,000</p>
+              <div className={`w-2 h-2 rounded-full ${parseFloat(amount) >= minWithdrawal ? 'bg-emerald-500' : 'bg-slate-200'}`}></div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Minimum Withdrawal: Rs {minWithdrawal}</p>
             </div>
 
             {error && (
@@ -199,11 +280,21 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             
             <button 
                 onClick={handleWithdraw}
-                disabled={!selectedAccount || parseFloat(amount) < 1000}
+                disabled={!selectedAccount || parseFloat(amount) < minWithdrawal || !windowInfo.isOpen}
                 className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:cursor-not-allowed text-white py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl shadow-slate-900/10"
             >
-                Confirm Withdrawal <ArrowRight className="w-5 h-5" />
+                {windowInfo.isOpen ? (
+                  <>Confirm Withdrawal <ArrowRight className="w-5 h-5" /></>
+                ) : (
+                  <>Withdrawal Locked <Lock className="w-4 h-4" /></>
+                )}
             </button>
+
+            {!windowInfo.isOpen && (
+              <p className="mt-4 text-[10px] text-center font-bold text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100">
+                Abhi kaam jari rakhein, aapka balance mehfooz hai. Withdrawal {windowInfo.nextWindowText.split(' ')[0]} tareek ko khulega.
+              </p>
+            )}
         </div>
 
         {/* History Section */}
