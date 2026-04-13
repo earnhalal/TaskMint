@@ -41,6 +41,7 @@ interface AdminPanelViewProps {
   onApprovePartner: (userId: string, requestId: string) => Promise<void>;
   onApproveDeposit: (userId: string, depositId: string, amount: number) => Promise<void>;
   onApproveWithdrawal: (userId: string, withdrawalId: string) => Promise<void>;
+  onRejectWithdrawal: (userId: string, withdrawalId: string) => Promise<void>;
 }
 
 function SettingsView() {
@@ -629,7 +630,7 @@ function SocialTasksAdminView() {
   );
 }
 
-export default function AdminPanelView({ onBack, onApproveActivation, onApprovePartner, onApproveDeposit, onApproveWithdrawal }: AdminPanelViewProps) {
+export default function AdminPanelView({ onBack, onApproveActivation, onApprovePartner, onApproveDeposit, onApproveWithdrawal, onRejectWithdrawal }: AdminPanelViewProps) {
   const [activeTab, setActiveTab] = useState<'activations' | 'partners' | 'deposits' | 'withdrawals' | 'settings' | 'lotteries' | 'promotions' | 'social_tasks'>('activations');
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -668,11 +669,15 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
     return () => unsubscribe();
   }, [activeTab]);
 
-  const handleReject = async (collectionName: string, id: string) => {
+  const handleReject = async (collectionName: string, id: string, userId?: string) => {
     if (!window.confirm("Are you sure you want to reject this request?")) return;
     try {
-      await updateDoc(doc(db, collectionName, id), { status: 'Rejected' });
-      alert("Request rejected.");
+      if (collectionName === 'withdrawals' && userId) {
+        await onRejectWithdrawal(userId, id);
+      } else {
+        await updateDoc(doc(db, collectionName, id), { status: 'Rejected' });
+        alert("Request rejected.");
+      }
     } catch (error) {
       console.error("Error rejecting request:", error);
     }
@@ -791,7 +796,8 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
                       onClick={() => handleReject(
                         activeTab === 'partners' ? 'partnerRequests' : 
                         activeTab === 'withdrawals' ? 'withdrawals' : 'deposits', 
-                        req.id
+                        req.id,
+                        req.userId
                       )}
                       className="flex-1 bg-red-50 text-red-600 py-3 rounded-xl text-[10px] font-bold flex items-center justify-center gap-2 hover:bg-red-100 transition-colors"
                     >

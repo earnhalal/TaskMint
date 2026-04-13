@@ -231,7 +231,8 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                       </div>
                       <div className={`text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg mt-1 inline-block ${
                         item.status === 'PENDING' ? 'bg-amber-50 text-amber-600' : 
-                        (item.status === 'APPROVED' || item.status === 'COMPLETED') ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'
+                        (item.status === 'APPROVED' || item.status === 'COMPLETED') ? 'bg-emerald-50 text-emerald-600' : 
+                        item.status === 'REJECTED' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'
                       }`}>
                         {item.status}
                       </div>

@@ -113,13 +113,11 @@ export default function Dashboard() {
   const [appBonusClaimed, setAppBonusClaimed] = useState(false);
   const [lastDailyCheckin, setLastDailyCheckin] = useState<any>(null);
   const [freeSpins, setFreeSpins] = useState(0);
-  const [pendingWithdrawals, setPendingWithdrawals] = useState<any[]>([]);
-  const [completedWithdrawals, setCompletedWithdrawals] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
 
   const withdrawalHistory = useMemo(() => {
-    const combined = [...pendingWithdrawals, ...completedWithdrawals];
-    return combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-  }, [pendingWithdrawals, completedWithdrawals]);
+    return [...withdrawals].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  }, [withdrawals]);
   const [depositHistory, setDepositHistory] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [topEarners, setTopEarners] = useState<any[]>([]);
@@ -137,23 +135,6 @@ export default function Dashboard() {
   useEffect(() => {
     document.title = 'Dashboard - TaskMint';
     if (!user) return;
-
-    // Seed Social Tasks if empty
-    const seedSocialTasks = async () => {
-      const q = query(collection(db, 'social_tasks'));
-      const snapshot = await getDocs(q);
-      if (snapshot.empty) {
-        const initialTasks = [
-          { title: 'Subscribe TaskMint Channel', platform: 'YouTube', reward: 10, link: 'https://youtube.com', instructions: 'Subscribe to our official channel and submit your channel name.', status: 'active', timestamp: firestoreServerTimestamp() },
-          { title: 'Follow TaskMint Instagram', platform: 'Instagram', reward: 5, link: 'https://instagram.com', instructions: 'Follow us on Instagram and submit your username.', status: 'active', timestamp: firestoreServerTimestamp() },
-          { title: 'Join Telegram Group', platform: 'Telegram', reward: 15, link: 'https://telegram.org', instructions: 'Join our Telegram group for updates and submit your Telegram ID.', status: 'active', timestamp: firestoreServerTimestamp() }
-        ];
-        for (const task of initialTasks) {
-          await addDoc(collection(db, 'social_tasks'), task);
-        }
-      }
-    };
-    seedSocialTasks();
 
     // Listener for user profile
     const unsubscribe = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
@@ -246,20 +227,13 @@ export default function Dashboard() {
       setDepositHistory(depositsData);
     }, (error) => console.error("Deposits Error:", error));
 
-    // Listener for withdrawals from RTDB (Both pending and completed)
-    const pendingWithdrawalsRef = ref(rtdb, `withdrawals/pending/${user.uid}`);
-    const completedWithdrawalsRef = ref(rtdb, `withdrawals/completed/${user.uid}`);
+    // Listener for withdrawals from RTDB (Single node)
+    const withdrawalsRef = ref(rtdb, `withdrawals/${user.uid}`);
     
-    const unsubscribePending = onValue(pendingWithdrawalsRef, (snapshot) => {
+    const unsubscribeWithdrawals = onValue(withdrawalsRef, (snapshot) => {
       const data = snapshot.val() || {};
-      const list = Object.entries(data).map(([id, val]: [string, any]) => ({ id, ...val, status: 'pending' }));
-      setPendingWithdrawals(list);
-    });
-
-    const unsubscribeCompleted = onValue(completedWithdrawalsRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      const list = Object.entries(data).map(([id, val]: [string, any]) => ({ id, ...val, status: 'approved' }));
-      setCompletedWithdrawals(list);
+      const list = Object.entries(data).map(([id, val]: [string, any]) => ({ id, ...val }));
+      setWithdrawals(list);
     });
 
     // Listener for notifications
@@ -338,8 +312,7 @@ export default function Dashboard() {
       unsubscribeNotify();
       unsubscribeEarners();
       unsubscribeDeposits();
-      unsubscribePending();
-      unsubscribeCompleted();
+      unsubscribeWithdrawals();
       unsubscribeSettings();
       unsubscribeReferrals();
       unsubscribeStats();
@@ -590,7 +563,7 @@ export default function Dashboard() {
 
       // 4. Save to RTDB (for User History)
       console.log("[WITHDRAWAL_RTDB] Attempting to save to RTDB...");
-      const pendingRef = ref(rtdb, `withdrawals/pending/${user.uid}/${withdrawalId}`);
+      const withdrawalRef = ref(rtdb, `withdrawals/${user.uid}/${withdrawalId}`);
       
       const account = withdrawalAccounts[0] || {};
       
@@ -606,8 +579,8 @@ export default function Dashboard() {
         firestoreId: withdrawalId
       };
       
-      await set(pendingRef, newTx);
-      console.log("[WITHDRAWAL_RTDB_SUCCESS] Saved to pending list");
+      await set(withdrawalRef, newTx);
+      console.log("[WITHDRAWAL_RTDB_SUCCESS] Saved to withdrawals list");
       
       // 5. Send internal notification
       await sendWithdrawalRequestMail(user.uid, amount, method);
@@ -740,6 +713,36 @@ export default function Dashboard() {
     }
   };
 
+  const handleRejectWithdrawal = async (targetUserId: string, withdrawalId: string) => {
+    try {
+      console.log(`[ADMIN_ACTION] Rejecting withdrawal: ${withdrawalId} for user: ${targetUserId}`);
+      
+      // 1. Update Firestore
+      const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
+      await updateDoc(withdrawalRef, { 
+        status: 'Rejected',
+        rejectedAt: new Date().toISOString()
+      });
+      console.log("[ADMIN_ACTION_SUCCESS] Firestore withdrawal status updated to Rejected");
+
+      // 2. Update RTDB
+      const withdrawalRefRtdb = ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`);
+      const snapshot = await get(withdrawalRefRtdb);
+      if (snapshot.exists()) {
+        await update(withdrawalRefRtdb, {
+          status: 'rejected',
+          rejectedAt: Date.now()
+        });
+        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal status updated to rejected");
+      }
+
+      alert("Withdrawal rejected.");
+    } catch (error) {
+      console.error("[ADMIN_ACTION_FAILURE] Error rejecting withdrawal:", error);
+      alert("Failed to reject withdrawal.");
+    }
+  };
+
   const handleApproveWithdrawal = async (targetUserId: string, withdrawalId: string) => {
     try {
       console.log(`[ADMIN_ACTION] Approving withdrawal: ${withdrawalId} for user: ${targetUserId}`);
@@ -765,41 +768,31 @@ export default function Dashboard() {
       }
 
       // 2. Update RTDB (Primary for History)
-      const pendingRef = ref(rtdb, `withdrawals/pending/${targetUserId}/${withdrawalId}`);
-      const completedRef = ref(rtdb, `withdrawals/completed/${targetUserId}/${withdrawalId}`);
+      const withdrawalRefRtdb = ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`);
       
-      const snapshot = await get(pendingRef);
+      const snapshot = await get(withdrawalRefRtdb);
       if (snapshot.exists()) {
-        const data = snapshot.val();
-        const updates: any = {};
-        updates[`withdrawals/pending/${targetUserId}/${withdrawalId}`] = null;
-        updates[`withdrawals/completed/${targetUserId}/${withdrawalId}`] = {
-          ...data,
+        await update(withdrawalRefRtdb, {
           status: 'approved',
           approvedAt: Date.now()
-        };
-        await update(ref(rtdb), updates);
-        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal moved from pending to completed");
+        });
+        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal status updated to approved");
       } else {
-        console.log("[ADMIN_ACTION] Withdrawal not found in RTDB pending by ID. Searching by amount fallback...");
-        const allPendingRef = ref(rtdb, `withdrawals/pending/${targetUserId}`);
-        const allPendingSnap = await get(allPendingRef);
-        if (allPendingSnap.exists()) {
-          const pendingData = allPendingSnap.val();
-          const matchEntry = Object.entries(pendingData).find(([_, val]: [string, any]) => val.amount === amount);
+        console.log("[ADMIN_ACTION] Withdrawal not found in RTDB by ID. Searching by amount fallback...");
+        const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
+        const userWithdrawalsSnap = await get(userWithdrawalsRef);
+        if (userWithdrawalsSnap.exists()) {
+          const withdrawalsData = userWithdrawalsSnap.val();
+          const matchEntry = Object.entries(withdrawalsData).find(([_, val]: [string, any]) => val.amount === amount && val.status === 'pending');
           if (matchEntry) {
-            const [oldId, oldData] = matchEntry as [string, any];
-            const updates: any = {};
-            updates[`withdrawals/pending/${targetUserId}/${oldId}`] = null;
-            updates[`withdrawals/completed/${targetUserId}/${withdrawalId}`] = {
-              ...oldData,
+            const [oldId] = matchEntry as [string, any];
+            await update(ref(rtdb, `withdrawals/${targetUserId}/${oldId}`), {
               status: 'approved',
               approvedAt: Date.now()
-            };
-            await update(ref(rtdb), updates);
-            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal found by amount and moved to completed");
+            });
+            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal found by amount and updated to approved");
           } else {
-            await set(completedRef, {
+            await set(ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`), {
               amount,
               method,
               status: 'approved',
@@ -807,10 +800,10 @@ export default function Dashboard() {
               approvedAt: Date.now(),
               userId: targetUserId
             });
-            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created in completed as last resort");
+            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created in approved as last resort");
           }
         } else {
-          await set(completedRef, {
+          await set(ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`), {
             amount,
             method,
             status: 'approved',
@@ -818,7 +811,7 @@ export default function Dashboard() {
             approvedAt: Date.now(),
             userId: targetUserId
           });
-          console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created in completed (no pending data found)");
+          console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created in approved (no data found)");
         }
       }
 
@@ -1000,6 +993,7 @@ export default function Dashboard() {
                  onApprovePartner={handleApprovePartner}
                  onApproveDeposit={handleApproveDeposit}
                  onApproveWithdrawal={handleApproveWithdrawal}
+                 onRejectWithdrawal={handleRejectWithdrawal}
                />;
       case 'partner_upgrade':
         return <PartnerUpgradeView 
