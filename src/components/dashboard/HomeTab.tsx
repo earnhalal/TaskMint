@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
     UserPlus as InviteIcon, 
     CheckSquare as DocumentCheckIcon, 
@@ -55,6 +56,7 @@ interface HomeTabProps {
   };
   appBonusClaimed: boolean;
   lastDailyCheckin: any;
+  timeLeft: number | null;
 }
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; bgClass: string; iconColor: string; delay: number }> = ({ icon, label, value, bgClass, iconColor, delay }) => (
@@ -144,8 +146,19 @@ export default function HomeTab({
   onUpdateBalance,
   appSettings,
   appBonusClaimed,
-  lastDailyCheckin
+  lastDailyCheckin,
+  timeLeft
 }: HomeTabProps) {
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const isOfferActive = timeLeft !== null && timeLeft > 0;
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -266,6 +279,46 @@ export default function HomeTab({
 
   return (
     <div className="space-y-6 animate-fade-in pb-24 font-sans">
+      
+      {/* Limited Time Offer Banner */}
+      <AnimatePresence>
+        {isOfferActive && accountStatus.toLowerCase() !== 'active' && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+            animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
+            exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+            className="relative overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 rounded-3xl p-5 text-white shadow-xl shadow-red-500/20 relative">
+              {/* Decorative Elements */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-12 -mb-12 blur-xl"></div>
+              
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-white/20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Limited Offer</span>
+                    <div className="flex items-center gap-1 text-yellow-300">
+                      <Clock className="w-3 h-3 animate-pulse" />
+                      <span className="text-[10px] font-black font-mono">{formatTime(timeLeft!)}</span>
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-black tracking-tight mb-1">Rs. 100 Activation Fee!</h3>
+                  <p className="text-[10px] text-white/80 font-medium leading-tight">
+                    Offer khatam hone ke baad fee Rs. 280 ho jayegi. Abhi join karein aur bachayein!
+                  </p>
+                </div>
+                <button 
+                  onClick={onActivateClick}
+                  className="bg-white text-red-600 p-3 rounded-2xl shadow-lg active:scale-90 transition-transform"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* APK Welcome Bonus - Only in App and if not claimed */}
       {isApp && !appBonusClaimed && (

@@ -131,8 +131,37 @@ export default function Dashboard() {
     paymentName: 'M-WASEEM',
     referralBonusBasic: 50,
     referralBonusPartner: 70,
-    indirectReferralBonus: 10
+    indirectReferralBonus: 10,
+    offerExpiryTime: null as any
   });
+
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!appSettings.offerExpiryTime) return;
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const expiry = appSettings.offerExpiryTime.toMillis ? appSettings.offerExpiryTime.toMillis() : new Date(appSettings.offerExpiryTime).getTime();
+      const distance = expiry - now;
+
+      if (distance < 0) {
+        setTimeLeft(0);
+        clearInterval(timer);
+      } else {
+        setTimeLeft(distance);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [appSettings.offerExpiryTime]);
+
+  const activeAppSettings = useMemo(() => {
+    if (timeLeft === 0) {
+      return { ...appSettings, activationFee: 280 };
+    }
+    return appSettings;
+  }, [appSettings, timeLeft]);
 
   useEffect(() => {
     document.title = 'Dashboard - TaskMint';
@@ -340,9 +369,19 @@ export default function Dashboard() {
     });
 
     // Listener for app settings
-    const unsubscribeSettings = onSnapshot(doc(db, 'app_settings', 'global'), (doc) => {
-      if (doc.exists()) {
-        setAppSettings(doc.data() as any);
+    const unsubscribeSettings = onSnapshot(doc(db, 'app_settings', 'global'), async (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setAppSettings(data as any);
+        
+        // Initialize offerExpiryTime if missing (5 hours from now)
+        if (!data.offerExpiryTime) {
+          const expiry = new Date();
+          expiry.setHours(expiry.getHours() + 5);
+          await setDoc(doc(db, 'app_settings', 'global'), {
+            offerExpiryTime: expiry
+          }, { merge: true });
+        }
       }
     });
 
@@ -358,15 +397,6 @@ export default function Dashboard() {
       unsubscribeStatus();
     };
   }, [user, role]);
-
-  useEffect(() => {
-    const unsubscribeSettings = onSnapshot(doc(db, 'app_settings', 'global'), (doc) => {
-      if (doc.exists()) {
-        setAppSettings(doc.data() as any);
-      }
-    });
-    return () => unsubscribeSettings();
-  }, []);
 
   useEffect(() => {
     // localStorage.setItem('taskmint_balance', balance.toString());
@@ -1114,7 +1144,7 @@ export default function Dashboard() {
           onDeposit={handleDeposit}
           transactions={depositHistory}
           initialType={status === 'Inactive' ? 'activation' : 'regular'}
-          appSettings={appSettings}
+          appSettings={activeAppSettings}
         />;
       case 'updates':
         return <UpdatesView 
@@ -1154,7 +1184,7 @@ export default function Dashboard() {
         />;
       case 'watch':
         if (accountStatus.toLowerCase() !== 'active') {
-          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={appSettings} userName={userName} />;
+          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} />;
         }
         return <WatchTab 
           onBack={() => setActiveTab('home')}
@@ -1163,7 +1193,7 @@ export default function Dashboard() {
         />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {
-          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={appSettings} userName={userName} />;
+          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} />;
         }
         return <TasksTab 
           onBack={() => setActiveTab('home')} 
@@ -1172,7 +1202,7 @@ export default function Dashboard() {
         />;
       case 'task_wall':
         if (accountStatus.toLowerCase() !== 'active') {
-          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={appSettings} userName={userName} />;
+          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} />;
         }
         return <TaskWall 
           onBack={() => setActiveTab('home')} 
@@ -1205,9 +1235,10 @@ export default function Dashboard() {
           onTaskWallClick={() => setActiveTab('task_wall')}
           onSocialTaskPlusClick={() => setActiveTab('social_task_plus')}
           onUpdateBalance={handleUpdateBalance}
-          appSettings={appSettings}
+          appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}
           lastDailyCheckin={lastDailyCheckin}
+          timeLeft={timeLeft}
         />;
     }
   };
