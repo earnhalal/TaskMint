@@ -82,21 +82,41 @@ const QuickActionBtn: React.FC<{
     isWhatsApp?: boolean;
     isShaking?: boolean;
     isLocked?: boolean;
-}> = ({ icon, label, onClick, colorClass, delay, isHighlight, isWhatsApp, isShaking, isLocked }) => (
+    badge?: string;
+}> = ({ icon, label, onClick, colorClass, delay, isHighlight, isWhatsApp, isShaking, isLocked, badge }) => (
     <button 
         onClick={onClick} 
-        className={`flex flex-col items-center gap-2 group animate-fade-in-up w-full ${isWhatsApp ? 'animate-bounce-small' : ''} ${isShaking ? 'animate-shaking' : ''} relative`}
+        className={`flex flex-col items-center gap-2.5 group animate-fade-in-up w-full ${isWhatsApp ? 'animate-bounce-small' : ''} ${isShaking ? 'animate-shaking' : ''} relative`}
         style={{ animationDelay: `${delay}ms` }}
     >
-        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-300 group-hover:scale-105 group-active:scale-95 ${colorClass} ${isHighlight ? 'ring-2 ring-red-100' : 'ring-2 ring-white ring-opacity-50'} ${isWhatsApp ? 'shadow-green-500/50' : ''}`}>
-            {React.cloneElement(icon as React.ReactElement, { className: "w-5 h-5 sm:w-6 sm:h-6" })}
+        <div className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-[22px] flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-active:scale-95 ${colorClass} ${isHighlight ? 'ring-4 ring-red-500/10' : 'ring-4 ring-slate-100'} ${isWhatsApp ? 'shadow-green-500/30' : ''} overflow-hidden`}>
+            {/* Glossy Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-50"></div>
+            <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white/10 rotate-45 transform transition-transform duration-700 group-hover:translate-x-full"></div>
+            
+            <div className="relative z-10 drop-shadow-md">
+                {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6 sm:w-7 sm:h-7" })}
+            </div>
         </div>
+
         {isLocked && (
-          <div className="absolute top-0 right-0 -mt-1 -mr-1 bg-white rounded-full p-1 shadow-md border border-slate-100 z-10">
-            <Lock className="w-2.5 h-2.5 text-amber-600" />
+          <div className="absolute top-0 right-0 -mt-1 -mr-1 bg-white rounded-full p-1.5 shadow-lg border border-slate-100 z-10">
+            <Lock className="w-3 h-3 text-slate-400" />
           </div>
         )}
-        <span className={`text-[10px] sm:text-xs font-bold transition-colors ${isHighlight ? 'text-red-700' : isWhatsApp ? 'text-green-600' : 'text-slate-600 group-hover:text-slate-900'}`}>{label}</span>
+
+        {badge && (
+          <div className="absolute -top-2 -right-1 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-lg border-2 border-white z-20 animate-pulse">
+            {badge}
+          </div>
+        )}
+
+        <div className="flex flex-col items-center">
+            <span className={`text-[10px] sm:text-[11px] font-black tracking-tight transition-colors uppercase ${isHighlight ? 'text-red-600' : isWhatsApp ? 'text-green-600' : 'text-slate-700 group-hover:text-slate-900'}`}>
+                {label}
+            </span>
+            <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-300 rounded-full mt-0.5 ${isHighlight ? 'bg-red-500' : isWhatsApp ? 'bg-green-500' : 'bg-slate-400'}`}></div>
+        </div>
     </button>
 );
 
@@ -453,34 +473,44 @@ export default function HomeTab({
       </div>
 
       {/* Quick Actions Grid */}
-      <div>
-          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4 px-1">
-              <SparklesIcon className="w-4 h-4 text-amber-500" /> 
-              Quick Actions
-          </h2>
-          <div className="grid grid-cols-4 gap-2 sm:gap-4">
+      <div className="relative">
+          {/* Decorative Background Elements */}
+          <div className="absolute -top-10 -left-10 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="flex items-center justify-between mb-6 px-1">
+              <h2 className="text-sm font-black text-slate-900 flex items-center gap-2 uppercase tracking-widest">
+                  <SparklesIcon className="w-4 h-4 text-amber-500" /> 
+                  Quick Actions
+              </h2>
+              <div className="h-px flex-1 bg-gradient-to-r from-slate-100 to-transparent ml-4"></div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-y-6 gap-x-3 sm:gap-6">
               <QuickActionBtn 
                   icon={<MessageCircle />} 
                   label="WhatsApp" 
                   onClick={() => window.open('https://whatsapp.com/channel/0029VbCpKTp2P59cvqS4CL2L', '_blank')} 
-                  colorClass="bg-gradient-to-br from-green-400 to-green-600 shadow-green-500/40" 
+                  colorClass="bg-gradient-to-br from-green-400 via-green-500 to-emerald-600" 
                   delay={25}
                   isWhatsApp={true}
+                  badge="HELP"
               />
               <QuickActionBtn 
                   icon={<PlayCircleIcon />} 
                   label="Watch Ads" 
                   onClick={onWatchAdsClick} 
-                  colorClass="bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/40" 
+                  colorClass="bg-gradient-to-br from-rose-500 via-red-600 to-red-700" 
                   delay={50}
                   isHighlight={true}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
+                  badge="HOT"
               />
               <QuickActionBtn 
                   icon={<EarnIcon />} 
                   label="Tasks" 
                   onClick={onTasksClick} 
-                  colorClass="bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-emerald-500/40" 
+                  colorClass="bg-gradient-to-br from-emerald-400 via-teal-500 to-teal-600" 
                   delay={100}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
               />
@@ -488,7 +518,7 @@ export default function HomeTab({
                   icon={<Zap />} 
                   label="Surveys" 
                   onClick={onTaskWallClick} 
-                  colorClass="bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-indigo-500/40" 
+                  colorClass="bg-gradient-to-br from-indigo-400 via-blue-500 to-blue-600" 
                   delay={110}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
               />
@@ -497,39 +527,42 @@ export default function HomeTab({
                   icon={<CalendarIcon />} 
                   label="Daily Gift" 
                   onClick={handleDailyCheckin} 
-                  colorClass="bg-gradient-to-br from-yellow-400 to-amber-600 shadow-yellow-500/40" 
+                  colorClass="bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500" 
                   delay={125}
                   isHighlight={true}
                   isShaking={isDailyClaimable}
+                  badge="GIFT"
               />
               <QuickActionBtn 
                   icon={<TicketIcon />} 
                   label="Lottery" 
                   onClick={onLotteryClick} 
-                  colorClass="bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/40" 
+                  colorClass="bg-gradient-to-br from-purple-500 via-indigo-600 to-violet-700" 
                   delay={150}
               />
               <QuickActionBtn 
                   icon={<GiftIcon />} 
                   label="Spin" 
                   onClick={onSpinClick} 
-                  colorClass="bg-gradient-to-br from-pink-500 to-rose-500 shadow-pink-500/40" 
+                  colorClass="bg-gradient-to-br from-pink-500 via-rose-500 to-red-500" 
                   delay={200}
+                  badge="NEW"
               />
               <QuickActionBtn 
                   icon={<InviteIcon />} 
                   label="Invite" 
                   onClick={onInviteClick} 
-                  colorClass="bg-gradient-to-br from-blue-400 to-blue-600 shadow-blue-500/40" 
+                  colorClass="bg-gradient-to-br from-blue-400 via-sky-500 to-blue-600" 
                   delay={300}
               />
               <QuickActionBtn 
                   icon={<SparklesIcon />} 
-                  label="Social Task+" 
+                  label="Social+" 
                   onClick={onSocialTaskPlusClick} 
-                  colorClass="bg-gradient-to-br from-orange-400 to-rose-600 shadow-orange-500/40" 
+                  colorClass="bg-gradient-to-br from-orange-400 via-rose-500 to-pink-600" 
                   delay={350}
                   isHighlight={true}
+                  badge="BONUS"
               />
           </div>
       </div>
