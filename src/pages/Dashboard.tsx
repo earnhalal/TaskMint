@@ -43,7 +43,8 @@ import {
   sendActivationMail, 
   playNotificationSound,
   sendDepositApprovedMail,
-  sendWithdrawalApprovedMail
+  sendWithdrawalApprovedMail,
+  sendSystemUpdateMail
 } from '../services/notificationService';
 import SpinWheel from '../components/SpinWheel';
 import HomeTab from '../components/dashboard/HomeTab';
@@ -158,12 +159,7 @@ export default function Dashboard() {
     return () => clearInterval(timer);
   }, [appSettings.offerExpiryTime]);
 
-  const activeAppSettings = useMemo(() => {
-    if (timeLeft === 0) {
-      return { ...appSettings, activationFee: 280 };
-    }
-    return appSettings;
-  }, [appSettings, timeLeft]);
+  const activeAppSettings = appSettings;
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -386,14 +382,38 @@ export default function Dashboard() {
         const data = snapshot.data();
         setAppSettings(data as any);
         
-        // Update offerExpiryTime to April 14, 2026 12:00 AM (End of April 14 -> April 15 00:00)
-        const targetDate = new Date('2026-04-15T00:00:00');
-        const currentExpiry = data.offerExpiryTime?.toMillis ? data.offerExpiryTime.toMillis() : (data.offerExpiryTime ? new Date(data.offerExpiryTime).getTime() : 0);
-        
-        if (currentExpiry !== targetDate.getTime()) {
+        // Ensure activationFee is 280 and remove offerExpiryTime
+        if (data.activationFee !== 280 || data.offerExpiryTime) {
           await setDoc(doc(db, 'app_settings', 'global'), {
-            offerExpiryTime: targetDate
+            activationFee: 280,
+            offerExpiryTime: null
           }, { merge: true });
+
+          // Notify all users about the fee update (one-time logic)
+          const notifyKey = 'fee_update_notified_280';
+          const alreadyNotified = localStorage.getItem(notifyKey);
+          
+          if (!alreadyNotified) {
+            const usersSnapshot = await getDocs(collection(db, 'users'));
+            const batch = writeBatch(db);
+            
+            usersSnapshot.docs.forEach(userDoc => {
+              const userId = userDoc.id;
+              const notificationRef = doc(collection(db, 'notifications'));
+              batch.set(notificationRef, {
+                userId,
+                title: 'Important Update: Activation Fee 📢',
+                message: 'Limited time offer khatam ho gaya hai. Ab joining fee Rs. 280 update kar di gayi hai. Kaam jari rakhein aur earn karein!',
+                type: 'system',
+                status: 'unread',
+                timestamp: new Date().toISOString()
+              });
+            });
+            
+            await batch.commit();
+            localStorage.setItem(notifyKey, 'true');
+            console.log("[SYSTEM_UPDATE] All users notified about fee update.");
+          }
         }
       }
     });
@@ -1395,46 +1415,6 @@ export default function Dashboard() {
         {/* Scrollable Content */}
         <div className={`flex-1 overflow-y-auto px-5 pt-6 hide-scrollbar ${role === 'partner' ? 'bg-amber-50/50' : 'bg-slate-50/50'}`}>
           
-          {/* Limited Time Offer Banner - Global Visibility for Inactive Users */}
-          <AnimatePresence>
-            {isOfferActive && accountStatus.toLowerCase() !== 'active' && (
-              <motion.div 
-                initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
-                exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                className="relative overflow-hidden"
-              >
-                <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 rounded-3xl p-5 text-white shadow-xl shadow-red-500/20 relative">
-                  {/* Decorative Elements */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-12 -mb-12 blur-xl"></div>
-                  
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-white/20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Limited Offer</span>
-                        <div className="flex items-center gap-1 text-yellow-300">
-                          <Clock className="w-3.5 h-3.5 animate-pulse" />
-                          <span className="text-[11px] font-black font-mono">{formatTime(timeLeft!)}</span>
-                        </div>
-                      </div>
-                      <h3 className="text-lg font-black tracking-tight mb-1">Rs. 100 Activation Fee!</h3>
-                      <p className="text-[10px] text-white/80 font-medium leading-tight">
-                        Offer khatam hone ke baad fee Rs. 280 ho jayegi. Abhi join karein aur bachayein!
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => setActiveTab('activation')}
-                      className="bg-white text-red-600 p-3 rounded-2xl shadow-lg active:scale-90 transition-transform"
-                    >
-                      <ArrowRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
           {role === 'partner' && activeTab === 'home' && (
             <div className="mb-6 space-y-4">
               <div className="bg-gradient-to-br from-[#060D2D] to-[#151E32] rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">

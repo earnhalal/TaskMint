@@ -89,3 +89,12 @@ export const sendWithdrawalApprovedMail = (userId: string, amount: number) => {
     type: 'withdrawal'
   });
 };
+
+export const sendSystemUpdateMail = (userId: string, title: string, message: string) => {
+  return sendInternalNotification({
+    userId,
+    title,
+    message,
+    type: 'system'
+  });
+};
