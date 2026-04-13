@@ -157,57 +157,70 @@ export default function ProfileTab({
       )}
 
       {/* Profile Header */}
-      <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white text-xl font-bold shadow-md overflow-hidden">
-              {avatar ? (
-                <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                name.substring(0, 2).toUpperCase()
-              )}
+      <div className="relative rounded-[32px] p-6 mb-8 overflow-hidden shadow-2xl shadow-blue-900/10 group">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900"></div>
+        <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl -ml-10 -mb-10"></div>
+        
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-1 shadow-xl shadow-amber-500/30 group-hover:scale-105 transition-transform duration-300">
+                <div className="w-full h-full rounded-xl bg-slate-900 flex items-center justify-center text-white text-2xl font-black overflow-hidden">
+                  {avatar ? (
+                    <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    name.substring(0, 2).toUpperCase()
+                  )}
+                </div>
+              </div>
+              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl border-2 border-slate-900 flex items-center justify-center text-xs font-black text-white shadow-lg">
+                1
+              </div>
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white">
-              1
-            </div>
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">{name}</h2>
-            <p className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded inline-block mb-1">ID: {referralCode}</p>
-            <p className="text-xs text-slate-500 mb-2">{email}</p>
-            <div className="flex flex-wrap gap-2">
-                {role === 'partner' ? (
-                  <div className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-yellow-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold shadow-md">
-                    <Crown className="w-3 h-3 text-white" />
-                    TaskMint Partner
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-2xl font-black text-white tracking-tight">{name}</h2>
+                {status.toLowerCase() === 'active' && <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-400/20" />}
+              </div>
+              <p className="text-sm font-medium text-blue-200 mb-3 opacity-90">{email}</p>
+              <div className="flex flex-wrap gap-2">
+                  <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                    ID: <span className="text-amber-400">{referralCode}</span>
                   </div>
-                ) : status.toLowerCase() === 'active' ? (
-                  <div className="inline-flex items-center gap-1 bg-blue-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold shadow-sm">
-                    <CheckCircle2 className="w-3 h-3 text-white fill-white/20" />
-                    Verified Account
-                  </div>
-                ) : status.toLowerCase() === 'pending' ? (
-                  <div className="inline-flex items-center gap-1 bg-amber-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold shadow-sm">
-                    <Clock className="w-3 h-3 text-white" />
-                    Pending Approval
-                  </div>
-                ) : (
-                  <div className="inline-flex items-center gap-1 bg-[#0F172A] text-white px-2.5 py-1 rounded-md text-[10px] font-bold">
-                    <Users className="w-3 h-3 text-slate-400" />
-                    Member
-                  </div>
-                )}
-                {joiningDate && (
-                    <div className="inline-flex items-center gap-1 bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md text-[10px] font-bold">
-                      Joined: {joiningDate}
+                  {role === 'partner' ? (
+                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-lg shadow-amber-500/30 uppercase tracking-wider">
+                      <Crown className="w-3.5 h-3.5 text-white" />
+                      Partner
                     </div>
-                )}
+                  ) : status.toLowerCase() === 'active' ? (
+                    <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                      <Shield className="w-3.5 h-3.5" />
+                      Verified
+                    </div>
+                  ) : status.toLowerCase() === 'pending' ? (
+                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                      <Clock className="w-3.5 h-3.5" />
+                      Pending
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                      <Users className="w-3.5 h-3.5" />
+                      Member
+                    </div>
+                  )}
+                  {joiningDate && (
+                      <div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                        Joined: {joiningDate}
+                      </div>
+                  )}
+              </div>
             </div>
           </div>
+          <button onClick={onEditProfile} className="hidden sm:block text-xs font-black text-white bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl hover:bg-white/20 transition-colors shadow-lg">
+            Edit
+          </button>
         </div>
-        <button onClick={onEditProfile} className="text-xs font-bold text-yellow-600 bg-yellow-50 px-3 py-1.5 rounded-lg hover:bg-yellow-100 transition-colors">
-          Edit Info
-        </button>
       </div>
 
       <Section title="Wallet Overview">

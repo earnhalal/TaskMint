@@ -123,19 +123,21 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
       </div>
 
       {/* Hero Card */}
-      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-[2.5rem] p-8 text-white mb-8 relative overflow-hidden shadow-2xl shadow-purple-500/20">
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full -ml-16 -mb-16 blur-2xl"></div>
+      <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 rounded-[2.5rem] p-8 text-white mb-8 relative overflow-hidden shadow-2xl shadow-blue-900/20 group border border-white/5">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/20 rounded-full -mr-24 -mt-24 blur-3xl group-hover:bg-amber-500/30 transition-colors duration-500"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/20 rounded-full -ml-16 -mb-16 blur-2xl"></div>
         
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-4">
-            <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
-              <Sparkles className="w-5 h-5 text-yellow-300" />
+            <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/10">
+              <Sparkles className="w-5 h-5 text-amber-400" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/80">Premium Rewards</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400">Premium Rewards</span>
           </div>
-          <h1 className="text-3xl font-black tracking-tighter mb-2 leading-none">Social Task+</h1>
-          <p className="text-sm text-white/80 font-medium max-w-[200px]">Complete simple social tasks and get instant rewards.</p>
+          <h1 className="text-4xl font-black tracking-tighter mb-2 leading-none font-display drop-shadow-md">
+            Social Task<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">+</span>
+          </h1>
+          <p className="text-sm text-blue-200 font-medium max-w-[220px]">Complete simple social tasks and get instant rewards directly to your wallet.</p>
         </div>
       </div>
 
@@ -178,9 +180,9 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
 
                 {isSubmitted ? (
                   <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${
-                    status === 'approved' ? 'bg-emerald-50 text-emerald-600' :
-                    status === 'pending' ? 'bg-amber-50 text-amber-600' :
-                    'bg-red-50 text-red-600'
+                    status === 'approved' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                    status === 'pending' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                    'bg-red-50 text-red-600 border border-red-100'
                   }`}>
                     {status === 'approved' ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                     {status}
@@ -188,7 +190,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
                 ) : (
                   <button
                     onClick={() => setSelectedTask(task)}
-                    className="bg-slate-900 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-wider hover:bg-indigo-600 transition-all shadow-lg shadow-slate-900/10"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-wider hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all"
                   >
                     Start
                   </button>
@@ -246,7 +248,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
 
                   <button
                     onClick={() => window.open(selectedTask.link, '_blank')}
-                    className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all"
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/30 hover:-translate-y-0.5 transition-all"
                   >
                     <ExternalLink className="w-4 h-4" /> Open Task Link
                   </button>
@@ -259,7 +261,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
                         value={proof}
                         onChange={(e) => setProof(e.target.value)}
                         placeholder="Enter your username or proof link"
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                       />
                       <Camera className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
                     </div>
@@ -268,7 +270,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
                   <button
                     onClick={handleSubmit}
                     disabled={isSubmitting || !proof}
-                    className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm disabled:opacity-50 shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-4 rounded-2xl font-black text-sm disabled:opacity-50 shadow-xl shadow-amber-500/20 hover:shadow-2xl hover:shadow-amber-500/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                     Submit Task

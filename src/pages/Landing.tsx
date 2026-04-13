@@ -215,10 +215,13 @@ export default function Landing() {
         <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass-nav py-3' : 'bg-white/0 py-5'}`}>
           <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.scrollTo(0,0)}>
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/30 transition-transform group-hover:scale-105">
-                <SparklesIcon className="w-6 h-6" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 transition-transform group-hover:scale-105 group-hover:rotate-3">
+                <SparklesIcon className="w-6 h-6 animate-pulse" />
               </div>
-              <span className="font-black text-2xl tracking-tighter font-heading text-slate-900">Task<span className="text-gold-gradient">Mint</span></span>
+              <span className="font-black text-2xl tracking-tighter font-display drop-shadow-sm">
+                <span className="text-blue-900">Task</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">Mint</span>
+              </span>
             </div>
 
             <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-gray-600">
@@ -255,18 +258,18 @@ export default function Landing() {
         <main>
             {/* --- Hero Section --- */}
             <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden bg-white">
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-amber-50 rounded-full blur-3xl opacity-60 -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-slate-50 rounded-full blur-3xl opacity-60 translate-y-1/3 -translate-x-1/4 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-50 rounded-full blur-3xl opacity-60 -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-50 rounded-full blur-3xl opacity-60 translate-y-1/3 -translate-x-1/4 pointer-events-none"></div>
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-200 text-gray-600 text-sm font-bold mb-8 shadow-sm animate-fade-in-up">
-                        <span className="flex h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-800 text-sm font-bold mb-8 shadow-sm animate-fade-in-up">
+                        <span className="flex h-2.5 w-2.5 rounded-full bg-blue-500 animate-pulse"></span>
                         The #1 Premium Earning Platform
                     </div>
                     
-                    <h1 className="text-5xl md:text-7xl font-black text-slate-900 mb-6 leading-tight tracking-tighter animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+                    <h1 className="text-5xl md:text-7xl font-black text-slate-900 mb-6 leading-tight tracking-tighter animate-fade-in-up font-display" style={{animationDelay: '0.1s'}}>
                         The Professional <br/>
-                        <span className="text-gold-gradient drop-shadow-sm">Task Marketplace.</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700 drop-shadow-sm">Task Marketplace.</span>
                     </h1>
                     
                     <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed font-medium animate-fade-in-up" style={{animationDelay: '0.2s'}}>
@@ -274,26 +277,26 @@ export default function Landing() {
                     </p>
                     
                     <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
-                        <button onClick={() => onGetStarted('signup')} className="btn-gold px-8 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 group shadow-lg hover:shadow-xl transition-all">
+                        <button onClick={() => onGetStarted('signup')} className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-full font-black text-lg flex items-center justify-center gap-2 group shadow-xl shadow-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/40 hover:-translate-y-1 transition-all">
                             Start Earning Now 
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
-                        <button onClick={() => setActiveModal('how-it-works')} className="btn-outline-gold px-8 py-4 rounded-full font-bold text-lg">
+                        <button onClick={() => setActiveModal('how-it-works')} className="bg-white text-slate-800 border-2 border-slate-200 px-8 py-4 rounded-full font-black text-lg hover:border-blue-500 hover:text-blue-600 transition-all">
                             How it Works
                         </button>
                     </div>
 
                     <div className="mt-16 flex flex-wrap justify-center gap-8 md:gap-16 text-slate-600 font-bold animate-fade-in-up" style={{animationDelay: '0.4s'}}>
                          <div className="flex items-center gap-2">
-                             <div className="p-1 rounded-full bg-green-100 text-green-600"><CheckCircleIcon className="w-4 h-4" /></div>
+                             <div className="p-1.5 rounded-full bg-blue-100 text-blue-600"><CheckCircleIcon className="w-5 h-5" /></div>
                              <span>Verified Premium Tasks</span>
                          </div>
                          <div className="flex items-center gap-2">
-                             <div className="p-1 rounded-full bg-green-100 text-green-600"><CheckCircleIcon className="w-4 h-4" /></div>
+                             <div className="p-1.5 rounded-full bg-amber-100 text-amber-600"><CheckCircleIcon className="w-5 h-5" /></div>
                              <span>Instant Local Payouts</span>
                          </div>
                          <div className="flex items-center gap-2">
-                             <div className="p-1 rounded-full bg-green-100 text-green-600"><CheckCircleIcon className="w-4 h-4" /></div>
+                             <div className="p-1.5 rounded-full bg-emerald-100 text-emerald-600"><CheckCircleIcon className="w-5 h-5" /></div>
                              <span>Bank-Grade Security</span>
                          </div>
                     </div>
@@ -347,8 +350,8 @@ export default function Landing() {
         <section className="py-24 px-6 bg-white relative">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-amber-600 font-bold tracking-widest uppercase text-sm mb-3">Professional Marketplace</h2>
-              <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">A Reliable Way To <br /> Monetize Your Time.</h3>
+              <h2 className="text-blue-600 font-bold tracking-widest uppercase text-sm mb-3">Professional Marketplace</h2>
+              <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight font-display">A Reliable Way To <br /> Monetize Your Time.</h3>
               <p className="text-slate-600 mt-4 max-w-2xl mx-auto text-lg">
                 We connect you with global research firms and digital advertisers to provide a steady stream of verified tasks.
               </p>
@@ -546,19 +549,19 @@ export default function Landing() {
 
         {/* --- CTA Section --- */}
             <section className="py-24 px-6">
-                <div className="max-w-5xl mx-auto text-center bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 p-12 md:p-24 rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(245,158,11,0.5)] relative overflow-hidden animate-float-slow">
+                <div className="max-w-5xl mx-auto text-center bg-gradient-to-br from-blue-600 via-indigo-700 to-blue-900 p-12 md:p-24 rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(30,58,138,0.5)] relative overflow-hidden animate-float-slow">
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay animate-pan-bg" style={{ backgroundSize: '200px' }} />
-                    <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
-                    <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-black/20 rounded-full blur-3xl pointer-events-none"></div>
                     
                     <div className="relative z-10">
                         <h2 className="font-display text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-white drop-shadow-md">
                             Ready to start earning?
                         </h2>
-                        <p className="text-xl text-amber-50 mb-10 max-w-2xl mx-auto font-medium drop-shadow-sm">
+                        <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto font-medium drop-shadow-sm">
                             Join thousands of users who are already making money daily. Withdraw easily via JazzCash, EasyPaisa, SadaPay, or Bank.
                         </p>
-                        <button onClick={() => onGetStarted('signup')} className="inline-block bg-white text-amber-600 px-10 py-5 rounded-full text-xl font-bold hover:bg-slate-50 transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_35px_-5px_rgba(0,0,0,0.3)]">
+                        <button onClick={() => onGetStarted('signup')} className="inline-block bg-gradient-to-r from-amber-400 to-orange-500 text-white px-10 py-5 rounded-full text-xl font-black hover:scale-105 active:scale-95 shadow-[0_10px_25px_-5px_rgba(245,158,11,0.4)] hover:shadow-[0_20px_35px_-5px_rgba(245,158,11,0.5)] transition-all duration-300">
                             Create Your Free Account
                         </button>
                     </div>
@@ -569,16 +572,16 @@ export default function Landing() {
             <footer className="py-12 px-6 border-t border-slate-200 bg-white">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
                             <SparklesIcon className="w-5 h-5 text-white" />
                         </div>
-                        <span className="font-display font-bold text-xl tracking-tight text-slate-900">TaskMint</span>
+                        <span className="font-display font-black text-xl tracking-tight text-slate-900">Task<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">Mint</span></span>
                     </div>
                     <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-500">
-                        <button onClick={() => navigate('/download')} className="text-amber-600 hover:text-amber-700 transition-colors">Download App</button>
-                        <button onClick={() => navigate('/privacy')} className="hover:text-amber-600 transition-colors">Privacy Policy</button>
-                        <button onClick={() => navigate('/terms')} className="hover:text-amber-600 transition-colors">Terms of Service</button>
-                        <button onClick={() => navigate('/contact')} className="hover:text-amber-600 transition-colors">Contact Support</button>
+                        <button onClick={() => navigate('/download')} className="text-blue-600 hover:text-blue-700 transition-colors">Download App</button>
+                        <button onClick={() => navigate('/privacy')} className="hover:text-blue-600 transition-colors">Privacy Policy</button>
+                        <button onClick={() => navigate('/terms')} className="hover:text-blue-600 transition-colors">Terms of Service</button>
+                        <button onClick={() => navigate('/contact')} className="hover:text-blue-600 transition-colors">Contact Support</button>
                     </div>
                     <p className="text-sm font-medium text-slate-400">© 2026 TaskMint. All rights reserved.</p>
                 </div>

@@ -126,9 +126,9 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
       </div>
 
       {/* Dynamic Status Card */}
-      <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full -ml-16 -mb-16 blur-2xl"></div>
+      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-blue-900/20 border border-white/5">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/10 rounded-full -ml-16 -mb-16 blur-2xl"></div>
         
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-4">
@@ -139,7 +139,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
           </div>
 
           <h3 className="text-xl font-black mb-1 tracking-tight">
-            Next Withdrawal Window: <span className="text-amber-400">{windowInfo.nextWindowText}</span>
+            Next Withdrawal Window: <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">{windowInfo.nextWindowText}</span>
           </h3>
           <p className="text-xs text-white/50 font-medium mb-8">
             {windowInfo.isOpen 
@@ -151,19 +151,19 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             <div className="flex justify-between items-end">
               <div className="flex flex-col">
                 <span className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Cycle Earnings</span>
-                <span className="text-2xl font-black tracking-tighter">Rs. {balance.toFixed(2)}</span>
+                <span className="text-3xl font-black tracking-tighter drop-shadow-md">Rs. {balance.toFixed(2)}</span>
               </div>
               <div className="text-right">
                 <span className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Target</span>
-                <span className="text-sm font-bold text-amber-400">Rs. {minWithdrawal}</span>
+                <span className="text-sm font-bold text-emerald-400">Rs. {minWithdrawal}</span>
               </div>
             </div>
             
-            <div className="h-3 bg-white/10 rounded-full overflow-hidden p-0.5">
+            <div className="h-3 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5">
               <motion.div 
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
-                className={`h-full rounded-full ${progress >= 100 ? 'bg-gradient-to-r from-emerald-400 to-teal-500' : 'bg-gradient-to-r from-amber-400 to-orange-500'}`}
+                className={`h-full rounded-full ${progress >= 100 ? 'bg-gradient-to-r from-emerald-400 to-cyan-500 shadow-[0_0_10px_rgba(52,211,153,0.5)]' : 'bg-gradient-to-r from-amber-400 to-orange-500'}`}
               />
             </div>
             <p className="text-[10px] font-bold text-white/40 text-center italic">
