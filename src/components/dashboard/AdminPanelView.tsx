@@ -15,7 +15,8 @@ import {
   Save,
   Ticket,
   Zap,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from 'lucide-react';
 import { 
   collection, 
@@ -27,7 +28,10 @@ import {
   getDoc,
   setDoc,
   orderBy,
-  limit
+  limit,
+  addDoc,
+  serverTimestamp,
+  increment
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -407,8 +411,226 @@ function PromotionOrdersView() {
   );
 }
 
+function SocialTasksAdminView() {
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    platform: 'YouTube',
+    reward: 10,
+    link: '',
+    instructions: '',
+    status: 'active'
+  });
+
+  useEffect(() => {
+    const qTasks = query(collection(db, 'social_tasks'), orderBy('timestamp', 'desc'));
+    const unsubscribeTasks = onSnapshot(qTasks, (snapshot) => {
+      setTasks(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const qSubs = query(collection(db, 'social_task_submissions'), where('status', '==', 'pending'), orderBy('timestamp', 'desc'));
+    const unsubscribeSubs = onSnapshot(qSubs, (snapshot) => {
+      setSubmissions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribeTasks();
+      unsubscribeSubs();
+    };
+  }, []);
+
+  const handleCreateTask = async () => {
+    if (!newTask.title || !newTask.link) return;
+    setCreating(true);
+    try {
+      await addDoc(collection(db, 'social_tasks'), {
+        ...newTask,
+        timestamp: serverTimestamp()
+      });
+      setNewTask({ title: '', platform: 'YouTube', reward: 10, link: '', instructions: '', status: 'active' });
+      alert("Task created!");
+    } catch (error) {
+      console.error("Error creating task:", error);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleApproveSubmission = async (sub: any) => {
+    try {
+      // 1. Update submission status
+      await updateDoc(doc(db, 'social_task_submissions', sub.id), { status: 'approved' });
+      
+      // 2. Update user balance (centralized logic would be better but this is admin panel)
+      // We'll use a custom function in Dashboard or just do it here for simplicity in admin panel
+      // Actually, we should trigger the balance update logic.
+      // For now, let's just update Firestore and RTDB directly like other admin actions.
+      
+      const userRef = doc(db, 'users', sub.userId);
+      await updateDoc(userRef, { balance: increment(sub.reward) });
+      
+      // Record in earning history
+      await addDoc(collection(db, 'earning_history'), {
+        userId: sub.userId,
+        amount: sub.reward,
+        source: 'social_task',
+        description: `Social Task Approved: ${sub.taskTitle || 'Task'}`,
+        timestamp: serverTimestamp()
+      });
+
+      alert("Submission approved and reward paid!");
+    } catch (error) {
+      console.error("Error approving submission:", error);
+    }
+  };
+
+  const handleRejectSubmission = async (id: string) => {
+    try {
+      await updateDoc(doc(db, 'social_task_submissions', id), { status: 'rejected' });
+      alert("Submission rejected.");
+    } catch (error) {
+      console.error("Error rejecting submission:", error);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Create Task */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
+        <h3 className="text-sm font-black text-slate-900 mb-4 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-orange-500" /> Create Social Task+
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Task Title</label>
+            <input 
+              type="text" 
+              value={newTask.title}
+              onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+              placeholder="e.g. Subscribe to our YouTube"
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Platform</label>
+            <select 
+              value={newTask.platform}
+              onChange={(e) => setNewTask({...newTask, platform: e.target.value})}
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+            >
+              <option value="YouTube">YouTube</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Facebook">Facebook</option>
+              <option value="TikTok">TikTok</option>
+              <option value="Telegram">Telegram</option>
+              <option value="Twitter">Twitter</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Reward (Rs)</label>
+            <input 
+              type="number" 
+              value={newTask.reward}
+              onChange={(e) => setNewTask({...newTask, reward: Number(e.target.value)})}
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Task Link</label>
+            <input 
+              type="text" 
+              value={newTask.link}
+              onChange={(e) => setNewTask({...newTask, link: e.target.value})}
+              placeholder="https://..."
+              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+            />
+          </div>
+        </div>
+        <button 
+          onClick={handleCreateTask}
+          disabled={creating}
+          className="w-full bg-orange-600 text-white py-3 rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+        >
+          {creating ? 'CREATING...' : 'CREATE SOCIAL TASK'}
+        </button>
+      </div>
+
+      {/* Pending Submissions */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+          <Clock className="w-4 h-4 text-amber-500" /> Pending Submissions ({submissions.length})
+        </h3>
+        {loading ? (
+          <p className="text-xs text-slate-400 text-center py-4">Loading submissions...</p>
+        ) : submissions.length > 0 ? (
+          submissions.map(sub => (
+            <div key={sub.id} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs font-black text-slate-900">{sub.userName}</p>
+                  <p className="text-[10px] text-slate-500">{sub.taskTitle}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-black text-emerald-600">Rs {sub.reward}</p>
+                  <p className="text-[8px] text-slate-400 uppercase font-bold">{new Date(sub.timestamp?.toDate()).toLocaleString()}</p>
+                </div>
+              </div>
+              <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Proof Provided:</p>
+                <p className="text-xs font-bold text-slate-700 break-all">{sub.proof}</p>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handleRejectSubmission(sub.id)}
+                  className="flex-1 bg-red-50 text-red-600 py-2.5 rounded-xl text-[10px] font-bold"
+                >
+                  Reject
+                </button>
+                <button 
+                  onClick={() => handleApproveSubmission(sub)}
+                  className="flex-1 bg-emerald-600 text-white py-2.5 rounded-xl text-[10px] font-bold"
+                >
+                  Approve & Pay
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-xs text-slate-400 text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">No pending submissions.</p>
+        )}
+      </div>
+
+      {/* Active Tasks List */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-black text-slate-900">Existing Tasks</h3>
+        {tasks.map(task => (
+          <div key={task.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-slate-900">{task.title}</p>
+              <p className="text-[10px] text-slate-500">{task.platform} • Rs {task.reward}</p>
+            </div>
+            <button 
+              onClick={async () => {
+                const newStatus = task.status === 'active' ? 'inactive' : 'active';
+                await updateDoc(doc(db, 'social_tasks', task.id), { status: newStatus });
+              }}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold ${task.status === 'active' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}
+            >
+              {task.status === 'active' ? 'Deactivate' : 'Activate'}
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPanelView({ onBack, onApproveActivation, onApprovePartner, onApproveDeposit, onApproveWithdrawal }: AdminPanelViewProps) {
-  const [activeTab, setActiveTab] = useState<'activations' | 'partners' | 'deposits' | 'withdrawals' | 'settings' | 'lotteries' | 'promotions'>('activations');
+  const [activeTab, setActiveTab] = useState<'activations' | 'partners' | 'deposits' | 'withdrawals' | 'settings' | 'lotteries' | 'promotions' | 'social_tasks'>('activations');
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -485,6 +707,7 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
           { id: 'partners', label: 'Partners', icon: <Crown className="w-3.5 h-3.5" /> },
           { id: 'deposits', label: 'Deposits', icon: <Wallet className="w-3.5 h-3.5" /> },
           { id: 'withdrawals', label: 'Withdrawals', icon: <ArrowLeft className="w-3.5 h-3.5 rotate-180" /> },
+          { id: 'social_tasks', label: 'Social Tasks', icon: <Sparkles className="w-3.5 h-3.5" /> },
           { id: 'promotions', label: 'Promotions', icon: <Zap className="w-3.5 h-3.5" /> },
           { id: 'lotteries', label: 'Lotteries', icon: <Ticket className="w-3.5 h-3.5" /> },
           { id: 'settings', label: 'Settings', icon: <Settings className="w-3.5 h-3.5" /> },
@@ -510,6 +733,8 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
         <LotteriesAdminView />
       ) : activeTab === 'promotions' ? (
         <PromotionOrdersView />
+      ) : activeTab === 'social_tasks' ? (
+        <SocialTasksAdminView />
       ) : (
         <>
           <div className="relative mb-6">

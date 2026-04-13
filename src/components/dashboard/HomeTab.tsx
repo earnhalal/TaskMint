@@ -48,6 +48,7 @@ interface HomeTabProps {
   onPartnerUpgradeClick: () => void;
   onActivateClick: () => void;
   onTaskWallClick: () => void;
+  onSocialTaskPlusClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
   appSettings: {
     activationFee: number;
@@ -119,6 +120,7 @@ export default function HomeTab({
   onPartnerUpgradeClick,
   onActivateClick,
   onTaskWallClick,
+  onSocialTaskPlusClick,
   onUpdateBalance,
   appSettings,
   appBonusClaimed,
@@ -158,11 +160,17 @@ export default function HomeTab({
       console.log("[BONUS_CLAIM] Starting APK Bonus Claim...");
       const userRef = doc(db, 'users', auth.currentUser.uid);
       
-      // 1. Update the flag in Firestore first
+      // 1. Update the flag in both databases first
       await setDoc(userRef, {
         appBonusClaimed: true
       }, { merge: true });
-      console.log("[BONUS_CLAIM] Flag updated in Firestore");
+      
+      const rtdbUserRef = ref(rtdb, `users/${auth.currentUser.uid}`);
+      await update(rtdbUserRef, {
+        appBonusClaimed: true
+      });
+      
+      console.log("[BONUS_CLAIM] Flag updated in both Firestore and RTDB");
       
       // 2. Use the centralized balance update logic which handles both DBs and commissions
       await onUpdateBalance(100, 'app_bonus', 'APK Install Welcome Bonus');
@@ -514,6 +522,14 @@ export default function HomeTab({
                   onClick={onInviteClick} 
                   colorClass="bg-gradient-to-br from-blue-400 to-blue-600 shadow-blue-500/40" 
                   delay={300}
+              />
+              <QuickActionBtn 
+                  icon={<SparklesIcon />} 
+                  label="Social Task+" 
+                  onClick={onSocialTaskPlusClick} 
+                  colorClass="bg-gradient-to-br from-orange-400 to-rose-600 shadow-orange-500/40" 
+                  delay={350}
+                  isHighlight={true}
               />
           </div>
       </div>

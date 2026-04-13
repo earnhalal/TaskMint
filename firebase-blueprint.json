@@ -211,14 +211,52 @@
       "properties": {
         "userId": { "type": "string" },
         "amount": { "type": "number" },
-        "source": { "type": "string", "enum": ["ad_watch", "task", "spin", "lottery", "referral", "app_bonus", "daily_reward", "commission"] },
+        "source": { "type": "string", "enum": ["ad_watch", "task", "spin", "lottery", "referral", "app_bonus", "daily_reward", "commission", "social_task"] },
         "description": { "type": "string" },
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "amount", "source", "timestamp"]
+    },
+    "SocialTask": {
+      "title": "Social Task",
+      "description": "Social media task for users to complete",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "platform": { "type": "string", "enum": ["YouTube", "Facebook", "Instagram", "TikTok", "Telegram", "Twitter"] },
+        "reward": { "type": "number" },
+        "link": { "type": "string" },
+        "instructions": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "platform", "reward", "link", "status"]
+    },
+    "SocialTaskSubmission": {
+      "title": "Social Task Submission",
+      "description": "User submission for a social task",
+      "type": "object",
+      "properties": {
+        "taskId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "proof": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "reward": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["taskId", "userId", "status", "timestamp"]
     }
   },
   "firestore": {
+    "/social_tasks/{taskId}": {
+      "schema": "SocialTask",
+      "description": "Available social media tasks"
+    },
+    "/social_task_submissions/{submissionId}": {
+      "schema": "SocialTaskSubmission",
+      "description": "User submissions for social tasks"
+    },
     "/earning_history/{transactionId}": {
       "schema": "EarningTransaction",
       "description": "History of all user earning activities"

@@ -49,6 +49,7 @@ import InviteTab from '../components/dashboard/InviteTab';
 import WithdrawTab from '../components/dashboard/WithdrawTab';
 import DepositTab from '../components/dashboard/DepositTab';
 import EarningHistoryView from '../components/dashboard/EarningHistoryView';
+import SocialTaskPlusView from '../components/dashboard/SocialTaskPlusView';
 import PremiumModal from '../components/dashboard/PremiumModal';
 import LeaderboardView from '../components/dashboard/LeaderboardView';
 import PinLockView from '../components/PinLockView';
@@ -97,6 +98,7 @@ export default function Dashboard() {
   const [isNotificationAnimating, setIsNotificationAnimating] = useState(true);
   const [partnerReferrals, setPartnerReferrals] = useState<any[]>([]);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
 
   const names = ['Ahmed', 'Fatima', 'Ali', 'Ayesha', 'Zainab', 'Bilal', 'Hassan', 'Sana', 'Usman', 'Maryam', 'Abdullah', 'Khadija'];
   const amounts = [100, 250, 500, 750, 1000, 1250, 2000];
@@ -136,6 +138,23 @@ export default function Dashboard() {
     document.title = 'Dashboard - TaskMint';
     if (!user) return;
 
+    // Seed Social Tasks if empty
+    const seedSocialTasks = async () => {
+      const q = query(collection(db, 'social_tasks'));
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) {
+        const initialTasks = [
+          { title: 'Subscribe TaskMint Channel', platform: 'YouTube', reward: 10, link: 'https://youtube.com', instructions: 'Subscribe to our official channel and submit your channel name.', status: 'active', timestamp: firestoreServerTimestamp() },
+          { title: 'Follow TaskMint Instagram', platform: 'Instagram', reward: 5, link: 'https://instagram.com', instructions: 'Follow us on Instagram and submit your username.', status: 'active', timestamp: firestoreServerTimestamp() },
+          { title: 'Join Telegram Group', platform: 'Telegram', reward: 15, link: 'https://telegram.org', instructions: 'Join our Telegram group for updates and submit your Telegram ID.', status: 'active', timestamp: firestoreServerTimestamp() }
+        ];
+        for (const task of initialTasks) {
+          await addDoc(collection(db, 'social_tasks'), task);
+        }
+      }
+    };
+    seedSocialTasks();
+
     // Listener for user profile
     const unsubscribe = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
       if (snapshot.exists()) {
@@ -157,6 +176,7 @@ export default function Dashboard() {
         setReferralCode(data.referralCode || '');
         setAppBonusClaimed(data.appBonusClaimed || false);
         setLastDailyCheckin(data.lastDailyCheckin || null);
+        setIsProfileLoaded(true);
 
         // Migration logic for old users
         if (!data.referralCode && data.username) {
@@ -178,14 +198,17 @@ export default function Dashboard() {
           const rtdbData = rtdbSnap.val();
           await setDoc(doc(db, 'users', user.uid), {
             ...rtdbData,
-            lockedBalance: 0,
-            appBonusClaimed: false,
-            lastDailyCheckin: null,
+            lockedBalance: rtdbData.lockedBalance || 0,
+            appBonusClaimed: rtdbData.appBonusClaimed || false,
+            lastDailyCheckin: rtdbData.lastDailyCheckin || null,
             pin: '',
             withdrawalAccounts: [],
             seenUpdates: []
           });
           console.log("[MIGRATION] Firestore document created from RTDB data");
+          setIsProfileLoaded(true);
+        } else {
+          setIsProfileLoaded(true);
         }
       }
     });
@@ -1003,6 +1026,8 @@ export default function Dashboard() {
                />;
       case 'earning_history':
         return <EarningHistoryView onBack={() => setActiveTab('profile')} />;
+      case 'social_task_plus':
+        return <SocialTaskPlusView onBack={() => setActiveTab('home')} userName={userName} />;
       case 'invite':
         return <InviteTab 
           status={status}
@@ -1132,6 +1157,7 @@ export default function Dashboard() {
           onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
           onActivateClick={() => setActiveTab('activation')}
           onTaskWallClick={() => setActiveTab('task_wall')}
+          onSocialTaskPlusClick={() => setActiveTab('social_task_plus')}
           onUpdateBalance={handleUpdateBalance}
           appSettings={appSettings}
           appBonusClaimed={appBonusClaimed}
@@ -1142,6 +1168,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans">
+      {!isProfileLoaded && (
+        <div className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mb-4"></div>
+          <p className="text-xs font-black text-slate-900 uppercase tracking-widest animate-pulse">Loading Profile...</p>
+        </div>
+      )}
       {/* Referral Update Notification */}
       <AnimatePresence>
         {showReferralUpdateNotify && (
