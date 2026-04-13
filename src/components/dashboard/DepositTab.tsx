@@ -21,6 +21,7 @@ interface DepositTabProps {
     activationFee: number;
     paymentNumber: string;
     paymentName: string;
+    referralBonusBasic?: number;
   };
 }
 
@@ -138,7 +139,7 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
           <div>
             <h3 className="text-lg font-bold text-amber-900">Why Activate?</h3>
             <p className="text-sm text-amber-800/80 leading-relaxed">
-              Activation unlocks all earning features including <span className="font-bold">Spin Wheel, Task Wall, and Surveys</span>. Plus, you get your unique referral link to earn Rs 40 per friend!
+              Activation unlocks all earning features including <span className="font-bold">Spin Wheel, Task Wall, and Surveys</span>. Plus, you get your unique referral link to earn Rs {appSettings.referralBonusBasic || 125} per friend!
             </p>
           </div>
         </div>

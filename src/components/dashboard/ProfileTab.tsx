@@ -22,7 +22,9 @@ export default function ProfileTab({
   onManageWalletClick, 
   onPartnerUpgradeClick, 
   onAdminPanelClick,
-  onEarningHistoryClick
+  onEarningHistoryClick,
+  onActivateClick,
+  appSettings
 }: { 
   name: string, 
   email: string, 
@@ -39,7 +41,9 @@ export default function ProfileTab({
   onManageWalletClick?: () => void, 
   onPartnerUpgradeClick?: () => void, 
   onAdminPanelClick?: () => void,
-  onEarningHistoryClick?: () => void
+  onEarningHistoryClick?: () => void,
+  onActivateClick?: () => void,
+  appSettings?: any
 }) {
   const { user } = useAuth();
   const [avatar, setAvatar] = React.useState<string | null>(null);
@@ -128,6 +132,30 @@ export default function ProfileTab({
       className="pb-24"
     >
       <input type="file" accept="image/*" ref={fileInputRef} onChange={handleAvatarChange} className="hidden" />
+      
+      {/* Activation Status Indicator - Moved from Invite Tab */}
+      {status.toLowerCase() !== 'active' && (
+        <div className="mb-6 p-4 rounded-2xl flex items-center justify-between border-2 bg-red-50 border-red-100 text-red-700">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-red-100">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Account Status</p>
+              <p className="text-sm font-bold">Inactive</p>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <button 
+              onClick={onActivateClick}
+              className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-red-600/20 active:scale-95 transition-all"
+            >
+              Pay Rs {appSettings?.activationFee || 280} to Start
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Profile Header */}
       <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">

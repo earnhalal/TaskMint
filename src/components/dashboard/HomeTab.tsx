@@ -571,45 +571,40 @@ export default function HomeTab({
       {/* Quick Promotions Section */}
       <QuickPromotions balance={balance} onUpdateBalance={onUpdateBalance} />
 
-      {/* Top Earners Section */}
+      {/* Invite Promotional Banner */}
       <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-          <div className="flex items-center justify-between mb-4 px-1">
-              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-amber-500" /> 
-                  Top Earners
-              </h2>
+          <div 
+            onClick={onInviteClick}
+            className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-[24px] p-6 text-white shadow-xl shadow-indigo-500/30 relative overflow-hidden cursor-pointer group transform transition-transform hover:scale-[1.02]"
+          >
+            {/* Background elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-400/20 rounded-full -ml-8 -mb-8 blur-xl"></div>
+            
+            <div className="relative z-10 flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+                  <InviteIcon className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xs font-black uppercase tracking-widest text-blue-100">Mega Referral Bonus</span>
+              </div>
+              
+              <div>
+                <h3 className="text-2xl font-black leading-tight mb-1">
+                  Invite & Earn <br/>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-amber-400 text-4xl drop-shadow-sm">Rs 250</span>
+                </h3>
+                <p className="text-sm text-blue-100 font-medium leading-relaxed">
+                  Get <strong className="text-white">Rs 125</strong> for every friend you invite. Just 2 friends = Rs 250 instantly!
+                </p>
+              </div>
+
               <button 
-                onClick={onLeaderboardClick}
-                className="text-[10px] font-bold text-amber-600 hover:text-amber-700"
+                className="mt-2 bg-white text-indigo-600 font-black py-3 px-6 rounded-xl shadow-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-2 active:scale-95 group-hover:shadow-xl"
               >
-                View All
+                Invite Friends Now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
-          </div>
-          
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-              {topEarners.slice(0, 3).map((user, i) => (
-                  <div 
-                    key={user.id || `top-${i}`} 
-                    className={`flex items-center justify-between p-4 ${i !== 2 ? 'border-b border-slate-50' : ''}`}
-                  >
-                      <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${
-                              i === 0 ? 'bg-yellow-100 text-yellow-600' : 
-                              i === 1 ? 'bg-slate-100 text-slate-600' : 
-                              'bg-amber-50 text-amber-700'
-                          }`}>
-                              {i + 1}
-                          </div>
-                          <div>
-                              <p className="text-xs font-bold text-slate-900">{user.username || 'User'}</p>
-                              <p className="text-[10px] text-slate-500">Active Earner</p>
-                          </div>
-                      </div>
-                      <div className="text-right">
-                          <p className="text-xs font-black text-emerald-600">{user.balance?.toLocaleString() || 0} PKR</p>
-                      </div>
-                  </div>
-              ))}
+            </div>
           </div>
       </div>
 

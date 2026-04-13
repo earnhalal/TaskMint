@@ -128,13 +128,13 @@ export default function Dashboard() {
   const [topEarners, setTopEarners] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [appSettings, setAppSettings] = useState({
-    activationFee: 100,
+    activationFee: 280,
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
-    referralBonusBasic: 50,
-    referralBonusPartner: 70,
-    indirectReferralBonus: 10,
+    referralBonusBasic: 125,
+    referralBonusPartner: 150,
+    indirectReferralBonus: 20,
     offerExpiryTime: null as any
   });
 
@@ -996,15 +996,15 @@ export default function Dashboard() {
           const referrerStatsRef = ref(rtdb, `users/${l1Uid}`);
           await update(referrerStatsRef, {
             activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(70),
-            balance: rtdbIncrement(70)
+            totalCommission: rtdbIncrement(appSettings.referralBonusBasic),
+            balance: rtdbIncrement(appSettings.referralBonusBasic)
           });
 
           // Update balance in Firestore
           await updateDoc(doc(db, 'users', l1Uid), {
-            balance: increment(70)
+            balance: increment(appSettings.referralBonusBasic)
           });
-          console.log(`[REFERRAL_LOG] Commission of 70 added to referrer ${l1Uid} in Firestore and RTDB`);
+          console.log(`[REFERRAL_LOG] Commission of ${appSettings.referralBonusBasic} added to referrer ${l1Uid} in Firestore and RTDB`);
         }
       }
       
@@ -1100,6 +1100,8 @@ export default function Dashboard() {
                  onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
                  onAdminPanelClick={() => setActiveTab('admin')}
                  onEarningHistoryClick={() => setActiveTab('earning_history')}
+                 onActivateClick={() => setActiveTab('activation')}
+                 appSettings={activeAppSettings}
                />;
       case 'admin':
         return <AdminPanelView 
@@ -1144,6 +1146,7 @@ export default function Dashboard() {
           referralCode={referralCode || userName || ''}
           onActivateClick={() => setActiveTab('activation')}
           referrals={partnerReferrals}
+          appSettings={activeAppSettings}
         />;
       case 'activation':
         return <ActivationTab 

@@ -94,7 +94,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
 
       // Redirect to WhatsApp
       const whatsappNumber = "923338739929";
-      const message = `🚀 TaskMint Official 🚀\nHi Admin! 👋\nMera naam ${userName} hai. ✨\nMaine ${appSettings.activationFee} PKR pay kar diye hain. ✅\nYe raha mera payment screenshot. 📸\nPlease mera account active kar dein! 🙏🔥`;
+      const message = `🌟 *TASKMINT OFFICIAL* 🌟\n\n*Hi Admin!* 👋\nMera naam *${userName || 'User'}* hai. ✨\n\nMaine *Rs. ${appSettings.activationFee}* Joining Fee pay kar di hai. ✅\nYe raha mera *Payment Screenshot* as a proof. 📸\n\n*Please mera account jaldi active kar dein!* 🙏🔥\n\n_Sent via TaskMint App_`;
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
 

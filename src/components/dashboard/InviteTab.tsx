@@ -12,9 +12,10 @@ interface InviteTabProps {
   referralCode: string;
   onActivateClick: () => void;
   referrals: any[];
+  appSettings?: any;
 }
 
-export default function InviteTab({ status, referralStats, referralCode, onActivateClick, referrals }: InviteTabProps) {
+export default function InviteTab({ status, referralStats, referralCode, onActivateClick, referrals, appSettings }: InviteTabProps) {
   const [copied, setCopied] = useState(false);
   const referralLink = `https://taskmint.click/ref/${encodeURIComponent(referralCode)}`;
 
@@ -73,167 +74,189 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       animate={{ opacity: 1, y: 0 }}
       className="pb-24"
     >
-      {/* Activation Status Indicator */}
-      {status !== 'Active' && (
-        <div className="mb-6 p-4 rounded-2xl flex items-center justify-between border-2 bg-red-50 border-red-100 text-red-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-red-100">
-              <AlertCircle className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Account Status</p>
-              <p className="text-sm font-bold">Inactive</p>
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <button 
-              onClick={onActivateClick}
-              className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-red-600/20 active:scale-95 transition-all"
-            >
-              Pay Rs 100 to Start
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Top Card: Earn Rs 50 per Friend! */}
-      <div className="bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 rounded-[2rem] p-8 text-center shadow-xl mb-6 relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.3),transparent_50%)]"></div>
-        <motion.div 
-          animate={{ rotate: [0, 5, -5, 0] }}
-          transition={{ repeat: Infinity, duration: 4 }}
-          className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"
-        ></motion.div>
+      {/* Top Card: Premium Design */}
+      <div className="bg-[#0F172A] rounded-[2.5rem] p-8 text-center shadow-2xl mb-8 relative overflow-hidden group border border-slate-800">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.15),transparent_60%)]"></div>
+        <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl"></div>
         
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-1.5 bg-white/20 text-white px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase mb-4 border border-white/30 backdrop-blur-sm">
-            <Star className="w-3 h-3 fill-white" />
-            Limited Time Offer
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-500 px-4 py-1.5 rounded-full text-[10px] font-black tracking-[0.2em] uppercase mb-6 border border-amber-500/20 backdrop-blur-md">
+            <Trophy className="w-3.5 h-3.5 fill-amber-500/20" />
+            Mega Referral Bonus
           </div>
-          <h1 className="text-3xl font-black text-white mb-2 leading-tight drop-shadow-md">
-            Earn Rs 50<br/>
-            <span className="text-white/90 text-2xl">per Friend!</span>
+          
+          <h1 className="text-4xl font-black text-white mb-4 leading-tight tracking-tighter">
+            Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">Rs {appSettings?.referralBonusBasic || 125}</span><br/>
+            <span className="text-white/60 text-xl font-bold tracking-normal">Directly per Friend!</span>
           </h1>
-          <p className="text-xs text-white/80 font-medium leading-relaxed max-w-[280px] mx-auto">
-            Invite friends to join TaskMint. When they activate their account, you get <span className="font-bold text-white underline">Rs 50</span> instantly!
+          
+          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10 max-w-[300px] mx-auto mb-2">
+            <p className="text-xs text-slate-300 font-medium leading-relaxed">
+              Invite 2 friends and get <span className="text-amber-400 font-bold">Rs 250</span> instantly! Unlimited earning potential.
+            </p>
+          </div>
+          
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-4">
+            Joining Fee: Rs {appSettings?.activationFee || 280}
           </p>
         </div>
       </div>
 
-      {/* My Team Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      {/* My Team Stats - Enhanced */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { icon: <Users className="w-4 h-4 text-blue-500" />, label: 'Total Invited', value: referralStats.totalInvited },
-          { icon: <CheckCircle className="w-4 h-4 text-emerald-500" />, label: 'Active Members', value: referralStats.activeMembers },
-          { icon: <Wallet className="w-4 h-4 text-amber-500" />, label: 'Team Comm.', value: `Rs ${referralStats.totalCommission}` },
+          { icon: <Users className="w-5 h-5 text-blue-500" />, label: 'Invited', value: referralStats.totalInvited, color: 'blue' },
+          { icon: <CheckCircle className="w-5 h-5 text-emerald-500" />, label: 'Active', value: referralStats.activeMembers, color: 'emerald' },
+          { icon: <Wallet className="w-5 h-5 text-amber-500" />, label: 'Earnings', value: `Rs ${referralStats.totalCommission}`, color: 'amber' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-2xl p-3 shadow-sm border border-slate-100 flex flex-col items-center text-center">
-            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center mb-2">
+          <div key={i} className="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100 flex flex-col items-center text-center group hover:border-slate-200 transition-all">
+            <div className={`w-10 h-10 rounded-2xl bg-${stat.color}-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
               {stat.icon}
             </div>
-            <span className="text-sm font-bold text-slate-900">{stat.value}</span>
-            <span className="text-[8px] font-bold text-slate-500 tracking-wider uppercase mt-1 leading-tight">{stat.label}</span>
+            <span className="text-lg font-black text-slate-900">{stat.value}</span>
+            <span className="text-[9px] font-black text-slate-400 tracking-widest uppercase mt-1">{stat.label}</span>
           </div>
         ))}
       </div>
 
-      {/* Referral Link Section */}
-      <div className="bg-white rounded-3xl p-5 shadow-sm border-2 border-yellow-100 relative overflow-hidden mb-6">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-yellow-50 text-yellow-600 text-[9px] font-bold tracking-widest uppercase px-4 py-1 rounded-b-lg">
-          Your Referral Link
+      {/* Referral Link Section - Enhanced */}
+      <div className="bg-white rounded-[2.5rem] p-6 shadow-xl border border-slate-100 relative overflow-hidden mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">Your Referral Link</h3>
+          <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold">Active</div>
         </div>
         
-        <div className="mt-6 flex gap-2 mb-4">
-          <div className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-[10px] text-slate-600 font-mono truncate">
+        <div className="flex gap-2 mb-6">
+          <div className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 text-xs text-slate-600 font-mono truncate select-all">
             {referralLink}
           </div>
           <button 
             onClick={handleCopy}
-            className="bg-[#0F172A] text-white px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-slate-800 transition-colors shrink-0"
+            className="bg-[#0F172A] text-white px-6 py-4 rounded-2xl text-xs font-bold flex items-center gap-2 hover:bg-slate-800 active:scale-95 transition-all shrink-0 shadow-lg shadow-slate-900/20"
           >
             {copied ? <CheckCircle className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
             <span>{copied ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
 
-        <div className="flex justify-center gap-4">
-          <button 
-            onClick={handleShareWhatsApp}
-            className="w-12 h-12 rounded-full bg-[#25D366] flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg shadow-[#25D366]/20"
-          >
-            <Phone className="w-6 h-6" />
-          </button>
-          <button className="w-12 h-12 rounded-full bg-[#1877F2] flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg shadow-[#1877F2]/20">
-            <Users className="w-6 h-6" />
-          </button>
-          <button className="w-12 h-12 rounded-full bg-[#00B2FF] flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg shadow-[#00B2FF]/20">
-            <MessageCircle className="w-6 h-6" />
-          </button>
-          <button 
-            onClick={handleShare}
-            className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:scale-110 transition-transform shadow-lg shadow-slate-200/50"
-          >
-            <Share2 className="w-6 h-6" />
-          </button>
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { icon: <Phone className="w-5 h-5" />, color: 'bg-[#25D366]', onClick: handleShareWhatsApp, label: 'WhatsApp' },
+            { icon: <Users className="w-5 h-5" />, color: 'bg-[#1877F2]', label: 'Facebook' },
+            { icon: <MessageCircle className="w-5 h-5" />, color: 'bg-[#00B2FF]', label: 'Telegram' },
+            { icon: <Share2 className="w-5 h-5" />, color: 'bg-slate-900', onClick: handleShare, label: 'More' }
+          ].map((btn, i) => (
+            <div key={i} className="flex flex-col items-center gap-2">
+              <button 
+                onClick={btn.onClick}
+                className={`w-12 h-12 rounded-2xl ${btn.color} flex items-center justify-center text-white hover:scale-110 active:scale-90 transition-all shadow-lg shadow-black/5`}
+              >
+                {btn.icon}
+              </button>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{btn.label}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Commission Info */}
-      <div className="bg-slate-900 rounded-3xl p-6 text-white mb-6">
-        <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-yellow-400" />
-          Commission Structure
-        </h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10">
-            <div>
-              <p className="text-xs font-bold">Direct Referral (Level 1)</p>
-              <p className="text-[10px] text-white/60">When your friend joins & activates</p>
-            </div>
-            <p className="text-lg font-black text-yellow-400">Rs 40</p>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10">
-            <div>
-              <p className="text-xs font-bold">Indirect Referral (Level 2)</p>
-              <p className="text-[10px] text-white/60">When their friend activates</p>
-            </div>
-            <p className="text-lg font-black text-emerald-400">Rs 10</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Referral History Table */}
-      <div className="mt-8">
-        <h3 className="text-sm font-bold text-slate-900 mb-4">My Referrals History</h3>
+      {/* Commission Info - Enhanced */}
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2.5rem] p-8 text-white mb-8 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl"></div>
         
-        <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
+        <h3 className="text-base font-black mb-6 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center">
+            <Trophy className="w-4 h-4 text-amber-500" />
+          </div>
+          Earning Structure
+        </h3>
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-5 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm group hover:bg-white/10 transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                <UserPlus className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-black tracking-tight">Direct Referral</p>
+                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Level 1 Bonus</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-black text-amber-400">Rs {appSettings?.referralBonusBasic || 125}</p>
+              <p className="text-[9px] text-emerald-400 font-black uppercase tracking-tighter">Instant Credit</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between p-5 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm group hover:bg-white/10 transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                <Gift className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-black tracking-tight">Indirect Referral</p>
+                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Level 2 Bonus</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-black text-emerald-400">Rs {appSettings?.indirectReferralBonus || 20}</p>
+              <p className="text-[9px] text-emerald-500/60 font-black uppercase tracking-tighter">Passive Income</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Referral History Table - Enhanced */}
+      <div className="mt-10">
+        <div className="flex items-center justify-between mb-6 px-2">
+          <h3 className="text-base font-black text-slate-900 tracking-tight">Referral History</h3>
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">
+            {referrals.length} Total
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-xl">
           {referrals.length > 0 ? (
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 uppercase font-bold">
-                <tr>
-                  <th className="px-4 py-3">User Name</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {referrals.map(r => (
-                  <tr key={r.id}>
-                    <td className="px-4 py-3 font-bold text-slate-900">{r.name}</td>
-                    <td className="px-4 py-3">
-                      <span className={`font-bold px-2 py-1 rounded-lg ${r.status === 'paid' ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
-                        {r.status === 'paid' ? 'Earned' : 'Pending'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">
-                      {r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'N/A'}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/50 text-slate-400 uppercase font-black tracking-widest border-b border-slate-100">
+                  <tr>
+                    <th className="px-6 py-4">User</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4 text-right">Date</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {referrals.map(r => (
+                    <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-black text-[10px]">
+                            {r.name.substring(0, 1).toUpperCase()}
+                          </div>
+                          <span className="font-black text-slate-900">{r.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className={`font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full ${r.status === 'paid' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'}`}>
+                          {r.status === 'paid' ? 'Earned' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-right text-slate-400 font-bold">
+                        {r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'N/A'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <div className="p-8 text-center text-slate-400 font-bold">No referrals yet</div>
+            <div className="p-12 text-center">
+              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-slate-200" />
+              </div>
+              <p className="text-sm text-slate-400 font-black uppercase tracking-widest">No referrals yet</p>
+              <p className="text-[10px] text-slate-300 font-bold mt-1">Start sharing your link to earn!</p>
+            </div>
           )}
         </div>
       </div>
