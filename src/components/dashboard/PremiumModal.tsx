@@ -132,23 +132,23 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       className="w-full h-full pb-24 flex flex-col bg-slate-50/50"
     >
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#060D2D] via-[#151E32] to-[#060D2D] text-center py-12 px-6 relative rounded-b-[2.5rem] shadow-xl z-10">
+      <div className="bg-gradient-to-br from-[#060D2D] via-[#151E32] to-[#060D2D] text-center py-8 px-6 relative rounded-b-[2rem] shadow-xl z-10">
         <div className="relative z-10">
-          <div className="w-20 h-20 bg-gradient-to-tr from-amber-400 to-yellow-600 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-[0_0_40px_rgba(245,158,11,0.4)] rotate-3">
-            <Crown className="w-10 h-10 text-white" />
+          <div className="w-14 h-14 bg-gradient-to-tr from-amber-400 to-yellow-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.3)] rotate-3">
+            <Crown className="w-7 h-7 text-white" />
           </div>
-          <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Partner Programs</h2>
-          <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">Upgrade your account to unlock higher referral bonuses, team commissions, and VIP perks.</p>
+          <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Partner Programs</h2>
+          <p className="text-slate-400 text-xs max-w-xs mx-auto leading-relaxed">Upgrade your account to unlock higher referral bonuses, team commissions, and VIP perks.</p>
           
-          <div className="mt-8 inline-flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 shadow-inner">
-            <span className="text-xs text-slate-300 font-bold uppercase tracking-widest">Your Balance:</span>
-            <span className="text-lg font-black text-emerald-400">Rs {balance.toFixed(2)}</span>
+          <div className="mt-6 inline-flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-inner">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Balance:</span>
+            <span className="text-base font-black text-emerald-400">Rs {balance.toFixed(2)}</span>
           </div>
         </div>
         
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-blue-500/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-500/10 rounded-full -ml-32 -mb-32 blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/10 rounded-full -ml-24 -mb-24 blur-3xl"></div>
       </div>
 
       {/* Plans Grid */}

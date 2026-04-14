@@ -365,19 +365,28 @@ export default function Landing() {
         </section>
 
         {/* --- Partners Section --- */}
-        <section className="py-12 bg-white">
+        <section className="py-12 bg-white border-t border-slate-50">
           <div className="max-w-7xl mx-auto px-6">
-            <p className="text-center text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-8">Official Offerwall Partners</p>
-            <div className="flex flex-wrap justify-center items-center gap-12 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+            <p className="text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mb-10">Official Global Partners</p>
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 hover:opacity-100 transition-all duration-500 grayscale hover:grayscale-0">
               <div className="flex items-center gap-3 group cursor-default">
-                <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-lg shadow-indigo-200">CPX</div>
-                <span className="text-xl font-black text-slate-800 tracking-tighter">CPX Research</span>
+                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xs shadow-lg shadow-indigo-200">CPX</div>
+                <span className="text-lg font-black text-slate-800 tracking-tighter">CPX Research</span>
               </div>
-              {/* Add more real partners if any, or just keep it clean */}
-              <div className="h-8 w-px bg-slate-200 hidden md:block"></div>
+              <div className="flex items-center gap-3 group cursor-default">
+                <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-lg shadow-blue-200">WND</div>
+                <span className="text-lg font-black text-slate-800 tracking-tighter">Wannads</span>
+              </div>
+              <div className="flex items-center gap-3 group cursor-default">
+                <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-lg shadow-slate-300">
+                  <PlayCircleIcon className="w-6 h-6" />
+                </div>
+                <span className="text-lg font-black text-slate-800 tracking-tighter">Unity Ads</span>
+              </div>
+              <div className="h-8 w-px bg-slate-200 hidden lg:block"></div>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-6 h-6 text-emerald-500" />
-                <span className="text-sm font-bold text-slate-600">Verified Marketplace</span>
+                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Verified Platform</span>
               </div>
             </div>
           </div>
@@ -584,6 +593,59 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* --- Blog Section --- */}
+        <section className="py-24 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
+              <div className="text-left">
+                <h2 className="text-blue-600 font-black tracking-widest uppercase text-[10px] mb-3">Earning Guides</h2>
+                <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight font-display">Latest Online Earning <br/> Strategies & Tips.</h3>
+              </div>
+              <button onClick={() => navigate('/blog')} className="flex items-center gap-2 text-blue-600 font-black text-sm uppercase tracking-widest hover:gap-3 transition-all">
+                View All Posts <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "How to Earn Money Watching Ads",
+                  slug: "earn-money-watching-ads",
+                  category: "Online Work",
+                  image: "https://picsum.photos/seed/ads/600/400"
+                },
+                {
+                  title: "Maximize Offer Wall Earnings",
+                  slug: "maximize-offer-wall-earnings",
+                  category: "Tutorial",
+                  image: "https://picsum.photos/seed/offerwall/600/400"
+                },
+                {
+                  title: "TaskMint Online Lottery Guide",
+                  slug: "taskmint-online-lottery-guide",
+                  category: "Lottery",
+                  image: "https://picsum.photos/seed/lottery/600/400"
+                }
+              ].map((post, i) => (
+                <div key={i} className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group cursor-pointer" onClick={() => navigate(`/blog/${post.slug}`)}>
+                  <div className="h-48 overflow-hidden relative">
+                    <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                    <div className="absolute top-4 left-4 bg-blue-600 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                      {post.category}
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h4 className="text-lg font-black text-slate-900 mb-4 group-hover:text-blue-600 transition-colors leading-tight">{post.title}</h4>
+                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">
+                      Read Guide <ArrowRight className="w-3 h-3" />
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* --- CTA Section --- */}
             <section className="py-24 px-6">
                 <div className="max-w-5xl mx-auto text-center bg-gradient-to-br from-blue-600 via-indigo-700 to-blue-900 p-12 md:p-24 rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(30,58,138,0.5)] relative overflow-hidden animate-float-slow">
@@ -606,21 +668,44 @@ export default function Landing() {
             </section>
 
             {/* --- Footer --- */}
-            <footer className="py-12 px-6 border-t border-slate-200 bg-white">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
-                            <SparklesIcon className="w-5 h-5 text-white" />
+            <footer className="py-16 px-6 border-t border-slate-100 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                        <div className="md:col-span-2">
+                            <div className="flex items-center gap-2 mb-6">
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+                                    <SparklesIcon className="w-6 h-6 text-white" />
+                                </div>
+                                <span className="font-display font-black text-2xl tracking-tight text-slate-900">Task<span className="text-amber-500">Mint</span></span>
+                            </div>
+                            <p className="text-slate-500 font-medium max-w-sm leading-relaxed">
+                                Pakistan's #1 premium platform for <strong>online earning</strong> and <strong>online work from home</strong>. Join 50,000+ users earning daily.
+                            </p>
                         </div>
-                        <span className="font-display font-black text-xl tracking-tight text-slate-900">Task<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">Mint</span></span>
+                        <div>
+                            <h4 className="text-slate-900 font-black uppercase tracking-widest text-xs mb-6">Important Links</h4>
+                            <ul className="space-y-4 text-sm font-bold text-slate-500">
+                                <li><button onClick={() => navigate('/blog')} className="hover:text-blue-600 transition-colors">Earning Blog</button></li>
+                                <li><button onClick={() => navigate('/promotion')} className="hover:text-blue-600 transition-colors">Promotion Program</button></li>
+                                <li><button onClick={() => navigate('/download')} className="hover:text-blue-600 transition-colors">Download App</button></li>
+                                <li><button onClick={() => navigate('/contact')} className="hover:text-blue-600 transition-colors">Support Center</button></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="text-slate-900 font-black uppercase tracking-widest text-xs mb-6">Legal & Policy</h4>
+                            <ul className="space-y-4 text-sm font-bold text-slate-500">
+                                <li><button onClick={() => navigate('/privacy')} className="hover:text-blue-600 transition-colors">Privacy Policy</button></li>
+                                <li><button onClick={() => navigate('/terms')} className="hover:text-blue-600 transition-colors">Terms of Service</button></li>
+                                <li><button onClick={() => navigate('/disclaimer')} className="hover:text-blue-600 transition-colors">Earnings Disclaimer</button></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-500">
-                        <button onClick={() => navigate('/download')} className="text-blue-600 hover:text-blue-700 transition-colors">Download App</button>
-                        <button onClick={() => navigate('/privacy')} className="hover:text-blue-600 transition-colors">Privacy Policy</button>
-                        <button onClick={() => navigate('/terms')} className="hover:text-blue-600 transition-colors">Terms of Service</button>
-                        <button onClick={() => navigate('/contact')} className="hover:text-blue-600 transition-colors">Contact Support</button>
+                    <div className="pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">© 2026 TaskMint. All rights reserved.</p>
+                        <div className="flex gap-6">
+                            {/* Social icons could go here */}
+                        </div>
                     </div>
-                    <p className="text-sm font-medium text-slate-400">© 2026 TaskMint. All rights reserved.</p>
                 </div>
             </footer>
         </main>

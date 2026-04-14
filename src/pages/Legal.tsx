@@ -84,6 +84,63 @@ export default function Legal() {
       );
     }
 
+    if (path === '/disclaimer') {
+      return (
+        <div className="prose prose-slate max-w-none">
+          <h1 className="text-4xl font-display font-bold mb-8">Disclaimer</h1>
+          <p className="text-lg text-slate-600 mb-6">Last updated: April 14, 2026</p>
+          
+          <p className="text-slate-600 mb-4">The information provided by TaskMint ("we", "us", or "our") on our website and mobile application is for general informational purposes only. All information on the site and our mobile application is provided in good faith, however we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site or our mobile application.</p>
+          
+          <h2 className="text-2xl font-bold mt-8 mb-4">1. Earnings Disclaimer</h2>
+          <p className="text-slate-600 mb-4">Any earnings or income statements, or earnings or income examples, are only estimates of what we think you could earn. There is no assurance you'll do as well. If you rely upon our figures, you must accept the risk of not doing as well. Your results may vary, and will be based on your individual capacity, experience, expertise, and level of desire.</p>
+          
+          <h2 className="text-2xl font-bold mt-8 mb-4">2. External Links Disclaimer</h2>
+          <p className="text-slate-600 mb-4">The site and our mobile application may contain (or you may be sent through the site or our mobile application) links to other websites or content belonging to or originating from third parties or links to websites and features in banners or other advertising. Such external links are not investigated, monitored, or checked for accuracy, adequacy, validity, reliability, availability or completeness by us.</p>
+          
+          <h2 className="text-2xl font-bold mt-8 mb-4">3. Professional Disclaimer</h2>
+          <p className="text-slate-600 mb-4">The site cannot and does not contain professional financial advice. The financial information is provided for general informational and educational purposes only and is not a substitute for professional advice. Accordingly, before taking any actions based upon such information, we encourage you to consult with the appropriate professionals.</p>
+        </div>
+      );
+    }
+
+    if (path === '/promotion') {
+      return (
+        <div className="prose prose-slate max-w-none">
+          <h1 className="text-4xl font-display font-bold mb-8">Promotion & Affiliate Program</h1>
+          <p className="text-lg text-slate-600 mb-6">Earn more by sharing TaskMint with your network.</p>
+          
+          <div className="bg-blue-50 border border-blue-100 rounded-3xl p-8 mb-10">
+            <h2 className="text-2xl font-bold text-blue-900 mb-4 mt-0">Why Promote TaskMint?</h2>
+            <p className="text-blue-800 font-medium mb-4">TaskMint is Pakistan's most trusted online earning platform. By promoting us, you are helping others find a legitimate way to earn money online.</p>
+            <ul className="list-disc pl-6 text-blue-800 font-medium space-y-2">
+              <li>Earn Rs. 125 for every successful referral.</li>
+              <li>Get 10% commission on your team's earnings (Partner levels).</li>
+              <li>Access to exclusive promotional materials and banners.</li>
+              <li>Real-time tracking of your referrals and commissions.</li>
+            </ul>
+          </div>
+
+          <h2 className="text-2xl font-bold mt-8 mb-4">How to Get Started</h2>
+          <ol className="list-decimal pl-6 text-slate-600 mb-4 space-y-4">
+            <li><strong>Sign Up:</strong> Create a free account on TaskMint.</li>
+            <li><strong>Get Your Link:</strong> Go to the "Partner" or "Profile" section to find your unique referral link.</li>
+            <li><strong>Share:</strong> Share your link on WhatsApp, Facebook, YouTube, or with your friends and family.</li>
+            <li><strong>Earn:</strong> When someone joins using your link and activates their account, you get rewarded instantly.</li>
+          </ol>
+
+          <h2 className="text-2xl font-bold mt-8 mb-4">Promotion Guidelines</h2>
+          <p className="text-slate-600 mb-4">To maintain the integrity of our platform, we ask all promoters to follow these rules:</p>
+          <ul className="list-disc pl-6 text-slate-600 mb-4 space-y-2">
+            <li>Do not make false promises or guarantee specific income amounts.</li>
+            <li>Do not use spamming techniques on social media or email.</li>
+            <li>Do not create fake accounts to refer yourself.</li>
+            <li>Always disclose that you are an affiliate of TaskMint.</li>
+          </ul>
+        </div>
+      );
+    }
+
     if (path === '/contact') {
       return (
         <div className="max-w-4xl mx-auto">

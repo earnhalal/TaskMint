@@ -6,6 +6,8 @@ import Auth from './pages/Auth';
 import Legal from './pages/Legal';
 import Dashboard from './pages/Dashboard';
 import Download from './pages/Download';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import Loader from './components/Loader';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -81,7 +83,11 @@ function AppContent() {
         <Route path="/download" element={<Download />} />
         <Route path="/privacy" element={<Legal />} />
         <Route path="/terms" element={<Legal />} />
+        <Route path="/disclaimer" element={<Legal />} />
+        <Route path="/promotion" element={<Legal />} />
         <Route path="/contact" element={<Legal />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
       </Routes>
     </>
   );
