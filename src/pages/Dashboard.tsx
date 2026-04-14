@@ -797,7 +797,7 @@ export default function Dashboard() {
         
         // Update referral status in RTDB if referred
         if (userData.referredBy) {
-          const sanitizedRef = userData.referredBy.toLowerCase();
+          const sanitizedRef = userData.referredBy.trim().toLowerCase();
           let l1Uid = null;
           const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
           const querySnapshot = await getDocs(q);
@@ -1028,7 +1028,7 @@ export default function Dashboard() {
       // 2. Handle Direct Referral (Level 1)
       if (userData.referredBy) {
         console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
-        const sanitizedRef = userData.referredBy.toLowerCase();
+        const sanitizedRef = userData.referredBy.trim().toLowerCase();
         
         let l1Uid = null;
         const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));

@@ -208,60 +208,59 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       {/* Referral History Table - Enhanced */}
       <div className="mt-10">
         <div className="flex items-center justify-between mb-6 px-2">
-          <h3 className="text-base font-black text-slate-900 tracking-tight">Referral History</h3>
-          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">
+          <h3 className="text-xl font-black text-slate-900 tracking-tight">Referral History</h3>
+          <div className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-4 py-1.5 rounded-full border border-indigo-100">
             {referrals.length} Total
           </div>
         </div>
         
-        <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-xl">
+        <div className="space-y-3">
           {referrals.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50/50 text-slate-400 uppercase font-black tracking-widest border-b border-slate-100">
-                  <tr>
-                    <th className="px-6 py-4">User</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 text-right">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {referrals.map(r => (
-                    <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-black text-[10px]">
-                            {r.name.substring(0, 1).toUpperCase()}
-                          </div>
-                          <span className="font-black text-slate-900">{r.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5">
-                        <span className={`font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full ${
-                          r.status === 'paid' 
-                            ? 'text-emerald-600 bg-emerald-50' 
-                            : r.status === 'rejected'
-                              ? 'text-rose-600 bg-rose-50'
-                              : 'text-amber-600 bg-amber-50'
-                        }`}>
-                          {r.status === 'paid' ? 'Approved' : r.status === 'rejected' ? 'Rejected' : 'Pending'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5 text-right text-slate-400 font-bold">
-                        {r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'N/A'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-slate-200" />
+            referrals.map(r => (
+              <div key={r.id} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg shadow-inner ${
+                    r.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 
+                    r.status === 'rejected' ? 'bg-rose-50 text-rose-600' : 
+                    'bg-amber-50 text-amber-600'
+                  }`}>
+                    {r.name.substring(0, 1).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 className="font-black text-slate-900 text-base">{r.name}</h4>
+                    <p className="text-xs font-bold text-slate-400 mt-0.5">
+                      {r.timestamp ? new Date(r.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className={`inline-flex items-center gap-1.5 font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full ${
+                    r.status === 'paid' 
+                      ? 'text-emerald-700 bg-emerald-100/50' 
+                      : r.status === 'rejected'
+                        ? 'text-rose-700 bg-rose-100/50'
+                        : 'text-amber-700 bg-amber-100/50'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      r.status === 'paid' ? 'bg-emerald-500' : 
+                      r.status === 'rejected' ? 'bg-rose-500' : 
+                      'bg-amber-500 animate-pulse'
+                    }`}></span>
+                    {r.status === 'paid' ? 'Approved' : r.status === 'rejected' ? 'Rejected' : 'Pending'}
+                  </span>
+                  {r.status === 'paid' && (
+                    <p className="text-xs font-black text-emerald-600 mt-1.5">+ Rs {appSettings?.referralBonusBasic || 125}</p>
+                  )}
+                </div>
               </div>
-              <p className="text-sm text-slate-400 font-black uppercase tracking-widest">No referrals yet</p>
-              <p className="text-[10px] text-slate-300 font-bold mt-1">Start sharing your link to earn!</p>
+            ))
+          ) : (
+            <div className="bg-white rounded-[2.5rem] p-12 text-center border border-slate-100 shadow-sm">
+              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-5">
+                <Users className="w-10 h-10 text-slate-300" />
+              </div>
+              <p className="text-base text-slate-900 font-black tracking-tight">No referrals yet</p>
+              <p className="text-xs text-slate-500 font-medium mt-2 max-w-[200px] mx-auto">Share your link with friends to start earning instant rewards!</p>
             </div>
           )}
         </div>
