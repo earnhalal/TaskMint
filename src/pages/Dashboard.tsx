@@ -1366,7 +1366,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans overflow-x-hidden w-full max-w-full">
       {!isProfileLoaded && (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center">
+        <div className="absolute inset-0 z-[200] bg-white flex flex-col items-center justify-center">
           <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mb-4"></div>
           <p className="text-xs font-black text-slate-900 uppercase tracking-widest animate-pulse">Loading Profile...</p>
         </div>
@@ -1374,7 +1374,7 @@ export default function Dashboard() {
       {/* Referral Update Notification */}
       <AnimatePresence>
         {showReferralUpdateNotify && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
+          <div className="absolute inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1411,7 +1411,7 @@ export default function Dashboard() {
       {/* Urdu Inactive Modal */}
       <AnimatePresence>
         {showInactiveModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" dir="rtl">
+          <div className="absolute inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" dir="rtl">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

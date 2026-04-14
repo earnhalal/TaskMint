@@ -49,7 +49,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            className="fixed inset-0 z-[100] bg-slate-50 flex flex-col font-sans"
+            className="absolute inset-0 z-[100] bg-slate-50 flex flex-col font-sans"
         >
             {/* Premium Header */}
             <div className="bg-white border-b border-slate-100 px-6 py-6 flex items-center justify-between sticky top-0 z-10 shadow-sm">
