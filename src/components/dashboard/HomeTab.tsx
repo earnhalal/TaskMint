@@ -617,45 +617,52 @@ export default function HomeTab({
       <div className="animate-fade-in-up" style={{ animationDelay: '400ms' }}>
           <div 
             onClick={onInviteClick}
-            className="bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 rounded-[32px] p-1 text-white shadow-2xl shadow-purple-500/20 relative overflow-hidden cursor-pointer group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-purple-500/40"
+            className="bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 rounded-[32px] p-1 text-white shadow-2xl shadow-blue-900/30 relative overflow-hidden cursor-pointer group transform transition-all duration-300 hover:scale-[1.02] hover:shadow-amber-500/30"
           >
             {/* Animated Border Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-slow"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 opacity-60 group-hover:opacity-100 transition-opacity duration-500 animate-pulse-slow"></div>
             
             {/* Inner Card */}
-            <div className="relative bg-slate-900/90 backdrop-blur-xl rounded-[28px] p-6 h-full overflow-hidden">
+            <div className="relative bg-slate-900/95 backdrop-blur-2xl rounded-[28px] p-6 sm:p-8 h-full overflow-hidden">
                 {/* Floating Elements */}
-                <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/20 rounded-full -mr-10 -mt-10 blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-500/20 rounded-full -ml-10 -mb-10 blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/20 rounded-full -mr-20 -mt-20 blur-[60px] group-hover:bg-amber-500/30 transition-colors duration-500"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/20 rounded-full -ml-10 -mb-10 blur-[50px] group-hover:bg-blue-500/30 transition-colors duration-500"></div>
                 
-                <div className="relative z-10 flex flex-col gap-5">
+                {/* Texture overlay */}
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+
+                <div className="relative z-10 flex flex-col gap-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-2.5 rounded-2xl shadow-lg shadow-pink-500/30 group-hover:scale-110 transition-transform duration-300">
+                      <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-3 rounded-2xl shadow-lg shadow-amber-500/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                         <InviteIcon className="w-6 h-6 text-white" />
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-purple-200 bg-purple-500/20 px-3 py-1 rounded-full border border-purple-500/30">Mega Bonus</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 shadow-sm">Mega Bonus</span>
                     </div>
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30 animate-bounce-small">
-                        <span className="text-xl">🎁</span>
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-300 to-amber-600 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.5)] border-2 border-white/20 animate-bounce-small">
+                        <GiftIcon className="w-7 h-7 text-white drop-shadow-md" />
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="text-3xl font-black leading-tight mb-2">
-                      Invite & Earn <br/>
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 text-5xl drop-shadow-[0_0_15px_rgba(251,191,36,0.5)]">Rs 250</span>
+                    <h3 className="text-3xl sm:text-4xl font-black leading-tight mb-2 font-display drop-shadow-md">
+                      Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400 text-5xl sm:text-6xl drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">Rs 125</span>
                     </h3>
-                    <p className="text-sm text-slate-300 font-medium leading-relaxed">
-                      Get <strong className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 text-base font-black">Rs 125</strong> for every friend you invite. Just 2 friends = Rs 250 instantly!
-                    </p>
+                    <h4 className="text-xl sm:text-2xl font-black text-blue-100 mb-4 drop-shadow-sm">Per Friend!</h4>
+                    
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm inline-block w-full">
+                      <p className="text-sm sm:text-base text-slate-200 font-medium leading-relaxed">
+                        Just <strong className="text-amber-400 font-black text-lg">2 Invites</strong> = <strong className="text-emerald-400 font-black text-lg">Rs 250 Guaranteed!</strong>
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1 font-bold">No limits. Withdraw instantly.</p>
+                    </div>
                   </div>
 
                   <button 
-                    className="mt-2 w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 transition-all flex items-center justify-center gap-2 active:scale-95 group-hover:from-pink-400 group-hover:to-purple-500 relative overflow-hidden"
+                    className="mt-2 w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-all flex items-center justify-center gap-2 active:scale-95 group-hover:from-amber-400 group-hover:to-orange-500 relative overflow-hidden"
                   >
                     <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-                    <span className="relative z-10 flex items-center gap-2">Invite Friends Now <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></span>
+                    <span className="relative z-10 flex items-center gap-2 drop-shadow-md">Invite Friends Now <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></span>
                   </button>
                 </div>
             </div>

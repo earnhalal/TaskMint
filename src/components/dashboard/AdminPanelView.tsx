@@ -38,6 +38,7 @@ import { db } from '../../firebase';
 interface AdminPanelViewProps {
   onBack: () => void;
   onApproveActivation: (userId: string, depositId: string) => Promise<void>;
+  onRejectActivation: (userId: string, depositId: string) => Promise<void>;
   onApprovePartner: (userId: string, requestId: string) => Promise<void>;
   onApproveDeposit: (userId: string, depositId: string, amount: number) => Promise<void>;
   onApproveWithdrawal: (userId: string, withdrawalId: string) => Promise<void>;
@@ -630,7 +631,7 @@ function SocialTasksAdminView() {
   );
 }
 
-export default function AdminPanelView({ onBack, onApproveActivation, onApprovePartner, onApproveDeposit, onApproveWithdrawal, onRejectWithdrawal }: AdminPanelViewProps) {
+export default function AdminPanelView({ onBack, onApproveActivation, onRejectActivation, onApprovePartner, onApproveDeposit, onApproveWithdrawal, onRejectWithdrawal }: AdminPanelViewProps) {
   const [activeTab, setActiveTab] = useState<'activations' | 'partners' | 'deposits' | 'withdrawals' | 'settings' | 'lotteries' | 'promotions' | 'social_tasks'>('activations');
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -674,6 +675,8 @@ export default function AdminPanelView({ onBack, onApproveActivation, onApproveP
     try {
       if (collectionName === 'withdrawals' && userId) {
         await onRejectWithdrawal(userId, id);
+      } else if (activeTab === 'activations' && userId) {
+        await onRejectActivation(userId, id);
       } else {
         await updateDoc(doc(db, collectionName, id), { status: 'Rejected' });
         alert("Request rejected.");

@@ -7,6 +7,7 @@ interface AuthViewProps {
     onLogin: (email: string, password: string) => void;
     onForgotPassword: (email: string) => void; // Added prop
     initialView: 'login' | 'signup';
+    initialReferralCode?: string;
 }
 
 // Local Google Icon Component for this view
@@ -19,7 +20,7 @@ const GoogleIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword, initialView }) => {
+const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword, initialView, initialReferralCode = '' }) => {
     const navigate = useNavigate();
     const [isSignup, setIsSignup] = useState(initialView === 'signup');
     const [isResetMode, setIsResetMode] = useState(false);
@@ -30,7 +31,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
-    const [referralCode, setReferralCode] = useState('');
+    const [referralCode, setReferralCode] = useState(initialReferralCode);
     const [showPassword, setShowPassword] = useState(false);
     const [agree, setAgree] = useState(false);
     const [error, setError] = useState('');

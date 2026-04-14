@@ -779,6 +779,52 @@ export default function Dashboard() {
     }
   };
 
+  const handleRejectActivation = async (targetUserId: string, depositId: string) => {
+    try {
+      if (depositId) {
+        await updateDoc(doc(db, 'deposits', depositId), { status: 'Rejected' });
+      }
+      
+      const userRef = doc(db, 'users', targetUserId);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        
+        // Update feeStatus to rejected
+        await updateDoc(userRef, { feeStatus: 'rejected' });
+        const userStatusRef = ref(rtdb, `users/${targetUserId}`);
+        await update(userStatusRef, { feeStatus: 'rejected' });
+        
+        // Update referral status in RTDB if referred
+        if (userData.referredBy) {
+          const sanitizedRef = userData.referredBy.toLowerCase();
+          let l1Uid = null;
+          const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
+          const querySnapshot = await getDocs(q);
+          
+          if (!querySnapshot.empty) {
+            l1Uid = querySnapshot.docs[0].id;
+          } else {
+            const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
+            if (parentUsernameDoc.exists()) {
+              l1Uid = parentUsernameDoc.data().uid;
+            }
+          }
+
+          if (l1Uid) {
+            const referralStatusRef = ref(rtdb, `invites/${l1Uid}/history/${targetUserId}`);
+            await update(referralStatusRef, { status: 'rejected' });
+          }
+        }
+      }
+      
+      alert("Activation request rejected.");
+    } catch (error) {
+      console.error("Error rejecting activation:", error);
+      alert("Error rejecting activation.");
+    }
+  };
+
   const handleApprovePartner = async (targetUserId: string, requestId: string) => {
     try {
       await updateDoc(doc(db, 'users', targetUserId), { 
@@ -982,10 +1028,22 @@ export default function Dashboard() {
       // 2. Handle Direct Referral (Level 1)
       if (userData.referredBy) {
         console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
-        const parentUsernameDoc = await getDoc(doc(db, 'usernames', userData.referredBy.toLowerCase()));
+        const sanitizedRef = userData.referredBy.toLowerCase();
         
-        if (parentUsernameDoc.exists()) {
-          const l1Uid = parentUsernameDoc.data().uid;
+        let l1Uid = null;
+        const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          l1Uid = querySnapshot.docs[0].id;
+        } else {
+          const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
+          if (parentUsernameDoc.exists()) {
+            l1Uid = parentUsernameDoc.data().uid;
+          }
+        }
+        
+        if (l1Uid) {
           console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
           
           // Update referral status in RTDB
@@ -1107,6 +1165,7 @@ export default function Dashboard() {
         return <AdminPanelView 
                  onBack={() => setActiveTab('profile')}
                  onApproveActivation={handleActivateUser}
+                 onRejectActivation={handleRejectActivation}
                  onApprovePartner={handleApprovePartner}
                  onApproveDeposit={handleApproveDeposit}
                  onApproveWithdrawal={handleApproveWithdrawal}

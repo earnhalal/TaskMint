@@ -155,6 +155,7 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
   return (
     <AuthView 
       initialView={initialView}
+      initialReferralCode={queryParams.get('ref') || ''}
       onSignup={handleSignup}
       onLogin={handleLogin}
       onForgotPassword={handleForgotPassword}

@@ -91,7 +91,9 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <AppContent />
+        <div className="w-full max-w-full overflow-x-hidden relative min-h-screen">
+          <AppContent />
+        </div>
       </BrowserRouter>
     </AuthProvider>
   );

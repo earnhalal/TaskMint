@@ -237,8 +237,14 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <span className={`font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full ${r.status === 'paid' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'}`}>
-                          {r.status === 'paid' ? 'Earned' : 'Pending'}
+                        <span className={`font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full ${
+                          r.status === 'paid' 
+                            ? 'text-emerald-600 bg-emerald-50' 
+                            : r.status === 'rejected'
+                              ? 'text-rose-600 bg-rose-50'
+                              : 'text-amber-600 bg-amber-50'
+                        }`}>
+                          {r.status === 'paid' ? 'Approved' : r.status === 'rejected' ? 'Rejected' : 'Pending'}
                         </span>
                       </td>
                       <td className="px-6 py-5 text-right text-slate-400 font-bold">

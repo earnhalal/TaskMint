@@ -303,6 +303,43 @@ export default function Landing() {
                 </div>
             </section>
 
+            {/* --- Promotional Invite Banner (Landing) --- */}
+            <section className="py-12 px-6 bg-white relative z-20 -mt-10">
+                <div className="max-w-5xl mx-auto">
+                    <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden group border border-white/10">
+                        {/* Animated Backgrounds */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 opacity-40 group-hover:opacity-80 transition-opacity duration-700 animate-pulse-slow"></div>
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+                        
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 bg-slate-900/90 backdrop-blur-2xl p-8 rounded-[2rem] border border-white/10">
+                            <div className="flex-1 text-center md:text-left">
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 mb-4 shadow-sm">
+                                    <SparklesIcon className="w-4 h-4 text-amber-400 animate-pulse" />
+                                    <span className="text-xs font-black uppercase tracking-widest text-amber-400">Limited Time Offer</span>
+                                </div>
+                                <h2 className="text-4xl md:text-5xl font-black mb-3 font-display leading-tight">
+                                    Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400 drop-shadow-md">Rs. 125</span> Per Friend!
+                                </h2>
+                                <p className="text-lg md:text-xl text-blue-100 font-medium mb-6">
+                                    Invite your friends to TaskMint. <br className="hidden md:block" />
+                                    <strong className="text-amber-400 font-black">Just 2 Invites = Rs. 250 Guaranteed.</strong> No limits!
+                                </p>
+                                <button onClick={() => onGetStarted('signup')} className="bg-gradient-to-r from-amber-400 to-orange-500 text-white px-8 py-4 rounded-full font-black text-lg shadow-xl shadow-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/40 hover:-translate-y-1 transition-all flex items-center gap-2 mx-auto md:mx-0">
+                                    Create Account & Start Referring <ArrowRight className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="relative w-48 h-48 shrink-0 hidden md:flex items-center justify-center">
+                                <div className="absolute inset-0 bg-amber-400 rounded-full blur-[50px] opacity-30 animate-pulse-slow"></div>
+                                <div className="relative w-32 h-32 bg-gradient-to-br from-amber-300 to-orange-500 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(245,158,11,0.6)] border-4 border-white/20 animate-float">
+                                    <GiftIcon className="w-16 h-16 text-white drop-shadow-lg" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         {/* --- Stats Section --- */}
         <section className="py-16 bg-slate-50 border-y border-slate-100">
           <div className="max-w-7xl mx-auto px-6">
