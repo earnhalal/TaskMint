@@ -153,6 +153,8 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
     const [selectedPlatform, setSelectedPlatform] = useState<any>(null);
     const [selectedService, setSelectedService] = useState<any>(null);
     const [link, setLink] = useState('');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [quantity, setQuantity] = useState<number>(100);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -223,6 +225,8 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                 platform: selectedPlatform.name,
                 service: selectedService.name,
                 link: link,
+                title: title,
+                description: description,
                 quantity: quantity,
                 price: totalPrice,
                 status: 'pending',
@@ -231,6 +235,8 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
 
             setStatus('success');
             setLink('');
+            setTitle('');
+            setDescription('');
             setQuantity(100);
             setTimeout(() => {
                 setSelectedService(null);
@@ -371,6 +377,32 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                                 </div>
 
                                                 <div className={`p-6 rounded-3xl ${selectedPlatform.cardBg} shadow-xl`}>
+                                                    <label className="text-xs font-black uppercase tracking-widest mb-3 block opacity-90">Promotion Title (Optional)</label>
+                                                    <div className="relative">
+                                                        <input 
+                                                            type="text" 
+                                                            placeholder="e.g. My New Video"
+                                                            value={title}
+                                                            onChange={(e) => setTitle(e.target.value)}
+                                                            className={`w-full rounded-2xl py-4 px-5 text-base font-bold focus:outline-none transition-all ${selectedPlatform.inputBg}`}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className={`p-6 rounded-3xl ${selectedPlatform.cardBg} shadow-xl`}>
+                                                    <label className="text-xs font-black uppercase tracking-widest mb-3 block opacity-90">Description (Optional)</label>
+                                                    <div className="relative">
+                                                        <textarea 
+                                                            placeholder="Any specific instructions..."
+                                                            value={description}
+                                                            onChange={(e) => setDescription(e.target.value)}
+                                                            rows={3}
+                                                            className={`w-full rounded-2xl py-4 px-5 text-base font-bold focus:outline-none transition-all resize-none ${selectedPlatform.inputBg}`}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className={`p-6 rounded-3xl ${selectedPlatform.cardBg} shadow-xl`}>
                                                     <label className="text-xs font-black uppercase tracking-widest mb-3 block opacity-90">Quantity</label>
                                                     <div className="relative">
                                                         <Hash className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 opacity-50" />
@@ -473,6 +505,12 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                                                             {order.status}
                                                                         </span>
                                                                     </div>
+                                                                    {(order.title || order.description) && (
+                                                                        <div className="bg-black/20 p-3 rounded-xl space-y-1">
+                                                                            {order.title && <p className="text-sm font-bold">{order.title}</p>}
+                                                                            {order.description && <p className="text-xs opacity-80">{order.description}</p>}
+                                                                        </div>
+                                                                    )}
                                                                     <div className="flex justify-between items-center text-sm opacity-80 bg-black/20 p-3 rounded-xl">
                                                                         <span className="font-bold">Qty: {order.quantity}</span>
                                                                         <span className="font-black">{order.price} PKR</span>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Users, CheckCircle, Wallet, Trophy, UserPlus, Gift, Copy, Phone, MessageCircle, Share2, Star, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react';
+import { Users, CheckCircle, Wallet, Trophy, UserPlus, Gift, Copy, Phone, MessageCircle, Share2, Star, ChevronRight, AlertCircle, ExternalLink, Clock, Zap } from 'lucide-react';
 
 interface InviteTabProps {
   status: string;
@@ -214,42 +214,50 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
           </div>
         </div>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           {referrals.length > 0 ? (
             referrals.map(r => (
-              <div key={r.id} className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+              <div key={r.id} className="group bg-white rounded-[2rem] p-4 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-xl hover:border-indigo-100 transition-all duration-300 active:scale-[0.98]">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg shadow-inner ${
-                    r.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 
-                    r.status === 'rejected' ? 'bg-rose-50 text-rose-600' : 
-                    'bg-amber-50 text-amber-600'
+                  <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-sm overflow-hidden ${
+                    r.status === 'paid' ? 'bg-indigo-600 text-white' : 
+                    r.status === 'rejected' ? 'bg-rose-500 text-white' : 
+                    'bg-slate-100 text-slate-400'
                   }`}>
-                    {r.name.substring(0, 1).toUpperCase()}
+                    {/* Decorative background pattern */}
+                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+                    <span className="relative z-10">{r.name.substring(0, 1).toUpperCase()}</span>
                   </div>
                   <div>
-                    <h4 className="font-black text-slate-900 text-base">{r.name}</h4>
-                    <p className="text-xs font-bold text-slate-400 mt-0.5">
-                      {r.timestamp ? new Date(r.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
-                    </p>
+                    <h4 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{r.name}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
+                        <Clock className="w-3 h-3" />
+                        {r.timestamp ? new Date(r.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'N/A'}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className={`inline-flex items-center gap-1.5 font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full ${
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`inline-flex items-center gap-1.5 font-black text-[9px] uppercase tracking-widest px-3 py-2 rounded-xl shadow-sm border ${
                     r.status === 'paid' 
-                      ? 'text-emerald-700 bg-emerald-100/50' 
+                      ? 'text-emerald-700 bg-emerald-50 border-emerald-100' 
                       : r.status === 'rejected'
-                        ? 'text-rose-700 bg-rose-100/50'
-                        : 'text-amber-700 bg-amber-100/50'
+                        ? 'text-rose-700 bg-rose-50 border-rose-100'
+                        : 'text-amber-700 bg-amber-50 border-amber-100'
                   }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      r.status === 'paid' ? 'bg-emerald-500' : 
+                    <div className={`w-1.5 h-1.5 rounded-full ${
+                      r.status === 'paid' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 
                       r.status === 'rejected' ? 'bg-rose-500' : 
-                      'bg-amber-500 animate-pulse'
-                    }`}></span>
+                      'bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+                    }`}></div>
                     {r.status === 'paid' ? 'Approved' : r.status === 'rejected' ? 'Rejected' : 'Pending'}
                   </span>
                   {r.status === 'paid' && (
-                    <p className="text-xs font-black text-emerald-600 mt-1.5">+ Rs {appSettings?.referralBonusBasic || 125}</p>
+                    <div className="flex items-center gap-1 bg-emerald-500 text-white px-2 py-0.5 rounded-lg shadow-sm shadow-emerald-200">
+                      <Zap className="w-2.5 h-2.5 fill-current" />
+                      <p className="text-[10px] font-black">+Rs {appSettings?.referralBonusBasic || 125}</p>
+                    </div>
                   )}
                 </div>
               </div>

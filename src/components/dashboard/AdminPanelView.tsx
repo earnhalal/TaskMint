@@ -378,6 +378,23 @@ function PromotionOrdersView() {
               </button>
             </div>
 
+            {(order.title || order.description) && (
+              <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
+                {order.title && (
+                  <div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Title</span>
+                    <p className="text-xs font-bold text-slate-800">{order.title}</p>
+                  </div>
+                )}
+                {order.description && (
+                  <div>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Description</span>
+                    <p className="text-xs text-slate-600 leading-relaxed">{order.description}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-2">
               {order.status === 'pending' && (
                 <>

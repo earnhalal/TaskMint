@@ -89,6 +89,7 @@ export default function Dashboard() {
   const [accountStatus, setAccountStatus] = useState('inactive');
   const [role, setRole] = useState('user');
   const [partnerStatus, setPartnerStatus] = useState('none');
+  const [partnerTier, setPartnerTier] = useState('basic');
   const [totalTeamEarnings, setTotalTeamEarnings] = useState(0);
   const [referralStats, setReferralStats] = useState({
     totalInvited: 0,
@@ -192,6 +193,7 @@ export default function Dashboard() {
         setJoiningDate(data.joiningDate || '');
         setRole(data.role || 'user');
         setPartnerStatus(data.partnerStatus || 'none');
+        setPartnerTier(data.partnerTier || (data.role === 'partner' ? 'silver' : 'basic'));
         setTotalTeamEarnings(data.totalTeamEarnings || 0);
         setReferredBy(data.referredBy || null);
         setReferralCode(data.referralCode || '');
@@ -1046,6 +1048,20 @@ export default function Dashboard() {
         if (l1Uid) {
           console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
           
+          // Determine bonus amount based on referrer's role/tier
+          let bonusAmount = appSettings.referralBonusBasic;
+          const referrerDoc = await getDoc(doc(db, 'users', l1Uid));
+          if (referrerDoc.exists()) {
+            const refData = referrerDoc.data();
+            if (refData.role === 'partner') {
+              if (refData.partnerTier === 'gold') {
+                bonusAmount = 200;
+              } else {
+                bonusAmount = appSettings.referralBonusPartner || 150;
+              }
+            }
+          }
+
           // Update referral status in RTDB
           const referralStatusRef = ref(rtdb, `invites/${l1Uid}/history/${targetUserId}`);
           await update(referralStatusRef, { status: 'paid' });
@@ -1054,15 +1070,15 @@ export default function Dashboard() {
           const referrerStatsRef = ref(rtdb, `users/${l1Uid}`);
           await update(referrerStatsRef, {
             activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(appSettings.referralBonusBasic),
-            balance: rtdbIncrement(appSettings.referralBonusBasic)
+            totalCommission: rtdbIncrement(bonusAmount),
+            balance: rtdbIncrement(bonusAmount)
           });
 
           // Update balance in Firestore
           await updateDoc(doc(db, 'users', l1Uid), {
-            balance: increment(appSettings.referralBonusBasic)
+            balance: increment(bonusAmount)
           });
-          console.log(`[REFERRAL_LOG] Commission of ${appSettings.referralBonusBasic} added to referrer ${l1Uid} in Firestore and RTDB`);
+          console.log(`[REFERRAL_LOG] Commission of ${bonusAmount} added to referrer ${l1Uid} in Firestore and RTDB`);
         }
       }
       
@@ -1155,7 +1171,7 @@ export default function Dashboard() {
                  onEditProfile={() => setActiveTab('edit_profile')} 
                  onLeaderboardClick={() => setActiveTab('leaderboard')} 
                  onManageWalletClick={() => setActiveTab('manage_wallet')}
-                 onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
+                 onPartnerUpgradeClick={() => setActiveTab('premium')}
                  onAdminPanelClick={() => setActiveTab('admin')}
                  onEarningHistoryClick={() => setActiveTab('earning_history')}
                  onActivateClick={() => setActiveTab('activation')}
@@ -1267,7 +1283,14 @@ export default function Dashboard() {
           onWinLockedPrize={handleWinLockedPrize}
         />;
       case 'premium':
-        return <PremiumModal onClose={() => setActiveTab('home')} />;
+        return <PremiumModal 
+                 onClose={() => setActiveTab('home')} 
+                 balance={balance}
+                 currentRole={role}
+                 partnerTier={partnerTier}
+                 onUpdateBalance={handleUpdateBalance}
+                 appSettings={activeAppSettings}
+               />;
       case 'pin':
         return <PinLockView
           mode={pinMode}
@@ -1325,7 +1348,7 @@ export default function Dashboard() {
           onLotteryClick={() => setActiveTab('lottery')}
           onStreakClick={() => setActiveTab('streak')}
           onLeaderboardClick={() => setActiveTab('leaderboard')}
-          onPartnerUpgradeClick={() => setActiveTab('partner_upgrade')}
+          onPartnerUpgradeClick={() => setActiveTab('premium')}
           onActivateClick={() => setActiveTab('activation')}
           onTaskWallClick={() => setActiveTab('task_wall')}
           onSocialTaskPlusClick={() => setActiveTab('social_task_plus')}
@@ -1542,7 +1565,7 @@ export default function Dashboard() {
               { id: 'watch', icon: <PlaySquare className="w-5 h-5" />, label: 'WATCH' },
               { id: 'task_wall', icon: <Search className="w-5 h-5" />, label: 'SURVEYS' },
               { id: 'tasks', icon: <Layout className="w-5 h-5" />, label: 'TASKS' },
-              { id: 'premium', icon: <Briefcase className="w-5 h-5" />, label: 'PREMIUM' },
+              { id: 'premium', icon: <Briefcase className="w-5 h-5" />, label: 'PARTNER' },
               { id: 'profile', icon: <User className="w-5 h-5" />, label: 'PROFILE' },
             ].map((tab) => (
               <button 

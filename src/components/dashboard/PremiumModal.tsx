@@ -1,54 +1,126 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, PlayCircle, Star, Shield, Crown, Check } from 'lucide-react';
+import { X, Star, Shield, Crown, Check, AlertCircle, Zap } from 'lucide-react';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
+import { ref, update, increment as rtdbIncrement } from 'firebase/database';
+import { rtdb } from '../../firebase';
 
-export default function PremiumModal({ onClose }: { onClose: () => void }) {
+interface PartnerPlansProps {
+  onClose: () => void;
+  balance?: number;
+  currentRole?: string;
+  partnerTier?: string;
+  onUpdateBalance?: (amount: number, source?: string, description?: string) => Promise<void>;
+  appSettings?: any;
+}
+
+export default function PremiumModal({ onClose, balance = 0, currentRole = 'user', partnerTier = 'basic', onUpdateBalance, appSettings }: PartnerPlansProps) {
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleBuyPlan = async (planId: string, price: number, tier: string) => {
+    if (!auth.currentUser || !onUpdateBalance) return;
+    
+    if (balance < price) {
+      alert(`Insufficient balance! You need Rs ${price} to buy this plan. Please deposit first.`);
+      return;
+    }
+
+    if (confirm(`Are you sure you want to upgrade to ${tier.toUpperCase()} Partner for Rs ${price}? This will be deducted from your main balance.`)) {
+      setIsProcessing(true);
+      try {
+        // Deduct balance
+        await onUpdateBalance(-price, 'partner_upgrade', `Upgraded to ${tier.toUpperCase()} Partner`);
+        
+        // Update user role and tier in Firestore
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          role: 'partner',
+          partnerStatus: 'active',
+          partnerTier: tier
+        });
+
+        // Update in RTDB
+        await update(ref(rtdb, `users/${auth.currentUser.uid}`), {
+          role: 'partner',
+          partnerStatus: 'active',
+          partnerTier: tier
+        });
+
+        alert(`Congratulations! You are now a ${tier.toUpperCase()} Partner.`);
+        onClose();
+      } catch (error) {
+        console.error("Error upgrading plan:", error);
+        alert("Something went wrong. Please try again.");
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
+
   const plans = [
     {
-      id: 'free',
-      name: 'FREE',
-      price: 'FREE',
+      id: 'basic',
+      name: 'BASIC MEMBER',
+      price: `Rs ${appSettings?.activationFee || 280}`,
       duration: 'Lifetime',
-      icon: <PlayCircle className="w-6 h-6" />,
-      color: 'bg-slate-500',
-      features: ['10 Ads Daily', 'Standard Speed', 'Basic Support'],
-      buttonText: 'Current Plan',
-      buttonColor: 'bg-emerald-500 hover:bg-emerald-600 text-white',
-      isCurrent: true
-    },
-    {
-      id: 'starter',
-      name: 'STARTER',
-      price: '500 Rs',
-      duration: 'for 30 days',
       icon: <Star className="w-6 h-6" />,
-      color: 'bg-blue-500',
-      features: ['30 Ads Daily', 'Valid for 30 Days', 'Standard Support'],
-      buttonText: 'Buy Plan',
-      buttonColor: 'bg-blue-500 hover:bg-blue-600 text-white',
+      color: 'bg-slate-500',
+      features: [
+        `Rs ${appSettings?.referralBonusBasic || 125} per Invite`,
+        'Standard Daily Tasks',
+        'Basic Support',
+        'Normal Withdrawals'
+      ],
+      buttonText: currentRole !== 'partner' ? 'Current Plan' : 'Basic Plan',
+      buttonColor: 'bg-slate-500 text-white opacity-50 cursor-not-allowed',
+      isCurrent: currentRole !== 'partner',
+      action: () => {}
     },
     {
-      id: 'pro',
-      name: 'PRO',
-      price: '1000 Rs',
-      duration: 'for 30 days',
+      id: 'silver',
+      name: 'SILVER PARTNER',
+      price: `Rs ${appSettings?.partnerFee || 1000}`,
+      duration: 'Lifetime',
       icon: <Shield className="w-6 h-6" />,
-      color: 'bg-fuchsia-500',
-      features: ['60 Ads Daily', 'Valid for 30 Days', 'Priority Access'],
-      buttonText: 'Buy Plan',
-      buttonColor: 'bg-fuchsia-500 hover:bg-fuchsia-600 text-white',
-      isPopular: true
+      color: 'bg-blue-500',
+      features: [
+        `Rs ${appSettings?.referralBonusPartner || 150} per Invite`,
+        '10% Team Commission',
+        'High Priority Withdrawals',
+        'Team Analytics Dashboard'
+      ],
+      buttonText: partnerTier === 'silver' ? 'Current Plan' : 'Upgrade to Silver',
+      buttonColor: partnerTier === 'silver' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]',
+      isCurrent: partnerTier === 'silver',
+      action: () => {
+        if (partnerTier !== 'silver' && partnerTier !== 'gold') {
+          handleBuyPlan('silver', appSettings?.partnerFee || 1000, 'silver');
+        }
+      }
     },
     {
-      id: 'vip',
-      name: 'VIP',
-      price: '2000 Rs',
-      duration: 'for 365 days',
+      id: 'gold',
+      name: 'GOLD VIP PARTNER',
+      price: 'Rs 2000',
+      duration: 'Lifetime',
       icon: <Crown className="w-6 h-6" />,
-      color: 'bg-yellow-500',
-      features: ['Unlimited Ads', 'Valid for 1 Year', 'VIP Badge & Support'],
-      buttonText: 'Buy Plan',
-      buttonColor: 'bg-yellow-500 hover:bg-yellow-600 text-white',
+      color: 'bg-amber-500',
+      features: [
+        'Rs 200 per Invite',
+        '10% Team Commission',
+        '2 Free Lottery Tickets / Month',
+        'VIP Badge & Instant Withdrawals',
+        'Premium Support'
+      ],
+      buttonText: partnerTier === 'gold' ? 'Current Plan' : 'Upgrade to VIP',
+      buttonColor: partnerTier === 'gold' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-white shadow-[0_0_15px_rgba(245,158,11,0.5)]',
+      isPopular: true,
+      isCurrent: partnerTier === 'gold',
+      action: () => {
+        if (partnerTier !== 'gold') {
+          handleBuyPlan('gold', 2000, 'gold');
+        }
+      }
     }
   ];
 
@@ -66,62 +138,80 @@ export default function PremiumModal({ onClose }: { onClose: () => void }) {
         className="bg-white w-full h-full sm:rounded-[2rem] relative overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="bg-[#151E32] text-center py-8 px-6 relative">
+        <div className="bg-gradient-to-br from-[#060D2D] via-[#151E32] to-[#060D2D] text-center py-10 px-6 relative">
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-colors"
+            className="absolute top-4 right-4 w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-colors z-20"
           >
             <X className="w-5 h-5" />
           </button>
-          <h2 className="text-2xl font-bold text-white mb-2">Upgrade Your Earning Power</h2>
-          <p className="text-slate-400 text-sm">Choose a plan to increase your daily ad watch limit.</p>
           
-          {/* Hexagon pattern overlay */}
-          <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
+          <div className="relative z-10">
+            <div className="w-16 h-16 bg-gradient-to-tr from-amber-400 to-yellow-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.3)] rotate-3">
+              <Crown className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Partner Programs</h2>
+            <p className="text-slate-400 text-sm max-w-xs mx-auto">Upgrade your account to unlock higher referral bonuses, team commissions, and VIP perks.</p>
+            
+            <div className="mt-6 inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+              <span className="text-xs text-slate-300 font-bold uppercase tracking-widest">Your Balance:</span>
+              <span className="text-sm font-black text-emerald-400">Rs {balance.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full -ml-32 -mb-32 blur-3xl"></div>
         </div>
 
         {/* Plans Grid */}
-        <div className="p-6 overflow-y-auto hide-scrollbar">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-6 overflow-y-auto hide-scrollbar flex-1 bg-slate-50/50">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {plans.map((plan) => (
-              <div key={plan.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col relative">
+              <div key={plan.id} className={`bg-white rounded-[2rem] border ${plan.isPopular ? 'border-amber-200 shadow-xl shadow-amber-500/10 scale-[1.02]' : 'border-slate-100 shadow-sm'} overflow-hidden flex flex-col relative transition-transform`}>
                 {plan.isCurrent && (
-                  <div className="absolute top-0 left-0 bg-emerald-500 text-white text-[9px] font-bold px-2 py-1 rounded-br-lg z-10 uppercase tracking-wider">
-                    Active
+                  <div className="absolute top-0 left-0 bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-br-xl z-10 uppercase tracking-widest shadow-sm">
+                    Current Plan
                   </div>
                 )}
-                {plan.isPopular && (
-                  <div className="absolute top-0 right-0 bg-yellow-500 text-white text-[9px] font-bold px-2 py-1 rounded-bl-lg z-10 uppercase tracking-wider">
-                    Popular
+                {plan.isPopular && !plan.isCurrent && (
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black px-4 py-1.5 rounded-bl-xl z-10 uppercase tracking-widest shadow-sm">
+                    Most Popular
                   </div>
                 )}
                 
-                <div className={`${plan.color} p-6 text-center text-white relative overflow-hidden`}>
+                <div className={`${plan.color} p-8 text-center text-white relative overflow-hidden`}>
                   <div className="absolute inset-0 bg-black/10"></div>
-                  <div className="relative z-10">
-                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 shadow-inner">
                       {plan.icon}
                     </div>
-                    <h3 className="text-sm font-bold tracking-widest uppercase mb-1">{plan.name}</h3>
+                    <h3 className="text-lg font-black tracking-widest uppercase mb-1 drop-shadow-sm">{plan.name}</h3>
                     <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-3xl font-bold">{plan.price.split(' ')[0]}</span>
-                      {plan.price.includes('Rs') && <span className="text-sm font-bold">Rs</span>}
+                      <span className="text-3xl font-black drop-shadow-md">{plan.price}</span>
                     </div>
-                    <p className="text-xs text-white/80 mt-1">{plan.duration}</p>
+                    <p className="text-white/80 text-xs font-bold mt-2 uppercase tracking-widest">{plan.duration}</p>
                   </div>
                 </div>
                 
-                <div className="p-5 flex-1 flex flex-col">
-                  <ul className="space-y-3 mb-6 flex-1">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-xs text-slate-600">
-                        <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                <div className="p-6 flex-1 flex flex-col">
+                  <ul className="space-y-4 mb-8 flex-1">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-sm font-bold text-slate-600">
+                        <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${plan.isPopular ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'}`}>
+                          <Check className="w-3 h-3" />
+                        </div>
                         {feature}
                       </li>
                     ))}
                   </ul>
-                  <button className={`w-full py-3 rounded-xl text-sm font-bold transition-all ${plan.buttonColor}`}>
-                    {plan.buttonText}
+                  
+                  <button 
+                    onClick={plan.action}
+                    disabled={plan.isCurrent || isProcessing || (plan.id === 'basic')}
+                    className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 disabled:active:scale-100 ${plan.buttonColor}`}
+                  >
+                    {isProcessing && !plan.isCurrent && plan.id !== 'basic' ? 'Processing...' : plan.buttonText}
                   </button>
                 </div>
               </div>
