@@ -99,7 +99,7 @@ export default function Legal() {
                 <div>
                   <h3 className="font-bold text-xl mb-1">Email Us</h3>
                   <p className="text-slate-600 mb-2">For general inquiries and support.</p>
-                  <a href="mailto:support@taskmint.pk" className="text-emerald-600 font-semibold hover:underline">support@taskmint.pk</a>
+                  <a href="mailto:taskmintpro@gmail.com" className="text-emerald-600 font-semibold hover:underline">taskmintpro@gmail.com</a>
                 </div>
               </div>
               

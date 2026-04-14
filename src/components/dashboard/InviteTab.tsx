@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Users, CheckCircle, Wallet, Trophy, UserPlus, Gift, Copy, Phone, MessageCircle, Share2, Star, ChevronRight, AlertCircle, ExternalLink, Clock, Zap } from 'lucide-react';
+import { Users, CheckCircle2, Wallet, Trophy, UserPlus, Gift, Copy, Phone, MessageCircle, Share2, Star, ChevronRight, AlertCircle, ExternalLink, Clock, Zap } from 'lucide-react';
 
 interface InviteTabProps {
   status: string;
@@ -13,11 +13,23 @@ interface InviteTabProps {
   onActivateClick: () => void;
   referrals: any[];
   appSettings?: any;
+  role?: string;
+  partnerTier?: string;
 }
 
-export default function InviteTab({ status, referralStats, referralCode, onActivateClick, referrals, appSettings }: InviteTabProps) {
+export default function InviteTab({ status, referralStats, referralCode, onActivateClick, referrals, appSettings, role = 'user', partnerTier = 'basic' }: InviteTabProps) {
   const [copied, setCopied] = useState(false);
   const referralLink = `https://taskmint.click/ref/${encodeURIComponent(referralCode)}`;
+  
+  // Determine dynamic bonus based on role and tier
+  let currentBonus = appSettings?.referralBonusBasic || 125;
+  if (role === 'partner') {
+    if (partnerTier === 'gold') {
+      currentBonus = 200;
+    } else {
+      currentBonus = appSettings?.referralBonusPartner || 150;
+    }
+  }
 
   const handleCopy = async () => {
     try {
@@ -86,7 +98,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
           </div>
           
           <h1 className="text-4xl font-black text-white mb-4 leading-tight tracking-tighter">
-            Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">Rs {appSettings?.referralBonusBasic || 125}</span><br/>
+            Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600">Rs {currentBonus}</span><br/>
             <span className="text-white/60 text-xl font-bold tracking-normal">Directly per Friend!</span>
           </h1>
           
@@ -106,7 +118,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
           { icon: <Users className="w-5 h-5 text-blue-500" />, label: 'Invited', value: referralStats.totalInvited, color: 'blue' },
-          { icon: <CheckCircle className="w-5 h-5 text-emerald-500" />, label: 'Active', value: referralStats.activeMembers, color: 'emerald' },
+          { icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />, label: 'Active', value: referralStats.activeMembers, color: 'emerald' },
           { icon: <Wallet className="w-5 h-5 text-amber-500" />, label: 'Earnings', value: `Rs ${referralStats.totalCommission}`, color: 'amber' },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-[2rem] p-4 shadow-sm border border-slate-100 flex flex-col items-center text-center group hover:border-slate-200 transition-all">
@@ -134,7 +146,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             onClick={handleCopy}
             className="bg-[#0F172A] text-white px-6 py-4 rounded-2xl text-xs font-bold flex items-center gap-2 hover:bg-slate-800 active:scale-95 transition-all shrink-0 shadow-lg shadow-slate-900/20"
           >
-            {copied ? <CheckCircle className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            {copied ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
             <span>{copied ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
@@ -182,7 +194,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xl font-black text-amber-400">Rs {appSettings?.referralBonusBasic || 125}</p>
+              <p className="text-xl font-black text-amber-400">Rs {currentBonus}</p>
               <p className="text-[9px] text-emerald-400 font-black uppercase tracking-tighter">Instant Credit</p>
             </div>
           </div>
@@ -256,7 +268,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                   {r.status === 'paid' && (
                     <div className="flex items-center gap-1 bg-emerald-500 text-white px-2 py-0.5 rounded-lg shadow-sm shadow-emerald-200">
                       <Zap className="w-2.5 h-2.5 fill-current" />
-                      <p className="text-[10px] font-black">+Rs {appSettings?.referralBonusBasic || 125}</p>
+                      <p className="text-[10px] font-black">+Rs {currentBonus}</p>
                     </div>
                   )}
                 </div>

@@ -11,6 +11,7 @@ export default function ProfileTab({
   email, 
   status, 
   role, 
+  partnerTier = 'basic',
   balance, 
   lockedBalance, 
   accountNumber, 
@@ -30,6 +31,7 @@ export default function ProfileTab({
   email: string, 
   status: string, 
   role: string, 
+  partnerTier?: string,
   balance: number, 
   lockedBalance: number, 
   accountNumber: string, 
@@ -157,48 +159,92 @@ export default function ProfileTab({
       )}
 
       {/* Profile Header */}
-      <div className="relative rounded-[32px] p-6 mb-8 overflow-hidden shadow-2xl shadow-blue-900/10 group">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900"></div>
-        <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl -ml-10 -mb-10"></div>
+      <div className={`relative rounded-[32px] p-8 mb-8 overflow-hidden shadow-2xl transition-all duration-500 group ${
+        role === 'partner' 
+          ? partnerTier === 'gold'
+            ? 'bg-gradient-to-br from-[#1a1a1a] via-[#2d2d2d] to-[#1a1a1a] border border-amber-500/30'
+            : 'bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] border border-blue-500/30'
+          : 'bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900'
+      }`}>
+        {/* Animated Background Glow */}
+        <div className={`absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-20 animate-pulse ${
+          role === 'partner' 
+            ? partnerTier === 'gold' ? 'bg-amber-400' : 'bg-blue-400'
+            : 'bg-blue-400'
+        }`}></div>
         
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 p-1 shadow-xl shadow-amber-500/30 group-hover:scale-105 transition-transform duration-300">
-                <div className="w-full h-full rounded-xl bg-slate-900 flex items-center justify-center text-white text-2xl font-black overflow-hidden">
-                  {avatar ? (
-                    <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    name.substring(0, 2).toUpperCase()
-                  )}
-                </div>
-              </div>
-              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl border-2 border-slate-900 flex items-center justify-center text-xs font-black text-white shadow-lg">
-                1
+        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className="relative">
+            <div className={`w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl transform transition-transform group-hover:scale-105 duration-500 p-1 ${
+              role === 'partner'
+                ? partnerTier === 'gold'
+                  ? 'bg-gradient-to-tr from-amber-400 to-yellow-600 shadow-amber-500/40'
+                  : 'bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-blue-500/40'
+                : 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-500/30'
+            }`}>
+              <div className={`w-full h-full rounded-2xl flex items-center justify-center text-white text-3xl font-black overflow-hidden ${
+                role === 'partner' ? 'bg-transparent' : 'bg-slate-900'
+              }`}>
+                {avatar ? (
+                  <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  role === 'partner' 
+                    ? partnerTier === 'gold' ? <Crown className="w-12 h-12" /> : <Shield className="w-12 h-12" />
+                    : name.substring(0, 2).toUpperCase()
+                )}
               </div>
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-2xl font-black text-white tracking-tight">{name}</h2>
-                {status.toLowerCase() === 'active' && <CheckCircle2 className="w-5 h-5 text-emerald-400 fill-emerald-400/20" />}
+            {status.toLowerCase() === 'active' && (
+              <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-xl flex items-center justify-center border-2 shadow-lg ${
+                role === 'partner'
+                  ? partnerTier === 'gold' ? 'bg-amber-500 border-[#1a1a1a]' : 'bg-blue-500 border-[#0f172a]'
+                  : 'bg-emerald-500 border-slate-900'
+              }`}>
+                <CheckCircle2 className="w-4 h-4 text-white" />
               </div>
-              <p className="text-sm font-medium text-blue-200 mb-3 opacity-90">{email}</p>
-              <div className="flex flex-wrap gap-2">
-                  <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
-                    ID: <span className="text-amber-400">{referralCode}</span>
-                  </div>
-                  {role === 'partner' ? (
-                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-lg shadow-amber-500/30 uppercase tracking-wider">
+            )}
+          </div>
+          
+          <div className="flex-1 text-center sm:text-left">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                <h2 className="text-3xl font-black text-white tracking-tight">{name}</h2>
+                {role === 'partner' && (
+                  partnerTier === 'gold' ? (
+                    <div className="bg-amber-500 p-1 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.8)]">
+                      <Star className="w-3 h-3 text-white fill-current" />
+                    </div>
+                  ) : (
+                    <div className="bg-blue-500 p-1 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)]">
+                      <CheckCircle2 className="w-3 h-3 text-white fill-current" />
+                    </div>
+                  )
+                )}
+              </div>
+              <p className="text-sm font-medium text-blue-200 mb-4 opacity-80">{email}</p>
+              
+              <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                  ID: <span className={role === 'partner' ? partnerTier === 'gold' ? 'text-amber-400' : 'text-blue-400' : 'text-amber-400'}>{referralCode}</span>
+                </div>
+                {role === 'partner' ? (
+                  partnerTier === 'gold' ? (
+                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-yellow-600 border border-amber-300/50 text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-[0_0_20px_rgba(245,158,11,0.6)] uppercase tracking-wider">
                       <Crown className="w-3.5 h-3.5 text-white" />
-                      Partner
+                      Gold VIP
                     </div>
-                  ) : status.toLowerCase() === 'active' ? (
-                    <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
-                      <Shield className="w-3.5 h-3.5" />
-                      Verified
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-400/50 text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-[0_0_20px_rgba(59,130,246,0.6)] uppercase tracking-wider">
+                      <Shield className="w-3.5 h-3.5 text-white" />
+                      Silver Partner
                     </div>
-                  ) : status.toLowerCase() === 'pending' ? (
+                  )
+                ) : status.toLowerCase() === 'active' ? (
+                  <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider backdrop-blur-sm">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Verified
+                  </div>
+                ) : status.toLowerCase() === 'pending' ? (
                     <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
                       <Clock className="w-3.5 h-3.5" />
                       Pending

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Gamepad2, 
   Mail, 
-  CheckCircle, 
   Wallet, 
   ShieldCheck, 
   Info,

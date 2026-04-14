@@ -1162,6 +1162,7 @@ export default function Dashboard() {
                  email={userEmail}
                  status={status}
                  role={role}
+                 partnerTier={partnerTier}
                  balance={balance}
                  lockedBalance={lockedBalance}
                  accountNumber={withdrawalAccounts[0]?.number || ''}
@@ -1222,6 +1223,8 @@ export default function Dashboard() {
           onActivateClick={() => setActiveTab('activation')}
           referrals={partnerReferrals}
           appSettings={activeAppSettings}
+          role={role}
+          partnerTier={partnerTier}
         />;
       case 'activation':
         return <ActivationTab 
@@ -1558,27 +1561,32 @@ export default function Dashboard() {
         </div>
 
         {/* Bottom Navigation */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-3 pb-6 sm:pb-4 z-20">
-          <div className="flex items-center justify-between max-w-md mx-auto">
+        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-3 pb-6 sm:pb-4 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center justify-between max-w-md mx-auto relative">
             {[
-              { id: 'home', icon: <Home className="w-5 h-5" />, label: 'HOME' },
-              { id: 'watch', icon: <PlaySquare className="w-5 h-5" />, label: 'WATCH' },
-              { id: 'task_wall', icon: <Search className="w-5 h-5" />, label: 'SURVEYS' },
-              { id: 'tasks', icon: <Layout className="w-5 h-5" />, label: 'TASKS' },
-              { id: 'premium', icon: <Briefcase className="w-5 h-5" />, label: 'PARTNER' },
-              { id: 'profile', icon: <User className="w-5 h-5" />, label: 'PROFILE' },
+              { id: 'home', icon: <Home className="w-6 h-6" />, label: 'HOME' },
+              { id: 'watch', icon: <PlaySquare className="w-6 h-6" />, label: 'WATCH' },
+              { id: 'task_wall', icon: <Search className="w-6 h-6" />, label: 'SURVEYS' },
+              { id: 'tasks', icon: <Layout className="w-6 h-6" />, label: 'TASKS' },
+              { id: 'premium', icon: <Briefcase className="w-6 h-6" />, label: 'PARTNER' },
+              { id: 'profile', icon: <User className="w-6 h-6" />, label: 'PROFILE' },
             ].map((tab) => (
               <button 
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1 w-14 ${activeTab === tab.id ? 'text-yellow-600' : 'text-slate-400 hover:text-slate-600'} transition-colors relative`}
+                className={`flex flex-col items-center gap-1 w-14 ${activeTab === tab.id ? 'text-amber-500' : 'text-slate-400 hover:text-slate-600'} transition-all duration-300 relative group`}
               >
-                <div className={`transition-transform ${activeTab === tab.id ? 'scale-110' : ''}`}>
-                  {tab.icon}
+                <div className={`relative transition-all duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-2' : 'group-hover:scale-105'}`}>
+                  {activeTab === tab.id && (
+                    <div className="absolute inset-0 bg-amber-400 blur-xl opacity-60 rounded-full animate-pulse"></div>
+                  )}
+                  <div className="relative z-10 drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]">
+                    {tab.icon}
+                  </div>
                 </div>
-                <span className="text-[8px] font-black tracking-tighter text-center leading-none">{tab.label}</span>
+                <span className={`text-[9px] font-black tracking-tighter text-center leading-none transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-110' : 'opacity-70'}`}>{tab.label}</span>
                 {activeTab === tab.id && (
-                  <div className="absolute -top-3 w-6 h-1 bg-yellow-500 rounded-b-full"></div>
+                  <div className="absolute -top-3 w-10 h-1.5 bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 rounded-b-full shadow-[0_4px_12px_rgba(245,158,11,0.6)]"></div>
                 )}
               </button>
             ))}

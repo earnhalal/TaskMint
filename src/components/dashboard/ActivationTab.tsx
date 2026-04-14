@@ -8,7 +8,6 @@ import {
   Smartphone, 
   History, 
   Clock, 
-  CheckCircle, 
   XCircle,
   ArrowLeft,
   Copy,
@@ -224,7 +223,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
                   item.status === 'Rejected' ? 'bg-red-100 text-red-600' :
                   'bg-amber-100 text-amber-600'
                 }`}>
-                  {item.status === 'Approved' ? <CheckCircle className="w-5 h-5" /> :
+                  {item.status === 'Approved' ? <CheckCircle2 className="w-5 h-5" /> :
                    item.status === 'Rejected' ? <XCircle className="w-5 h-5" /> :
                    <Clock className="w-5 h-5" />}
                 </div>
