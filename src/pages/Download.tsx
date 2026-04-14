@@ -8,17 +8,17 @@ export default function DownloadPage() {
   const apkLink = "https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4";
 
   useEffect(() => {
-    document.title = "Download TaskMint App | Best Online Earning App in Pakistan 2026";
+    document.title = "Download TaskMint App APK | Best Online Earning App in Pakistan 2026";
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
-      metaDesc.setAttribute('content', "Download TaskMint APK - The #1 real online earning app in Pakistan. Earn money daily by watching ads, completing tasks, and surveys. Fast JazzCash & Easypaisa withdrawals. Get Rs. 100 bonus on app install.");
+      metaDesc.setAttribute('content', "Download TaskMint App APK - The #1 real online earning app in Pakistan. Earn money daily by watching ads, completing tasks, and surveys. Fast JazzCash & Easypaisa withdrawals. Get TaskMint APK download for free.");
     }
   }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-amber-100 selection:text-amber-900">
-      {/* SEO Optimized Meta Tags (handled by useEffect but good to have visible content) */}
-      <h1 className="sr-only">Download TaskMint APK - Best Online Earning App in Pakistan</h1>
+      {/* SEO Optimized Meta Tags */}
+      <h1 className="sr-only">TaskMint App APK Download - Best Online Earning App in Pakistan</h1>
       
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-slate-100">
@@ -50,7 +50,7 @@ export default function DownloadPage() {
               animate={{ opacity: 1, scale: 1 }}
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-black uppercase tracking-widest mb-6"
             >
-              <Star className="w-3 h-3 fill-amber-500" /> Official APK Download
+              <Star className="w-3 h-3 fill-amber-500" /> Official TaskMint App APK
             </motion.div>
             
             <motion.h2 
@@ -58,8 +58,8 @@ export default function DownloadPage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-tight"
             >
-              Earn Real Money <br/> 
-              <span className="text-amber-500">Every Single Day.</span>
+              Download TaskMint <br/> 
+              <span className="text-amber-500">Real Earning App APK.</span>
             </motion.h2>
             
             <motion.p 
@@ -68,7 +68,7 @@ export default function DownloadPage() {
               transition={{ delay: 0.1 }}
               className="text-slate-600 text-lg mb-10 max-w-2xl mx-auto font-medium"
             >
-              TaskMint is Pakistan's most trusted online earning platform. Watch ads, complete surveys, and withdraw your earnings instantly via JazzCash and Easypaisa.
+              TaskMint app apk download karein aur ghar baithy online earning shuru karein. Pakistan ka sabse bharosemand online work platform.
             </motion.p>
 
             {/* Download Card */}
@@ -86,7 +86,7 @@ export default function DownloadPage() {
                 </div>
                 
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-2xl font-black text-slate-900 mb-2">TaskMint Mobile App</h3>
+                  <h3 className="text-2xl font-black text-slate-900 mb-2">TaskMint App APK (Latest)</h3>
                   <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
                     <div className="flex items-center gap-1 text-amber-500">
                       <Star className="w-4 h-4 fill-amber-500" />
@@ -110,11 +110,11 @@ export default function DownloadPage() {
                     className="inline-flex items-center gap-3 bg-slate-900 text-white px-10 py-5 rounded-2xl font-black text-xl hover:bg-slate-800 transition-all shadow-xl hover:shadow-slate-900/20 active:scale-95 group"
                   >
                     <Download className="w-6 h-6 group-hover:animate-bounce" />
-                    Download APK Now
+                    Download TaskMint APK
                   </a>
                   
                   <p className="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    Claim Rs. 100 Welcome Bonus after installing!
+                    TaskMint app install karein aur Rs. 100 bonus claim karein!
                   </p>
                 </div>
               </div>
@@ -127,60 +127,60 @@ export default function DownloadPage() {
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-6">
                 <ShieldCheck className="w-6 h-6" />
               </div>
-              <h4 className="text-lg font-black text-slate-900 mb-2">100% Secure</h4>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">Verified APK with no malware. Your data and earnings are always protected.</p>
+              <h4 className="text-lg font-black text-slate-900 mb-2">100% Secure APK</h4>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed">Verified TaskMint app apk with no malware. Safe for all Android devices.</p>
             </div>
             
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
               <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-6">
                 <Wallet className="w-6 h-6" />
               </div>
-              <h4 className="text-lg font-black text-slate-900 mb-2">Fast Payouts</h4>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">Withdraw your money instantly to JazzCash, Easypaisa, or any Bank account in Pakistan.</p>
+              <h4 className="text-lg font-black text-slate-900 mb-2">JazzCash Earnings</h4>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed">TaskMint app se earn kiya hua paisa JazzCash aur Easypaisa mein withdraw karein.</p>
             </div>
 
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
               <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 mb-6">
                 <Gift className="w-6 h-6" />
               </div>
-              <h4 className="text-lg font-black text-slate-900 mb-2">Daily Rewards</h4>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">Get daily login bonuses and high-paying tasks exclusive to our mobile app users.</p>
+              <h4 className="text-lg font-black text-slate-900 mb-2">App Install Bonus</h4>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed">TaskMint app apk install karne par Rs. 100 ka instant welcome bonus milta hai.</p>
             </div>
           </div>
 
           {/* SEO Content Section */}
           <article className="prose prose-slate max-w-none bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-sm">
-            <h3 className="text-2xl font-black text-slate-900 mb-6">Why TaskMint is the Best Online Earning App in Pakistan?</h3>
+            <h3 className="text-2xl font-black text-slate-900 mb-6">TaskMint App APK: Pakistan's Best Online Earning App</h3>
             <p className="text-slate-600 font-medium leading-relaxed mb-6">
-              Pakistan mein online earning ke liye hazaron apps hain, lekin TaskMint sabse mukhtalif aur bharosemand hai. Hum apne users ko real cash dete hain jo wo asani se apne JazzCash ya Easypaisa account mein mangwa sakte hain. 
+              Agar aap real <strong>online earning app</strong> talash kar rahe hain, to <strong>TaskMint app apk</strong> aapke liye behtareen choice hai. Is app mein aap video ads dekh kar, surveys mukammal kar ke, aur doston ko invite kar ke rozana hazaron rupaye kama sakte hain.
             </p>
             
             <div className="space-y-4 mb-8">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                <p className="text-sm text-slate-700 font-bold">Watch High-Paying Video Ads: Har video dekhne par Rs. 0.20 se Rs. 1 tak earn karein.</p>
+                <p className="text-sm text-slate-700 font-bold">TaskMint App APK Download: Simple aur fast installation process.</p>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                <p className="text-sm text-slate-700 font-bold">Spin & Win: Daily spin wheel se baray inamaat jeetne ka mauka.</p>
+                <p className="text-sm text-slate-700 font-bold">Online Work from Home: Ghar baithy mobile par kaam karein.</p>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                <p className="text-sm text-slate-700 font-bold">Referral Bonus: Apne doston ko invite karein aur unki earning ka 10% commission payein.</p>
+                <p className="text-sm text-slate-700 font-bold">Real Earning App: 100% verified payouts aur local support.</p>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                <p className="text-sm text-slate-700 font-bold">Instant Withdrawals: Payouts ke liye hafton intezar nahi karna parta, same day withdrawal milta hai.</p>
+                <p className="text-sm text-slate-700 font-bold">TaskMint APK: Low data usage aur fast performance.</p>
               </div>
             </div>
 
-            <h4 className="text-xl font-black text-slate-900 mb-4">How to Install TaskMint APK?</h4>
+            <h4 className="text-xl font-black text-slate-900 mb-4">How to Download and Install TaskMint App APK?</h4>
             <ol className="list-decimal list-inside space-y-3 text-slate-600 font-medium">
-              <li>Upar diye gaye "Download APK Now" button par click karein.</li>
-              <li>APK file download hone ke baad usay open karein.</li>
-              <li>Agar "Install from Unknown Sources" ka option aaye, to usay settings mein ja kar enable karein.</li>
-              <li>Install button par click karein aur app open kar ke apna account banayein.</li>
-              <li>Account banate hi Rs. 100 ka Welcome Bonus claim karein!</li>
+              <li>Upar diye gaye <strong>"Download TaskMint APK"</strong> button par click karein.</li>
+              <li>APK file download hone ke baad notification bar se file open karein.</li>
+              <li>Settings mein ja kar "Allow from this source" ya "Unknown Sources" ko enable karein.</li>
+              <li>Install par click karein aur app open kar ke Register karein.</li>
+              <li>Apna referral code enter karein aur bonus hasil karein!</li>
             </ol>
           </article>
 
@@ -188,7 +188,7 @@ export default function DownloadPage() {
           <div className="mt-12 text-center">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Keywords</p>
             <div className="flex flex-wrap justify-center gap-2">
-              {["online earning pakistan", "earn money online", "taskmint app", "jazzcash earning app", "easypaisa earning app", "real earning app 2026", "make money online pakistan"].map(tag => (
+              {["online earning pakistan", "earn money online", "taskmint app apk", "taskmint download", "jazzcash earning app", "easypaisa earning app", "real earning app 2026", "make money online pakistan", "taskmint apk download"].map(tag => (
                 <span key={tag} className="text-[9px] font-bold text-slate-400 border border-slate-200 px-2 py-1 rounded-md">#{tag.replace(/\s+/g, '')}</span>
               ))}
             </div>

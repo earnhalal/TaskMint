@@ -412,6 +412,12 @@ export default function HomeTab({
                 {accountStatus === 'Active' && (
                   <CheckCircle2 className="w-5 h-5 text-blue-600 fill-blue-600/10" />
                 )}
+                {role === 'partner' && (
+                  <div className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                    <Crown className="w-3 h-3" />
+                    <span className="text-[10px] font-black uppercase">VIP Partner</span>
+                  </div>
+                )}
               </div>
           </div>
           
@@ -567,6 +573,15 @@ export default function HomeTab({
               />
               {/* Daily Gift Logic */}
               <QuickActionBtn 
+                  icon={<SparklesIcon />} 
+                  label="Social+" 
+                  onClick={onSocialTaskPlusClick} 
+                  colorClass="bg-gradient-to-br from-orange-400 via-rose-500 to-pink-600" 
+                  delay={350}
+                  isHighlight={true}
+                  badge="BONUS"
+              />
+              <QuickActionBtn 
                   icon={<CalendarIcon />} 
                   label="Daily Gift" 
                   onClick={handleDailyCheckin} 
@@ -598,15 +613,6 @@ export default function HomeTab({
                   colorClass="bg-gradient-to-br from-blue-400 via-sky-500 to-blue-600" 
                   delay={300}
               />
-              <QuickActionBtn 
-                  icon={<SparklesIcon />} 
-                  label="Social+" 
-                  onClick={onSocialTaskPlusClick} 
-                  colorClass="bg-gradient-to-br from-orange-400 via-rose-500 to-pink-600" 
-                  delay={350}
-                  isHighlight={true}
-                  badge="BONUS"
-              />
           </div>
       </div>
 
@@ -631,38 +637,33 @@ export default function HomeTab({
                 {/* Texture overlay */}
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
 
-                <div className="relative z-10 flex flex-col gap-6">
+                <div className="relative z-10 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-3 rounded-2xl shadow-lg shadow-amber-500/30 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                        <InviteIcon className="w-6 h-6 text-white" />
+                      <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-2.5 rounded-2xl shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-300">
+                        <InviteIcon className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 shadow-sm">Mega Bonus</span>
-                    </div>
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-300 to-amber-600 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.5)] border-2 border-white/20 animate-bounce-small">
-                        <GiftIcon className="w-7 h-7 text-white drop-shadow-md" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-300 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 shadow-sm">Mega Bonus</span>
                     </div>
                   </div>
                   
                   <div>
-                    <h3 className="text-3xl sm:text-4xl font-black leading-tight mb-2 font-display drop-shadow-md">
-                      Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400 text-5xl sm:text-6xl drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">Rs 125</span>
+                    <h3 className="text-2xl font-black leading-tight mb-1 font-display drop-shadow-md">
+                      Earn <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400 text-3xl drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">Rs 125</span>
                     </h3>
-                    <h4 className="text-xl sm:text-2xl font-black text-blue-100 mb-4 drop-shadow-sm">Per Friend!</h4>
+                    <h4 className="text-lg font-black text-blue-100 mb-3 drop-shadow-sm">Per Friend!</h4>
                     
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm inline-block w-full">
-                      <p className="text-sm sm:text-base text-slate-200 font-medium leading-relaxed">
-                        Just <strong className="text-amber-400 font-black text-lg">2 Invites</strong> = <strong className="text-emerald-400 font-black text-lg">Rs 250 Guaranteed!</strong>
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-3 backdrop-blur-sm inline-block w-full">
+                      <p className="text-xs text-slate-200 font-medium">
+                        Invite friends & earn <strong className="text-amber-400 font-black">unlimited rewards</strong>.
                       </p>
-                      <p className="text-xs text-slate-400 mt-1 font-bold">No limits. Withdraw instantly.</p>
                     </div>
                   </div>
 
                   <button 
-                    className="mt-2 w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-all flex items-center justify-center gap-2 active:scale-95 group-hover:from-amber-400 group-hover:to-orange-500 relative overflow-hidden"
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black py-3 px-4 rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-all flex items-center justify-center gap-2 active:scale-95 group-hover:from-amber-400 group-hover:to-orange-500 relative overflow-hidden"
                   >
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-                    <span className="relative z-10 flex items-center gap-2 drop-shadow-md">Invite Friends Now <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></span>
+                    <span className="relative z-10 flex items-center gap-2 drop-shadow-md text-sm">Invite Now <ArrowRight className="w-4 h-4" /></span>
                   </button>
                 </div>
             </div>
