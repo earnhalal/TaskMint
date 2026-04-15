@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import Landing from './pages/Landing';
 import Auth from './pages/Auth';
@@ -96,11 +96,11 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <div className="w-full max-w-full overflow-x-hidden relative min-h-screen">
           <AppContent />
         </div>
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   );
 }
