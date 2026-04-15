@@ -20,7 +20,7 @@ export const blogPosts: BlogPost[] = [
     date: 'April 14, 2026',
     author: 'TaskMint Team',
     category: 'Online Earning',
-    image: 'https://picsum.photos/seed/ads/800/400',
+    image: '',
     keywords: ['online earning', 'watch ads', 'earn money online', 'online work'],
     content: `
       <h2>The Easiest Way to Start Online Earning</h2>
@@ -50,7 +50,7 @@ export const blogPosts: BlogPost[] = [
     date: 'April 12, 2026',
     author: 'TaskMint Team',
     category: 'Tutorial',
-    image: 'https://picsum.photos/seed/offerwall/800/400',
+    image: '',
     keywords: ['offer wall', 'wannads', 'cpx research', 'online earning app'],
     content: `
       <h2>Professional Online Earning with Offer Walls</h2>
@@ -81,7 +81,7 @@ export const blogPosts: BlogPost[] = [
     date: 'April 10, 2026',
     author: 'TaskMint Team',
     category: 'Lottery',
-    image: 'https://picsum.photos/seed/lottery/800/400',
+    image: '',
     keywords: ['online lottery', 'win money', 'spin wheel', 'online earning Pakistan'],
     content: `
       <h2>Your Chance to Win Big with Online Lottery</h2>
@@ -110,7 +110,7 @@ export const blogPosts: BlogPost[] = [
     date: 'April 08, 2026',
     author: 'TaskMint Team',
     category: 'Reviews',
-    image: 'https://picsum.photos/seed/pakistan/800/400',
+    image: '',
     keywords: ['online earning app Pakistan', 'online work from home', 'real earning app', 'JazzCash earning'],
     content: `
       <h2>The Future of Online Work in Pakistan</h2>

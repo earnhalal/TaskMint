@@ -78,14 +78,16 @@ export default function BlogPost() {
             </div>
           </div>
 
-          <div className="rounded-[2.5rem] overflow-hidden mb-12 shadow-2xl">
-            <img 
-              src={post.image} 
-              alt={post.title} 
-              className="w-full h-auto"
-              referrerPolicy="no-referrer"
-            />
-          </div>
+          {post.image && (
+            <div className="rounded-[2.5rem] overflow-hidden mb-12 shadow-2xl">
+              <img 
+                src={post.image} 
+                alt={post.title} 
+                className="w-full h-auto"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          )}
 
           <article className="prose prose-slate prose-lg max-w-none 
             prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight

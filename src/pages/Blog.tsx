@@ -51,13 +51,17 @@ export default function Blog() {
               transition={{ delay: index * 0.1 }}
               className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group flex flex-col"
             >
-              <div className="relative h-64 overflow-hidden">
-                <img 
-                  src={post.image} 
-                  alt={post.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  referrerPolicy="no-referrer"
-                />
+              <div className="relative h-64 overflow-hidden bg-slate-100 flex items-center justify-center">
+                {post.image ? (
+                  <img 
+                    src={post.image} 
+                    alt={post.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="text-slate-400 font-black text-4xl tracking-tighter">TM</div>
+                )}
                 <div className="absolute top-4 left-4 bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
                   {post.category}
                 </div>
