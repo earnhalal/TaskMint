@@ -22,7 +22,8 @@ import {
     Zap,
     Download,
     Lock,
-    Gift
+    Gift,
+    Crown
 } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
 import { db, auth, rtdb } from '../../firebase';
