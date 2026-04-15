@@ -20,7 +20,7 @@ export const blogPosts: BlogPost[] = [
     date: 'April 14, 2026',
     author: 'TaskMint Team',
     category: 'Online Earning',
-    image: '',
+    image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800',
     keywords: ['online earning', 'watch ads', 'earn money online', 'online work'],
     content: `
       <h2>The Easiest Way to Start Online Earning</h2>
@@ -50,7 +50,7 @@ export const blogPosts: BlogPost[] = [
     date: 'April 12, 2026',
     author: 'TaskMint Team',
     category: 'Tutorial',
-    image: '',
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800',
     keywords: ['offer wall', 'wannads', 'cpx research', 'online earning app'],
     content: `
       <h2>Professional Online Earning with Offer Walls</h2>
@@ -81,7 +81,7 @@ export const blogPosts: BlogPost[] = [
     date: 'April 10, 2026',
     author: 'TaskMint Team',
     category: 'Lottery',
-    image: '',
+    image: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
     keywords: ['online lottery', 'win money', 'spin wheel', 'online earning Pakistan'],
     content: `
       <h2>Your Chance to Win Big with Online Lottery</h2>
@@ -110,7 +110,7 @@ export const blogPosts: BlogPost[] = [
     date: 'April 08, 2026',
     author: 'TaskMint Team',
     category: 'Reviews',
-    image: '',
+    image: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=800',
     keywords: ['online earning app Pakistan', 'online work from home', 'real earning app', 'JazzCash earning'],
     content: `
       <h2>The Future of Online Work in Pakistan</h2>
