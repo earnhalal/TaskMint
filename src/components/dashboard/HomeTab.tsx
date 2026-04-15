@@ -245,7 +245,7 @@ export default function HomeTab({
     if (!isApp) {
       console.log("[DAILY_CHECKIN] Not in App, redirecting...");
       alert("Ye reward sirf TaskMint App par milta hai. Bonus lene ke liye App download karein!");
-      navigate('/download');
+      navigate('/app-download');
       return;
     }
 
@@ -326,7 +326,7 @@ export default function HomeTab({
       {/* Download App Button - Hero Section */}
       {!isApp && (
         <div 
-          onClick={() => navigate('/download')}
+          onClick={() => navigate('/app-download')}
           className="block w-full bg-gradient-to-r from-emerald-500 to-emerald-800 p-4 rounded-2xl shadow-lg shadow-emerald-500/30 border border-emerald-400/30 relative overflow-hidden group animate-pulse-emerald cursor-pointer"
         >
           <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>

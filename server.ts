@@ -96,6 +96,56 @@ async function startServer() {
     res.status(200).send("OK - Status not complete");
   });
 
+  // API route for Wannads postback
+  app.all("/api/postback/wannads", async (req, res) => {
+    console.log("--- Wannads Postback Received ---");
+    console.log("Query Params:", req.query);
+
+    const { userId, reward, transId, status } = req.query;
+
+    if (status === "credited") {
+      try {
+        const firestore = getDb();
+        const rewardLocal = parseFloat(reward as string);
+        
+        if (!userId) throw new Error("Missing userId");
+
+        const userRef = firestore.collection("users").doc(userId as string);
+        const transRef = userRef.collection("transactions").doc();
+        
+        console.log(`Processing Wannads reward for user: ${userId}, amount: ${rewardLocal}`);
+
+        await firestore.runTransaction(async (transaction) => {
+          const userDoc = await transaction.get(userRef);
+          if (!userDoc.exists) {
+            throw new Error(`User ${userId} not found`);
+          }
+
+          transaction.update(userRef, {
+            balance: admin.firestore.FieldValue.increment(rewardLocal),
+            totalEarnings: admin.firestore.FieldValue.increment(rewardLocal)
+          });
+
+          transaction.set(transRef, {
+            type: 'Wannads Reward',
+            amount: rewardLocal,
+            status: 'completed',
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            description: `Wannads Offer (${transId})`
+          });
+        });
+        
+        console.log("Balance and earnings updated, transaction recorded.");
+        return res.status(200).send("OK");
+      } catch (error: any) {
+        console.error("Wannads Postback Processing Error:", error.message);
+        return res.status(200).send(`Error: ${error.message}`);
+      }
+    }
+
+    res.status(200).send("OK - Status not credited");
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

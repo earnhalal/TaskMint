@@ -80,7 +80,7 @@ function AppContent() {
             <Dashboard />
           </ProtectedRoute>
         } />
-        <Route path="/download" element={<Download />} />
+        <Route path="/app-download" element={<Download />} />
         <Route path="/privacy" element={<Legal />} />
         <Route path="/terms" element={<Legal />} />
         <Route path="/disclaimer" element={<Legal />} />

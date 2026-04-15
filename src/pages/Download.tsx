@@ -18,7 +18,11 @@ export default function DownloadPage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-amber-100 selection:text-amber-900">
       {/* SEO Optimized Meta Tags */}
-      <h1 className="sr-only">TaskMint App APK Download - Best Online Earning App in Pakistan</h1>
+      <div className="max-w-4xl mx-auto px-6 pt-10">
+        <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          TaskMint App <span className="text-amber-500">Download</span>
+        </h1>
+      </div>
       
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-slate-100">

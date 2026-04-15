@@ -612,19 +612,19 @@ export default function Landing() {
                   title: "How to Earn Money Watching Ads",
                   slug: "earn-money-watching-ads",
                   category: "Online Work",
-                  image: "https://picsum.photos/seed/ads/600/400"
+                  image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800"
                 },
                 {
                   title: "Maximize Offer Wall Earnings",
                   slug: "maximize-offer-wall-earnings",
                   category: "Tutorial",
-                  image: "https://picsum.photos/seed/offerwall/600/400"
+                  image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800"
                 },
                 {
                   title: "TaskMint Online Lottery Guide",
                   slug: "taskmint-online-lottery-guide",
                   category: "Lottery",
-                  image: "https://picsum.photos/seed/lottery/600/400"
+                  image: "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800"
                 }
               ].map((post, i) => (
                 <div key={i} className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group cursor-pointer" onClick={() => navigate(`/blog/${post.slug}`)}>
@@ -687,7 +687,7 @@ export default function Landing() {
                             <ul className="space-y-4 text-sm font-bold text-slate-500">
                                 <li><button onClick={() => navigate('/blog')} className="hover:text-blue-600 transition-colors">Earning Blog</button></li>
                                 <li><button onClick={() => navigate('/promotion')} className="hover:text-blue-600 transition-colors">Promotion Program</button></li>
-                                <li><button onClick={() => navigate('/download')} className="hover:text-blue-600 transition-colors">Download App</button></li>
+                                <li><button onClick={() => navigate('/app-download')} className="hover:text-blue-600 transition-colors">Download App</button></li>
                                 <li><button onClick={() => navigate('/contact')} className="hover:text-blue-600 transition-colors">Support Center</button></li>
                             </ul>
                         </div>

@@ -82,7 +82,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
     if (!isApp) {
       alert("Video Ads sirf TaskMint App mein chalte hain. Bonus lene ke liye App download karein!");
-      navigate('/download');
+      navigate('/app-download');
       return;
     }
 
