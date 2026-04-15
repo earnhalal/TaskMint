@@ -99,16 +99,27 @@ async function startServer() {
   // API route for Wannads postback
   app.all("/api/postback/wannads", async (req, res) => {
     console.log("--- Wannads Postback Received ---");
-    console.log("Query Params:", req.query);
+    console.log("Query Params:", JSON.stringify(req.query));
 
     const { userId, reward, transId, status } = req.query;
+
+    // Check if parameters are still placeholders
+    if (userId === "{userId}" || reward === "{reward}" || transId === "{transId}") {
+      console.error("Error: Received placeholder values instead of real data.");
+      return res.status(400).send("Error: Placeholder values received. Please check Wannads dashboard configuration.");
+    }
+
+    // Wannads might send reward as a string like "1.00"
+    const rewardLocal = parseFloat(reward as string);
+    
+    console.log(`Debug: userId=${userId}, reward=${reward}, rewardLocal=${rewardLocal}, transId=${transId}, status=${status}`);
 
     if (status === "credited") {
       try {
         const firestore = getDb();
-        const rewardLocal = parseFloat(reward as string);
         
         if (!userId) throw new Error("Missing userId");
+        if (isNaN(rewardLocal)) throw new Error(`Invalid reward amount: ${reward}`);
 
         const userRef = firestore.collection("users").doc(userId as string);
         const transRef = userRef.collection("transactions").doc();
@@ -118,6 +129,7 @@ async function startServer() {
         await firestore.runTransaction(async (transaction) => {
           const userDoc = await transaction.get(userRef);
           if (!userDoc.exists) {
+            console.error(`User ${userId} not found in Firestore`);
             throw new Error(`User ${userId} not found`);
           }
 
@@ -135,14 +147,15 @@ async function startServer() {
           });
         });
         
-        console.log("Balance and earnings updated, transaction recorded.");
+        console.log("Balance and earnings updated successfully.");
         return res.status(200).send("OK");
       } catch (error: any) {
         console.error("Wannads Postback Processing Error:", error.message);
-        return res.status(200).send(`Error: ${error.message}`);
+        return res.status(500).send(`Error: ${error.message}`);
       }
     }
 
+    console.log(`Wannads Postback ignored: status=${status}`);
     res.status(200).send("OK - Status not credited");
   });
 
