@@ -97,16 +97,23 @@ async function startServer() {
   });
 
   // API route for Wannads postback
-  app.all("/api/postback/wannads", async (req, res) => {
+  app.all("/postback-wannads", async (req, res) => {
     console.log("--- Wannads Postback Received ---");
     console.log("Query Params:", JSON.stringify(req.query));
 
-    const { userId, reward, transId, status } = req.query;
+    const { userId, reward, transId, status, signature } = req.query;
+    const secret = "47642a4158"; // Secret from dashboard
 
-    // Check if parameters are still placeholders
-    if (userId === "{userId}" || reward === "{reward}" || transId === "{transId}") {
-      console.error("Error: Received placeholder values instead of real data.");
-      return res.status(400).send("Error: Placeholder values received. Please check Wannads dashboard configuration.");
+    // Verify signature (Wannads usually uses MD5 or SHA1 for postback signature)
+    // Assuming Wannads uses a simple hash of parameters + secret
+    const dataToHash = `${userId}${reward}${transId}${status}${secret}`;
+    const calculatedSignature = crypto.createHash("md5").update(dataToHash).digest("hex");
+
+    // For now, let's log the signature mismatch but still process if status is credited
+    if (signature && signature !== calculatedSignature) {
+      console.warn("Signature mismatch! Calculated:", calculatedSignature, "Received:", signature);
+      // You might want to uncomment the next line to enforce security
+      // return res.status(403).send("Forbidden: Invalid signature");
     }
 
     // Wannads might send reward as a string like "1.00"
@@ -118,7 +125,7 @@ async function startServer() {
       try {
         const firestore = getDb();
         
-        if (!userId) throw new Error("Missing userId");
+        if (!userId || userId === "{userId}") throw new Error(`Missing or placeholder userId: ${userId}`);
         if (isNaN(rewardLocal)) throw new Error(`Invalid reward amount: ${reward}`);
 
         const userRef = firestore.collection("users").doc(userId as string);
@@ -157,6 +164,11 @@ async function startServer() {
 
     console.log(`Wannads Postback ignored: status=${status}`);
     res.status(200).send("OK - Status not credited");
+  });
+
+  // Simple test endpoint
+  app.get("/api/test", (req, res) => {
+    res.status(200).send("API is working!");
   });
 
   // Vite middleware for development

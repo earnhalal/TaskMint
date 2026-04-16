@@ -305,14 +305,18 @@ export default function Dashboard() {
       setDepositHistory(depositsData);
     }, (error) => console.error("Deposits Error:", error));
 
-    // Listener for withdrawals from RTDB (Single node)
-    const withdrawalsRef = ref(rtdb, `withdrawals/${user.uid}`);
+    // Listener for withdrawals from Firestore
+    const qWithdrawals = query(
+      collection(db, 'withdrawals'),
+      where('userId', '==', user.uid)
+    );
     
-    const unsubscribeWithdrawals = onValue(withdrawalsRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      const list = Object.entries(data).map(([id, val]: [string, any]) => ({ id, ...val }));
+    const unsubscribeWithdrawals = onSnapshot(qWithdrawals, (snapshot) => {
+      const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      // Sort client-side
+      list.sort((a, b) => (b.timestamp?.toDate ? b.timestamp.toDate() : b.timestamp || 0) - (a.timestamp?.toDate ? a.timestamp.toDate() : a.timestamp || 0));
       setWithdrawals(list);
-    });
+    }, (error) => console.error("Withdrawals Error:", error));
 
     // Listener for notifications
     const qNotify = query(
@@ -876,27 +880,35 @@ export default function Dashboard() {
     }
   };
 
-  const handleRejectWithdrawal = async (targetUserId: string, withdrawalId: string) => {
+  const handleRejectWithdrawal = async (targetUserId: string, withdrawalId: string, reason: string) => {
     try {
-      console.log(`[ADMIN_ACTION] Rejecting withdrawal: ${withdrawalId} for user: ${targetUserId}`);
+      console.log(`[ADMIN_ACTION] Rejecting withdrawal: ${withdrawalId} for user: ${targetUserId}, Reason: ${reason}`);
       
       // 1. Update Firestore
       const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
       await updateDoc(withdrawalRef, { 
         status: 'Rejected',
+        rejectionReason: reason,
         rejectedAt: new Date().toISOString()
       });
       console.log("[ADMIN_ACTION_SUCCESS] Firestore withdrawal status updated to Rejected");
 
       // 2. Update RTDB
-      const withdrawalRefRtdb = ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`);
-      const snapshot = await get(withdrawalRefRtdb);
+      const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
+      const snapshot = await get(userWithdrawalsRef);
       if (snapshot.exists()) {
-        await update(withdrawalRefRtdb, {
-          status: 'rejected',
-          rejectedAt: Date.now()
-        });
-        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal status updated to rejected");
+        const data = snapshot.val();
+        for (const key in data) {
+          if (data[key].firestoreId === withdrawalId) {
+            await update(ref(rtdb, `withdrawals/${targetUserId}/${key}`), {
+              status: 'rejected',
+              rejectionReason: reason,
+              rejectedAt: Date.now()
+            });
+            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal status updated to rejected");
+            break;
+          }
+        }
       }
 
       alert("Withdrawal rejected.");
@@ -931,51 +943,44 @@ export default function Dashboard() {
       }
 
       // 2. Update RTDB (Primary for History)
-      const withdrawalRefRtdb = ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`);
+      // Path structure in RTDB is withdrawals/{userId}/{someId}/{withdrawalId}
+      // We need to find the withdrawal entry under {userId}
+      const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
+      console.log(`[DEBUG] Searching for withdrawal in RTDB at: withdrawals/${targetUserId}`);
       
-      const snapshot = await get(withdrawalRefRtdb);
+      const snapshot = await get(userWithdrawalsRef);
+      let found = false;
+
       if (snapshot.exists()) {
-        await update(withdrawalRefRtdb, {
-          status: 'approved',
-          approvedAt: Date.now()
-        });
-        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal status updated to approved");
-      } else {
-        console.log("[ADMIN_ACTION] Withdrawal not found in RTDB by ID. Searching by amount fallback...");
-        const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
-        const userWithdrawalsSnap = await get(userWithdrawalsRef);
-        if (userWithdrawalsSnap.exists()) {
-          const withdrawalsData = userWithdrawalsSnap.val();
-          const matchEntry = Object.entries(withdrawalsData).find(([_, val]: [string, any]) => val.amount === amount && val.status === 'pending');
-          if (matchEntry) {
-            const [oldId] = matchEntry as [string, any];
-            await update(ref(rtdb, `withdrawals/${targetUserId}/${oldId}`), {
+        const data = snapshot.val();
+        // Iterate through the nested structure to find the withdrawal with matching firestoreId
+        for (const key in data) {
+          const subNode = data[key];
+          // Check if the withdrawal is directly under {userId}/{someId}
+          if (subNode.firestoreId === withdrawalId) {
+            await update(ref(rtdb, `withdrawals/${targetUserId}/${key}`), {
               status: 'approved',
               approvedAt: Date.now()
             });
-            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal found by amount and updated to approved");
-          } else {
-            await set(ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`), {
-              amount,
-              method,
-              status: 'approved',
-              timestamp: Date.now(),
-              approvedAt: Date.now(),
-              userId: targetUserId
-            });
-            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created in approved as last resort");
+            console.log(`[ADMIN_ACTION_SUCCESS] RTDB withdrawal updated at path: withdrawals/${targetUserId}/${key}`);
+            found = true;
+            break;
           }
-        } else {
-          await set(ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`), {
-            amount,
-            method,
-            status: 'approved',
-            timestamp: Date.now(),
-            approvedAt: Date.now(),
-            userId: targetUserId
-          });
-          console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created in approved (no data found)");
         }
+      }
+
+      if (!found) {
+        console.log("[ADMIN_ACTION] Withdrawal not found in RTDB by firestoreId. Creating new entry.");
+        await set(ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`), {
+          amount,
+          method,
+          status: 'approved',
+          timestamp: Date.now(),
+          approvedAt: Date.now(),
+          userId: targetUserId,
+          firestoreId: withdrawalId
+        });
+        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created as fallback");
       }
 
       await sendWithdrawalApprovedMail(targetUserId, amount);

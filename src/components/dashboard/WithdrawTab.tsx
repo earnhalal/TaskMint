@@ -88,20 +88,27 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
     setShowSuccess(true);
   };
 
-  const displayHistory = history.map(h => ({
-      id: h.id,
-      title: `${h.method} Withdrawal`,
-      subtitle: h.status.toLowerCase() === 'approved' && h.approvedAt 
-        ? `Approved: ${new Date(h.approvedAt).toLocaleString()}` 
-        : h.timestamp 
-          ? new Date(h.timestamp).toLocaleDateString() 
-          : h.date 
-            ? new Date(h.date).toLocaleDateString() 
-            : 'Recently',
-      amount: `-${h.amount}`,
-      status: h.status.toUpperCase(),
-      type: 'withdraw'
-    }));
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
+
+  const displayHistory = history.map(h => {
+      const dateVal = h.approvedAt 
+        ? (h.approvedAt.toDate ? h.approvedAt.toDate() : new Date(h.approvedAt))
+        : (h.timestamp 
+          ? (h.timestamp.toDate ? h.timestamp.toDate() : new Date(h.timestamp))
+          : (h.date ? new Date(h.date) : new Date()));
+
+      return {
+        id: h.id,
+        title: `${h.method} Withdrawal`,
+        subtitle: h.status.toLowerCase() === 'approved' && h.approvedAt 
+          ? `Approved: ${dateVal.toLocaleString()}` 
+          : `Date: ${dateVal.toLocaleDateString()}`,
+        amount: `-${h.amount}`,
+        status: h.status.toUpperCase(),
+        type: 'withdraw',
+        raw: h
+      };
+    });
 
   const progress = Math.min((balance / minWithdrawal) * 100, 100);
 
@@ -306,7 +313,9 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             
             <div className="space-y-4">
             {displayHistory.length > 0 ? displayHistory.map((item, i) => (
-                <div key={item.id ? `withdraw-${item.id}` : `withdraw-idx-${i}`} className="bg-white p-5 rounded-3xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                <div key={item.id ? `withdraw-${item.id}` : `withdraw-idx-${i}`} 
+                     onClick={() => setSelectedWithdrawal(item.raw)}
+                     className="bg-white p-5 rounded-3xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-all cursor-pointer">
                   <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-900 flex items-center justify-center shrink-0 border border-slate-100">
                         <ArrowDownCircle className="w-6 h-6" />
@@ -337,6 +346,60 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             </div>
         </div>
       </div>
+
+      {/* Receipt Modal */}
+      <AnimatePresence>
+        {selectedWithdrawal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center px-6 bg-slate-900/60 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl relative"
+            >
+              <button onClick={() => setSelectedWithdrawal(null)} className="absolute top-6 right-6 p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200">
+                <X className="w-4 h-4" />
+              </button>
+              
+              <h3 className="text-xl font-black text-slate-900 mb-6 text-center">Payment Receipt</h3>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-xs font-bold text-slate-400">Status</span>
+                  <span className={`text-xs font-black uppercase ${
+                    selectedWithdrawal.status === 'Pending' ? 'text-amber-600' : 
+                    (selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed') ? 'text-emerald-600' : 
+                    'text-red-600'
+                  }`}>{selectedWithdrawal.status}</span>
+                </div>
+                {selectedWithdrawal.status === 'Rejected' && selectedWithdrawal.rejectionReason && (
+                  <div className="bg-red-50 p-4 rounded-2xl border border-red-100">
+                    <span className="text-[10px] font-black text-red-600 uppercase tracking-widest block mb-1">Reason for Rejection</span>
+                    <p className="text-xs font-bold text-red-900">{selectedWithdrawal.rejectionReason}</p>
+                  </div>
+                )}
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-xs font-bold text-slate-400">Amount</span>
+                  <span className="text-xs font-black text-slate-900">Rs {selectedWithdrawal.amount}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-xs font-bold text-slate-400">Method</span>
+                  <span className="text-xs font-black text-slate-900 uppercase">{selectedWithdrawal.method}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-xs font-bold text-slate-400">Date</span>
+                  <span className="text-xs font-black text-slate-900">{new Date(selectedWithdrawal.date).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Success Modal */}
       <AnimatePresence>

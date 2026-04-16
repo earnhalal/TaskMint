@@ -688,18 +688,22 @@ export default function AdminPanelView({ onBack, onApproveActivation, onRejectAc
   }, [activeTab]);
 
   const handleReject = async (collectionName: string, id: string, userId?: string) => {
-    if (!window.confirm("Are you sure you want to reject this request?")) return;
-    try {
-      if (collectionName === 'withdrawals' && userId) {
-        await onRejectWithdrawal(userId, id);
-      } else if (activeTab === 'activations' && userId) {
-        await onRejectActivation(userId, id);
-      } else {
-        await updateDoc(doc(db, collectionName, id), { status: 'Rejected' });
-        alert("Request rejected.");
+    if (collectionName === 'withdrawals') {
+      const reason = prompt("Enter reason for rejection:");
+      if (!reason) return;
+      await onRejectWithdrawal(userId!, id, reason);
+    } else {
+      if (!window.confirm("Are you sure you want to reject this request?")) return;
+      try {
+        if (activeTab === 'activations' && userId) {
+          await onRejectActivation(userId, id);
+        } else {
+          await updateDoc(doc(db, collectionName, id), { status: 'Rejected' });
+          alert("Request rejected.");
+        }
+      } catch (error) {
+        console.error("Error rejecting request:", error);
       }
-    } catch (error) {
-      console.error("Error rejecting request:", error);
     }
   };
 

@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/postback-wannads",
-      "destination": "https://ais-dev-qdp4vvp2hmutv3yhzb7dut-97642847461.asia-southeast1.run.app/postback-wannads"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
