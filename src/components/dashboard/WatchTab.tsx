@@ -61,11 +61,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   }, []);
 
   const handleWatchAd = async (ad: typeof VIDEO_ADS[0]) => {
-    // Intercept with Coming Soon as requested
-    setShowComingSoon(true);
-    return;
-
-    /* Original logic commented out for future use
     // Check if locked
     const lastWatched = adStats[ad.id];
     if (lastWatched) {
@@ -91,13 +86,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
     // Trigger AppCreator24 Rewarded Video Intent
     try {
-      // Use location.href as requested
       (window as any).location.href = 'appcreator24://rewarded/video';
     } catch (e) {
       console.error("Intent failed:", e);
     }
 
-    // Simulate ad watching delay
+    // Wait for ad completion - Adjust timeout based on ad length
     setTimeout(async () => {
       if (!auth.currentUser) return;
 
@@ -108,10 +102,9 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
           [ad.id]: serverTimestamp()
         }, { merge: true });
 
-        // 2. Use the centralized balance update logic
+        // Update Balance
         await onUpdateBalance(ad.reward, 'ad_watch', `Watched ${ad.title}`);
 
-        // Update local state
         setAdStats(prev => ({ ...prev, [ad.id]: new Date() }));
         setMessage({ type: 'success', text: `Mubarak ho! Rs. ${ad.reward} aapke wallet mein add ho gaye hain.` });
       } catch (error) {
@@ -120,8 +113,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
       } finally {
         setIsWatching(null);
       }
-    }, 5000); 
-    */
+    }, 15000); // 15 seconds wait
   };
 
   if (isLoading) {
