@@ -274,7 +274,7 @@
       "schema": "promotion_orders",
       "description": "Collection for social media promotion orders"
     },
-    "/ads/{adId}": {
+    "/video_ads/{adId}": {
       "schema": "Ad",
       "description": "Collection for available video ads"
     },

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, X, Construction, Info } from 'lucide-react';
-import { doc, updateDoc, increment, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface WatchTabProps {
@@ -11,15 +11,19 @@ interface WatchTabProps {
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
 }
 
-const VIDEO_ADS = Array.from({ length: 10 }, (_, i) => ({
-  id: `ad_${i + 1}`,
-  title: `Video Ad #${i + 1}`,
-  reward: 0.20,
-  limit: 1 // 1 watch per 24 hours
-}));
+interface VideoAd {
+  id: string;
+  title: string;
+  reward: number;
+  limit?: number;
+  status?: string;
+  videoUrl?: string;
+  duration?: number;
+}
 
 export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabProps) {
   const [adStats, setAdStats] = useState<Record<string, any>>({});
+  const [videoAds, setVideoAds] = useState<VideoAd[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isWatching, setIsWatching] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -43,24 +47,47 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   }, []);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       if (!auth.currentUser) return;
       try {
+        // Fetch ads from Firestore
+        const adsRef = collection(db, 'video_ads');
+        const adsSnap = await getDocs(adsRef);
+        const fetchedAds: VideoAd[] = [];
+        adsSnap.forEach((doc) => {
+          const data = doc.data();
+          if (data.status !== 'inactive') { // Only show active/null status ads
+            fetchedAds.push({
+              id: doc.id,
+              title: data.title || `Video Ad`,
+              reward: data.reward || 0.20,
+              limit: data.limit || 1,
+              status: data.status,
+              videoUrl: data.videoUrl,
+              duration: data.duration
+            });
+          }
+        });
+        
+        // Sort ads arbitrarily or keep order from DB
+        setVideoAds(fetchedAds);
+
+        // Fetch user ad stats
         const statsRef = doc(db, 'user_ad_locks', auth.currentUser.uid);
         const statsSnap = await getDoc(statsRef);
         if (statsSnap.exists()) {
           setAdStats(statsSnap.data() || {});
         }
       } catch (error) {
-        console.error("Error fetching ad stats:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchStats();
+    fetchData();
   }, []);
 
-  const handleWatchAd = async (ad: typeof VIDEO_ADS[0]) => {
+  const handleWatchAd = async (ad: VideoAd) => {
     // Check if locked
     const lastWatched = adStats[ad.id];
     if (lastWatched) {
@@ -86,12 +113,18 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
     // Trigger AppCreator24 Rewarded Video Intent
     try {
+      // Method 1: Check for AppCreator24 specific methods
       if ((window as any).AppCreator24 && (window as any).AppCreator24.showRewardedAd) {
         (window as any).AppCreator24.showRewardedAd();
-      } else {
-        // Fallback or log if method not found
-        console.log("AppCreator24 object or showRewardedAd method not found.");
-        (window as any).location.href = 'appcreator24://rewarded/video';
+      } 
+      // Method 2: Try standard AdMob JS handler for WebView
+      else if ((window as any).showRewardedAd) {
+        (window as any).showRewardedAd();
+      }
+      else {
+        console.error("Ad methods not found on window object.");
+        // Last resort: Silent fail or alert for debugging in App
+        alert("Ad method not found. Check AppCreator24 Ad Settings.");
       }
     } catch (e) {
       console.error("Intent failed:", e);
@@ -179,9 +212,16 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
       )}
 
       <div className="grid gap-3">
-        {VIDEO_ADS.map((ad, index) => {
-          const lastWatched = adStats[ad.id];
-          let isLocked = false;
+        {videoAds.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-2xl border border-slate-100">
+            <AlertCircle className="w-8 h-8 text-slate-400 mb-2" />
+            <p className="text-sm font-bold text-slate-600">No ads available right now.</p>
+            <p className="text-xs text-slate-500 mt-1">Please check back later.</p>
+          </div>
+        ) : (
+          videoAds.map((ad, index) => {
+            const lastWatched = adStats[ad.id];
+            let isLocked = false;
           let remainingHours = 0;
 
           if (lastWatched) {
@@ -240,7 +280,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
               </button>
             </motion.div>
           );
-        })}
+        }))}
       </div>
 
       <div className="mt-8 p-6 bg-slate-100 rounded-[2rem] border border-dashed border-slate-300 text-center">

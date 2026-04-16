@@ -105,6 +105,12 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
     }
 
+    // Video Ads
+    match /video_ads/{adId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
     // Ad Stats
     match /user_ad_stats/{statId} {
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
