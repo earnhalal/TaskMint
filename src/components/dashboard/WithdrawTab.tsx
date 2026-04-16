@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wallet, ArrowRight, ArrowDownCircle, Sparkles, CheckCircle2, AlertCircle, Lock, Calendar, TrendingUp } from 'lucide-react';
+import { Wallet, ArrowRight, ArrowDownCircle, Sparkles, CheckCircle2, AlertCircle, Lock, Calendar, TrendingUp, X } from 'lucide-react';
 
 interface Account {
   id: string;
