@@ -61,6 +61,7 @@ import UpdatesView from '../components/dashboard/UpdatesView';
 import PartnerUpgradeView from '../components/dashboard/PartnerUpgradeView';
 import AdminPanelView from '../components/dashboard/AdminPanelView';
 import ActivationTab from '../components/dashboard/ActivationTab';
+import WannadsSurveyView from '../components/dashboard/WannadsSurveyView';
 
 import EditProfileView from '../components/dashboard/EditProfileView';
 
@@ -1290,6 +1291,16 @@ export default function Dashboard() {
           activeInvites={referralStats.activeMembers}
           onWinLockedPrize={handleWinLockedPrize}
         />;
+      case 'wannads':
+        return <WannadsSurveyView 
+                 userId={user?.uid || ''} 
+                 onBack={() => setActiveTab('home')} 
+               />;
+      case 'wannads':
+        return <WannadsSurveyView 
+                 userId={user?.uid || ''} 
+                 onBack={() => setActiveTab('home')} 
+               />;
       case 'premium':
         return <PremiumModal 
                  onClose={() => setActiveTab('home')} 
@@ -1360,6 +1371,7 @@ export default function Dashboard() {
           onActivateClick={() => setActiveTab('activation')}
           onTaskWallClick={() => setActiveTab('task_wall')}
           onSocialTaskPlusClick={() => setActiveTab('social_task_plus')}
+          onEasyTaskClick={() => setActiveTab('wannads')}
           onUpdateBalance={handleUpdateBalance}
           appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}

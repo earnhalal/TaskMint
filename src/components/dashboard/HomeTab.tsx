@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
     UserPlus as InviteIcon, 
-    CheckSquare as DocumentCheckIcon, 
+    CheckSquare as CheckSquareIcon, 
     Sparkles as SparklesIcon, 
     Clock as EarnIcon, 
     ArrowRight, 
@@ -50,6 +50,7 @@ interface HomeTabProps {
   onPartnerUpgradeClick: () => void;
   onActivateClick: () => void;
   onTaskWallClick: () => void;
+  onEasyTaskClick: () => void;
   onSocialTaskPlusClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
   appSettings: {
@@ -168,6 +169,7 @@ export default function HomeTab({
   onPartnerUpgradeClick,
   onActivateClick,
   onTaskWallClick,
+  onEasyTaskClick,
   onSocialTaskPlusClick,
   onUpdateBalance,
   appSettings,
@@ -571,6 +573,15 @@ export default function HomeTab({
                   colorClass="bg-gradient-to-br from-indigo-400 via-blue-500 to-blue-600" 
                   delay={110}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
+              />
+              <QuickActionBtn 
+                  icon={<CheckSquareIcon />} 
+                  label="Easy Task" 
+                  onClick={onEasyTaskClick} 
+                  colorClass="bg-gradient-to-br from-teal-400 via-cyan-500 to-emerald-600" 
+                  delay={120}
+                  isLocked={accountStatus.toLowerCase() !== 'active'}
+                  badge="NEW"
               />
               {/* Daily Gift Logic */}
               <QuickActionBtn 
