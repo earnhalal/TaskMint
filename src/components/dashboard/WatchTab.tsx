@@ -86,7 +86,13 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
     // Trigger AppCreator24 Rewarded Video Intent
     try {
-      (window as any).location.href = 'appcreator24://rewarded/video';
+      if ((window as any).AppCreator24 && (window as any).AppCreator24.showRewardedAd) {
+        (window as any).AppCreator24.showRewardedAd();
+      } else {
+        // Fallback or log if method not found
+        console.log("AppCreator24 object or showRewardedAd method not found.");
+        (window as any).location.href = 'appcreator24://rewarded/video';
+      }
     } catch (e) {
       console.error("Intent failed:", e);
     }
