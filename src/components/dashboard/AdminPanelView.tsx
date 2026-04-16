@@ -42,7 +42,7 @@ interface AdminPanelViewProps {
   onApprovePartner: (userId: string, requestId: string) => Promise<void>;
   onApproveDeposit: (userId: string, depositId: string, amount: number) => Promise<void>;
   onApproveWithdrawal: (userId: string, withdrawalId: string) => Promise<void>;
-  onRejectWithdrawal: (userId: string, withdrawalId: string) => Promise<void>;
+  onRejectWithdrawal: (userId: string, withdrawalId: string, reason: string) => Promise<void>;
 }
 
 function SettingsView() {
