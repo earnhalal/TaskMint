@@ -31,6 +31,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [userName, setUserName] = useState<string>('User');
   const navigate = useNavigate();
 
   // Update "now" every minute to refresh lock timers
@@ -110,6 +111,14 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
         if (statsSnap.exists()) {
           setAdStats(statsSnap.data() || {});
         }
+
+        // Fetch user profile for name
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const udata = userSnap.data();
+          setUserName(udata.name || udata.username || udata.fullName || 'User');
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -124,6 +133,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   const [timeLeft, setTimeLeft] = useState(60);
   const [totalTime, setTotalTime] = useState(60);
   const [adLoaded, setAdLoaded] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState<{ 
+    amount: number;
+    adTitle: string;
+    timestamp: string;
+  } | null>(null);
 
   useEffect(() => {
     let timerId: NodeJS.Timeout;
@@ -143,6 +158,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
   const finishAdWatch = async () => {
     if (!auth.currentUser || !activeAd) return;
+    setIsClaiming(true);
     try {
       // Update Ad Views in DB
       const adRef = doc(db, 'video_ads', activeAd.id);
@@ -158,16 +174,33 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
       }, { merge: true });
 
       // Update Balance
-      await onUpdateBalance(activeAd.reward, 'ad_watch', `Watched ${activeAd.title}`);
+      const rewardAmount = activeAd.reward;
+      await onUpdateBalance(rewardAmount, 'ad_watch', `Watched ${activeAd.title}`);
 
       setAdStats(prev => ({ ...prev, [activeAd.id]: new Date() }));
-      setMessage({ type: 'success', text: `Mubarak ho! Rs. ${activeAd.reward} aapke wallet mein add ho gaye hain.` });
+      
+      // Clear watching states
+      const adTitle = activeAd.title;
+      setActiveAd(null);
+      setIsWatching(null);
+      
+      // Show Success Popup with details
+      setShowSuccessPopup({ 
+        amount: rewardAmount,
+        adTitle: adTitle,
+        timestamp: new Date().toLocaleString('en-US', { 
+          day: 'numeric', 
+          month: 'short', 
+          year: 'numeric',
+          hour: '2-digit', 
+          minute: '2-digit'
+        })
+      });
     } catch (error) {
       console.error("Error rewarding ad:", error);
       setMessage({ type: 'error', text: "Reward add karne mein masla hua." });
     } finally {
-      setActiveAd(null);
-      setIsWatching(null);
+      setIsClaiming(false);
     }
   };
 
@@ -528,6 +561,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                     <p className="text-slate-600 font-bold text-[10px] uppercase tracking-widest">
                       {adLoaded ? `You will be rewarded after ${timeLeft}s` : 'Timer starts once the ad content appears'}
                     </p>
+                    <div className="mt-4 pt-4 border-t border-slate-800/50">
+                      <p className="text-rose-500/80 text-[9px] font-black uppercase tracking-wider animate-pulse flex items-center justify-center gap-1.5">
+                        <AlertCircle className="w-3 h-3" />
+                        Do not click 'X' or close the ad, otherwise you won't get the bonus.
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -539,14 +578,82 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                       animate={{ scale: 1, opacity: 1, y: 0 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={finishAdWatch}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[2rem] font-black text-base uppercase tracking-[0.1em] shadow-2xl shadow-indigo-600/30 flex items-center justify-center gap-3 group relative overflow-hidden"
+                      disabled={isClaiming}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white py-5 rounded-[2rem] font-black text-base uppercase tracking-[0.1em] shadow-2xl shadow-indigo-600/30 flex items-center justify-center gap-3 group relative overflow-hidden"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                      <Sparkles className="w-6 h-6 text-amber-300 group-hover:rotate-12 transition-transform" />
-                      CLAIM REWARD (Rs. {activeAd.reward})
+                      {isClaiming ? (
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-6 h-6 text-amber-300 group-hover:rotate-12 transition-transform" />
+                      )}
+                      {isClaiming ? 'CLAIMING...' : `CLAIM REWARD (Rs. ${activeAd.reward})`}
                     </motion.button>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Success Reward Popup */}
+      <AnimatePresence>
+        {showSuccessPopup && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.5, y: 100 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.5, y: 100 }}
+              className="relative bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden text-center"
+            >
+              {/* Decorative elements */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-indigo-600"></div>
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
+              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl"></div>
+
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-emerald-500/40 rotate-12">
+                  <CheckCircle2 className="w-12 h-12" />
+                </div>
+
+                <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Congratulations! 🎉</h3>
+                <p className="text-emerald-600 font-bold text-sm uppercase tracking-[0.2em] mb-6">Dear {userName}</p>
+                
+                <div className="bg-slate-50 w-full p-6 rounded-[2rem] mb-6 border border-slate-100 flex flex-col items-center">
+                  <div className="w-full text-left space-y-3">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
+                      <span>Ad Task</span>
+                      <span className="text-slate-900">{showSuccessPopup.adTitle}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
+                      <span>Completed</span>
+                      <span className="text-slate-900">{showSuccessPopup.timestamp}</span>
+                    </div>
+                    <div className="h-px w-full bg-slate-200"></div>
+                    <div className="flex justify-between items-end">
+                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 pb-1">Bonus Reward</span>
+                      <span className="text-2xl font-black text-emerald-600 tracking-tighter">Rs. {showSuccessPopup.amount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <p className="text-[9px] font-bold text-slate-400 mt-6 italic">
+                    "Verified reward by TaskMint"
+                  </p>
+                </div>
+
+                <button 
+                  onClick={() => setShowSuccessPopup(null)}
+                  className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-900/40 flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-5 h-5 text-amber-400" />
+                  Thanks TaskMint
+                </button>
               </div>
             </motion.div>
           </div>
