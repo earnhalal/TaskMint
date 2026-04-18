@@ -61,13 +61,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
     {
       id: 'basic',
       name: 'BASIC MEMBER',
-      price: (
-        <span>
-          <span className="text-[10px] text-amber-300 font-bold block mb-1">SUNDAY SPECIAL 🎁</span>
-          <span className="line-through opacity-40 text-sm">Rs 280</span> <br/>
-          Rs {appSettings?.activationFee || 180}
-        </span>
-      ),
+      price: `Rs ${appSettings?.activationFee || 100}`,
       duration: 'Lifetime',
       icon: <Star className="w-6 h-6" />,
       color: 'bg-slate-500',
