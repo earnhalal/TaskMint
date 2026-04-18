@@ -130,7 +130,7 @@ export default function Dashboard() {
   const [topEarners, setTopEarners] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [appSettings, setAppSettings] = useState({
-    activationFee: 280,
+    activationFee: 180,
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
@@ -389,15 +389,15 @@ export default function Dashboard() {
         const data = snapshot.data();
         setAppSettings(data as any);
         
-        // Ensure activationFee is 280 and remove offerExpiryTime
-        if (data.activationFee !== 280 || data.offerExpiryTime) {
+        // Ensure activationFee is 180 and remove offerExpiryTime
+        if (data.activationFee !== 180 || data.offerExpiryTime) {
           await setDoc(doc(db, 'app_settings', 'global'), {
-            activationFee: 280,
+            activationFee: 180,
             offerExpiryTime: null
           }, { merge: true });
 
           // Notify all users about the fee update (one-time logic)
-          const notifyKey = 'fee_update_notified_280';
+          const notifyKey = 'fee_update_notified_180';
           const alreadyNotified = localStorage.getItem(notifyKey);
           
           if (!alreadyNotified) {
@@ -409,8 +409,8 @@ export default function Dashboard() {
               const notificationRef = doc(collection(db, 'notifications'));
               batch.set(notificationRef, {
                 userId,
-                title: 'Important Update: Activation Fee 📢',
-                message: 'Limited time offer khatam ho gaya hai. Ab joining fee Rs. 280 update kar di gayi hai. Kaam jari rakhein aur earn karein!',
+                title: 'Mega Sunday Offer: Activation Fee 📢',
+                message: 'Sunday Special! Ab joining fee sirf Rs. 180 hai. Saath hi App download karne par fori Cashback bhi payein. Jaldi karein!',
                 type: 'system',
                 status: 'unread',
                 timestamp: new Date().toISOString()
@@ -419,7 +419,7 @@ export default function Dashboard() {
             
             await batch.commit();
             localStorage.setItem(notifyKey, 'true');
-            console.log("[SYSTEM_UPDATE] All users notified about fee update.");
+            console.log("[SYSTEM_UPDATE] All users notified about the special 180 fee offer.");
           }
         }
       }

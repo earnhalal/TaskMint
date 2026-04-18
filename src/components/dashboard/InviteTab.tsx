@@ -92,9 +92,9 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
         <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl"></div>
         
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-500 px-4 py-1.5 rounded-full text-[10px] font-black tracking-[0.2em] uppercase mb-6 border border-amber-500/20 backdrop-blur-md">
-            <Trophy className="w-3.5 h-3.5 fill-amber-500/20" />
-            Mega Referral Bonus
+          <div className="inline-flex items-center gap-2 bg-rose-500/10 text-rose-500 px-4 py-1.5 rounded-full text-[10px] font-black tracking-[0.2em] uppercase mb-6 border border-rose-500/20 backdrop-blur-md">
+            <Zap className="w-3.5 h-3.5 fill-rose-500/20" />
+            Sunday Mega Offer
           </div>
           
           <h1 className="text-4xl font-black text-white mb-4 leading-tight tracking-tighter">
@@ -109,8 +109,9 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
           </div>
           
           <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-4">
-            Joining Fee: Rs {appSettings?.activationFee || 280}
+            Sunday Offer: <span className="line-through opacity-50">Rs 280</span> <span className="text-amber-400">Rs {appSettings?.activationFee || 180}</span>
           </p>
+          <div className="mt-2 text-[9px] font-black text-emerald-400 animate-pulse uppercase">🎁 App Download to fori Cashback!</div>
         </div>
       </div>
 

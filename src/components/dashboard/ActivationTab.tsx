@@ -93,7 +93,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
 
       // Redirect to WhatsApp
       const whatsappNumber = "923338739929";
-      const message = `🌟 *TASKMINT OFFICIAL* 🌟\n\n*Hi Admin!* 👋\nMera naam *${userName || 'User'}* hai. ✨\n\nMaine *Rs. ${appSettings.activationFee}* Joining Fee pay kar di hai. ✅\nYe raha mera *Payment Screenshot* as a proof. 📸\n\n*Please mera account jaldi active kar dein!* 🙏🔥\n\n_Sent via TaskMint App_`;
+      const message = `🌟 *TASKMINT OFFICIAL* 🌟\n\n*Hi Admin!* 👋\nMera naam *${userName || 'User'}* hai. ✨\n\nMaine *Rs. ${appSettings.activationFee}* (Sunday Offer) Joining Fee pay kar di hai. ✅\nYe raha mera *Payment Screenshot* as a proof. 📸\n\n*App download cashback offer ke liye confirm karein!* 🎁🔥\n\n_Sent via TaskMint App_`;
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
 
@@ -122,7 +122,11 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
         </button>
         <div>
           <h2 className="text-xl font-black text-slate-900 tracking-tight">Account Activation</h2>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Joining Fee: Rs {appSettings.activationFee}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
+            <span className="text-rose-500 font-black">Sunday Offer:</span>
+            <span className="line-through opacity-60">Rs 280</span> 
+            <span className="text-indigo-600">Rs {appSettings.activationFee}</span>
+          </p>
         </div>
       </div>
 
@@ -134,9 +138,14 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
       >
         <div className="bg-amber-50 border-2 border-amber-100 rounded-2xl p-4 flex gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-          <p className="text-[11px] font-bold text-amber-800 leading-relaxed">
-            Neeche diye gaye number par <span className="text-amber-900 font-black">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein. Aapka account foran active kar diya jayega.
-          </p>
+          <div className="space-y-1">
+            <p className="text-[11px] font-bold text-amber-800 leading-relaxed">
+              Neeche diye gaye number par <span className="text-slate-400 line-through decoration-red-500 font-bold">Rs 280</span> <span className="text-amber-900 font-black text-lg">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein.
+            </p>
+            <div className="bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full inline-block animate-pulse">
+              🎁 App Download karne pe fori Cashback!
+            </div>
+          </div>
         </div>
 
           <div className="grid grid-cols-1 gap-3">

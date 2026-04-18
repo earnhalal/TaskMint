@@ -143,16 +143,18 @@ export default function ProfileTab({
               <AlertCircle className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Account Status</p>
-              <p className="text-sm font-bold">Inactive</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Sunday Special Offer</p>
+              <p className="text-sm font-black text-rose-600">Active Now! 🎁</p>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             <button 
               onClick={onActivateClick}
-              className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-red-600/20 active:scale-95 transition-all"
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/20 active:scale-95 transition-all text-center"
             >
-              Pay Rs {appSettings?.activationFee || 280} to Start
+              <div className="line-through opacity-60 text-[9px]">Rs 280</div>
+              <div>Pay Rs {appSettings?.activationFee || 180}</div>
+              <div className="text-[8px] mt-0.5 text-emerald-300 animate-pulse font-black uppercase">Free Cashback Included!</div>
             </button>
           </div>
         </div>

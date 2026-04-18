@@ -87,7 +87,7 @@ export const DepositInfo = () => (
 export const RefundPolicyInfo = () => (
     <>
         <InfoSection title="Joining Fee">
-            <p>The one-time joining fee (280 Rs) is <strong>non-refundable</strong>. This nominal fee ensures that our community consists of verified, serious users and covers the administrative costs of account setup.</p>
+            <p>The standard joining fee is 280 Rs, but under the <strong>Sunday Mega Offer</strong>, it is reduced to 180 Rs. This fee is non-refundable and covers administrative costs.</p>
         </InfoSection>
         <InfoSection title="Campaign Funds">
             <p>Funds deposited for task campaigns are non-refundable once the campaign is live and tasks have been completed by other users. If you wish to cancel a pending campaign, please contact support immediately for a wallet credit.</p>
