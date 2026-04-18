@@ -87,18 +87,28 @@ const QuickActionBtn: React.FC<{
     isLocked?: boolean;
     badge?: string;
 }> = ({ icon, label, onClick, colorClass, delay, isHighlight, isWhatsApp, isShaking, isLocked, badge }) => (
-    <button 
+    <motion.button 
+        variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 }
+        }}
+        whileHover={{ scale: 1.05, y: -2 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onClick} 
-        className={`flex flex-col items-center gap-2.5 group animate-fade-in-up w-full ${isWhatsApp ? 'animate-bounce-small' : ''} ${isShaking ? 'animate-shaking' : ''} relative`}
-        style={{ animationDelay: `${delay}ms` }}
+        className={`flex flex-col items-center gap-2.5 group w-full relative ${isWhatsApp ? 'animate-bounce-small' : ''}`}
     >
-        <div className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-[22px] flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-active:scale-95 ${colorClass} ${isHighlight ? 'ring-4 ring-red-500/10' : 'ring-4 ring-slate-100'} ${isWhatsApp ? 'shadow-green-500/30' : ''} overflow-hidden`}>
-            {/* Glossy Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-50"></div>
-            <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-white/10 rotate-45 transform transition-transform duration-700 group-hover:translate-x-full"></div>
+        <div className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-[24px] flex items-center justify-center text-white shadow-xl transition-all duration-500 ${colorClass} ${isHighlight ? 'ring-4 ring-amber-500/10' : 'ring-4 ring-slate-100'} ${isWhatsApp ? 'shadow-green-500/30' : ''} overflow-hidden`}>
+            {/* Animated Glow for Highlights */}
+            {isHighlight && (
+              <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+            )}
             
-            <div className="relative z-10 drop-shadow-md">
-                {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6 sm:w-7 sm:h-7" })}
+            {/* Glossy Overlay & Shimmer */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/30 to-transparent opacity-40"></div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            
+            <div className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+                {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6 sm:w-7 sm:h-7 stroke-[2.5]" })}
             </div>
         </div>
 
@@ -109,18 +119,22 @@ const QuickActionBtn: React.FC<{
         )}
 
         {badge && (
-          <div className="absolute -top-2 -right-1 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full shadow-lg border-2 border-white z-20 animate-pulse">
+          <div className={`absolute -top-2 -right-1 ${isHighlight ? 'bg-amber-500' : 'bg-red-500'} text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg border-2 border-white z-20 animate-pulse`}>
             {badge}
           </div>
         )}
 
         <div className="flex flex-col items-center">
-            <span className={`text-[10px] sm:text-[11px] font-black tracking-tight transition-colors uppercase ${isHighlight ? 'text-red-600' : isWhatsApp ? 'text-green-600' : 'text-slate-700 group-hover:text-slate-900'}`}>
+            <span className={`text-[10px] sm:text-[11px] font-black tracking-tight transition-colors uppercase ${isHighlight ? 'text-amber-600' : isWhatsApp ? 'text-green-600' : 'text-slate-700 group-hover:text-slate-900'}`}>
                 {label}
             </span>
-            <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-300 rounded-full mt-0.5 ${isHighlight ? 'bg-red-500' : isWhatsApp ? 'bg-green-500' : 'bg-slate-400'}`}></div>
+            <motion.div 
+                initial={{ width: 0 }}
+                whileHover={{ width: '100%' }}
+                className={`h-0.5 rounded-full mt-0.5 ${isHighlight ? 'bg-amber-500' : isWhatsApp ? 'bg-green-500' : 'bg-slate-900 opacity-20'}`}
+            ></motion.div>
         </div>
-    </button>
+    </motion.button>
 );
 
 const AnimatedCounter = ({ value, trigger }: { value: number, trigger: number }) => {
@@ -527,23 +541,39 @@ export default function HomeTab({
       {/* Quick Actions Grid */}
       <div className="relative">
           {/* Decorative Background Elements */}
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -top-20 -left-10 w-64 h-64 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+          <div className="absolute -bottom-20 -right-10 w-64 h-64 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-          <div className="flex items-center justify-between mb-6 px-1">
-              <h2 className="text-sm font-black text-slate-900 flex items-center gap-2 uppercase tracking-widest">
-                  <SparklesIcon className="w-4 h-4 text-amber-500" /> 
-                  Quick Actions
-              </h2>
-              <div className="h-px flex-1 bg-gradient-to-r from-slate-100 to-transparent ml-4"></div>
+          <div className="flex items-center justify-between mb-8 px-1">
+              <div className="flex flex-col">
+                <h2 className="text-sm font-black text-slate-900 flex items-center gap-2 uppercase tracking-tight">
+                    <Zap className="w-4 h-4 text-amber-500 fill-amber-500/20" /> 
+                    Quick Actions
+                </h2>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Fast shortcuts</p>
+              </div>
+              <div className="h-px w-24 bg-gradient-to-r from-slate-200 to-transparent"></div>
           </div>
 
-          <div className="grid grid-cols-4 gap-y-6 gap-x-3 sm:gap-6">
+          <motion.div 
+            variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                    opacity: 1,
+                    transition: {
+                        staggerChildren: 0.05
+                    }
+                }
+            }}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-4 gap-y-8 gap-x-4"
+          >
               <QuickActionBtn 
                   icon={<MessageCircle />} 
                   label="WhatsApp" 
                   onClick={() => window.open('https://whatsapp.com/channel/0029VbCpKTp2P59cvqS4CL2L', '_blank')} 
-                  colorClass="bg-gradient-to-br from-green-400 via-green-500 to-emerald-600" 
+                  colorClass="bg-gradient-to-br from-emerald-500 to-green-600 shadow-emerald-500/30" 
                   delay={25}
                   isWhatsApp={true}
                   badge="HELP"
@@ -552,7 +582,7 @@ export default function HomeTab({
                   icon={<PlayCircleIcon />} 
                   label="Watch Ads" 
                   onClick={onWatchAdsClick} 
-                  colorClass="bg-gradient-to-br from-rose-500 via-red-600 to-red-700" 
+                  colorClass="bg-gradient-to-br from-[#ff0000] to-[#990000] shadow-red-500/30" 
                   delay={50}
                   isHighlight={true}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
@@ -562,7 +592,7 @@ export default function HomeTab({
                   icon={<EarnIcon />} 
                   label="Tasks" 
                   onClick={onTasksClick} 
-                  colorClass="bg-gradient-to-br from-emerald-400 via-teal-500 to-teal-600" 
+                  colorClass="bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/30" 
                   delay={100}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
               />
@@ -570,7 +600,7 @@ export default function HomeTab({
                   icon={<Zap />} 
                   label="Surveys" 
                   onClick={onTaskWallClick} 
-                  colorClass="bg-gradient-to-br from-indigo-400 via-blue-500 to-blue-600" 
+                  colorClass="bg-gradient-to-br from-indigo-500 to-blue-700 shadow-indigo-500/30" 
                   delay={110}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
               />
@@ -578,7 +608,7 @@ export default function HomeTab({
                   icon={<CheckSquareIcon />} 
                   label="Easy Task" 
                   onClick={onEasyTaskClick} 
-                  colorClass="bg-gradient-to-br from-teal-400 via-cyan-500 to-emerald-600" 
+                  colorClass="bg-gradient-to-br from-cyan-500 to-blue-600 shadow-cyan-500/30" 
                   delay={120}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
                   badge="NEW"
@@ -588,7 +618,7 @@ export default function HomeTab({
                   icon={<SparklesIcon />} 
                   label="Social+" 
                   onClick={onSocialTaskPlusClick} 
-                  colorClass="bg-gradient-to-br from-orange-400 via-rose-500 to-pink-600" 
+                  colorClass="bg-gradient-to-br from-purple-500 to-pink-600 shadow-purple-500/30" 
                   delay={350}
                   isHighlight={true}
                   badge="BONUS"
@@ -597,7 +627,7 @@ export default function HomeTab({
                   icon={<CalendarIcon />} 
                   label="Daily Gift" 
                   onClick={handleDailyCheckin} 
-                  colorClass="bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500" 
+                  colorClass="bg-gradient-to-br from-amber-400 to-yellow-600 shadow-yellow-500/30" 
                   delay={125}
                   isHighlight={true}
                   isShaking={isDailyClaimable}
@@ -607,14 +637,14 @@ export default function HomeTab({
                   icon={<TicketIcon />} 
                   label="Lottery" 
                   onClick={onLotteryClick} 
-                  colorClass="bg-gradient-to-br from-purple-500 via-indigo-600 to-violet-700" 
+                  colorClass="bg-gradient-to-br from-slate-600 to-slate-900 shadow-slate-900/30" 
                   delay={150}
               />
               <QuickActionBtn 
                   icon={<GiftIcon />} 
                   label="Spin" 
                   onClick={onSpinClick} 
-                  colorClass="bg-gradient-to-br from-pink-500 via-rose-500 to-red-500" 
+                  colorClass="bg-gradient-to-br from-pink-500 to-rose-700 shadow-pink-500/30" 
                   delay={200}
                   badge="NEW"
               />
@@ -622,10 +652,10 @@ export default function HomeTab({
                   icon={<InviteIcon />} 
                   label="Invite" 
                   onClick={onInviteClick} 
-                  colorClass="bg-gradient-to-br from-blue-400 via-sky-500 to-blue-600" 
+                  colorClass="bg-gradient-to-br from-blue-500 to-indigo-700 shadow-blue-500/30" 
                   delay={300}
               />
-          </div>
+          </motion.div>
       </div>
 
       {/* Quick Promotions Section */}
