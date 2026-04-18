@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History } from 'lucide-react';
+import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool } from 'lucide-react';
 
 export default function ProfileTab({ 
   name, 
@@ -25,6 +25,7 @@ export default function ProfileTab({
   onAdminPanelClick,
   onEarningHistoryClick,
   onActivateClick,
+  onMailboxClick,
   appSettings
 }: { 
   name: string, 
@@ -45,12 +46,14 @@ export default function ProfileTab({
   onAdminPanelClick?: () => void,
   onEarningHistoryClick?: () => void,
   onActivateClick?: () => void,
+  onMailboxClick?: () => void,
   appSettings?: any
 }) {
   const { user } = useAuth();
   const [avatar, setAvatar] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const [showJobsModal, setShowJobsModal] = React.useState(false);
 
   React.useEffect(() => {
     setAvatar(localStorage.getItem('taskmint_avatar'));
@@ -159,7 +162,7 @@ export default function ProfileTab({
       )}
 
       {/* Profile Header */}
-      <div className={`relative rounded-[32px] p-8 mb-8 overflow-hidden shadow-2xl transition-all duration-500 group ${
+      <div className={`relative rounded-[36px] p-10 mb-10 overflow-hidden shadow-2xl transition-all duration-500 group ${
         role === 'partner' 
           ? partnerTier === 'gold'
             ? 'bg-gradient-to-br from-[#1a1a1a] via-[#2d2d2d] to-[#1a1a1a] border border-amber-500/30'
@@ -167,48 +170,48 @@ export default function ProfileTab({
           : 'bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900'
       }`}>
         {/* Animated Background Glow */}
-        <div className={`absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-20 animate-pulse ${
+        <div className={`absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse ${
           role === 'partner' 
             ? partnerTier === 'gold' ? 'bg-amber-400' : 'bg-blue-400'
-            : 'bg-blue-400'
+            : 'bg-indigo-400'
         }`}></div>
         
-        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-8">
           <div className="relative">
-            <div className={`w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl transform transition-transform group-hover:scale-105 duration-500 p-1 ${
+            <div className={`w-28 h-28 rounded-[32px] flex items-center justify-center shadow-2xl transform transition-transform group-hover:scale-105 duration-500 p-1.5 ${
               role === 'partner'
                 ? partnerTier === 'gold'
                   ? 'bg-gradient-to-tr from-amber-400 to-yellow-600 shadow-amber-500/40'
                   : 'bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-blue-500/40'
                 : 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-500/30'
             }`}>
-              <div className={`w-full h-full rounded-2xl flex items-center justify-center text-white text-3xl font-black overflow-hidden ${
+              <div className={`w-full h-full rounded-[26px] flex items-center justify-center text-white text-4xl font-black overflow-hidden ${
                 role === 'partner' ? 'bg-transparent' : 'bg-slate-900'
               }`}>
                 {avatar ? (
                   <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   role === 'partner' 
-                    ? partnerTier === 'gold' ? <Crown className="w-12 h-12" /> : <Shield className="w-12 h-12" />
+                    ? partnerTier === 'gold' ? <Crown className="w-14 h-14" /> : <Shield className="w-14 h-14" />
                     : name.substring(0, 2).toUpperCase()
                 )}
               </div>
             </div>
             {status.toLowerCase() === 'active' && (
-              <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-xl flex items-center justify-center border-2 shadow-lg ${
+              <div className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl flex items-center justify-center border-2 shadow-lg ${
                 role === 'partner'
                   ? partnerTier === 'gold' ? 'bg-amber-500 border-[#1a1a1a]' : 'bg-blue-500 border-[#0f172a]'
                   : 'bg-emerald-500 border-slate-900'
               }`}>
-                <CheckCircle2 className="w-4 h-4 text-white" />
+                <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
             )}
           </div>
           
-          <div className="flex-1 text-center sm:text-left">
+          <div className="flex-1 text-center sm:text-left pt-2">
             <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                <h2 className="text-3xl font-black text-white tracking-tight">{name}</h2>
+              <div className="flex items-center justify-center sm:justify-start gap-3 mb-1">
+                <h2 className="text-4xl font-black text-white tracking-tighter">{name}</h2>
                 {role === 'partner' && (
                   partnerTier === 'gold' ? (
                     <div className="bg-amber-500 p-1 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.8)]">
@@ -322,17 +325,75 @@ export default function ProfileTab({
       <Section title="Account">
         <Item icon={<ImageIcon className="w-4 h-4" />} label="Change Avatar" onClick={() => fileInputRef.current?.click()} />
         <Item icon={<Wallet className="w-4 h-4" />} label="Manage Wallet & PIN" onClick={onManageWalletClick} />
-        <Item icon={<Mail className="w-4 h-4" />} label="System Mailbox" />
+        <Item icon={<Mail className="w-4 h-4" />} label="System Mailbox" onClick={onMailboxClick} />
       </Section>
 
       <Section title="Features">
-        <Item icon={<Briefcase className="w-4 h-4" />} label="Premium Jobs" />
+        <Item 
+          icon={<Briefcase className="w-4 h-4" />} 
+          label="Premium Jobs" 
+          onClick={() => setShowJobsModal(true)}
+        />
       </Section>
 
       <Section title="Support">
         <Item icon={<LogOut className="w-4 h-4" />} label="Log Out" isDestructive onClick={handleLogout} />
         <Item icon={<AlertCircle className="w-4 h-4" />} label="Delete Account" isDestructive onClick={() => setShowDeleteModal(true)} />
       </Section>
+
+      {/* Premium Jobs Modal */}
+      {showJobsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white rounded-[32px] p-6 max-w-sm w-full shadow-2xl overflow-hidden relative"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+            
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                  <Briefcase className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">Premium Jobs</h3>
+              </div>
+              <button onClick={() => setShowJobsModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                <LogOut className="w-5 h-5 text-slate-400 rotate-180" />
+              </button>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              {[
+                { label: 'Video Editor', icon: <Video className="w-4 h-4" />, color: 'blue' },
+                { label: 'Personal Assistant', icon: <Headphones className="w-4 h-4" />, color: 'indigo' },
+                { label: 'Content Writing', icon: <PenTool className="w-4 h-4" />, color: 'purple' },
+                { label: 'Data Entry', icon: <Database className="w-4 h-4" />, color: 'emerald' },
+                { label: 'Typing Expert', icon: <Keyboard className="w-4 h-4" />, color: 'amber' },
+              ].map((job, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl group opacity-60">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-white shadow-sm text-slate-600`}>
+                      {job.icon}
+                    </div>
+                    <span className="text-sm font-bold text-slate-700">{job.label}</span>
+                  </div>
+                  <div className="bg-slate-200 text-slate-500 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider">
+                    COMING SOON
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button 
+              onClick={() => setShowJobsModal(false)}
+              className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-slate-900/20"
+            >
+              Close
+            </button>
+          </motion.div>
+        </div>
+      )}
 
       {/* Delete Account Modal */}
       {showDeleteModal && (

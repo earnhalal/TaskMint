@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Star, Shield, Crown, Check, AlertCircle, Zap } from 'lucide-react';
+import { X, Star, Shield, Crown, Check, AlertCircle, Zap, Wallet } from 'lucide-react';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { ref, update, increment as rtdbIncrement } from 'firebase/database';
@@ -29,23 +29,17 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
     if (confirm(`Are you sure you want to upgrade to ${tier.toUpperCase()} Partner for Rs ${price}? This will be deducted from your main balance.`)) {
       setIsProcessing(true);
       try {
-        // Deduct balance
         await onUpdateBalance(-price, 'partner_upgrade', `Upgraded to ${tier.toUpperCase()} Partner`);
-        
-        // Update user role and tier in Firestore
         await updateDoc(doc(db, 'users', auth.currentUser.uid), {
           role: 'partner',
           partnerStatus: 'active',
           partnerTier: tier
         });
-
-        // Update in RTDB
         await update(ref(rtdb, `users/${auth.currentUser.uid}`), {
           role: 'partner',
           partnerStatus: 'active',
           partnerTier: tier
         });
-
         alert(`Congratulations! You are now a ${tier.toUpperCase()} Partner.`);
         onClose();
       } catch (error) {
@@ -62,17 +56,19 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       id: 'basic',
       name: 'BASIC MEMBER',
       price: `Rs ${appSettings?.activationFee || 100}`,
-      duration: 'Lifetime',
+      duration: 'Lifetime Access',
       icon: <Star className="w-6 h-6" />,
-      color: 'bg-slate-500',
+      color: 'from-slate-600 to-slate-800',
+      tagline: 'Standard Earning Mode',
+      adEarnings: 'Rs 5 - 10 / Daily (Min)',
       features: [
         `Rs ${appSettings?.referralBonusBasic || 125} per Invite`,
+        '1.00 Reward per Ad Watch',
         'Standard Daily Tasks',
-        'Basic Support',
-        'Normal Withdrawals'
+        'Basic Support'
       ],
-      buttonText: currentRole !== 'partner' ? 'Current Plan' : 'Basic Plan',
-      buttonColor: 'bg-slate-500 text-white opacity-50 cursor-not-allowed',
+      buttonText: currentRole !== 'partner' ? 'Active Plan' : 'Basic Plan',
+      buttonColor: 'bg-slate-200 text-slate-500 cursor-not-allowed',
       isCurrent: currentRole !== 'partner',
       action: () => {}
     },
@@ -80,17 +76,19 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       id: 'silver',
       name: 'SILVER PARTNER',
       price: `Rs ${appSettings?.partnerFee || 1000}`,
-      duration: 'Lifetime',
+      duration: 'Lifetime High-Yield',
       icon: <Shield className="w-6 h-6" />,
-      color: 'bg-blue-500',
+      color: 'from-indigo-600 to-blue-700',
+      tagline: 'High Traffic Partner',
+      adEarnings: 'Rs 75 - 150 / Daily (Min)',
       features: [
         `Rs ${appSettings?.referralBonusPartner || 150} per Invite`,
+        '15.00 Reward per VIP Ad',
         '10% Team Commission',
-        'High Priority Withdrawals',
-        'Team Analytics Dashboard'
+        'Priority Withdrawals'
       ],
-      buttonText: partnerTier === 'silver' ? 'Current Plan' : 'Upgrade to Silver',
-      buttonColor: partnerTier === 'silver' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]',
+      buttonText: partnerTier === 'silver' ? 'Current Plan' : 'Purchase Silver',
+      buttonColor: partnerTier === 'silver' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/30',
       isCurrent: partnerTier === 'silver',
       action: () => {
         if (partnerTier !== 'silver' && partnerTier !== 'gold') {
@@ -102,18 +100,19 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       id: 'gold',
       name: 'GOLD VIP PARTNER',
       price: 'Rs 2000',
-      duration: 'Lifetime',
+      duration: 'Elite Lifetime VIP',
       icon: <Crown className="w-6 h-6" />,
-      color: 'bg-amber-500',
+      color: 'from-amber-500 to-orange-600',
+      tagline: 'Maximum Revenue Mode',
+      adEarnings: 'Rs 175 - 350 / Daily (Min)',
       features: [
-        'Rs 200 per Invite',
-        '10% Team Commission',
-        '2 Free Lottery Tickets / Month',
-        'VIP Badge & Instant Withdrawals',
-        'Premium Support'
+        'Rs 200 per Instant Invite',
+        '35.00 Reward per Elite Ad',
+        '15% Team Commission',
+        'Instant VIP Payouts'
       ],
-      buttonText: partnerTier === 'gold' ? 'Current Plan' : 'Upgrade to VIP',
-      buttonColor: partnerTier === 'gold' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-white shadow-[0_0_15px_rgba(245,158,11,0.5)]',
+      buttonText: partnerTier === 'gold' ? 'Current Plan' : 'Become VIP Elite',
+      buttonColor: partnerTier === 'gold' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:scale-[1.02] text-white shadow-xl shadow-amber-500/30',
       isPopular: true,
       isCurrent: partnerTier === 'gold',
       action: () => {
@@ -126,85 +125,110 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      className="w-full h-full pb-24 flex flex-col bg-slate-50/50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="w-full h-full pb-32 overflow-y-auto hide-scrollbar bg-[#F8FAFC]"
     >
-      {/* Header */}
-      <div className="bg-gradient-to-br from-[#060D2D] via-[#151E32] to-[#060D2D] text-center py-8 px-6 relative rounded-b-[2rem] shadow-xl z-10">
-        <div className="relative z-10">
-          <div className="w-14 h-14 bg-gradient-to-tr from-amber-400 to-yellow-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.3)] rotate-3">
+      {/* Immersive Header - Now scrolls with content */}
+      <div className="bg-[#060D2D] pt-10 pb-20 px-6 text-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-32 -mt-32 blur-[120px]"></div>
+        
+        <div className="relative z-10 max-w-lg mx-auto">
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-14 h-14 bg-gradient-to-tr from-amber-400 to-yellow-600 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-2xl shadow-amber-500/40 rotate-12"
+          >
             <Crown className="w-7 h-7 text-white" />
-          </div>
-          <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Partner Programs</h2>
-          <p className="text-slate-400 text-xs max-w-xs mx-auto leading-relaxed">Upgrade your account to unlock higher referral bonuses, team commissions, and VIP perks.</p>
+          </motion.div>
           
-          <div className="mt-6 inline-flex items-center gap-2 bg-white/5 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-inner">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Balance:</span>
-            <span className="text-base font-black text-emerald-400">Rs {balance.toFixed(2)}</span>
+          <h2 className="text-3xl font-black text-white mb-2 tracking-tighter italic uppercase">
+            Partner <span className="text-amber-500">Nodes</span>
+          </h2>
+          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] max-w-xs mx-auto mb-6 opacity-60">
+            High-Yield Ad Transmission Protocol
+          </p>
+          
+          <div className="inline-flex items-center gap-3 bg-white/5 backdrop-blur-xl px-5 py-2.5 rounded-2xl border border-white/10">
+            <Wallet className="w-4 h-4 text-emerald-500" />
+            <span className="text-lg font-black text-emerald-400 tracking-tighter italic">Rs {balance.toLocaleString()}</span>
           </div>
         </div>
-        
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/10 rounded-full -ml-24 -mb-24 blur-3xl"></div>
       </div>
 
-      {/* Plans Grid */}
-      <div className="p-6 overflow-y-auto hide-scrollbar flex-1 -mt-6 pt-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pb-8">
-            {plans.map((plan) => (
-              <div key={plan.id} className={`bg-white rounded-[2rem] border ${plan.isPopular ? 'border-amber-200 shadow-xl shadow-amber-500/10 scale-[1.02]' : 'border-slate-100 shadow-sm'} overflow-hidden flex flex-col relative transition-transform`}>
-                {plan.isCurrent && (
-                  <div className="absolute top-0 left-0 bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-br-xl z-10 uppercase tracking-widest shadow-sm">
-                    Current Plan
-                  </div>
-                )}
-                {plan.isPopular && !plan.isCurrent && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black px-4 py-1.5 rounded-bl-xl z-10 uppercase tracking-widest shadow-sm">
-                    Most Popular
-                  </div>
-                )}
-                
-                <div className={`${plan.color} p-8 text-center text-white relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-black/10"></div>
-                  <div className="relative z-10 flex flex-col items-center">
-                    <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 shadow-inner">
-                      {plan.icon}
-                    </div>
-                    <h3 className="text-lg font-black tracking-widest uppercase mb-1 drop-shadow-sm">{plan.name}</h3>
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-3xl font-black drop-shadow-md">{plan.price}</span>
-                    </div>
-                    <p className="text-white/80 text-xs font-bold mt-2 uppercase tracking-widest">{plan.duration}</p>
-                  </div>
+      {/* Plans Section */}
+      <div className="px-5 -mt-16 relative z-20 pb-10">
+        <div className="space-y-6 max-w-md mx-auto">
+          {plans.map((plan) => (
+            <motion.div 
+              key={plan.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`bg-white rounded-[2.5rem] border ${plan.isPopular ? 'border-amber-200' : 'border-slate-100'} overflow-hidden shadow-2xl shadow-slate-200/50 flex flex-col relative group`}
+            >
+              {plan.isCurrent && (
+                <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full z-10 uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                  Active Member
                 </div>
-                
-                <div className="p-6 flex-1 flex flex-col">
-                  <ul className="space-y-4 mb-8 flex-1">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm font-bold text-slate-600">
-                        <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${plan.isPopular ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'}`}>
-                          <Check className="w-3 h-3" />
-                        </div>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <button 
-                    onClick={plan.action}
-                    disabled={plan.isCurrent || isProcessing || (plan.id === 'basic')}
-                    className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 disabled:active:scale-100 ${plan.buttonColor}`}
-                  >
-                    {isProcessing && !plan.isCurrent && plan.id !== 'basic' ? 'Processing...' : plan.buttonText}
-                  </button>
+              )}
+              
+              {/* Card Header Gradient */}
+              <div className={`bg-gradient-to-br ${plan.color} p-8 relative overflow-hidden`}>
+                <div className="absolute inset-0 bg-white/5 opacity-10 blur-xl"></div>
+                <div className="relative z-10">
+                   <div className="flex items-start justify-between mb-4">
+                      <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20">
+                        {plan.icon}
+                      </div>
+                      <div className="text-right">
+                         <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{plan.tagline}</p>
+                         <h3 className="text-xl font-black text-white italic tracking-tight">{plan.name}</h3>
+                      </div>
+                   </div>
+                   
+                   <div className="flex items-end gap-2 text-white">
+                      <span className="text-4xl font-black tracking-tighter italic leading-none">{plan.price}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">{plan.duration}</span>
+                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="p-8">
+                {/* Daily Ad Earnings Section - ENHANCED */}
+                <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group-hover:bg-indigo-50 transition-colors">
+                   <div className="flex items-center gap-3">
+                      <Zap className={`w-5 h-5 ${plan.isPopular ? 'text-amber-500' : 'text-indigo-500'}`} />
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Estimated Daily Ads Income</p>
+                        <p className={`text-sm font-black italic tracking-tight ${plan.isPopular ? 'text-amber-600' : 'text-indigo-600'}`}>{plan.adEarnings}</p>
+                      </div>
+                   </div>
+                </div>
+
+                <ul className="space-y-4 mb-10">
+                  {plan.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-center gap-4 text-xs font-black text-slate-600 uppercase tracking-tight">
+                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${plan.isPopular ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
+                        <Check className="w-3 h-3" strokeWidth={3} />
+                      </div>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                <button 
+                  onClick={plan.action}
+                  disabled={plan.isCurrent || isProcessing || (plan.id === 'basic')}
+                  className={`w-full py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${plan.buttonColor}`}
+                >
+                  {isProcessing && !plan.isCurrent && plan.id !== 'basic' ? 'Syncing...' : plan.buttonText}
+                </button>
+              </div>
+            </motion.div>
+          ))}
         </div>
+      </div>
     </motion.div>
   );
 }

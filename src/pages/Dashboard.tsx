@@ -3,8 +3,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, 
   User, 
+  UserCircle,
   Bell, 
-  PlaySquare, 
+  Tv2, 
+  Rocket,
+  Zap,
+  ShieldCheck,
+  LayoutGrid,
   ClipboardList,
   Briefcase,
   X,
@@ -1182,6 +1187,7 @@ export default function Dashboard() {
                  onAdminPanelClick={() => setActiveTab('admin')}
                  onEarningHistoryClick={() => setActiveTab('earning_history')}
                  onActivateClick={() => setActiveTab('activation')}
+                 onMailboxClick={() => setActiveTab('updates')}
                  appSettings={activeAppSettings}
                />;
       case 'admin':
@@ -1465,7 +1471,7 @@ export default function Dashboard() {
       </AnimatePresence>
 
       {/* Mobile App Container */}
-      <div className={`w-full sm:max-w-[440px] ${role === 'partner' ? 'bg-amber-50' : 'bg-slate-50'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-slate-900`}>
+      <div className={`w-full ${activeTab === 'watch' ? 'max-w-full' : 'sm:max-w-[440px]'} ${role === 'partner' ? 'bg-amber-50' : 'bg-slate-50'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-slate-900`}>
         
         {/* Notch simulation (Desktop only) */}
         <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-3xl z-50"></div>
@@ -1508,21 +1514,29 @@ export default function Dashboard() {
               <span className={role === 'partner' ? 'text-white/80' : 'text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500'}>Mint</span>
             </h1>
           </div>
-          <button 
-            onClick={() => setActiveTab('updates')}
-            className={`relative p-2 rounded-full ${role === 'partner' ? 'hover:bg-white/10' : 'hover:bg-gray-100'} transition-colors group`}
-          >
-            <Mail className={`w-6 h-6 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-amber-600`} />
-            {unreadUpdatesCount > 0 && (
-              <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm animate-bounce">
-                {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setActiveTab('updates')}
+              className={`relative p-2 rounded-full ${role === 'partner' ? 'hover:bg-white/10' : 'hover:bg-gray-100'} transition-colors group`}
+            >
+              <Mail className={`w-5.5 h-5.5 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-amber-600`} />
+              {unreadUpdatesCount > 0 && (
+                <span className="absolute top-1 right-1 w-4.5 h-4.5 bg-red-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm animate-bounce">
+                  {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
+                </span>
+              )}
+            </button>
+            <button 
+              onClick={() => setActiveTab('profile')}
+              className={`relative p-2 rounded-full ${role === 'partner' ? 'hover:bg-white/10' : 'hover:bg-gray-100'} transition-colors group ${activeTab === 'profile' ? 'bg-amber-100 text-amber-600' : ''}`}
+            >
+              <UserCircle className={`w-6 h-6 ${role === 'partner' ? 'text-white' : (activeTab === 'profile' ? 'text-amber-600' : 'text-slate-600')} transition-colors group-hover:text-amber-600`} />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Content */}
-        <div className={`flex-1 overflow-y-auto px-5 pt-6 hide-scrollbar ${role === 'partner' ? 'bg-amber-50/50' : 'bg-slate-50/50'}`}>
+        <div className={`flex-1 overflow-y-auto ${activeTab === 'watch' ? 'px-0 pt-0' : 'px-5 pt-6'} hide-scrollbar ${role === 'partner' ? 'bg-amber-50/50' : 'bg-slate-50/50'}`}>
           
           {role === 'partner' && activeTab === 'home' && (
             <div className="mb-6 space-y-4">
@@ -1581,12 +1595,11 @@ export default function Dashboard() {
         <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-3 pb-6 sm:pb-4 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
           <div className="flex items-center justify-between max-w-md mx-auto relative">
             {[
-              { id: 'home', icon: <Home className="w-6 h-6" />, label: 'HOME' },
-              { id: 'watch', icon: <PlaySquare className="w-6 h-6" />, label: 'WATCH' },
-              { id: 'task_wall', icon: <Search className="w-6 h-6" />, label: 'SURVEYS' },
-              { id: 'tasks', icon: <Layout className="w-6 h-6" />, label: 'TASKS' },
-              { id: 'premium', icon: <Briefcase className="w-6 h-6" />, label: 'PARTNER' },
-              { id: 'profile', icon: <User className="w-6 h-6" />, label: 'PROFILE' },
+              { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },
+              { id: 'watch', icon: <Tv2 className="w-6 h-6" />, label: 'WATCH' },
+              { id: 'task_wall', icon: <Rocket className="w-6 h-6" />, label: 'SURVEYS' },
+              { id: 'tasks', icon: <Zap className="w-6 h-6" />, label: 'TASKS' },
+              { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PARTNER' },
             ].map((tab) => (
               <button 
                 key={tab.id}
