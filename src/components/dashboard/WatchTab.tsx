@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, X, Construction, Info, Crown, Zap } from 'lucide-react';
+import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, ArrowRight, CheckCircle2, AlertCircle, Loader2, Lock, X, Construction, Info, Crown, Zap } from 'lucide-react';
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
@@ -385,105 +385,125 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen pb-24 bg-[#050810] text-slate-300 overflow-x-hidden"
+      className="min-h-screen pb-24 bg-[#030612] text-slate-300 overflow-x-hidden relative"
     >
-      {/* Dynamic Animated Background Spikes */}
+      {/* Immersive Dynamic Neural Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/5 blur-[100px] rounded-full" />
+        <div className="absolute top-[-15%] left-[-15%] w-[80%] h-[80%] bg-indigo-600/15 blur-[160px] rounded-full animate-pulse" />
+        <div className="absolute top-[20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[130px] rounded-full animate-bounce duration-[15000ms]" />
+        <div className="absolute bottom-[-10%] left-[10%] w-[60%] h-[60%] bg-indigo-900/10 blur-[100px] rounded-full" />
       </div>
 
-      {/* Header - Full Width Glassy */}
-      <div className="sticky top-0 z-[100] backdrop-blur-2xl bg-black/40 border-b border-white/5 px-6 py-5 flex items-center justify-between shadow-2xl">
-        <div className="flex items-center gap-4">
+      {/* Header - Truly Integrated Full Width */}
+      <div className="sticky top-0 z-[100] backdrop-blur-3xl bg-[#02040a]/80 border-b border-white/5 px-4 h-18 flex items-center justify-between shadow-2xl">
+        <div className="flex items-center gap-3">
           <button 
             onClick={onBack}
-            className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all active:scale-90"
+            className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all active:scale-90"
           >
             <ArrowLeft className="w-5 h-5 text-indigo-400" />
           </button>
-          <div>
-            <h2 className="text-xl font-black text-white tracking-widest uppercase italic leading-none">
+          <div className="flex flex-col">
+            <h2 className="text-lg font-black text-white tracking-[0.2em] uppercase italic leading-none">
               Ad<span className="text-indigo-500">Node</span>
             </h2>
-            <p className="text-[8px] text-indigo-400/60 font-black uppercase tracking-[0.4em] mt-1">Ready for Sync</p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_5px_#10b981]"></span>
+              <span className="text-[7px] text-slate-500 font-black uppercase tracking-[0.4em]">Neural Link: Active</span>
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-           <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
-             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-             <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Live Node</span>
+        <div className="flex items-center gap-3">
+           <div className="hidden sm:flex px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl items-center gap-2">
+             <Zap className="w-3.5 h-3.5 text-indigo-400 fill-indigo-400" />
+             <span className="text-[9px] font-black text-white uppercase tracking-widest leading-none">High-Sync</span>
+           </div>
+           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 p-0.5 shadow-lg shadow-indigo-500/20">
+             <div className="w-full h-full bg-[#02040a] rounded-[calc(1rem-2px)] flex items-center justify-center">
+               <Wallet className="w-4 h-4 text-white" />
+             </div>
            </div>
         </div>
       </div>
 
-      <div className="relative z-10 px-4 pt-6">
-        {/* Main Banner - Edge to Edge look */}
-        <div className="bg-gradient-to-br from-indigo-600/20 via-slate-900/40 to-black/20 rounded-[2.5rem] p-8 border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-10 overflow-hidden group">
-          <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px] group-hover:bg-indigo-500/30 transition-all duration-1000" />
+      <div className="relative z-10 pt-0">
+        {/* Full-Bleed Animated Banner */}
+        <div className="bg-gradient-to-b from-indigo-950/20 to-transparent border-b border-white/5 pt-10 pb-16 px-6 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-full opacity-30 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] pointer-events-none"></div>
           
-          <div className="relative z-10">
-            <h3 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] mb-3">Transmission Center</h3>
-            <h2 className="text-4xl font-black text-white tracking-tighter mb-4 leading-none">
-              Stream & <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">Harvest</span>
+          <div className="relative z-10 flex flex-col items-center">
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="p-3 bg-indigo-500 rounded-[1.5rem] shadow-[0_0_40px_rgba(99,102,241,0.4)] mb-6"
+            >
+              <Zap className="w-8 h-8 text-white fill-white" />
+            </motion.div>
+            
+            <h2 className="text-5xl font-black text-white tracking-tighter text-center mb-4 leading-[0.85]">
+              Neural<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400">Harvest</span>
             </h2>
-            <p className="text-xs text-slate-400 font-medium max-w-[220px] leading-relaxed mb-6">
-              Watch encrypted neural streams for 60s and earn instant credits.
+            
+            <p className="text-[10px] text-slate-400 font-black text-center max-w-[280px] leading-relaxed uppercase tracking-[0.3em] opacity-60 mb-8">
+              Watch encrypted video streams for 60 cycles to synthesize rewards.
             </p>
             
-            <div className="flex items-center gap-2">
-               <div className="flex -space-x-3">
-                 {[1,2,3,4].map(i => (
-                   <div key={i} className="w-8 h-8 rounded-full border-2 border-[#050810] bg-slate-800 overflow-hidden">
-                     <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" className="w-full h-full object-cover opacity-60" />
-                   </div>
-                 ))}
+            <div className="flex items-center gap-4">
+               <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
+                 <div className="flex -space-x-2">
+                   {[1,2,3].map(i => (
+                     <div key={i} className="w-5 h-5 rounded-full border border-black bg-slate-800" />
+                   ))}
+                 </div>
+                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">500k+ Active Peers</span>
                </div>
-               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-2">500k+ Harmonic peers online</span>
             </div>
           </div>
         </div>
 
         {message && (
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`mb-8 p-5 rounded-3xl border flex items-center gap-4 bg-black/40 backdrop-blur-xl ${
-              message.type === 'success' ? 'border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'border-rose-500/30 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.1)]'
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`mx-4 mt-6 p-4 rounded-3xl border flex items-center gap-4 bg-black/60 shadow-2xl ${
+              message.type === 'success' ? 'border-emerald-500/40 text-emerald-400' : 'border-rose-500/40 text-rose-400'
             }`}
           >
-            <div className={`p-2 rounded-xl bg-current/10`}>
+            <div className="p-2 rounded-xl bg-current/10">
               {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
             </div>
-            <p className="text-[11px] font-black uppercase tracking-widest">{message.text}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest leading-normal">{message.text}</p>
           </motion.div>
         )}
 
         {accountStatus.toLowerCase() !== 'active' && (
-          <div className="mb-10 p-8 rounded-[3rem] bg-gradient-to-tr from-amber-500/5 to-transparent border border-amber-500/20 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4">
-              <AlertCircle className="w-8 h-8 text-amber-500/20 group-hover:text-amber-500/40 transition-colors" />
+          <div className="mx-4 mt-8 p-8 rounded-[3rem] bg-gradient-to-tr from-amber-500/10 via-slate-900/50 to-black/20 border-2 border-amber-500/20 relative overflow-hidden group shadow-2xl shadow-amber-500/5">
+            <div className="absolute -right-8 -top-8 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all"></div>
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-14 h-14 bg-amber-500 rounded-[1.5rem] flex items-center justify-center text-black mb-6 shadow-xl shadow-amber-500/20 rotate-12 group-hover:rotate-0 transition-transform">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-black text-amber-500 uppercase tracking-tighter mb-2">Node Activation Required</h3>
+              <p className="text-[10px] text-slate-400 font-bold text-center leading-relaxed px-4 opacity-80 mb-6">
+                Bina account active keye ya joining fee pay kiye bagair apki earning balance mein add nahi hogi.
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-black py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg shadow-amber-500/20"
+              >
+                Enable Neural protocol
+              </button>
             </div>
-            <h3 className="text-amber-500 text-[10px] font-black uppercase tracking-[0.4em] mb-2 text-center">Protocol Violation</h3>
-            <p className="text-[11px] text-slate-400 font-bold text-center mb-6 leading-relaxed">
-              Earnings cannot be synthesized in balance because your account node is currently <span className="text-amber-500">INACTIVE</span>. Activate your protocol to enable harvests.
-            </p>
-            <button 
-              onClick={() => navigate('/dashboard')}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-black py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl shadow-amber-500/10 active:scale-95"
-            >
-              Initialize Node
-            </button>
           </div>
         )}
 
-        {/* Video Style Ads List - Now True Full Width Card Look */}
-        <div className="flex flex-col gap-8">
+        {/* Video Ads List - Truly Full Width No Extra Side Gaps */}
+        <div className="flex flex-col gap-0 mt-8 pb-10">
           {videoAds.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-20 text-center bg-white/5 rounded-[3rem] border border-white/5 border-dashed">
+            <div className="mx-4 flex flex-col items-center justify-center p-20 text-center bg-white/5 rounded-[3rem] border border-white/5 border-dashed">
               <Zap className="w-12 h-12 text-slate-700 mb-4 animate-pulse" />
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">No Signal Detected</p>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic opacity-40 leading-relaxed">Searching for Neural Frequency...</p>
             </div>
           ) : (
               videoAds
@@ -492,12 +512,11 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                   return tiers[a.tier || 'basic'] - tiers[b.tier || 'basic'];
                 })
                 .map((ad, index) => {
-              // Same tier/time lock logic... remains same as before...
               const isSilver = partnerTier === 'silver' || partnerTier === 'gold' || role === 'partner';
               const isGold = partnerTier === 'gold';
               let isTierLocked = false;
               let tierLockText = "";
-              if (ad.tier === 'silver' && !isSilver) { isTierLocked = true; tierLockText = "Silver Link Needed"; } 
+              if (ad.tier === 'silver' && !isSilver) { isTierLocked = true; tierLockText = "Silver Plan Needed"; } 
               else if (ad.tier === 'gold' && !isGold) { isTierLocked = true; tierLockText = "Elite VIP Link Needed"; }
 
               const lastWatched = adStats[ad.id];
@@ -520,101 +539,105 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               return (
                 <motion.div
                   key={ad.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   onClick={() => {
                     if (isTierLocked) { setTierLockModal(ad.tier as 'silver' | 'gold'); return; }
-                    if (isTimeLocked) { setMessage({ type: 'error', text: "Node cooldown in progress." }); return; }
+                    if (isTimeLocked) { setMessage({ type: 'error', text: "Node in cooldown." }); return; }
                     handleWatchAd(ad);
                   }}
-                  className={`group relative w-full rounded-[2.5rem] overflow-hidden border transition-all duration-500 cursor-pointer ${
+                  className={`group relative w-full overflow-hidden border-b transition-all duration-500 cursor-pointer ${
                     isLocked 
-                      ? 'bg-black/20 border-white/5 opacity-60 grayscale' 
-                      : 'bg-gradient-to-br from-white/[0.07] to-white/[0.02] border-white/10 hover:border-indigo-500/40 hover:shadow-[0_0_40px_rgba(99,102,241,0.2)]'
+                      ? 'bg-black/40 border-white/5 grayscale saturate-50 opacity-70' 
+                      : 'bg-gradient-to-br from-white/5 to-transparent border-white/5 hover:bg-white/10'
                   }`}
                 >
-                  {/* FULL WIDTH IMAGE WRAPPER */}
+                  {/* FULL WIDTH IMAGE CONTAINER */}
                   <div className="relative aspect-video w-full overflow-hidden">
                     <img 
-                      src={`https://picsum.photos/seed/${ad.id}/1280/720`}
+                      src={`https://picsum.photos/seed/${ad.id}/1280/800`}
                       alt={ad.title}
                       referrerPolicy="no-referrer"
-                      className={`w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 ${isLocked ? 'blur-sm' : ''}`}
+                      className={`w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105 ${isLocked ? 'blur-[8px]' : ''}`}
                     />
                     
-                    {/* Overlay Grid Pattern */}
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.05] pointer-events-none"></div>
+                    {/* Dark Gradient Overlay for Typography Depth */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
                     
-                    {/* Play/Lock Status Icons */}
-                    <div className={`absolute inset-0 flex items-center justify-center transition-all ${isLocked ? 'bg-black/60' : 'bg-black/20 group-hover:bg-black/40'}`}>
+                    {/* Status Play / Lock Icon */}
+                    <div className="absolute inset-0 flex items-center justify-center">
                       {isTierLocked ? (
                         <div className="flex flex-col items-center gap-4">
-                           <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex items-center justify-center shadow-2xl">
-                             <Crown className={`w-8 h-8 ${ad.tier === 'gold' ? 'text-amber-400' : 'text-blue-400'}`} />
+                           <div className="w-16 h-16 rounded-[1.8rem] bg-white/5 border border-white/10 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_50px_rgba(0,0,0,0.5)] rotate-12 group-hover:rotate-0 transition-transform">
+                             <Crown className={`w-8 h-8 ${ad.tier === 'gold' ? 'text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]' : 'text-blue-400'}`} />
                            </div>
-                           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">{tierLockText}</span>
+                           <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white italic">{tierLockText}</span>
                         </div>
                       ) : isTimeLocked ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}>
-                            <Clock className="w-12 h-12 text-indigo-500/30" />
+                        <div className="flex flex-col items-center gap-3">
+                          <motion.div animate={{ rotate: 360 }} transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}>
+                            <Clock className="w-14 h-14 text-indigo-400/40" />
                           </motion.div>
-                          <span className="text-[11px] font-mono font-black text-indigo-400 uppercase tracking-widest">{remainingText}</span>
+                          <span className="text-[12px] font-mono font-black text-indigo-400 uppercase tracking-widest bg-black/40 px-4 py-1.5 rounded-full border border-indigo-500/20 backdrop-blur-md italic">{remainingText}</span>
                         </div>
                       ) : (
                         <motion.div 
-                          whileHover={{ scale: 1.2 }}
-                          className="w-20 h-20 bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(99,102,241,0.6)] relative overflow-hidden"
+                          whileHover={{ scale: 1.15 }}
+                          className="w-20 h-20 bg-indigo-600 text-white rounded-[2rem] flex items-center justify-center shadow-[0_30px_60px_rgba(0,0,0,0.6)] relative overflow-hidden group-hover:shadow-indigo-500/20 transition-all border border-indigo-400/30"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                          <PlayCircle className="w-10 h-10 fill-white drop-shadow-lg" />
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent" />
+                          <PlayCircle className="w-10 h-10 fill-white drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]" />
                         </motion.div>
                       )}
                     </div>
 
-                    {/* Meta Overlays */}
+                    {/* Edge Floating Overlays */}
                     <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none">
-                       {/* Tier Badge */}
-                       <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border backdrop-blur-3xl shadow-2xl ${
+                       {/* Tier Tag */}
+                       <div className={`px-4 py-1.5 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] border backdrop-blur-3xl shadow-2xl skew-x-[-12deg] ${
                           ad.tier === 'gold' ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' :
                           ad.tier === 'silver' ? 'bg-blue-500/20 border-blue-500/40 text-blue-300' :
                           'bg-white/5 border-white/10 text-white/50'
                        }`}>
-                         {ad.tier || 'Base'} Node
+                         {ad.tier || 'Standard'} Node
                        </div>
                        
-                       {/* Reward Badge */}
-                       <div className="flex flex-col items-end gap-1">
-                          <div className={`px-5 py-2 rounded-2xl border backdrop-blur-3xl shadow-2xl flex items-center gap-2 ${
-                            isLocked ? 'bg-slate-900/40 border-slate-800' : 'bg-black/40 border-indigo-500/30'
-                          }`}>
-                            <Wallet className="w-3.5 h-3.5 text-indigo-400" />
-                            <span className="text-white font-black text-sm italic tracking-tighter">Rs. {ad.reward.toFixed(2)}</span>
-                          </div>
+                       {/* Floating Reward Card */}
+                       <div className={`px-5 py-2.5 rounded-2xl border backdrop-blur-3xl shadow-2xl flex items-center gap-2.5 transform group-hover:scale-105 transition-transform ${
+                         isLocked ? 'bg-slate-900/40 border-slate-800' : 'bg-black/60 border-indigo-500/30'
+                       }`}>
+                         <div className={`w-2 h-2 rounded-full animate-pulse ${isLocked ? 'bg-slate-600' : 'bg-emerald-500 shadow-[0_0_8px_#10b981]'}`} />
+                         <span className="text-white font-black text-base italic tracking-tighter">Rs. {ad.reward.toFixed(2)}</span>
                        </div>
                     </div>
                   </div>
 
-                  {/* INFO SECTION - FULL WIDTH TEXT */}
-                  <div className="px-8 py-8">
-                    <div className="flex justify-between items-end gap-4">
+                  {/* BOTTOM INFO AREA - FULLY INTEGRATED */}
+                  <div className="px-6 py-8 relative">
+                    <div className="flex justify-between items-end gap-6">
                       <div className="flex-1 min-w-0">
-                         <h4 className={`text-2xl font-black tracking-tight mb-2 truncate ${isLocked ? 'text-slate-600' : 'text-white italic capitalize'}`}>
+                         <h4 className={`text-2xl font-black tracking-tighter mb-2 truncate italic uppercase ${isLocked ? 'text-slate-700' : 'text-white'}`}>
                            {ad.title}
                          </h4>
                          <div className="flex items-center gap-4">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400/60 flex items-center gap-2">
-                               <Zap className="w-3 h-3 fill-indigo-400" /> {formatViews(ad.views || 0)} Harmonic Syncs
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 flex items-center gap-2">
+                               <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
+                               {formatViews(ad.views || 0)} views
                             </span>
-                            <div className="w-1 h-1 bg-white/5 rounded-full" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 italic">60 Cycle Stream</span>
+                            <div className="w-1.5 h-1.5 bg-white/5 rounded-full" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 italic opacity-60">
+                               60 Cycle Transmission
+                            </span>
                          </div>
                       </div>
                       
                       {!isLocked && (
-                        <div className="w-12 h-12 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-center group-hover:bg-indigo-500 transition-all group-hover:shadow-[0_0_20px_rgba(99,102,241,0.5)]">
-                          <ArrowLeft className="w-6 h-6 text-indigo-400 group-hover:text-white rotate-180 transition-colors" />
+                        <div className="flex flex-col items-center">
+                           <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 transition-all shadow-xl group-hover:shadow-indigo-500/20">
+                             <ArrowRight className="w-6 h-6 text-indigo-400 group-hover:text-white transition-colors" />
+                           </div>
                         </div>
                       )}
                     </div>
@@ -624,11 +647,11 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           }))}
         </div>
 
-        <div className="mt-20 mb-10 pb-10 border-t border-white/5 pt-10 text-center">
-          <Sparkles className="w-6 h-6 text-indigo-500/20 mx-auto mb-4" />
-          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.4em] leading-relaxed">
-            All nodes are verified by taskmint neural network.<br/>
-            Credits added instantly after successfully harvest.
+        <div className="mt-20 mb-10 pb-16 px-6 text-center">
+          <div className="w-12 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent mx-auto mb-8" />
+          <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] leading-relaxed max-w-[260px] mx-auto opacity-40">
+            Secure neural transmission technology by TaskMint.<br/>
+            All credits verified by node network.
           </p>
         </div>
       </div>
