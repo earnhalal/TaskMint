@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, X, Construction, Info } from 'lucide-react';
+import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, X, Construction, Info, Crown, Zap } from 'lucide-react';
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
@@ -9,6 +9,9 @@ interface WatchTabProps {
   onBack: () => void;
   balance: number;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
+  accountStatus: string;
+  role: string;
+  partnerTier: string;
 }
 
 interface VideoAd {
@@ -21,9 +24,10 @@ interface VideoAd {
   scriptUrl?: string; // used for Web script
   duration?: number;
   views?: number;
+  tier?: 'basic' | 'silver' | 'gold';
 }
 
-export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabProps) {
+export default function WatchTab({ onBack, balance, onUpdateBalance, accountStatus, role, partnerTier }: WatchTabProps) {
   const [adStats, setAdStats] = useState<Record<string, any>>({});
   const [videoAds, setVideoAds] = useState<VideoAd[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +36,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [userName, setUserName] = useState<string>('User');
+  const [tierLockModal, setTierLockModal] = useState<'silver' | 'gold' | null>(null);
   const navigate = useNavigate();
 
   // Update "now" every minute to refresh lock timers
@@ -66,38 +71,133 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
         const fetchedAds: VideoAd[] = [];
         adsSnap.forEach((doc) => {
           const data = doc.data();
-          if (data.status !== 'inactive') { // Only show active/null status ads
+          if (data.status !== 'inactive') {
+            let title = data.title || `Video Ad`;
+            let reward = data.reward || 0.20;
+            let tier = data.tier || 'basic';
+
+            // Clean Basic titles and force reward
+            if (tier === 'basic') {
+              title = title.replace(/premium/gi, '').replace(/hilltopads/gi, 'TaskMint').trim();
+              if (!title) title = `Daily Ad #${doc.id.split('_').pop()}`;
+              reward = 1.00;
+              // Update in background if needed
+              setDoc(doc.ref, { title, reward, tier: 'basic' }, { merge: true });
+            }
+
             fetchedAds.push({
               id: doc.id,
-              title: data.title || `Video Ad`,
-              reward: data.reward || 0.20,
+              title: title,
+              reward: reward,
               limit: data.limit || 1,
               status: data.status,
               videoUrl: data.videoUrl,
               scriptUrl: data.scriptUrl,
               duration: data.duration,
-              views: data.views || Math.floor(Math.random() * 10000) + 5000 // Fake base views
+              views: data.views || (tier === 'basic' ? Math.floor(Math.random() * 5000) + 8000 : Math.floor(Math.random() * 1000) + 2000),
+              tier: tier
             });
           }
         });
+
+        // Ensure Silver and Gold ads exist with correct view counts (2k-3k)
+        const hasSilver = fetchedAds.some(a => a.tier === 'silver');
+        const hasGold = fetchedAds.some(a => a.tier === 'gold');
+
+        if (!hasSilver || !hasGold) {
+          const extraAds: VideoAd[] = [];
+          
+          if (!hasSilver) {
+            for (let i = 1; i <= 5; i++) {
+              const adId = `ad_silver_new_${i}`;
+              const adData = {
+                title: `Silver Executive Task #${i}`,
+                reward: 15.00,
+                limit: 1,
+                status: 'active',
+                scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
+                duration: 60,
+                views: Math.floor(Math.random() * 1000) + 2000,
+                tier: 'silver' as const
+              };
+              await setDoc(doc(db, 'video_ads', adId), adData);
+              extraAds.push({ id: adId, ...adData });
+            }
+          }
+
+          if (!hasGold) {
+            for (let i = 1; i <= 5; i++) {
+              const adId = `ad_gold_new_${i}`;
+              const adData = {
+                title: `Gold VIP Special #${i}`,
+                reward: 35.00,
+                limit: 1,
+                status: 'active',
+                scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
+                duration: 60,
+                views: Math.floor(Math.random() * 1000) + 2000,
+                tier: 'gold' as const
+              };
+              await setDoc(doc(db, 'video_ads', adId), adData);
+              extraAds.push({ id: adId, ...adData });
+            }
+          }
+          fetchedAds.push(...extraAds);
+        }
         
-        // Sort ads arbitrarily or keep order from DB
         setVideoAds(fetchedAds);
 
-        // Seeding mechanism: if no ads, create 15 dummy ads Using the provided script
+        // Seeding mechanism: ONLY if the list is completely empty (failsafe)
         if (fetchedAds.length === 0) {
-          console.log("No ads found in DB. Seeding 15 default ads...");
+          console.log("No ads found in DB. Seeding tier-based ads...");
           const newAds: VideoAd[] = [];
-          for (let i = 1; i <= 15; i++) {
-            const adId = `ad_${i}`;
+          
+          // 1. Basic Ads (Standard Daily)
+          for (let i = 1; i <= 10; i++) {
+            const adId = `ad_basic_${i}`;
             const adData = {
-              title: `HilltopAds Premium #${i}`,
-              reward: 0.50, // Updated reward logic as an example
+              title: `TaskMint Daily Reward #${i}`,
+              reward: 1.00, // 1 Rs per user request
               limit: 1,
               status: 'active',
               scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
               duration: 60,
-              views: Math.floor(Math.random() * 8000) + 2000
+              views: Math.floor(Math.random() * 8000) + 2000,
+              tier: 'basic' as const
+            };
+            await setDoc(doc(db, 'video_ads', adId), adData);
+            newAds.push({ id: adId, ...adData });
+          }
+
+          // 2. Silver Ads (5 ads)
+          for (let i = 1; i <= 5; i++) {
+            const adId = `ad_silver_${i}`;
+            const adData = {
+              title: `Silver Premium Ad #${i}`,
+              reward: 15.00, 
+              limit: 1,
+              status: 'active',
+              scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
+              duration: 60,
+              views: Math.floor(Math.random() * 15000) + 8000,
+              tier: 'silver' as const
+            };
+            await setDoc(doc(db, 'video_ads', adId), adData);
+            newAds.push({ id: adId, ...adData });
+          }
+
+          // 3. Gold Ads (5 ads)
+          for (let i = 1; i <= 5; i++) {
+            const adId = `ad_gold_${i}`;
+            const adData = {
+              title: `Gold VIP Exclusive #${i}`,
+              reward: 35.00,
+              limit: 1,
+              status: 'active',
+              scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
+              duration: 60,
+              views: Math.floor(Math.random() * 25000) + 15000,
+              tier: 'gold' as const
             };
             await setDoc(doc(db, 'video_ads', adId), adData);
             newAds.push({ id: adId, ...adData });
@@ -174,8 +274,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
       }, { merge: true });
 
       // Update Balance
-      const rewardAmount = activeAd.reward;
-      await onUpdateBalance(rewardAmount, 'ad_watch', `Watched ${activeAd.title}`);
+      const isUserActive = accountStatus.toLowerCase() === 'active';
+      const rewardAmount = isUserActive ? activeAd.reward : 0;
+      
+      if (isUserActive) {
+        await onUpdateBalance(rewardAmount, 'ad_watch', `Watched ${activeAd.title}`);
+      }
 
       setAdStats(prev => ({ ...prev, [activeAd.id]: new Date() }));
       
@@ -196,6 +300,10 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
           minute: '2-digit'
         })
       });
+      
+      if (!isUserActive) {
+        setMessage({ type: 'error', text: "Account inactive hone ki wajah se balance add nahi hua." });
+      }
     } catch (error) {
       console.error("Error rewarding ad:", error);
       setMessage({ type: 'error', text: "Reward add karne mein masla hua." });
@@ -256,32 +364,55 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="pb-24 px-4 pt-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen pb-24 px-4 pt-4 bg-[#0B1120] text-slate-300"
     >
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-8">
         <button 
           onClick={onBack}
-          className="p-2 bg-white rounded-xl shadow-sm hover:bg-slate-50 transition-colors"
+          className="p-3 bg-white/5 border border-white/10 rounded-2xl shadow-xl hover:bg-white/10 transition-all active:scale-95"
         >
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
+          <ArrowLeft className="w-5 h-5 text-white" />
         </button>
         <div>
-          <h2 className="text-xl font-black text-slate-900 tracking-tight">Watch Ads</h2>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Premium Video Content</p>
+          <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic">Ad <span className="text-indigo-500">Multiverse</span></h2>
+          <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.3em] flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+            Neural Content Feed
+          </p>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-6 text-white shadow-lg shadow-indigo-500/30 mb-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+      <div className="bg-gradient-to-br from-indigo-900/40 via-slate-900 to-[#0B1120] rounded-[2.5rem] p-8 border border-white/5 shadow-2xl mb-10 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-32 -mt-32 blur-[100px] group-hover:bg-indigo-500/20 transition-colors"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 rounded-full -ml-24 -mb-24 blur-[80px]"></div>
+        
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <h2 className="text-2xl font-black tracking-tighter text-white">Ad Center</h2>
-            <span className="bg-white/20 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border border-white/30">60s Timer</span>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-500 rounded-lg shadow-[0_0_20px_rgba(99,102,241,0.4)]">
+                <Zap className="w-5 h-5 text-white fill-white" />
+              </div>
+              <h2 className="text-3xl font-black tracking-tighter text-white">Ad <span className="text-indigo-400">Core</span></h2>
+            </div>
+            
+            <p className="text-xs text-slate-400 font-bold max-w-[280px] leading-relaxed">
+              Synthesize neural rewards by watching encrypted video nodes for <span className="text-white">60 cycles</span>.
+            </p>
+
+            <div className="flex items-center gap-4 mt-2">
+               <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10 flex items-center gap-2">
+                 <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                 <span className="text-[10px] font-black tracking-widest text-white uppercase">60s Cycle</span>
+               </div>
+               <div className="px-4 py-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex items-center gap-2">
+                 <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                 <span className="text-[10px] font-black tracking-widest text-emerald-400 uppercase">Verified</span>
+               </div>
+            </div>
           </div>
-          <p className="text-xs text-indigo-100 font-bold opacity-90">Watch video ads for 60 seconds to maximize your earning potential.</p>
         </div>
       </div>
 
@@ -298,6 +429,24 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
         </motion.div>
       )}
 
+      {accountStatus.toLowerCase() !== 'active' && (
+        <div className="mb-8 p-6 rounded-[2rem] bg-amber-50 border-2 border-amber-200 border-dashed text-center">
+          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-600">
+            <Info className="w-6 h-6 animate-bounce" />
+          </div>
+          <h3 className="text-sm font-black text-amber-900 uppercase tracking-tight mb-2">Attention Needed!</h3>
+          <p className="text-[10px] text-amber-700 font-bold leading-relaxed px-4">
+            Bina account active keye ya joining fee pay kiye bagair apki earning balance mein add nahi hogi. Account active karne ke liye niche button dabayein.
+          </p>
+          <button 
+            onClick={() => navigate('/dashboard')}
+            className="mt-4 px-6 py-2 bg-amber-600 text-white text-[10px] font-black rounded-xl hover:bg-amber-700 transition-all uppercase tracking-widest shadow-lg shadow-amber-600/20"
+          >
+            Activate Now
+          </button>
+        </div>
+      )}
+
       {/* Video Style Ads List */}
       <div className="grid grid-cols-1 gap-6">
         {videoAds.length === 0 ? (
@@ -307,12 +456,32 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
             <p className="text-xs text-slate-500 mt-1">Please check back later.</p>
           </div>
         ) : (
-          videoAds.map((ad, index) => {
+            videoAds
+              .sort((a, b) => {
+                const tiers = { basic: 0, silver: 1, gold: 2 };
+                return tiers[a.tier || 'basic'] - tiers[b.tier || 'basic'];
+              })
+              .map((ad, index) => {
             const isThisWatching = isWatching === ad.id;
             
-            // Lock Calculation
+            // Tier based lock logic
+            const isSilver = partnerTier === 'silver' || partnerTier === 'gold' || role === 'partner'; // Admin might see all
+            const isGold = partnerTier === 'gold';
+            
+            let isTierLocked = false;
+            let tierLockText = "";
+
+            if (ad.tier === 'silver' && !isSilver) {
+              isTierLocked = true;
+              tierLockText = "Silver Plan required";
+            } else if (ad.tier === 'gold' && !isGold) {
+              isTierLocked = true;
+              tierLockText = "Gold VIP required";
+            }
+
+            // Time based Lock Calculation
             const lastWatched = adStats[ad.id];
-            let isLocked = false;
+            let isTimeLocked = false;
             let remainingText = "";
             
             if (lastWatched) {
@@ -320,7 +489,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
               const lastTime = lastWatched.toMillis ? lastWatched.toMillis() : new Date(lastWatched).getTime();
               const diff = Date.now() - lastTime;
               if (diff < lockTime) {
-                isLocked = true;
+                isTimeLocked = true;
                 const remainingMs = lockTime - diff;
                 const minutes = Math.floor(remainingMs / (1000 * 60));
                 const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
@@ -328,77 +497,122 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
               }
             }
 
+            const isLocked = isTimeLocked || isTierLocked;
+
             return (
               <motion.div
                 key={ad.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                onClick={() => !isLocked && handleWatchAd(ad)}
-                className={`group relative rounded-[2rem] overflow-hidden border shadow-sm transition-all cursor-pointer ${
+                onClick={() => {
+                  if (isTierLocked) {
+                    setTierLockModal(ad.tier as 'silver' | 'gold');
+                    return;
+                  }
+                  if (isTimeLocked) {
+                    setMessage({ type: 'error', text: "Yeh ad abhi locked hai. Agle watch ke liye intezar karein." });
+                    return;
+                  }
+                  handleWatchAd(ad);
+                }}
+                className={`group relative rounded-[2.5rem] overflow-hidden border transition-all cursor-pointer ${
                   isLocked 
-                    ? 'bg-slate-50 border-slate-200 grayscale-[0.5]' 
-                    : 'bg-white border-slate-100 hover:shadow-xl hover:border-indigo-200 active:scale-[0.98]'
+                    ? 'bg-white/5 border-white/5 grayscale saturate-50 opacity-60 hover:opacity-100' 
+                    : 'bg-gradient-to-b from-white/10 to-transparent border-white/10 hover:border-indigo-500/50 hover:shadow-[0_0_30px_rgba(99,102,241,0.15)] active:scale-[0.98]'
                 }`}
               >
                 {/* Thumbnail Area */}
-                <div className="aspect-video bg-slate-100 relative overflow-hidden">
+                <div className="aspect-video bg-slate-900 relative overflow-hidden">
                   <img 
                     src={`https://picsum.photos/seed/${ad.id}/640/360`}
                     alt={ad.title}
                     referrerPolicy="no-referrer"
-                    className={`w-full h-full object-cover transition-transform duration-500 ${!isLocked && 'group-hover:scale-105'}`}
+                    className={`w-full h-full object-cover transition-transform duration-700 ${!isLocked && 'group-hover:scale-110'}`}
                   />
-                  <div className={`absolute inset-0 transition-colors flex items-center justify-center ${
-                    isLocked ? 'bg-slate-900/60' : 'bg-slate-900/40 group-hover:bg-slate-900/50'
+                  <div className={`absolute inset-0 transition-all duration-500 flex items-center justify-center ${
+                    isLocked ? 'bg-slate-950/90' : 'bg-slate-950/40 group-hover:bg-slate-950/60'
                   }`}>
-                    {isLocked ? (
+                    {isTierLocked ? (
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 bg-white/5 backdrop-blur-xl rounded-[2rem] flex items-center justify-center border border-white/10 shadow-2xl rotate-12 group-hover:rotate-0 transition-transform">
+                          <Crown className={`w-8 h-8 ${ad.tier === 'gold' ? 'text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.5)]' : 'text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.5)]'}`} />
+                        </div>
+                        <div className="bg-white/5 backdrop-blur-md px-5 py-2 rounded-full text-[10px] font-black text-white uppercase tracking-[0.3em] border border-white/10">
+                          {tierLockText}
+                        </div>
+                      </div>
+                    ) : isTimeLocked ? (
                       <div className="flex flex-col items-center gap-2">
-                        <Lock className="w-10 h-10 text-white/80" />
-                        <div className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-white/20">
-                          Unlocked in {remainingText}
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}>
+                          <Clock className="w-12 h-12 text-white/20" />
+                        </motion.div>
+                        <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-full text-[11px] font-mono font-black text-white uppercase tracking-widest border border-white/10">
+                          COOLDOWN: {remainingText}
                         </div>
                       </div>
                     ) : (
-                      <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <PlayCircle className="w-8 h-8 text-white fill-white" />
+                      <div className="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-full flex items-center justify-center group-hover:scale-125 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-white/20">
+                        <PlayCircle className="w-10 h-10 text-white fill-white shadow-2xl" />
                       </div>
                     )}
                   </div>
                   
                   {/* Reward Badge Overlay */}
-                  <div className={`absolute top-4 right-4 text-white px-3 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-wider shadow-lg ${
-                    isLocked ? 'bg-slate-500' : 'bg-emerald-500'
+                  <motion.div 
+                    initial={false}
+                    animate={isLocked ? {} : { scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className={`absolute top-5 right-5 text-white p-[2px] rounded-2xl shadow-2xl ${
+                    isLocked ? 'bg-slate-800' : 
+                    ad.tier === 'gold' ? 'bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600' :
+                    ad.tier === 'silver' ? 'bg-gradient-to-tr from-blue-500 via-indigo-400 to-blue-600' :
+                    'bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-600'
                   }`}>
-                    Rs {ad.reward.toFixed(2)}
-                  </div>
+                    <div className="bg-[#1A1A1A]/90 backdrop-blur-md px-4 py-2 rounded-[calc(1rem-2px)] flex items-center gap-2">
+                      <Wallet className="w-3.5 h-3.5 text-white" />
+                      <span className="font-black text-[12px] tracking-tighter italic">Rs {ad.reward.toFixed(2)}</span>
+                    </div>
+                  </motion.div>
 
-                  {/* Duration Badge Overlay */}
-                  <div className="absolute bottom-4 right-4 bg-slate-950/80 text-white px-2 py-1 rounded-md font-mono text-[9px] font-bold">
-                    60s
+                  {/* Tier Label */}
+                  <div className={`absolute top-5 left-5 px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border backdrop-blur-md ${
+                    ad.tier === 'gold' ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' :
+                    ad.tier === 'silver' ? 'bg-blue-500/20 border-blue-500/50 text-blue-400' :
+                    'bg-white/10 border-white/20 text-white'
+                  }`}>
+                    {ad.tier || 'Standard'}
                   </div>
                 </div>
 
                 {/* Info Area */}
-                <div className="p-5 flex items-center justify-between">
+                <div className="px-6 py-6 flex items-center justify-between">
                   <div className="flex-1">
-                    <h4 className={`font-black line-clamp-1 ${isLocked ? 'text-slate-400' : 'text-slate-900'}`}>{ad.title}</h4>
-                    <div className="flex items-center gap-3 mt-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                        <Info className="w-3 h-3" /> {ad.views?.toLocaleString()} Views
+                    <h4 className={`text-lg font-black tracking-tight ${isLocked ? 'text-slate-600' : 'text-white'}`}>
+                      {ad.title}
+                    </h4>
+                    <div className="flex items-center gap-4 mt-2">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-indigo-400" /> {ad.views?.toLocaleString()} Active Peers
                       </p>
-                      {isLocked && (
-                        <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Locked</span>
-                      )}
+                      <div className="w-1 h-1 bg-slate-800 rounded-full"></div>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        60s Node
+                      </p>
                     </div>
                   </div>
                   <div className="ml-4">
-                    {isLocked ? (
-                      <Clock className="w-5 h-5 text-slate-300" />
-                    ) : isThisWatching ? (
-                      <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
+                    {isTierLocked ? (
+                      <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                        <Lock className="w-5 h-5 text-amber-500" />
+                      </div>
+                    ) : isTimeLocked ? (
+                      <Clock className="w-5 h-5 text-slate-700" />
                     ) : (
-                      <Sparkles className="w-5 h-5 text-amber-500 animate-bounce" />
+                      <button className="flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-xl group-hover:bg-indigo-500 transition-colors">
+                         <span className="text-[10px] font-black text-indigo-400 group-hover:text-white uppercase tracking-widest">Transmit</span>
+                         <ArrowLeft className="w-4 h-4 text-indigo-400 group-hover:text-white rotate-180" />
+                      </button>
                     )}
                   </div>
                 </div>
@@ -445,68 +659,106 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
       {/* Player Modal */}
       <AnimatePresence>
         {activeAd && (
-          <div className="fixed inset-0 z-[110] flex flex-col bg-slate-900">
+          <div className={`fixed inset-0 z-[110] flex flex-col ${
+            activeAd.tier === 'gold' ? 'bg-[#150F02]' : 
+            activeAd.tier === 'silver' ? 'bg-[#0A101F]' :
+            'bg-slate-900'
+          }`}>
+            {/* Enchanted background glow */}
+            <div className={`absolute inset-0 opacity-40 blur-[150px] pointer-events-none ${
+              activeAd.tier === 'gold' ? 'bg-amber-500/20' : 
+              activeAd.tier === 'silver' ? 'bg-blue-500/20' :
+              'bg-indigo-500/10'
+            }`} />
+
             {/* Progress Bar Top */}
-            <div className="h-1.5 w-full bg-slate-800 relative z-[120]">
+            <div className="h-1.5 w-full bg-white/5 relative z-[120]">
               <motion.div 
                 initial={{ width: '0%' }}
                 animate={{ width: adLoaded ? `${((totalTime - timeLeft) / totalTime) * 100}%` : '0%' }}
                 transition={{ duration: 0.5 }}
-                className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                className={`h-full shadow-[0_0_20px_rgba(255,255,255,0.3)] ${
+                  activeAd.tier === 'gold' ? 'bg-gradient-to-r from-amber-500 to-yellow-300' : 
+                  activeAd.tier === 'silver' ? 'bg-gradient-to-r from-blue-500 to-indigo-300' :
+                  'bg-indigo-500'
+                }`}
               />
             </div>
 
             <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col h-full w-full max-w-md mx-auto bg-slate-900 relative"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="flex-1 flex flex-col h-full w-full max-w-md mx-auto relative overflow-hidden"
             >
               {/* Top Bar */}
-              <div className="flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                    <PlayCircle className="w-5 h-5 text-indigo-500" />
+              <div className="flex items-center justify-between p-6 border-b border-white/5 bg-black/20 backdrop-blur-xl relative z-20">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center p-[1px] ${
+                    activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-amber-500 to-yellow-300' : 
+                    activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-500 to-indigo-300' :
+                    'bg-white/10'
+                  }`}>
+                    <div className="w-full h-full bg-slate-900 rounded-[calc(1rem-1px)] flex items-center justify-center">
+                      <PlayCircle className={`w-6 h-6 ${
+                        activeAd.tier === 'gold' ? 'text-amber-400' : 
+                        activeAd.tier === 'silver' ? 'text-blue-400' :
+                        'text-indigo-400'
+                      }`} />
+                    </div>
                   </div>
                   <div>
-                    <h3 className="text-white font-black text-sm">{activeAd.title}</h3>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-wider">
-                      {!adLoaded ? 'INITIALIZING...' : timeLeft > 0 ? 'AD PLAYING' : 'READY TO CLAIM'}
-                    </p>
+                    <h3 className="text-white font-black text-base tracking-tight leading-none mb-1">{activeAd.title}</h3>
+                    <div className="flex items-center gap-2">
+                       <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
+                         activeAd.tier === 'gold' ? 'text-amber-400 border-amber-500/30' : 
+                         activeAd.tier === 'silver' ? 'text-blue-400 border-blue-500/30' :
+                         'text-indigo-400 border-indigo-500/30'
+                       }`}>
+                         {activeAd.tier || 'Standard'} Mode
+                       </span>
+                    </div>
                   </div>
                 </div>
-                {/* Timer Display Badge */}
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-300 ${
-                  timeLeft > 0 
-                  ? 'bg-slate-950/50 border-slate-800 shadow-inner' 
-                  : 'bg-emerald-500 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                }`}>
-                  {timeLeft > 0 ? (
-                    <>
-                      <Clock className={`w-3.5 h-3.5 ${adLoaded ? 'text-amber-500' : 'text-slate-600'}`} />
-                      <span className={`${adLoaded ? 'text-amber-500' : 'text-slate-600'} font-mono font-black text-sm`}>{timeLeft}s</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                      <span className="text-white font-black text-[10px] uppercase tracking-wider">DONE</span>
-                    </>
-                  )}
+                
+                <div className={`flex flex-col items-center gap-0.5 ${timeLeft > 0 ? 'text-white' : 'text-emerald-400'}`}>
+                   <span className="text-[20px] font-mono font-black tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+                     {timeLeft > 0 ? timeLeft : 'CLAIM'}
+                   </span>
+                   <span className="text-[7px] font-bold uppercase tracking-widest opacity-60">
+                     {timeLeft > 0 ? 'Watching' : 'Ready'}
+                   </span>
                 </div>
               </div>
 
               {/* Main Ad Area */}
               <div className="flex-1 bg-black flex flex-col justify-center items-center relative overflow-hidden">
                 {!adLoaded && (
-                  <div className="absolute inset-0 z-10 bg-slate-900 flex flex-col items-center justify-center">
-                    <Loader2 className="w-10 h-10 text-indigo-500 animate-spin mb-4" />
-                    <p className="text-white font-black uppercase tracking-widest text-[10px] animate-pulse">Waiting for Ad...</p>
-                    <p className="text-slate-500 text-[9px] mt-2 font-bold">Timer will start automatically</p>
+                  <div className="absolute inset-0 z-10 bg-[#0B1120] flex flex-col items-center justify-center">
+                    <motion.div 
+                      animate={{ 
+                        rotate: 360,
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        rotate: { duration: 3, repeat: Infinity, ease: 'linear' },
+                        scale: { duration: 2, repeat: Infinity }
+                      }}
+                      className="w-16 h-16 rounded-full border-t-2 border-r-2 border-indigo-500 mb-6 shadow-[0_0_30px_rgba(99,102,241,0.2)]"
+                    />
+                    <p className="text-white font-black uppercase tracking-[0.4em] text-[10px] animate-pulse">Initializing Portal</p>
+                    <p className="text-slate-500 text-[9px] mt-4 font-bold max-w-[200px] text-center uppercase tracking-widest">establishing secure transmission link...</p>
                   </div>
                 )}
                 
                 {/* Script Container */}
                 <div id="ad-script-container" className="w-full h-full flex items-center justify-center relative z-0 bg-black">
+                  {/* Neon border decoration */}
+                  <div className={`absolute inset-4 border rounded-[2rem] pointer-events-none opacity-20 ${
+                    activeAd.tier === 'gold' ? 'border-amber-500 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 
+                    activeAd.tier === 'silver' ? 'border-blue-500 shadow-[0_0_50px_rgba(59,130,246,0.2)]' :
+                    'border-indigo-500'
+                  }`} />
                   
                   {activeAd.scriptUrl ? (
                     <iframe
@@ -537,7 +789,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                         </body>
                         </html>
                       `}
-                      className="w-full h-full border-none"
+                      className="w-full h-full border-none relative z-10"
                       sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-forms allow-top-navigation-by-user-activation"
                       onLoad={() => {
                         console.log("Ad Player Iframe Loaded");
@@ -546,48 +798,72 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
                       }}
                     />
                   ) : (
-                    <p className="text-slate-500 text-xs text-center">Ad Space<br/>(No script assigned)</p>
+                    <p className="text-slate-500 text-xs text-center uppercase tracking-[0.3em]">No Signal</p>
                   )}
                 </div>
               </div>
 
               {/* Bottom Instructions and Action */}
-              <div className="p-8 bg-slate-900 border-t border-slate-800/50 shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
+              <div className="p-8 bg-black/40 backdrop-blur-2xl border-t border-white/5 relative z-20">
                 {timeLeft > 0 ? (
-                  <div className="bg-slate-950/50 p-6 rounded-3xl border border-slate-800 text-center shadow-inner">
-                    <p className="text-slate-400 text-sm font-black mb-1">
-                      {adLoaded ? 'STAY ON THIS SCREEN' : 'PREPARING AD...'}
-                    </p>
-                    <p className="text-slate-600 font-bold text-[10px] uppercase tracking-widest">
-                      {adLoaded ? `You will be rewarded after ${timeLeft}s` : 'Timer starts once the ad content appears'}
-                    </p>
-                    <div className="mt-4 pt-4 border-t border-slate-800/50">
-                      <p className="text-rose-500/80 text-[9px] font-black uppercase tracking-wider animate-pulse flex items-center justify-center gap-1.5">
-                        <AlertCircle className="w-3 h-3" />
-                        Do not click 'X' or close the ad, otherwise you won't get the bonus.
-                      </p>
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center px-4">
+                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Node Syncing</span>
+                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{Math.round(((totalTime - timeLeft) / totalTime) * 100)}% Complete</span>
+                    </div>
+                    
+                    <div className="bg-white/5 p-6 rounded-[2rem] border border-white/10 text-center relative group overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-2000"></div>
+                      <p className="text-white text-xs font-black tracking-widest uppercase mb-2">Maintain Connection</p>
+                      <p className="text-slate-500 font-bold text-[9px] uppercase tracking-widest mb-4">do not interrupt the neural stream</p>
+                      
+                      <div className="pt-4 border-t border-white/5">
+                        <p className="text-rose-500 text-[10px] font-black uppercase tracking-widest animate-pulse flex items-center justify-center gap-2 italic">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          Node closure results in reward loss
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 text-center mb-4">
-                      <p className="text-emerald-500 text-sm font-black uppercase tracking-widest animate-pulse">Bonus Ready for Collection!</p>
-                    </div>
+                    <motion.div 
+                      animate={{ 
+                        boxShadow: activeAd.tier === 'gold' ? ['0 0 20px rgba(245,158,11,0.2)', '0 0 50px rgba(245,158,11,0.6)', '0 0 20px rgba(245,158,11,0.2)'] : []
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className={`p-4 rounded-[1.5rem] border text-center transition-all ${
+                        activeAd.tier === 'gold' ? 'bg-amber-500/10 border-amber-500/30' : 
+                        activeAd.tier === 'silver' ? 'bg-blue-500/10 border-blue-500/30' :
+                        'bg-emerald-500/10 border-emerald-500/30'
+                      }`}
+                    >
+                      <p className={`text-sm font-black uppercase tracking-[0.3em] ${
+                        activeAd.tier === 'gold' ? 'text-amber-400' : 
+                        activeAd.tier === 'silver' ? 'text-blue-400' :
+                        'text-emerald-400'
+                      }`}>Transmission Finalized</p>
+                    </motion.div>
+                    
                     <motion.button
-                      initial={{ scale: 0.9, opacity: 0, y: 10 }}
-                      animate={{ scale: 1, opacity: 1, y: 0 }}
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={finishAdWatch}
                       disabled={isClaiming}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white py-5 rounded-[2rem] font-black text-base uppercase tracking-[0.1em] shadow-2xl shadow-indigo-600/30 flex items-center justify-center gap-3 group relative overflow-hidden"
+                      className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden group transition-all duration-500 ${
+                        activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-amber-600 to-yellow-400 text-black' : 
+                        activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-600 to-indigo-400 text-white shadow-blue-500/30' :
+                        'bg-indigo-600 text-white shadow-indigo-600/30 font-black'
+                      }`}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                      <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                       {isClaiming ? (
-                        <Loader2 className="w-6 h-6 animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
-                        <Sparkles className="w-6 h-6 text-amber-300 group-hover:rotate-12 transition-transform" />
+                        <Sparkles className={`w-5 h-5 ${activeAd.tier === 'gold' ? 'text-black' : 'text-amber-300'}`} />
                       )}
-                      {isClaiming ? 'CLAIMING...' : `CLAIM REWARD (Rs. ${activeAd.reward})`}
+                      {isClaiming ? 'Extracting...' : `Harvest Reward (Rs. ${activeAd.reward})`}
                     </motion.button>
                   </div>
                 )}
@@ -605,55 +881,117 @@ export default function WatchTab({ onBack, balance, onUpdateBalance }: WatchTabP
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
+              className="absolute inset-0 bg-slate-900/80 backdrop-blur-md shadow-2xl"
+              onClick={() => setShowSuccessPopup(null)}
             />
             <motion.div 
               initial={{ opacity: 0, scale: 0.5, y: 100 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5, y: 100 }}
-              className="relative bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden text-center"
+              className="relative bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden text-center border-4 border-emerald-500/20"
             >
-              {/* Decorative elements */}
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-indigo-600"></div>
               <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl"></div>
-
+              
               <div className="relative z-10 flex flex-col items-center">
                 <div className="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-emerald-500/40 rotate-12">
                   <CheckCircle2 className="w-12 h-12" />
                 </div>
 
                 <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Congratulations! 🎉</h3>
-                <p className="text-emerald-600 font-bold text-sm uppercase tracking-[0.2em] mb-6">Dear {userName}</p>
+                <p className="text-emerald-600 font-bold text-sm uppercase tracking-[0.2em] mb-6 tracking-widest italic">Dear {userName}</p>
                 
                 <div className="bg-slate-50 w-full p-6 rounded-[2rem] mb-6 border border-slate-100 flex flex-col items-center">
-                  <div className="w-full text-left space-y-3">
+                  <div className="w-full text-left space-y-4">
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
-                      <span>Ad Task</span>
-                      <span className="text-slate-900">{showSuccessPopup.adTitle}</span>
+                      <span>Neural Task</span>
+                      <span className="text-slate-900 line-clamp-1 max-w-[120px]">{showSuccessPopup.adTitle}</span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
-                      <span>Completed</span>
+                      <span>Harvested</span>
+                      <span className="text-emerald-600 font-black">Rs. {showSuccessPopup.amount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
+                      <span>Cycle Date</span>
                       <span className="text-slate-900">{showSuccessPopup.timestamp}</span>
                     </div>
-                    <div className="h-px w-full bg-slate-200"></div>
-                    <div className="flex justify-between items-end">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 pb-1">Bonus Reward</span>
-                      <span className="text-2xl font-black text-emerald-600 tracking-tighter">Rs. {showSuccessPopup.amount.toFixed(2)}</span>
-                    </div>
                   </div>
-                  <p className="text-[9px] font-bold text-slate-400 mt-6 italic">
-                    "Verified reward by TaskMint"
-                  </p>
                 </div>
+
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6 border-b border-slate-100 pb-4">
+                  Verified Reward by TaskMint
+                </p>
 
                 <button 
                   onClick={() => setShowSuccessPopup(null)}
-                  className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-900/40 flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
                 >
-                  <Sparkles className="w-5 h-5 text-amber-400" />
-                  Thanks TaskMint
+                  Continue Journey
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Tier Lock Modal */}
+      <AnimatePresence>
+        {tierLockModal && (
+          <div className="fixed inset-0 z-[250] flex items-center justify-center px-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-[#0B1120]/95 backdrop-blur-xl"
+              onClick={() => setTierLockModal(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-gradient-to-b from-slate-900 to-black rounded-[3rem] p-8 border border-white/10 shadow-2xl overflow-hidden text-center"
+            >
+              {/* Decorative Glow */}
+              <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 opacity-20 blur-[60px] ${
+                tierLockModal === 'gold' ? 'bg-amber-500' : 'bg-blue-500'
+              }`} />
+
+              <div className="relative z-10 flex flex-col items-center">
+                <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-2xl ${
+                  tierLockModal === 'gold' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-600/20'
+                }`}>
+                  <Crown className="w-10 h-10 text-white" />
+                </div>
+
+                <h3 className="text-2xl font-black text-white mb-2 tracking-tighter uppercase italic italic text-center">
+                  {tierLockModal === 'gold' ? 'Gold VIP' : 'Silver Partner'} Required
+                </h3>
+                
+                <p className="text-slate-400 text-xs font-bold leading-relaxed mb-8 px-4 opacity-80">
+                  Yeh premium ad nodes sirf {tierLockModal === 'gold' ? 'Gold VIP' : 'Silver Partner'} members ke liye available hain. Mazeed earning ke liye apna plan upgrade karein.
+                </p>
+
+                <div className="w-full space-y-3">
+                  <button 
+                    onClick={() => {
+                      setTierLockModal(null);
+                      navigate('/dashboard');
+                    }}
+                    className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 ${
+                      tierLockModal === 'gold' 
+                        ? 'bg-gradient-to-r from-amber-600 to-yellow-400 text-black' 
+                        : 'bg-gradient-to-r from-blue-600 to-indigo-400 text-white shadow-blue-500/20'
+                    }`}
+                  >
+                    Upgrade Plan Now
+                  </button>
+                  <button 
+                    onClick={() => setTierLockModal(null)}
+                    className="w-full py-4 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-white transition-colors"
+                  >
+                    Maybe Later
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>

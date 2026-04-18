@@ -1320,13 +1320,13 @@ export default function Dashboard() {
           onSkip={() => setActiveTab('withdraw')}
         />;
       case 'watch':
-        if (accountStatus.toLowerCase() !== 'active') {
-          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} />;
-        }
         return <WatchTab 
           onBack={() => setActiveTab('home')}
           balance={balance}
           onUpdateBalance={handleUpdateBalance}
+          accountStatus={accountStatus}
+          role={role}
+          partnerTier={partnerTier}
         />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {
