@@ -468,75 +468,106 @@ export default function HomeTab({
           </div>
       </div>
 
-      {/* Enhanced Premium Balance Card */}
-      <div className="relative w-full rounded-[28px] p-6 text-white shadow-[0_0_40px_rgba(16,185,129,0.15)] overflow-hidden group transform transition-transform hover:scale-[1.02] border border-emerald-500/20">
-        {/* Main Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-[#1a1c29] to-slate-900"></div>
+      {/* Realistic Digital Finance Balance Card (Compact & Pro) */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative w-full rounded-[28px] p-[1.5px] overflow-hidden shadow-2xl"
+      >
+        {/* Animated Border Glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-teal-500 animate-spin-slow opacity-40"></div>
         
-        {/* Glow Effects */}
-        <div className="absolute top-[-30%] right-[-10%] w-[250px] h-[250px] bg-emerald-500/40 rounded-full blur-[80px] animate-pulse-slow"></div>
-        <div className="absolute bottom-[-30%] left-[-10%] w-[200px] h-[200px] bg-blue-500/40 rounded-full blur-[70px] animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
-        
-        {/* Texture & Border */}
-        <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-overlay"></div>
-        <div className="absolute inset-0 rounded-[28px] border border-white/10 shadow-[inset_0_0_30px_rgba(255,255,255,0.05)]"></div>
+        {/* Main Card Container */}
+        <div className="relative bg-[#0A0A0B] rounded-[27px] p-4 sm:p-6 overflow-hidden">
+          
+          {/* Subtle Ambient Glows */}
+          <div className="absolute top-[-10%] right-[-5%] w-[200px] h-[200px] bg-indigo-600/20 rounded-full blur-[80px] animate-pulse-slow"></div>
+          <div className="absolute bottom-[-10%] left-[-5%] w-[180px] h-[180px] bg-teal-500/10 rounded-full blur-[80px] animate-pulse-slow" style={{ animationDelay: '2.5s' }}></div>
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col gap-5">
+          {/* Content */}
+          <div className="relative z-10 flex flex-col gap-4 sm:gap-6">
+            
+            {/* Header */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 opacity-90">
-                    <div className="p-1.5 bg-white/10 rounded-lg backdrop-blur-sm shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                        <WalletIcon className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                    </div>
-                    <span className="text-[11px] font-black tracking-widest uppercase text-slate-300 drop-shadow-md">Available Balance</span>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20 backdrop-blur-md">
+                  <WalletIcon className="w-4 h-4 text-indigo-400" />
                 </div>
-                <button 
-                  onClick={handleReloadBalance}
-                  className={`p-2 bg-white/5 hover:bg-white/10 rounded-full backdrop-blur-sm transition-all shadow-[0_0_10px_rgba(255,255,255,0.05)] hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] ${isReloading ? 'animate-spin text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'text-slate-400 hover:text-white'}`}
-                >
-                  <ExchangeIcon className="w-4 h-4" />
-                </button>
-            </div>
-
-            <div className="flex items-baseline gap-2">
-                <span className="text-4xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-amber-400 to-yellow-600 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]">
-                    <AnimatedCounter value={balance} trigger={reloadTrigger} />
-                </span>
-                <span className="text-sm font-bold text-amber-400 font-mono tracking-widest drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]">PKR</span>
-            </div>
-
-            {lockedBalance > 0 && (
-              <div className="inline-flex items-center gap-2 bg-white/5 rounded-xl p-2.5 border border-white/5 w-fit shadow-[0_0_15px_rgba(251,191,36,0.15)]">
-                <Clock className="w-3.5 h-3.5 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-                <div className="flex items-baseline gap-1.5">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400">Locked:</span>
-                    <span className="text-sm font-black text-amber-100 drop-shadow-[0_0_10px_rgba(251,191,36,0.4)]">
-                        {lockedBalance.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
-                    </span>
-                    <span className="text-[9px] font-bold text-amber-400/60 font-mono">PKR</span>
+                <div>
+                  <h3 className="text-[9px] font-black tracking-widest uppercase text-indigo-300/40">Ledger v2.0</h3>
+                  <p className="text-[11px] font-bold text-white/80">Available Portfolio</p>
                 </div>
               </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3 mt-2">
-                <button 
-                    onClick={onDepositClick}
-                    className="flex-1 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-white text-xs font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all active:scale-95 border border-emerald-300/50 relative overflow-hidden group"
-                >
-                    <div className="absolute inset-0 bg-white/20 blur-md group-hover:opacity-100 opacity-0 transition-opacity"></div>
-                    <PlusCircleIcon className="w-4 h-4 relative z-10 drop-shadow-md" /> <span className="relative z-10 drop-shadow-md">DEPOSIT</span>
-                </button>
-                <button 
-                    onClick={onWithdrawClick}
-                    className="flex-1 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-400 hover:to-red-400 text-white text-xs font-black py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:shadow-[0_0_30px_rgba(244,63,94,0.6)] transition-all active:scale-95 border border-rose-400/50 relative overflow-hidden group"
-                >
-                    <div className="absolute inset-0 bg-white/20 blur-md group-hover:opacity-100 opacity-0 transition-opacity"></div>
-                    <ArrowRight className="w-4 h-4 relative z-10 drop-shadow-md" /> <span className="relative z-10 drop-shadow-md">WITHDRAW</span>
-                </button>
+              
+              <button 
+                onClick={handleReloadBalance}
+                className={`p-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl transition-all ${isReloading ? 'animate-spin' : ''}`}
+              >
+                <ExchangeIcon className="w-3.5 h-3.5 text-white/50" />
+              </button>
             </div>
+
+            {/* Balance */}
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-1 opacity-70">Credit Balance</span>
+              <div className="flex items-baseline gap-2">
+                <motion.span 
+                  key={balance}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-4xl sm:text-5xl font-black tracking-tighter text-white font-mono"
+                >
+                  <AnimatedCounter value={balance} trigger={reloadTrigger} />
+                </motion.span>
+                <span className="text-xs font-black text-indigo-400 tracking-wider">PKR</span>
+              </div>
+            </div>
+
+            {/* Metrics Grid */}
+            <div className="flex flex-wrap items-center gap-3">
+              {lockedBalance > 0 && (
+                <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-1.5 border border-white/5">
+                  <Lock className="w-3 h-3 text-amber-400" />
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[8px] font-black text-white/30 uppercase">Locked</span>
+                    <span className="text-xs font-black text-white font-mono">{lockedBalance.toLocaleString()}</span>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-1.5 border border-white/5">
+                <Zap className="w-3 h-3 text-teal-400 font-bold" />
+                <span className="text-[8px] font-black text-teal-400/80 uppercase tracking-widest">Instant Sync</span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <motion.button 
+                whileTap={{ scale: 0.96 }}
+                onClick={onDepositClick}
+                className="group relative overflow-hidden px-4 py-3 rounded-xl flex items-center justify-center gap-2 bg-indigo-600 shadow-[0_8px_20px_rgba(79,70,229,0.3)]"
+              >
+                <PlusCircleIcon className="w-4 h-4 text-white" />
+                <span className="text-[10px] font-black text-white tracking-widest uppercase">Deposit</span>
+              </motion.button>
+
+              <motion.button 
+                whileTap={{ scale: 0.96 }}
+                onClick={onWithdrawClick}
+                className="relative overflow-hidden px-4 py-3 rounded-xl flex items-center justify-center gap-2 bg-white shadow-lg"
+              >
+                <ArrowRight className="w-4 h-4 text-slate-900" />
+                <span className="text-[10px] font-black text-slate-900 tracking-widest uppercase">Withdraw</span>
+              </motion.button>
+            </div>
+          </div>
+          
+          {/* Glass Bezel */}
+          <div className="absolute inset-0 rounded-[27px] border border-white/5 pointer-events-none"></div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Quick Actions Grid */}
       <div className="relative">
@@ -715,6 +746,10 @@ export default function HomeTab({
       <style>{`
         .animate-pulse-slow { animation: pulse-slow 6s infinite ease-in-out; }
         @keyframes pulse-slow { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
+        
+        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
         .animate-bounce-small { animation: bounce-small 2s infinite; }
         @keyframes bounce-small { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         
