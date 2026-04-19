@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Crown, Check, X, ArrowLeft, Wallet, Send, AlertCircle, Clock } from 'lucide-react';
+import { Crown, Check, X, ArrowLeft, Wallet, Send, AlertCircle, Clock, Ticket } from 'lucide-react';
 import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -55,8 +55,10 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
 
   const comparisonData = [
     { feature: "Joining Fee", basic: `Rs ${appSettings.activationFee}`, partner: `Rs ${appSettings.partnerFee}` },
+    { feature: "Task Earnings", basic: "Basic", partner: "Premium (+20%)" },
     { feature: "Referral Bonus", basic: `Rs ${appSettings.referralBonusBasic}`, partner: `Rs ${appSettings.referralBonusPartner}` },
     { feature: "Team Commission", basic: "0%", partner: "10%" },
+    { feature: "Free Lottery Tickets", basic: "0", partner: "2 (Monthly)" },
     { feature: "Withdrawal Priority", basic: "Normal", partner: "High" },
     { feature: "Team Analytics", basic: false, partner: true },
     { feature: "Member Approval", basic: false, partner: true },
@@ -103,13 +105,40 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
             <Crown className="w-6 h-6 text-white" />
           </div>
           <div className="flex items-center gap-2 mb-2">
-            <h2 className="text-2xl font-black">Partner Program</h2>
+            <h2 className="text-2xl font-black text-white">Partner Program</h2>
             <span className="bg-red-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter animate-pulse">
               Special Discount
             </span>
           </div>
           <p className="text-slate-400 text-sm">Unlock premium benefits and earn massive team commissions.</p>
         </div>
+      </div>
+
+      {/* NEW: Elite Benefits Highlights */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <Send className="w-5 h-5 rotate-45" />
+          </div>
+          <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Task Earnings</h4>
+          <p className="text-sm font-black text-emerald-600">+20% Bonus</p>
+          <p className="text-[8px] text-slate-400 font-medium leading-tight">Every task pays more</p>
+        </motion.div>
+
+        <motion.div 
+          whileHover={{ y: -5 }}
+          className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <Ticket className="w-5 h-5" />
+          </div>
+          <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Lottery Pack</h4>
+          <p className="text-sm font-black text-purple-600">2 Free Tickets</p>
+          <p className="text-[8px] text-slate-400 font-medium leading-tight">Monthly free entries</p>
+        </motion.div>
       </div>
 
       <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm mb-8">

@@ -8,6 +8,7 @@ import { ref, update, increment as rtdbIncrement } from 'firebase/database';
 interface LotteryViewProps {
   onBack: () => void;
   balance: number;
+  userName: string;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
 }
 
@@ -29,10 +30,11 @@ interface Winner {
   timestamp: any;
 }
 
-export default function LotteryView({ onBack, balance, onUpdateBalance }: LotteryViewProps) {
+export default function LotteryView({ onBack, balance, userName, onUpdateBalance }: LotteryViewProps) {
   const [lotteries, setLotteries] = useState<Lottery[]>([]);
   const [joinedLotteries, setJoinedLotteries] = useState<string[]>([]);
   const [pastWinners, setPastWinners] = useState<Winner[]>([]);
+  const [recentEntries, setRecentEntries] = useState<any[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(true);
@@ -71,14 +73,28 @@ export default function LotteryView({ onBack, balance, onUpdateBalance }: Lotter
     const winnersQuery = query(
       collection(db, 'lottery_winners'), 
       orderBy('timestamp', 'desc'), 
-      limit(5)
+      limit(10)
     );
     const unsubscribeWinners = onSnapshot(winnersQuery, (snapshot) => {
       const winners = snapshot.docs.map(doc => doc.data() as Winner);
       setPastWinners(winners);
     });
 
-    return () => unsubscribeWinners();
+    // 4. Listen for recent participants (Joined History)
+    const recentQuery = query(
+      collection(db, 'lottery_entries'),
+      orderBy('timestamp', 'desc'),
+      limit(10)
+    );
+    const unsubscribeRecent = onSnapshot(recentQuery, (snapshot) => {
+      const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setRecentEntries(entries);
+    });
+
+    return () => {
+      unsubscribeWinners();
+      unsubscribeRecent();
+    };
   }, []);
 
   const handleJoin = async (lottery: Lottery) => {
@@ -91,13 +107,15 @@ export default function LotteryView({ onBack, balance, onUpdateBalance }: Lotter
     }
 
     try {
-      const userName = localStorage.getItem('taskmint_name') || 'User';
+      // Robust name detection for entries
+      const storedName = localStorage.getItem('taskmint_name');
+      const entryName = userName || storedName || auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || 'Member';
       
       // 1. Create entry
       await addDoc(collection(db, 'lottery_entries'), {
         lotteryId: lottery.id,
         userId: auth.currentUser.uid,
-        userName: userName,
+        userName: entryName,
         timestamp: serverTimestamp()
       });
 
@@ -146,7 +164,7 @@ export default function LotteryView({ onBack, balance, onUpdateBalance }: Lotter
             lotteryId: lottery.id,
             lotteryName: `Mega Draw (Rs ${lottery.prizePool})`,
             userId: winner.userId,
-            userName: winner.userName || 'Lucky User',
+            userName: winner.userName || 'Member', 
             prize: lottery.prizePool,
             timestamp: serverTimestamp()
           });
@@ -186,7 +204,7 @@ export default function LotteryView({ onBack, balance, onUpdateBalance }: Lotter
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="pb-24"
+      className="pb-24 max-w-md mx-auto px-4 pt-4"
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
@@ -283,91 +301,164 @@ export default function LotteryView({ onBack, balance, onUpdateBalance }: Lotter
 
             return (
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 key={lottery.id} 
-                className={`relative overflow-hidden rounded-[28px] p-1 shadow-lg ${isJoined ? 'shadow-slate-200' : 'shadow-purple-900/10'}`}
+                className={`relative overflow-hidden rounded-[20px] p-[1px] shadow-lg ${isJoined ? 'shadow-slate-100' : 'shadow-indigo-500/10'}`}
               >
-                {/* Gradient Border Background */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${lottery.color || 'from-purple-500 to-indigo-600'} opacity-100`}></div>
+                {/* Dynamic Border Glow */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${lottery.color || 'from-indigo-600 to-blue-500'} animate-pulse-slow`}></div>
                 
-                {/* Inner Card */}
-                <div className="relative bg-slate-900 rounded-[24px] overflow-hidden">
-                  {/* Top Section */}
-                  <div className="p-6 flex justify-between items-start relative">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-                    <div>
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 text-white text-[10px] font-bold uppercase tracking-wider mb-3 backdrop-blur-md border border-white/10">
-                        <Star className="w-3 h-3 text-amber-400" /> Mega Prize
-                      </span>
-                      <p className="text-sm text-slate-400 font-medium mb-1">Winning Amount</p>
-                      <p className="text-3xl font-display font-black text-white tracking-tight flex items-center gap-2">
-                        Rs {userPrize.toLocaleString()}
-                      </p>
+                {/* Inner Card Wrapper */}
+                <div className="relative bg-[#0F172A] rounded-[19px] overflow-hidden">
+                  
+                  {/* Top Ticket Part (Compact) */}
+                  <div className="p-3 sm:p-5 relative">
+                    <div className="flex justify-between items-start mb-2 sm:mb-4">
+                      <div className="flex flex-col gap-0.5 sm:gap-1">
+                        <div className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[7px] sm:text-[9px] font-black uppercase tracking-wider w-fit">
+                          <Crown className="w-2 sm:w-2.5 h-2 sm:h-2.5 fill-current" /> Premium Draw
+                        </div>
+                        <h4 className="text-base sm:text-2xl font-black text-white tracking-tight flex items-baseline gap-1">
+                           Rs {userPrize.toLocaleString()}
+                           <span className="text-[7px] sm:text-[8px] text-slate-500 font-bold uppercase tracking-widest">Prize</span>
+                        </h4>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[7px] sm:text-[8px] text-slate-500 font-bold uppercase tracking-widest mb-0.5 sm:mb-1">Fee</p>
+                        <div className="bg-white/5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border border-white/5 backdrop-blur-sm">
+                          <p className="text-[10px] sm:text-base font-black text-amber-400">Rs {lottery.fee}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-slate-400 font-medium mb-1">Entry Fee</p>
-                      <p className="text-xl font-bold text-amber-400">Rs {lottery.fee}</p>
+
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                       <div className="bg-white/5 rounded-lg p-1.5 sm:p-2.5 border border-white/[0.03]">
+                          <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Spots</p>
+                          <p className="text-[10px] sm:text-xs font-black text-slate-300">{lottery.maxMembers}</p>
+                       </div>
+                       <div className="bg-white/5 rounded-lg p-1.5 sm:p-2.5 border border-white/[0.03]">
+                          <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Status</p>
+                          <div className="flex items-center gap-1">
+                             <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                             <p className="text-[8px] sm:text-[10px] font-black text-emerald-500 uppercase">OPEN</p>
+                          </div>
+                       </div>
                     </div>
                   </div>
                   
-                  {/* Dashed Separator */}
-                  <div className="relative h-4 flex items-center px-2">
-                    <div className="absolute left-0 w-4 h-4 bg-white rounded-full -ml-2"></div>
-                    <div className="w-full border-t-2 border-dashed border-slate-700"></div>
-                    <div className="absolute right-0 w-4 h-4 bg-white rounded-full -mr-2"></div>
+                  {/* Ticket Notches */}
+                  <div className="relative h-px flex items-center justify-between px-0">
+                    <div className="w-3 h-6 bg-slate-50 rounded-full -ml-1.5 z-10 border-r border-slate-200"></div>
+                    <div className="flex-1 border-t-2 border-dashed border-slate-700/40 mx-1"></div>
+                    <div className="w-3 h-6 bg-slate-50 rounded-full -mr-1.5 z-10 border-l border-slate-200"></div>
                   </div>
                   
-                  {/* Bottom Section */}
-                  <div className="p-6 pt-4 bg-slate-800/50">
-                    <div className="flex justify-between text-xs text-slate-300 font-medium mb-3">
-                      <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-slate-400" /> {lottery.currentMembers} / {lottery.maxMembers} Joined</span>
-                      <span className="flex items-center gap-1.5 text-amber-400"><Clock className="w-4 h-4" /> Draws when full</span>
+                  {/* Bottom Ticket Part (Compact) */}
+                  <div className="p-3 sm:p-5 pt-6 sm:pt-8 bg-gradient-to-t from-slate-900 to-slate-800/20 relative">
+                    <div className="flex justify-between items-end mb-2 sm:mb-3">
+                      <div>
+                        <p className="text-[7px] sm:text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Joined</p>
+                        <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-black text-white">
+                           <Users className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-indigo-400" />
+                           {lottery.currentMembers} <span className="text-[8px] sm:text-[10px] text-slate-600 font-bold">/ {lottery.maxMembers}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[7px] sm:text-[9px] font-bold text-indigo-400/80 uppercase tracking-wider mb-0.5">Win Rate</p>
+                        <p className="text-[8px] sm:text-[10px] font-bold text-slate-400">{(1/lottery.maxMembers * 100).toFixed(1)}%</p>
+                      </div>
                     </div>
                     
-                    <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden mb-6 border border-slate-700">
+                    {/* Compact Progress Bar */}
+                    <div className="w-full h-1 sm:h-2 bg-black/40 rounded-full overflow-hidden mb-4 sm:mb-6">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: `${fillPercentage}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                        className={`h-full bg-gradient-to-r ${lottery.color || 'from-purple-500 to-indigo-500'} relative`}
-                      >
-                        <div className="absolute inset-0 bg-white/20 w-full h-full animate-pulse"></div>
-                      </motion.div>
+                        transition={{ duration: 1.5 }}
+                        className={`h-full bg-gradient-to-r ${lottery.color || 'from-indigo-600 to-blue-500'} rounded-full`}
+                      />
                     </div>
 
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => handleJoin(lottery)}
                       disabled={isJoined || lottery.currentMembers >= lottery.maxMembers}
-                      className={`w-full py-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                      className={`w-full py-2 sm:py-3.5 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
                         isJoined 
-                          ? 'bg-slate-700 text-slate-400 cursor-not-allowed' 
+                          ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-none' 
                           : lottery.currentMembers >= lottery.maxMembers
-                          ? 'bg-red-900/50 text-red-400 cursor-not-allowed border border-red-500/20'
-                          : `bg-gradient-to-r ${lottery.color || 'from-purple-500 to-indigo-600'} hover:opacity-90 text-white shadow-lg shadow-purple-900/50 active:scale-[0.98]`
+                          ? 'bg-slate-800 text-slate-600 border border-slate-700'
+                          : `bg-white text-slate-900 shadow-lg`
                       }`}
                     >
                       {isJoined ? (
                         <>
-                          <CheckCircle2 className="w-5 h-5" /> Ticket Purchased
+                          <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" /> SECURED
                         </>
                       ) : lottery.currentMembers >= lottery.maxMembers ? (
                         <>
-                          <AlertCircle className="w-5 h-5" /> Draw Full
+                          <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" /> SOLD OUT
                         </>
                       ) : (
                         <>
-                          <Ticket className="w-5 h-5" /> Buy Ticket Now
+                          <Ticket className="w-3 h-3 sm:w-4 sm:h-4" /> 
+                          <span>BUY TICKET</span>
                         </>
                       )}
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               </motion.div>
             );
           })
         )}
+      </div>
+
+      {/* Joined History Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-display font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <Users className="w-5 h-5 text-blue-500" /> Joined History
+        </h3>
+        <div className="bg-white/50 backdrop-blur-sm rounded-3xl border border-slate-100 overflow-hidden">
+          <div className="max-h-64 overflow-y-auto scrollbar-hide p-2">
+            {recentEntries.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-6 font-medium italic">No entries yet. Be the first!</p>
+            ) : (
+              recentEntries.map((entry, i) => {
+                // Mask name for privacy (e.g., Faizullah -> Faiz***)
+                const maskName = (name: string) => {
+                  if (name.length <= 4) return name;
+                  return name.substring(0, 4) + '***';
+                };
+                return (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    key={entry.id || i} 
+                    className="flex items-center justify-between p-3 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-100 mb-1"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
+                        {entry.userName?.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-black text-slate-700">{maskName(entry.userName || 'User')}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Joined Mega Draw</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-emerald-600 tracking-tighter">SUCCESS</p>
+                      <p className="text-[8px] font-bold text-slate-400 uppercase">{entry.timestamp?.toDate ? entry.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'}</p>
+                    </div>
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Past Winners Announcement */}

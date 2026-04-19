@@ -1248,6 +1248,7 @@ export default function Dashboard() {
         return <LotteryView 
           onBack={() => setActiveTab('home')} 
           balance={balance} 
+          userName={userName}
           onUpdateBalance={handleUpdateBalance} 
         />;
       case 'streak':
