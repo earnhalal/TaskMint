@@ -741,10 +741,25 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                           <meta charset="utf-8">
                           <meta name="viewport" content="width=device-width, initial-scale=1">
                           <style>
-                            body { margin: 0; padding: 0; background: #000; color: #fff; height: 100vh; overflow: hidden; font-family: -apple-system, sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+                            body { margin: 0; padding: 0; background: #000; color: #fff; height: 100vh; overflow: hidden; font-family: -apple-system, sans-serif; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+                            #banner-container { width: 100%; text-align: center; margin-bottom: 10px; }
                           </style>
                         </head>
                         <body>
+                          <div id="banner-container">
+                            <script>
+                            (function(ljf){
+                            var d = document,
+                                s = d.createElement('script'),
+                                l = d.scripts[d.scripts.length - 1];
+                            s.settings = ljf || {};
+                            s.src = "//superbjudgment.com/bJXYVSs.dtGbl/0cYiWucZ/_e/mc9tumZjU/lUkXP/TGYf5PNJzVUK4GNpTQcqtFNljPkp3tNJTQgY2NMuQG";
+                            s.async = true;
+                            s.referrerPolicy = 'no-referrer-when-downgrade';
+                            l.parentNode.insertBefore(s, l);
+                            })({})
+                            </script>
+                          </div>
                           <script>
                             (function(wzuuy){
                               var d = document,

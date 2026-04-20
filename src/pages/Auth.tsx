@@ -4,9 +4,9 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, se
 import { app } from '../firebase';
 import AuthView from '../components/AuthView';
 
-import { doc, setDoc, getDoc, updateDoc, increment, query, collection, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, increment, query, collection, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db, rtdb } from '../firebase';
-import { ref, update, increment as rtdbIncrement, set, serverTimestamp } from 'firebase/database';
+import { ref, update, increment as rtdbIncrement, set } from 'firebase/database';
 import { sendWelcomeMail } from '../services/notificationService';
 
 const auth = getAuth(app);
@@ -94,29 +94,17 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
         }
 
         if (parentUid) {
-          // Save referral to RTDB: invites/{parentUid}/history/{new_uid}
-          const referralRef = ref(rtdb, `invites/${parentUid}/history/${user.uid}`);
-          await set(referralRef, {
+          // Save referral to Firestore: users/{parentUid}/referrals/{new_uid}
+          await setDoc(doc(db, 'users', parentUid, 'referrals', user.uid), {
             name: data.username,
             status: 'unpaid',
             timestamp: serverTimestamp()
           });
 
-          // Initialize/Update referrer stats in RTDB: users/{parentUid}
-          const referrerRef = ref(rtdb, `users/${parentUid}`);
-          await update(referrerRef, {
-            totalInvited: rtdbIncrement(1)
+          // Update referrer stats in Firestore: users/{parentUid}
+          await updateDoc(doc(db, 'users', parentUid), {
+            totalInvited: increment(1)
           });
-          // Ensure activeMembers is initialized if not present
-          // Note: rtdbIncrement(0) doesn't work for initialization if field is missing.
-          // We need to check or just set it if it doesn't exist.
-          // Since we are using update, we can't easily check-and-set.
-          // Let's use a transaction or just set it if it doesn't exist.
-          // Actually, for simplicity, let's just ensure it exists.
-          // Since we can't easily check in update, let's just set it to 0 if not present.
-          // Actually, Firebase RTDB `update` will just add the field if it doesn't exist.
-          // Wait, `rtdbIncrement` works fine even if field doesn't exist (it treats it as 0).
-          // So just incrementing is enough.
         }
       }
 

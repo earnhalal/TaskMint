@@ -343,25 +343,21 @@ export default function Dashboard() {
       setNotifications(notifyData);
     }, (error) => console.error("Notifications Error:", error));
 
-    // Listener for Referrals (from RTDB)
-    const referralsRef = ref(rtdb, `invites/${user.uid}/history`);
-    const unsubscribeReferrals = onValue(referralsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const referrals = Object.entries(data).map(([id, val]: [string, any]) => ({
-          id,
-          ...val
-        }));
-        setPartnerReferrals(referrals);
-      } else {
-        setPartnerReferrals([]);
-      }
+    // Listener for Referrals (from Firestore)
+    const referralsRef = collection(db, 'users', user.uid, 'referrals');
+    const qReferrals = query(referralsRef, orderBy('timestamp', 'desc'));
+    const unsubscribeReferrals = onSnapshot(qReferrals, (snapshot) => {
+      const referrals = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setPartnerReferrals(referrals);
     }, (error) => console.error("Referrals Error:", error));
 
-    // Listener for Referral Stats (from RTDB)
-    const statsRef = ref(rtdb, `users/${user.uid}`);
-    const unsubscribeStats = onValue(statsRef, (snapshot) => {
-      const data = snapshot.val();
+    // Listener for Referral Stats (from Firestore)
+    const userRef = doc(db, 'users', user.uid);
+    const unsubscribeStats = onSnapshot(userRef, (snapshot) => {
+      const data = snapshot.data();
       if (data) {
         setReferralStats({
           totalInvited: data.totalInvited || 0,
@@ -1073,23 +1069,16 @@ export default function Dashboard() {
             }
           }
 
-          // Update referral status in RTDB
-          const referralStatusRef = ref(rtdb, `invites/${l1Uid}/history/${targetUserId}`);
-          await update(referralStatusRef, { status: 'paid' });
+          // Update referral status in Firestore
+          await updateDoc(doc(db, 'users', l1Uid, 'referrals', targetUserId), { status: 'paid' });
 
-          // Update referrer stats in RTDB: users/${l1Uid}
-          const referrerStatsRef = ref(rtdb, `users/${l1Uid}`);
-          await update(referrerStatsRef, {
-            activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(bonusAmount),
-            balance: rtdbIncrement(bonusAmount)
-          });
-
-          // Update balance in Firestore
+          // Update referrer stats in Firestore
           await updateDoc(doc(db, 'users', l1Uid), {
+            activeMembers: increment(1),
+            totalCommission: increment(bonusAmount),
             balance: increment(bonusAmount)
           });
-          console.log(`[REFERRAL_LOG] Commission of ${bonusAmount} added to referrer ${l1Uid} in Firestore and RTDB`);
+          console.log(`[REFERRAL_LOG] Commission of ${bonusAmount} added to referrer ${l1Uid} in Firestore`);
         }
       }
       
