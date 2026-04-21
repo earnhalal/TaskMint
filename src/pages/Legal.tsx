@@ -156,7 +156,7 @@ export default function Legal() {
                 <div>
                   <h3 className="font-bold text-xl mb-1">Email Us</h3>
                   <p className="text-slate-600 mb-2">For general inquiries and support.</p>
-                  <a href="mailto:taskmintpro@gmail.com" className="text-emerald-600 font-semibold hover:underline">taskmintpro@gmail.com</a>
+                  <a href="mailto:support@taskmint.click" className="text-emerald-600 font-semibold hover:underline">support@taskmint.click</a>
                 </div>
               </div>
               
@@ -165,9 +165,9 @@ export default function Legal() {
                   <Phone className="w-6 h-6 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-xl mb-1">Call Us</h3>
-                  <p className="text-slate-600 mb-2">Mon-Fri from 9am to 6pm.</p>
-                  <a href="tel:+923001234567" className="text-emerald-600 font-semibold hover:underline">+92 300 1234567</a>
+                  <h3 className="font-bold text-xl mb-1">WhatsApp Us</h3>
+                  <p className="text-slate-600 mb-2">Support available on WhatsApp.</p>
+                  <a href="https://wa.me/923051234567" target="_blank" rel="noopener noreferrer" className="text-emerald-600 font-semibold hover:underline">+92 305 1234567</a>
                 </div>
               </div>
               
@@ -177,7 +177,7 @@ export default function Legal() {
                 </div>
                 <div>
                   <h3 className="font-bold text-xl mb-1">Office</h3>
-                  <p className="text-slate-600">123 Tech Avenue, Software Technology Park<br />Islamabad, Pakistan</p>
+                  <p className="text-slate-600">TaskMint Digital Solutions<br />Lahore, Pakistan</p>
                 </div>
               </div>
             </div>

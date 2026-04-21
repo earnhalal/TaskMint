@@ -1583,6 +1583,11 @@ export default function Dashboard() {
 
         {/* Bottom Navigation */}
         <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-3 pb-6 sm:pb-4 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+          <div className="flex justify-center gap-4 text-[9px] font-bold text-slate-400 mb-4 pb-2 border-b border-slate-50">
+            <button onClick={() => navigate('/privacy')}>PRIVACY</button>
+            <button onClick={() => navigate('/terms')}>TERMS</button>
+            <button onClick={() => navigate('/contact')}>SUPPORT</button>
+          </div>
           <div className="flex items-center justify-between max-w-md mx-auto relative">
             {[
               { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },

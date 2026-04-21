@@ -226,8 +226,8 @@ export default function Landing() {
 
             <nav className="hidden md:flex items-center gap-8 text-sm font-bold text-gray-600">
               <button onClick={() => setActiveModal('how-it-works')} className="hover:text-amber-600 transition-colors">How it Works</button>
-              <button onClick={() => setActiveModal('about')} className="hover:text-amber-600 transition-colors">About</button>
-              <button onClick={() => setActiveModal('blog')} className="hover:text-amber-600 transition-colors">Blog</button>
+              <button onClick={() => navigate('/privacy')} className="hover:text-amber-600 transition-colors">Privacy</button>
+              <button onClick={() => navigate('/terms')} className="hover:text-amber-600 transition-colors">Terms</button>
               <button onClick={() => navigate('/contact')} className="hover:text-amber-600 transition-colors">Support</button>
             </nav>
 
@@ -248,8 +248,9 @@ export default function Landing() {
         <div className={`fixed inset-0 bg-white z-40 pt-24 px-6 transition-transform duration-300 ${mobileMenu ? 'translate-x-0' : 'translate-x-full'}`}>
             <div className="flex flex-col space-y-6 text-lg font-bold text-gray-800">
                 <button onClick={() => { setActiveModal('how-it-works'); setMobileMenu(false); }} className="text-left border-b border-gray-100 pb-4">How It Works</button>
-                <button onClick={() => { setActiveModal('about'); setMobileMenu(false); }} className="text-left border-b border-gray-100 pb-4">About Us</button>
-                <button onClick={() => { setActiveModal('blog'); setMobileMenu(false); }} className="text-left border-b border-gray-100 pb-4">Blog</button>
+                <button onClick={() => { navigate('/privacy'); setMobileMenu(false); }} className="text-left border-b border-gray-100 pb-4">Privacy Policy</button>
+                <button onClick={() => { navigate('/terms'); setMobileMenu(false); }} className="text-left border-b border-gray-100 pb-4">Terms of Service</button>
+                <button onClick={() => { navigate('/contact'); setMobileMenu(false); }} className="text-left border-b border-gray-100 pb-4">Support Center</button>
                 <button onClick={() => { onGetStarted('login'); setMobileMenu(false); }} className="text-left border-b border-gray-100 pb-4 text-amber-600">Log In</button>
                 <button onClick={() => { onGetStarted('signup'); setMobileMenu(false); }} className="btn-gold py-4 rounded-xl text-center mt-4 shadow-lg">Sign Up Free</button>
             </div>
