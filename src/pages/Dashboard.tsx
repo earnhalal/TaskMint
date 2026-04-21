@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Home, 
@@ -78,6 +79,7 @@ import LotteryView from '../components/dashboard/LotteryView';
 import StreakRewardView from '../components/dashboard/StreakRewardView';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
   const [showNotification, setShowNotification] = useState(true);
