@@ -52,7 +52,6 @@ import {
   sendWithdrawalApprovedMail,
   sendSystemUpdateMail
 } from '../services/notificationService';
-import SpinWheel from '../components/SpinWheel';
 import HomeTab from '../components/dashboard/HomeTab';
 import ProfileTab from '../components/dashboard/ProfileTab';
 import InviteTab from '../components/dashboard/InviteTab';
@@ -1279,24 +1278,8 @@ export default function Dashboard() {
           }}
           onBack={() => setActiveTab('home')}
         />;
-      case 'spin':
-        return <SpinWheel 
-          onClose={() => setActiveTab('home')} 
-          balance={balance}
-          onUpdateBalance={handleUpdateBalance}
-          freeSpins={freeSpins}
-          onUseFreeSpin={handleUseFreeSpin}
-          onGoToDeposit={() => setActiveTab('deposit')}
-          activeInvites={referralStats.activeMembers}
-          onWinLockedPrize={handleWinLockedPrize}
-        />;
       case 'cpalead':
         return <CPALeadOfferWall />;
-      case 'wannads':
-        return <WannadsSurveyView 
-                 userId={user?.uid || ''} 
-                 onBack={() => setActiveTab('home')} 
-               />;
       case 'wannads':
         return <WannadsSurveyView 
                  userId={user?.uid || ''} 

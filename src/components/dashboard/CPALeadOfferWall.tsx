@@ -1,7 +1,15 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { useAuth } from '../../context/AuthContext';
 
 const CPALeadOfferWall = () => {
+  const { user } = useAuth();
+  const userUID = user?.uid;
+
+  // Formatting URL back to original base which was working
+  const offerWallUrl = userUID
+    ? `https://viral782.com/list/ry8QIz7?subid=${userUID}`
+    : 'https://viral782.com/list/ry8QIz7';
+
   return (
     <div className="space-y-4 animate-fade-in pb-24 font-sans">
       <div className="px-4">
@@ -11,7 +19,7 @@ const CPALeadOfferWall = () => {
       <div className="w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
         <iframe 
           sandbox="allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-popups-to-escape-sandbox" 
-          src="https://viral782.com/list/ry8QIz7" 
+          src={offerWallUrl} 
           style={{ width: '100%', height: '690px', border: 'none' }} 
           title="Offer Wall"
         />
