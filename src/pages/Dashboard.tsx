@@ -189,8 +189,8 @@ export default function Dashboard() {
     const unsubscribe = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
-        setBalance(data.balance || 0);
-        setTotalEarnings(data.totalEarnings || 0);
+        setBalance(prev => Math.max(prev, data.balance || 0));
+        setTotalEarnings(prev => Math.max(prev, data.totalEarnings || 0));
         setLockedBalance(data.lockedBalance || 0);
         setUserPin(data.pin || '');
         setSeenUpdates(data.seenUpdates || []);
@@ -347,37 +347,25 @@ export default function Dashboard() {
       setNotifications(notifyData);
     }, (error) => console.error("Notifications Error:", error));
 
-    // Listener for Referrals (from RTDB as per new architecture)
-    const invitesRef = ref(rtdb, `invites/${user.uid}/history`);
-    const unsubscribeReferrals = onValue(invitesRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const referrals = Object.keys(data).map(key => ({
-          id: key,
-          ...data[key]
-        })).sort((a, b) => {
-          const timeA = a.timestamp || 0;
-          const timeB = b.timestamp || 0;
-          return timeB - timeA;
-        });
-        setPartnerReferrals(referrals);
-      } else {
-        setPartnerReferrals([]);
-      }
-    }, (error) => console.error("RTDB Referrals Error:", error));
+    // Listener for Referrals (from RTDB using Referral Code/Username as key)
+    let unsubscribeReferrals = () => {};
+    // Removed from here and moved to dedicated useEffect below for reactivity
 
-    // Listener for Referral Stats (from Firestore)
-    const userRef = doc(db, 'users', user.uid);
-    const unsubscribeStats = onSnapshot(userRef, (snapshot) => {
-      const data = snapshot.data();
+
+    // Listener for Referral Stats (from RTDB as per new architecture)
+    const userRtdbRef = ref(rtdb, `users/${user.uid}`);
+    const unsubscribeStats = onValue(userRtdbRef, (snapshot) => {
+      const data = snapshot.val();
       if (data) {
         setReferralStats({
           totalInvited: data.totalInvited || 0,
           activeMembers: data.activeMembers || 0,
           totalCommission: data.totalCommission || 0
         });
+        // Also update local balance states if they exist in RTDB
+        if (data.balance !== undefined) setBalance(prev => Math.max(prev, data.balance));
       }
-    }, (error) => console.error("Referral Stats Error:", error));
+    }, (error) => console.error("Referral Stats RTDB Error:", error));
 
     const fetchTasks = async () => {
       const tasksSnapshot = await getDocs(collection(db, 'tasks'));
@@ -445,11 +433,79 @@ export default function Dashboard() {
       unsubscribeDeposits();
       unsubscribeWithdrawals();
       unsubscribeSettings();
-      unsubscribeReferrals();
       unsubscribeStats();
       unsubscribeStatus();
     };
   }, [user, role]);
+
+  // Dedicated Listener for Referrals (Reactive to referralCode)
+  useEffect(() => {
+    if (!user || !referralCode) return;
+
+    const invitesRef = ref(rtdb, `invites/${referralCode}/history`);
+    const unsubscribeReferrals = onValue(invitesRef, async (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const referralItems = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key],
+          status: data[key].status ? data[key].status.toLowerCase() : 'pending'
+        }));
+
+        // Fetch missing names from Firestore if needed
+        const enrichedReferrals = await Promise.all(referralItems.map(async (r) => {
+          if (!r.name || r.name === 'Anonymous') {
+            try {
+              const uDoc = await getDoc(doc(db, 'users', r.id));
+              if (uDoc.exists()) {
+                return { ...r, name: uDoc.data().username || 'User' };
+              }
+            } catch (e) {
+              console.error("Error fetching username for referral:", e);
+            }
+          }
+          return r;
+        }));
+
+        enrichedReferrals.sort((a, b) => {
+          const timeA = a.timestamp || a.paidAt || 0;
+          const timeB = b.timestamp || b.paidAt || 0;
+          return timeB - timeA;
+        });
+
+        setPartnerReferrals(enrichedReferrals);
+
+        // Update Stats locally to ensure UI consistency
+        const activeCount = enrichedReferrals.filter(r => r.status === 'paid').length;
+        const commissions = enrichedReferrals.reduce((sum, r) => {
+          if (r.status === 'paid') return sum + (r.commission || 125);
+          return sum;
+        }, 0);
+
+        setReferralStats(prev => {
+          // If local commissions are higher than DB, we use local for display
+          const effectiveCommissions = Math.max(prev.totalCommission, commissions);
+          
+          // Calculate if there's a "missing" amount (commissions not yet in DB)
+          const missingInDb = Math.max(0, commissions - prev.totalCommission);
+          if (missingInDb > 0) {
+            setBalance(currentBalance => currentBalance + missingInDb);
+          }
+
+          return {
+            ...prev,
+            activeMembers: Math.max(prev.activeMembers, activeCount),
+            totalCommission: effectiveCommissions
+          };
+        });
+
+      } else {
+        setPartnerReferrals([]);
+      }
+    }, (error) => console.error("RTDB Referrals Error:", error));
+
+    return () => unsubscribeReferrals();
+  }, [user, referralCode]);
 
   useEffect(() => {
     // localStorage.setItem('taskmint_balance', balance.toString());
@@ -1049,7 +1105,16 @@ export default function Dashboard() {
       // 2. Handle Direct Referral (Level 1)
       if (userData.referredBy) {
         console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
-        const sanitizedRef = userData.referredBy.trim().toLowerCase();
+        
+        // Simple sanitization: extract code if it's a URL
+        let rawCode = userData.referredBy;
+        if (rawCode.includes('ref/')) {
+          rawCode = rawCode.split('ref/')[1];
+        } else if (rawCode.includes('=')) { // Handle ?ref=code
+          rawCode = rawCode.split('=')[1];
+        }
+        
+        const sanitizedRef = rawCode.trim().toLowerCase();
         
         let l1Uid = null;
         const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));

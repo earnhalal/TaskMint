@@ -238,10 +238,10 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                   }`}>
                     {/* Decorative background pattern */}
                     <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-                    <span className="relative z-10">{r.name.substring(0, 1).toUpperCase()}</span>
+                    <span className="relative z-10">{r.name ? r.name.substring(0, 1).toUpperCase() : '?'}</span>
                   </div>
                   <div>
-                    <h4 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{r.name}</h4>
+                    <h4 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{r.name || 'Anonymous'}</h4>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
                         <Clock className="w-3 h-3" />
