@@ -35,6 +35,13 @@ async function startServer() {
 
   app.use(express.json());
 
+  // API route for CPALead callback
+  app.all("/api/cpalead-callback", (req, res) => {
+    console.log("--- CPALead Postback Received ---");
+    console.log("Query Params:", req.query);
+    res.status(200).send('1');
+  });
+
   // API route for CPX postback - NO REDIRECT, NO AUTH
   app.all("/api/cpx-postback", async (req, res) => {
     console.log("--- CPX Postback Received ---");
@@ -169,11 +176,6 @@ async function startServer() {
   // Simple test endpoint
   app.get("/api/test", (req, res) => {
     res.status(200).send("API is working!");
-  });
-
-  // API route for CPALead callback
-  app.all("/api/cpalead-callback", (req, res) => {
-    res.status(200).send('1');
   });
 
   // Vite middleware for development
