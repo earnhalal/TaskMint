@@ -347,16 +347,24 @@ export default function Dashboard() {
       setNotifications(notifyData);
     }, (error) => console.error("Notifications Error:", error));
 
-    // Listener for Referrals (from Firestore)
-    const referralsRef = collection(db, 'users', user.uid, 'referrals');
-    const qReferrals = query(referralsRef, orderBy('timestamp', 'desc'));
-    const unsubscribeReferrals = onSnapshot(qReferrals, (snapshot) => {
-      const referrals = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setPartnerReferrals(referrals);
-    }, (error) => console.error("Referrals Error:", error));
+    // Listener for Referrals (from RTDB as per new architecture)
+    const invitesRef = ref(rtdb, `invites/${user.uid}/history`);
+    const unsubscribeReferrals = onValue(invitesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const referrals = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key]
+        })).sort((a, b) => {
+          const timeA = a.timestamp || 0;
+          const timeB = b.timestamp || 0;
+          return timeB - timeA;
+        });
+        setPartnerReferrals(referrals);
+      } else {
+        setPartnerReferrals([]);
+      }
+    }, (error) => console.error("RTDB Referrals Error:", error));
 
     // Listener for Referral Stats (from Firestore)
     const userRef = doc(db, 'users', user.uid);

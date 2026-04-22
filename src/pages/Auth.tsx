@@ -94,14 +94,14 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
         }
 
         if (parentUid) {
-          // Save referral to Firestore: users/{parentUid}/referrals/{new_uid}
-          await setDoc(doc(db, 'users', parentUid, 'referrals', user.uid), {
+          // Save referral to RTDB: invites/{parentUid}/history/{new_uid}
+          await set(ref(rtdb, `invites/${parentUid}/history/${user.uid}`), {
             name: data.username,
-            status: 'unpaid',
-            timestamp: serverTimestamp()
+            status: 'pending', // Use 'pending' instead of 'unpaid' based on prompt
+            timestamp: Date.now() // Use Date.now() for RTDB timestamp
           });
 
-          // Update referrer stats in Firestore: users/{parentUid}
+          // Update referrer totalInvited stats in Firestore: users/{parentUid}
           await updateDoc(doc(db, 'users', parentUid), {
             totalInvited: increment(1)
           });
