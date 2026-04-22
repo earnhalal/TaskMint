@@ -1,11 +1,11 @@
-const admin = require('firebase-admin');
+import admin from 'firebase-admin';
 
 // Ensure Firebase Admin is initialized
 if (!admin.apps.length) {
     try {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-        if (!serviceAccount.projectId) throw new Error("Service account missing projectId");
-        if (!process.env.FIREBASE_DATABASE_URL) throw new Error("FIREBASE_DATABASE_URL missing");
+        if (!serviceAccount.projectId) throw new Error("Service account missing projectId. Have you set FIREBASE_SERVICE_ACCOUNT_KEY?");
+        if (!process.env.FIREBASE_DATABASE_URL) throw new Error("FIREBASE_DATABASE_URL missing. Have you set FIREBASE_DATABASE_URL in Vercel?");
         
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
@@ -14,10 +14,9 @@ if (!admin.apps.length) {
         console.log("Firebase Admin initialized successfully.");
     } catch (e) {
         console.error("Firebase Admin initialization FAILED:", e.message);
-        throw e; // Crash purposefully to see log in Vercel
+        // Do not crash completely so we can still return 500 cleanly
     }
 }
-const db = admin.database();
 
 export default async function handler(req, res) {
   // Sirf GET requests allow karein
@@ -34,18 +33,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log("Processing request for subid:", subid);
+    const db = admin.database();
     const userRef = db.ref(`users/${subid}`);
     
     // Transactional update taake balance sahi update ho
     await userRef.transaction((currentData) => {
-      console.log("Current data:", currentData);
-      if (currentData) {
-        currentData.credit_balance = (currentData.credit_balance || 0) + parseFloat(virtual_currency);
+      if (currentData === null) {
+          return { credit_balance: parseFloat(virtual_currency) };
       }
+      currentData.credit_balance = (currentData.credit_balance || 0) + parseFloat(virtual_currency);
       return currentData;
     });
-    console.log("Transaction success");
 
     // Success response
     res.setHeader('Content-Type', 'text/plain');
@@ -57,3 +55,4 @@ export default async function handler(req, res) {
     return res.status(200).send('1'); 
   }
 }
+
