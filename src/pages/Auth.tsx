@@ -94,11 +94,12 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
         }
 
         if (parentUid) {
-          // Save referral to RTDB: invites/{parentUid}/history/{new_uid}
-          await set(ref(rtdb, `invites/${parentUid}/history/${user.uid}`), {
+          // Save referral to RTDB: invites/{sanitizedRef}/history/{new_uid}
+          // We use sanitizedRef (username/code) as the key to match common architecture
+          await set(ref(rtdb, `invites/${sanitizedRef}/history/${user.uid}`), {
             name: data.username,
-            status: 'pending', // Use 'pending' instead of 'unpaid' based on prompt
-            timestamp: Date.now() // Use Date.now() for RTDB timestamp
+            status: 'pending',
+            timestamp: Date.now()
           });
 
           // Update referrer totalInvited stats in Firestore: users/{parentUid}
