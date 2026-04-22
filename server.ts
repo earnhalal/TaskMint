@@ -171,6 +171,11 @@ async function startServer() {
     res.status(200).send("API is working!");
   });
 
+  // API route for CPALead callback
+  app.all("/api/cpalead-callback", (req, res) => {
+    res.status(200).send('1');
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
