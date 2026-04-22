@@ -2,11 +2,20 @@ const admin = require('firebase-admin');
 
 // Ensure Firebase Admin is initialized
 if (!admin.apps.length) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
-    });
+    try {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
+        if (!serviceAccount.projectId) throw new Error("Service account missing projectId");
+        if (!process.env.FIREBASE_DATABASE_URL) throw new Error("FIREBASE_DATABASE_URL missing");
+        
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+        console.log("Firebase Admin initialized successfully.");
+    } catch (e) {
+        console.error("Firebase Admin initialization FAILED:", e.message);
+        throw e; // Crash purposefully to see log in Vercel
+    }
 }
 const db = admin.database();
 
