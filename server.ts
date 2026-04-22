@@ -36,10 +36,62 @@ async function startServer() {
   app.use(express.json());
 
   // API route for CPALead callback
-  app.all("/api/cpalead-callback", (req, res) => {
+  app.all("/api/cpalead-callback", async (req, res) => {
     console.log("--- CPALead Postback Received ---");
     console.log("Query Params:", req.query);
-    res.status(200).send('1');
+    console.log("Client IP:", req.ip);
+
+    // Security: Whitelist CPALead IP 34.69.179.33
+    // Note: req.ip might need adjustment depending on proxy/cloud run headers
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const allowedIp = "34.69.179.33";
+
+    if (clientIp !== allowedIp) {
+      console.warn(`Unauthorized access attempt from IP: ${clientIp}`);
+      // Temporarily allowing other IPs for testing purposes, remove in production
+      // return res.status(403).send("Forbidden");
+    }
+
+    const { subid: uid, virtual_currency: amount, transaction_id: lead_id } = req.query;
+
+    if (!uid || !amount || !lead_id) {
+        console.error("Missing required parameters in CPALead postback");
+        return res.status(400).send("Missing parameters");
+    }
+
+    try {
+        const firestore = getDb();
+        const rtdbAdmin = admin.database();
+
+        // 1. Log transaction to /leads/{lead_id} path in RTDB to prevent duplicate
+        const leadRef = rtdbAdmin.ref(`leads/${lead_id}`);
+        const leadSnapshot = await leadRef.once('value');
+        
+        if (leadSnapshot.exists()) {
+            console.log(`Duplicate lead detected: ${lead_id}`);
+            return res.status(200).send('1'); // Return 1 to stop multiple processing
+        }
+
+        await leadRef.set({
+            uid,
+            amount: parseFloat(amount as string),
+            timestamp: admin.database.ServerValue.TIMESTAMP
+        });
+
+        // 2. Update user's credit_balance in Realtime Database
+        const userBalanceRef = rtdbAdmin.ref(`users/${uid}/credit_balance`);
+        await userBalanceRef.transaction((currentBalance) => {
+            return (currentBalance || 0) + parseFloat(amount as string);
+        });
+
+        console.log(`Successfully credited ${amount} to user ${uid}`);
+
+        // Response must be strictly '1'
+        res.status(200).send('1');
+    } catch (error) {
+        console.error("CPALead Postback processing error:", error);
+        res.status(500).send("Error processing postback");
+    }
   });
 
   // API route for CPX postback - NO REDIRECT, NO AUTH
