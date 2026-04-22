@@ -52,6 +52,7 @@ interface HomeTabProps {
   onTaskWallClick: () => void;
   onEasyTaskClick: () => void;
   onSocialTaskPlusClick: () => void;
+  onOfferWallClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
   appSettings: {
     activationFee: number;
@@ -185,6 +186,7 @@ export default function HomeTab({
   onTaskWallClick,
   onEasyTaskClick,
   onSocialTaskPlusClick,
+  onOfferWallClick,
   onUpdateBalance,
   appSettings,
   appBonusClaimed,
@@ -629,10 +631,18 @@ export default function HomeTab({
               />
               <QuickActionBtn 
                   icon={<Zap />} 
-                  label="Surveys" 
-                  onClick={onTaskWallClick} 
+                  label="Offer Wall" 
+                  onClick={onOfferWallClick} 
                   colorClass="bg-gradient-to-br from-indigo-500 to-blue-700 shadow-indigo-500/30" 
                   delay={110}
+                  isLocked={accountStatus.toLowerCase() !== 'active'}
+              />
+              <QuickActionBtn 
+                  icon={<SparklesIcon />} 
+                  label="CPX Surveys" 
+                  onClick={onTaskWallClick} 
+                  colorClass="bg-gradient-to-br from-pink-500 to-rose-600 shadow-pink-500/30" 
+                  delay={115}
                   isLocked={accountStatus.toLowerCase() !== 'active'}
               />
               <QuickActionBtn 

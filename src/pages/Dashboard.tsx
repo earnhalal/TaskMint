@@ -69,6 +69,7 @@ import AdminPanelView from '../components/dashboard/AdminPanelView';
 import ActivationTab from '../components/dashboard/ActivationTab';
 import WannadsSurveyView from '../components/dashboard/WannadsSurveyView';
 
+import CPALeadOfferWall from '../components/dashboard/CPALeadOfferWall';
 import EditProfileView from '../components/dashboard/EditProfileView';
 
 import TaskWall from '../components/dashboard/TaskWall';
@@ -1289,6 +1290,8 @@ export default function Dashboard() {
           activeInvites={referralStats.activeMembers}
           onWinLockedPrize={handleWinLockedPrize}
         />;
+      case 'cpalead':
+        return <CPALeadOfferWall />;
       case 'wannads':
         return <WannadsSurveyView 
                  userId={user?.uid || ''} 
@@ -1370,6 +1373,7 @@ export default function Dashboard() {
           onTaskWallClick={() => setActiveTab('task_wall')}
           onSocialTaskPlusClick={() => setActiveTab('social_task_plus')}
           onEasyTaskClick={() => setActiveTab('wannads')}
+          onOfferWallClick={() => setActiveTab('cpalead')}
           onUpdateBalance={handleUpdateBalance}
           appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}
