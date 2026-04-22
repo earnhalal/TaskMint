@@ -5,13 +5,15 @@ if (!admin.apps.length) {
     try {
         const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
         if (!serviceAccount.projectId) throw new Error("Service account missing projectId. Have you set FIREBASE_SERVICE_ACCOUNT_KEY?");
-        if (!process.env.FIREBASE_DATABASE_URL) throw new Error("FIREBASE_DATABASE_URL missing. Have you set FIREBASE_DATABASE_URL in Vercel?");
+        
+        // Use environment variable OR hardcoded URL provided by user
+        const dbUrl = process.env.FIREBASE_DATABASE_URL || "https://earnapp-f8d27-default-rtdb.firebaseio.com";
         
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
-            databaseURL: process.env.FIREBASE_DATABASE_URL
+            databaseURL: dbUrl
         });
-        console.log("Firebase Admin initialized successfully.");
+        console.log("Firebase Admin initialized successfully with URL:", dbUrl);
     } catch (e) {
         console.error("Firebase Admin initialization FAILED:", e.message);
         // Do not crash completely so we can still return 500 cleanly
