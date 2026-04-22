@@ -25,15 +25,18 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log("Processing request for subid:", subid);
     const userRef = db.ref(`users/${subid}`);
     
     // Transactional update taake balance sahi update ho
     await userRef.transaction((currentData) => {
+      console.log("Current data:", currentData);
       if (currentData) {
         currentData.credit_balance = (currentData.credit_balance || 0) + parseFloat(virtual_currency);
       }
       return currentData;
     });
+    console.log("Transaction success");
 
     // Success response
     res.setHeader('Content-Type', 'text/plain');
