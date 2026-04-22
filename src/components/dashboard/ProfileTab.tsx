@@ -162,133 +162,130 @@ export default function ProfileTab({
       )}
 
       {/* Profile Header */}
-      <div className={`relative rounded-[36px] p-10 mb-10 overflow-hidden shadow-2xl transition-all duration-500 group ${
+      <div className={`relative rounded-[2.5rem] p-6 mb-6 overflow-hidden shadow-xl transition-all duration-500 group ${
         role === 'partner' 
           ? partnerTier === 'gold'
-            ? 'bg-gradient-to-br from-[#1a1a1a] via-[#2d2d2d] to-[#1a1a1a] border border-amber-500/30'
-            : 'bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] border border-blue-500/30'
-          : 'bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900'
+            ? 'bg-gradient-to-br from-[#111827] via-[#1f2937] to-[#111827] border border-amber-500/20'
+            : 'bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] border border-blue-500/20'
+          : 'bg-gradient-to-br from-[#1e3a8a] via-[#312e81] to-[#1e1b4b] border border-white/5'
       }`}>
         {/* Animated Background Glow */}
-        <div className={`absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse ${
+        <div className={`absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl opacity-20 animate-pulse ${
           role === 'partner' 
             ? partnerTier === 'gold' ? 'bg-amber-400' : 'bg-blue-400'
-            : 'bg-indigo-400'
+            : 'bg-blue-400'
         }`}></div>
         
-        <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-8">
+        <div className="relative z-10 flex flex-col items-center text-center gap-4">
           <div className="relative">
-            <div className={`w-28 h-28 rounded-[32px] flex items-center justify-center shadow-2xl transform transition-transform group-hover:scale-105 duration-500 p-1.5 ${
+            <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl transform transition-transform group-hover:scale-105 duration-500 p-1 ${
               role === 'partner'
                 ? partnerTier === 'gold'
-                  ? 'bg-gradient-to-tr from-amber-400 to-yellow-600 shadow-amber-500/40'
-                  : 'bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-blue-500/40'
-                : 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-amber-500/30'
+                  ? 'bg-gradient-to-tr from-amber-400 to-yellow-600 shadow-amber-500/30'
+                  : 'bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-blue-500/30'
+                : 'bg-[#0F172A] border-2 border-amber-500'
             }`}>
-              <div className={`w-full h-full rounded-[26px] flex items-center justify-center text-white text-4xl font-black overflow-hidden ${
+              <div className={`w-full h-full rounded-[20px] flex items-center justify-center text-white text-3xl font-black overflow-hidden ${
                 role === 'partner' ? 'bg-transparent' : 'bg-slate-900'
               }`}>
                 {avatar ? (
                   <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   role === 'partner' 
-                    ? partnerTier === 'gold' ? <Crown className="w-14 h-14" /> : <Shield className="w-14 h-14" />
+                    ? partnerTier === 'gold' ? <Crown className="w-10 h-10" /> : <Shield className="w-10 h-10" />
                     : name.substring(0, 2).toUpperCase()
                 )}
               </div>
             </div>
             {status.toLowerCase() === 'active' && (
-              <div className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl flex items-center justify-center border-2 shadow-lg ${
+              <div className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-lg flex items-center justify-center border-2 shadow-lg ${
                 role === 'partner'
                   ? partnerTier === 'gold' ? 'bg-amber-500 border-[#1a1a1a]' : 'bg-blue-500 border-[#0f172a]'
-                  : 'bg-emerald-500 border-slate-900'
+                  : 'bg-emerald-500 border-[#1e3a8a]'
               }`}>
-                <CheckCircle2 className="w-5 h-5 text-white" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
               </div>
             )}
           </div>
           
-          <div className="flex-1 text-center sm:text-left pt-2">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center justify-center sm:justify-start gap-3 mb-1">
-                <h2 className="text-4xl font-black text-white tracking-tighter">{name}</h2>
-                {role === 'partner' && (
-                  partnerTier === 'gold' ? (
-                    <div className="bg-amber-500 p-1 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.8)]">
-                      <Star className="w-3 h-3 text-white fill-current" />
-                    </div>
-                  ) : (
-                    <div className="bg-blue-500 p-1 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)]">
-                      <CheckCircle2 className="w-3 h-3 text-white fill-current" />
-                    </div>
-                  )
-                )}
-              </div>
-              <p className="text-sm font-medium text-blue-200 mb-4 opacity-80">{email}</p>
+          <div className="flex-1 w-full">
+            <div className="flex flex-col items-center gap-0.5">
+              <h2 className="text-3xl font-black text-white tracking-tighter mb-0.5">{name.toLowerCase()}</h2>
+              <p className="text-xs font-medium text-blue-100/60 mb-4">{email}</p>
               
-              <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
+              <div className="flex flex-wrap justify-center gap-2">
+                <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">
                   ID: <span className={role === 'partner' ? partnerTier === 'gold' ? 'text-amber-400' : 'text-blue-400' : 'text-amber-400'}>{referralCode}</span>
                 </div>
                 {role === 'partner' ? (
                   partnerTier === 'gold' ? (
-                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-yellow-600 border border-amber-300/50 text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-[0_0_20px_rgba(245,158,11,0.6)] uppercase tracking-wider">
-                      <Crown className="w-3.5 h-3.5 text-white" />
-                      Gold VIP
+                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-yellow-600 border border-amber-300/30 text-white px-3 py-1.5 rounded-xl text-[9px] font-black shadow-lg shadow-amber-500/20 uppercase tracking-wider">
+                      <Crown className="w-3 h-3 text-white" />
+                      Verified
                     </div>
                   ) : (
-                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-400/50 text-white px-3 py-1.5 rounded-xl text-[10px] font-black shadow-[0_0_20px_rgba(59,130,246,0.6)] uppercase tracking-wider">
-                      <Shield className="w-3.5 h-3.5 text-white" />
-                      Silver Partner
+                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-400/30 text-white px-3 py-1.5 rounded-xl text-[9px] font-black shadow-lg shadow-blue-500/20 uppercase tracking-wider">
+                      <Shield className="w-3 h-3 text-white" />
+                      Verified
                     </div>
                   )
                 ) : status.toLowerCase() === 'active' ? (
-                  <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider backdrop-blur-sm">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider backdrop-blur-sm">
+                    <CheckCircle2 className="w-3 h-3" />
                     Verified
                   </div>
                 ) : status.toLowerCase() === 'pending' ? (
-                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
-                      <Clock className="w-3.5 h-3.5" />
+                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">
+                      <Clock className="w-3 h-3" />
                       Pending
                     </div>
                   ) : (
-                    <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
-                      <Users className="w-3.5 h-3.5" />
+                    <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">
+                      <Users className="w-3 h-3" />
                       Member
                     </div>
                   )}
                   {joiningDate && (
-                      <div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider">
-                        Joined: {joiningDate}
+                      <div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">
+                        Joined: {joiningDate.includes('T') ? new Date(joiningDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : joiningDate}
                       </div>
                   )}
               </div>
             </div>
           </div>
-          <button onClick={onEditProfile} className="hidden sm:block text-xs font-black text-white bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl hover:bg-white/20 transition-colors shadow-lg">
-            Edit
+          <button onClick={onEditProfile} className="mt-2 text-[10px] font-black text-white bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-xl hover:bg-white/20 transition-colors">
+            Edit Profile
           </button>
         </div>
       </div>
 
       <Section title="Wallet Overview">
-        <div className="p-4 border-b border-slate-50 flex justify-between items-center">
+        <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-white">
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Available Balance</p>
-              <p className="text-lg font-black text-emerald-600">{balance?.toLocaleString() || 0} PKR</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Available Balance</p>
+              <p className="text-2xl font-black text-emerald-600 flex items-baseline gap-1">
+                {balance?.toLocaleString() || 0} 
+                <span className="text-[10px] font-bold text-slate-400">PKR</span>
+              </p>
             </div>
-            <Wallet className="w-5 h-5 text-emerald-500" />
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-emerald-500" />
+            </div>
         </div>
         <Item icon={<History className="w-4 h-4 text-slate-600" />} label="Earning History" onClick={onEarningHistoryClick} />
         {lockedBalance > 0 && (
-          <div className="p-4 flex justify-between items-center bg-amber-50/30">
+          <div className="p-4 flex justify-between items-center bg-amber-50/20 border-t border-amber-100/30">
               <div>
-                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider mb-1">Locked Balance</p>
-                <p className="text-lg font-black text-amber-600">{lockedBalance?.toLocaleString() || 0} PKR</p>
-                <p className="text-[9px] text-amber-500 font-medium">Invite friends to unlock!</p>
+                <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">Locked (Pending)</p>
+                <p className="text-xl font-black text-amber-600">{lockedBalance?.toLocaleString() || 0} PKR</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Info className="w-2.5 h-2.5 text-amber-400" />
+                  <p className="text-[8px] text-amber-500 font-bold uppercase">Invite friends to unlock!</p>
+                </div>
               </div>
-              <Clock className="w-5 h-5 text-amber-500" />
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-amber-600" />
+              </div>
           </div>
         )}
       </Section>

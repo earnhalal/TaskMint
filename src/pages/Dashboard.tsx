@@ -138,7 +138,7 @@ export default function Dashboard() {
   const [topEarners, setTopEarners] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [appSettings, setAppSettings] = useState({
-    activationFee: 100,
+    activationFee: 170,
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
@@ -390,15 +390,15 @@ export default function Dashboard() {
         const data = snapshot.data();
         setAppSettings(data as any);
         
-        // Ensure activationFee is 100 and remove offerExpiryTime
-        if (data.activationFee !== 100 || data.offerExpiryTime) {
+        // Ensure activationFee is 170 and remove offerExpiryTime
+        if (data.activationFee !== 170 || data.offerExpiryTime) {
           await setDoc(doc(db, 'app_settings', 'global'), {
-            activationFee: 100,
+            activationFee: 170,
             offerExpiryTime: null
           }, { merge: true });
 
           // Notify all users about the fee update (one-time logic)
-          const notifyKey = 'fee_update_notified_100';
+          const notifyKey = 'fee_update_notified_170';
           const alreadyNotified = localStorage.getItem(notifyKey);
           
           if (!alreadyNotified) {
@@ -476,6 +476,7 @@ export default function Dashboard() {
         setPartnerReferrals(enrichedReferrals);
 
         // Update Stats locally to ensure UI consistency
+        const totalCount = enrichedReferrals.length;
         const activeCount = enrichedReferrals.filter(r => r.status === 'paid').length;
         const commissions = enrichedReferrals.reduce((sum, r) => {
           if (r.status === 'paid') return sum + (r.commission || 125);
@@ -493,7 +494,7 @@ export default function Dashboard() {
           }
 
           return {
-            ...prev,
+            totalInvited: Math.max(prev.totalInvited, totalCount),
             activeMembers: Math.max(prev.activeMembers, activeCount),
             totalCommission: effectiveCommissions
           };
