@@ -95,6 +95,7 @@ export default function Dashboard() {
   const [joiningDate, setJoiningDate] = useState('');
   const [status, setStatus] = useState('Inactive');
   const [accountStatus, setAccountStatus] = useState('inactive');
+  const [manualWithdrawUnlock, setManualWithdrawUnlock] = useState(false);
   const [role, setRole] = useState('user');
   const [partnerStatus, setPartnerStatus] = useState('none');
   const [partnerTier, setPartnerTier] = useState('basic');
@@ -206,6 +207,7 @@ export default function Dashboard() {
         setReferredBy(data.referredBy || null);
         setReferralCode(data.referralCode || '');
         setAppBonusClaimed(data.appBonusClaimed || false);
+        setManualWithdrawUnlock(data.manualWithdrawUnlock || false);
         setLastDailyCheckin(data.lastDailyCheckin || null);
         setIsProfileLoaded(true);
 
@@ -1256,6 +1258,7 @@ export default function Dashboard() {
           onSetupPin={() => { setPinMode('set'); setActiveTab('pin'); }}
           onEditAccount={() => setActiveTab('manage_wallet')}
           accounts={withdrawalAccounts}
+          manualWithdrawUnlock={manualWithdrawUnlock}
         />;
       case 'deposit':
         return <DepositTab

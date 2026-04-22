@@ -17,6 +17,7 @@ interface WithdrawTabProps {
   onSetupPin: () => void;
   onEditAccount: () => void;
   accounts: Account[];
+  manualWithdrawUnlock?: boolean; // Added optional prop
 }
 
 const CardChip = () => (
@@ -30,7 +31,7 @@ const CardChip = () => (
     </div>
 );
 
-export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts }: WithdrawTabProps) {
+export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts, manualWithdrawUnlock = false }: WithdrawTabProps) {
   const [amount, setAmount] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
   const [error, setError] = useState('');
@@ -47,10 +48,12 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
 
     const isWindow1 = day >= 1 && day <= 3;
     const isWindow2 = day >= 16 && day <= 18;
-    const isOpen = isWindow1 || isWindow2;
+    const isOpen = isWindow1 || isWindow2 || manualWithdrawUnlock;
 
     let nextWindowText = "";
-    if (day <= 3) {
+    if (manualWithdrawUnlock) {
+      nextWindowText = "Unlocked Manually";
+    } else if (day <= 3) {
       nextWindowText = "1st to 3rd " + now.toLocaleString('default', { month: 'long' });
     } else if (day <= 18) {
       nextWindowText = "16th to 18th " + now.toLocaleString('default', { month: 'long' });
@@ -60,7 +63,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
     }
 
     return { isOpen, nextWindowText };
-  }, []);
+  }, [manualWithdrawUnlock]);
 
   const selectedAccount = accounts.find(a => a.id === selectedAccountId);
 
