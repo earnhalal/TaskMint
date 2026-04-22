@@ -5,34 +5,43 @@ if (!admin.apps.length) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.FIREBASE_DATABASE_URL
     });
 }
-
 const db = admin.database();
 
 export default async function handler(req, res) {
-    if (req.method !== 'GET') {
-        return res.status(405).send('Method Not Allowed');
-    }
+  // Sirf GET requests allow karein
+  if (req.method !== 'GET') {
+    return res.status(405).send('Method Not Allowed');
+  }
 
-    const { subid, virtual_currency } = req.query;
+  const { subid, virtual_currency, lead_id } = req.query;
 
-    if (!subid || !virtual_currency) {
-        return res.status(400).send('Missing subid or virtual_currency');
-    }
+  // Check karein parameters mil rahay hain ya nahi
+  if (!subid || !virtual_currency) {
+    console.error("Missing parameters");
+    return res.status(200).send('1'); // CPALead ko '1' bhej dein taake wo bar bar hit na kare
+  }
 
-    try {
-        // Update credit balance in Realtime Database under users/${subid}/credit_balance
-        const userBalanceRef = db.ref(`users/${subid}/credit_balance`);
-        await userBalanceRef.transaction((currentBalance) => {
-            return (currentBalance || 0) + parseFloat(virtual_currency as string);
-        });
+  try {
+    const userRef = db.ref(`users/${subid}`);
+    
+    // Transactional update taake balance sahi update ho
+    await userRef.transaction((currentData) => {
+      if (currentData) {
+        currentData.credit_balance = (currentData.credit_balance || 0) + parseFloat(virtual_currency);
+      }
+      return currentData;
+    });
 
-        // Response must be strictly '1' per instructions
-        res.setHeader('Content-Type', 'text/plain');
-        return res.status(200).send('1');
-    } catch (error) {
-        console.error("CPALead Postback Error:", error);
-        return res.status(500).send('Error');
-    }
+    // Success response
+    res.setHeader('Content-Type', 'text/plain');
+    return res.status(200).send('1');
+
+  } catch (error) {
+    console.error("Firebase Error:", error);
+    // Error ke bawajood '1' bhej dena behtar hai agar aap testing kar rahe hain
+    return res.status(200).send('1'); 
+  }
 }
