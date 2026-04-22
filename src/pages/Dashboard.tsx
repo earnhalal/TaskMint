@@ -1081,16 +1081,28 @@ export default function Dashboard() {
             }
           }
 
-          // Update referral status in Firestore
-          await updateDoc(doc(db, 'users', l1Uid, 'referrals', targetUserId), { status: 'paid' });
+          // Update referral status in RTDB (Replacing Firestore)
+          const referralStatusRef = ref(rtdb, `invites/${l1Uid}/history/${targetUserId}`);
+          await update(referralStatusRef, { status: 'paid', commission: bonusAmount });
 
           // Update referrer stats in Firestore
           await updateDoc(doc(db, 'users', l1Uid), {
             activeMembers: increment(1),
             totalCommission: increment(bonusAmount),
-            balance: increment(bonusAmount)
+            balance: increment(bonusAmount),
+            totalEarnings: increment(bonusAmount)
           });
-          console.log(`[REFERRAL_LOG] Commission of ${bonusAmount} added to referrer ${l1Uid} in Firestore`);
+          
+          // Also update the balanced sync in RTDB so UI is immediately updated for the referrer
+          const referrerRtdbRef = ref(rtdb, `users/${l1Uid}`);
+          await update(referrerRtdbRef, {
+            balance: rtdbIncrement(bonusAmount),
+            totalEarnings: rtdbIncrement(bonusAmount),
+            activeMembers: rtdbIncrement(1),
+            totalCommission: rtdbIncrement(bonusAmount)
+          });
+
+          console.log(`[REFERRAL_LOG] Commission of ${bonusAmount} added to referrer ${l1Uid} in Firestore and RTDB`);
         }
       }
       
