@@ -21,7 +21,8 @@ import {
   Search,
   Layout,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Users
 } from 'lucide-react';
 import { 
   doc, 
@@ -1442,6 +1443,8 @@ export default function Dashboard() {
           onLeaderboardClick={() => setActiveTab('leaderboard')}
           onPartnerUpgradeClick={() => setActiveTab('premium')}
           onActivateClick={() => setActiveTab('activation')}
+          onHistoryClick={() => setActiveTab('earning_history')}
+          onUpdatesClick={() => setActiveTab('updates')}
           onTaskWallClick={() => setActiveTab('task_wall')}
           onSocialTaskPlusClick={() => setActiveTab('social_task_plus')}
           onEasyTaskClick={() => setActiveTab('wannads')}
@@ -1568,133 +1571,177 @@ export default function Dashboard() {
           )}
         </AnimatePresence>
 
-        {/* Header */}
-        <div className={`px-5 py-4 ${role === 'partner' ? 'bg-gradient-to-r from-amber-500 to-yellow-600' : 'bg-white/95 backdrop-blur-md'} flex items-center justify-between sticky top-0 z-10 shadow-sm border-b border-gray-100`}>
-          <div className="flex items-center gap-2 cursor-pointer group relative" onClick={() => setActiveTab('home')}>
-            {role !== 'partner' && (
-              <div className="absolute -inset-2 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition duration-500"></div>
-            )}
-            <div className={`relative w-10 h-10 rounded-xl ${role === 'partner' ? 'bg-white/20 backdrop-blur-md' : 'bg-gradient-to-br from-blue-600 to-indigo-700'} flex items-center justify-center text-white shadow-xl ${role === 'partner' ? 'shadow-black/10' : 'shadow-blue-500/30'} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+        {/* Modern Polished Header */}
+        <div className={`px-5 py-5 ${role === 'partner' ? 'bg-gradient-to-r from-[#060D2D] to-[#151E32]' : 'bg-white/80 backdrop-blur-xl'} flex items-center justify-between sticky top-0 z-40 border-b border-gray-100/20 shadow-sm transition-all duration-300`}>
+          <div className="flex items-center gap-3 cursor-pointer group relative" onClick={() => setActiveTab('home')}>
+            <div className={`relative w-11 h-11 rounded-2xl ${role === 'partner' ? 'bg-amber-500 shadow-amber-500/40' : 'bg-[#0A0A0B] shadow-black/20'} flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 overflow-hidden`}>
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               <Sparkles className="w-6 h-6 animate-pulse" />
             </div>
-            <h1 className={`relative font-display font-black text-2xl sm:text-3xl tracking-tighter drop-shadow-sm`}>
-              <span className={role === 'partner' ? 'text-white' : 'text-blue-900'}>Task</span>
-              <span className={role === 'partner' ? 'text-white/80' : 'text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500'}>Mint</span>
-            </h1>
+            <div className="flex flex-col -space-y-1">
+              <h1 className={`font-black text-2xl sm:text-3xl tracking-tighter italic uppercase`}>
+                <span className={role === 'partner' ? 'text-white' : 'text-slate-900'}>Task</span>
+                <span className={role === 'partner' ? 'text-amber-500' : 'text-indigo-600'}>Mint</span>
+              </h1>
+              <div className={`flex items-center gap-1 ${role === 'partner' ? 'text-amber-500/60' : 'text-indigo-600/40'}`}>
+                 <div className="w-1 h-1 rounded-full bg-current"></div>
+                 <span className="text-[8px] font-black uppercase tracking-[0.3em]">Protocol v2</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button 
+          <div className="flex items-center gap-3">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab('updates')}
-              className={`relative p-2 rounded-full ${role === 'partner' ? 'hover:bg-white/10' : 'hover:bg-gray-100'} transition-colors group`}
+              className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group`}
             >
-              <Mail className={`w-5.5 h-5.5 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-amber-600`} />
+              <Mail className={`w-5 h-5 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-amber-600`} />
               {unreadUpdatesCount > 0 && (
-                <span className="absolute top-1 right-1 w-4.5 h-4.5 bg-red-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-sm animate-bounce">
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce">
                   {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
                 </span>
               )}
-            </button>
-            <button 
+            </motion.button>
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab('profile')}
-              className={`relative p-2 rounded-full ${role === 'partner' ? 'hover:bg-white/10' : 'hover:bg-gray-100'} transition-colors group ${activeTab === 'profile' ? 'bg-amber-100 text-amber-600' : ''}`}
+              className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group ${activeTab === 'profile' ? 'ring-2 ring-amber-500 bg-amber-50' : ''}`}
             >
               <UserCircle className={`w-6 h-6 ${role === 'partner' ? 'text-white' : (activeTab === 'profile' ? 'text-amber-600' : 'text-slate-600')} transition-colors group-hover:text-amber-600`} />
-            </button>
+            </motion.button>
           </div>
         </div>
 
         {/* Scrollable Content */}
-        <div className={`flex-1 overflow-y-auto ${activeTab === 'watch' ? 'px-0 pt-0' : 'px-5 pt-6'} hide-scrollbar ${role === 'partner' ? 'bg-amber-50/50' : 'bg-slate-50/50'}`}>
-          
-          {role === 'partner' && activeTab === 'home' && (
-            <div className="mb-6 space-y-4">
-              <div className="bg-gradient-to-br from-[#060D2D] to-[#151E32] rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-                <div className="flex items-center justify-between mb-4 relative z-10">
-                  <h3 className="font-black text-lg text-amber-400">Partner Analytics</h3>
-                  <Crown className="w-5 h-5 text-amber-500" />
-                </div>
-                <div className="grid grid-cols-2 gap-4 relative z-10">
-                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Team Earnings</p>
-                    <p className="text-xl font-black text-white">Rs {totalTeamEarnings.toFixed(2)}</p>
-                  </div>
-                  <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Active Team</p>
-                    <p className="text-xl font-black text-white">{partnerReferrals.filter(r => r.status === 'Active').length}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl p-5 border border-amber-100 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-slate-900 text-sm">Member Verification</h3>
-                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase">Helper Tool</span>
-                </div>
-                <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                  {partnerReferrals.length > 0 ? partnerReferrals.map((member, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                          {member.username?.substring(0, 1).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900">{member.username}</p>
-                          <p className={`text-[9px] font-bold uppercase ${member.status === 'Active' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                            {member.status}
-                          </p>
-                        </div>
-                      </div>
-                      {member.status === 'Inactive' && (
-                        <button className="text-[9px] font-bold text-amber-600 hover:underline">Verify</button>
-                      )}
+        <div className={`flex-1 overflow-y-auto ${activeTab === 'watch' ? 'px-0 pt-0' : 'px-5 pt-6'} hide-scrollbar ${role === 'partner' ? 'bg-[#060D2D]' : 'bg-slate-50'}`}>
+          <div className="max-w-2xl mx-auto pb-40">
+            {role === 'partner' && activeTab === 'home' && (
+              <div className="mb-8 space-y-4">
+                <div className="bg-gradient-to-br from-[#0A0A0B] to-[#1A1A1B] rounded-[32px] p-7 text-white shadow-2xl relative overflow-hidden border border-white/5">
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full -mr-24 -mt-24 blur-[80px]"></div>
+                  <div className="flex items-center justify-between mb-6 relative z-10">
+                    <div className="flex flex-col">
+                      <h3 className="font-black text-xl text-white tracking-tighter italic uppercase">Network Analytics</h3>
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Partner Access Protocol</p>
                     </div>
-                  )) : (
-                    <p className="text-[10px] text-slate-400 text-center py-4">No team members yet.</p>
-                  )}
+                    <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                      <Crown className="w-6 h-6 text-amber-500" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 relative z-10">
+                    <div className="bg-white/5 p-4 rounded-[24px] border border-white/10 backdrop-blur-md">
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">Team Yield</p>
+                      <p className="text-2xl font-black text-white italic tracking-tighter">Rs {totalTeamEarnings.toFixed(2)}</p>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-[24px] border border-white/10 backdrop-blur-md">
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">Active Nodes</p>
+                      <p className="text-2xl font-black text-amber-500 italic tracking-tighter">{partnerReferrals.filter(r => r.status === 'Active').length}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-xl shadow-slate-200/50">
+                  <div className="flex items-center justify-between mb-5 px-1">
+                    <div className="flex flex-col">
+                      <h3 className="font-black text-slate-900 text-sm uppercase tracking-tight">Identity Verification</h3>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Active Requests</p>
+                    </div>
+                    <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-widest border border-amber-100">PRO TOOL</span>
+                  </div>
+                  <div className="space-y-3 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
+                    {partnerReferrals.length > 0 ? partnerReferrals.map((member, i) => (
+                      <div key={i} className="flex items-center justify-between p-4 bg-slate-50/80 rounded-2xl border border-slate-100 hover:bg-white hover:shadow-lg hover:border-indigo-100 transition-all duration-300 group">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-sm font-black text-indigo-600 group-hover:scale-110 transition-transform">
+                            {member.username?.substring(0, 1).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{member.username}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <div className={`w-1.5 h-1.5 rounded-full ${member.status === 'Active' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></div>
+                              <p className={`text-[9px] font-black uppercase tracking-widest ${member.status === 'Active' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                {member.status}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        {member.status === 'Inactive' && (
+                          <button className="bg-indigo-600 text-white text-[9px] font-black px-4 py-2 rounded-xl shadow-lg shadow-indigo-600/20 hover:scale-105 transition-transform active:scale-95 uppercase tracking-widest">Verify</button>
+                        )}
+                      </div>
+                    )) : (
+                      <div className="flex flex-col items-center justify-center py-8 opacity-40">
+                        <Users className="w-10 h-10 mb-2" />
+                        <p className="text-[10px] font-black uppercase tracking-widest">No team members</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          {renderTabContent()}
+            )}
+            {renderTabContent()}
+          </div>
         </div>
 
-        {/* Bottom Navigation */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-3 pb-6 sm:pb-4 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-          <div className="flex justify-center gap-4 text-[9px] font-bold text-slate-400 mb-4 pb-2 border-b border-slate-50">
-            <button onClick={() => navigate('/privacy')}>PRIVACY</button>
-            <button onClick={() => navigate('/terms')}>TERMS</button>
-            <button onClick={() => navigate('/contact')}>SUPPORT</button>
-          </div>
-          <div className="flex items-center justify-between max-w-md mx-auto relative">
+        {/* Floating Modern Tab Bar */}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
+          <div className="bg-[#0A0A0B]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-between relative overflow-hidden">
+             {/* Decorative shine */}
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>
+            
             {[
               { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },
               { id: 'watch', icon: <Tv2 className="w-6 h-6" />, label: 'WATCH' },
               { id: 'task_wall', icon: <Rocket className="w-6 h-6" />, label: 'SURVEYS' },
               { id: 'tasks', icon: <Zap className="w-6 h-6" />, label: 'TASKS' },
-              { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PARTNER' },
+              { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PRO' },
             ].map((tab) => (
               <button 
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1 w-14 ${activeTab === tab.id ? 'text-amber-500' : 'text-slate-400 hover:text-slate-600'} transition-all duration-300 relative group`}
+                className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-14 relative transition-all duration-300 ${activeTab === tab.id ? 'text-amber-500' : 'text-slate-500 hover:text-slate-300'}`}
               >
-                <div className={`relative transition-all duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-2' : 'group-hover:scale-105'}`}>
-                  {activeTab === tab.id && (
-                    <div className="absolute inset-0 bg-amber-400 blur-xl opacity-60 rounded-full animate-pulse"></div>
-                  )}
-                  <div className="relative z-10 drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]">
-                    {tab.icon}
-                  </div>
-                </div>
-                <span className={`text-[9px] font-black tracking-tighter text-center leading-none transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-110' : 'opacity-70'}`}>{tab.label}</span>
                 {activeTab === tab.id && (
-                  <div className="absolute -top-3 w-10 h-1.5 bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 rounded-b-full shadow-[0_4px_12px_rgba(245,158,11,0.6)]"></div>
+                  <motion.div 
+                    layoutId="activeTab"
+                    className="absolute inset-0 bg-white/5 rounded-2xl border border-white/5 shadow-inner"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                
+                <div className={`relative z-10 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-1' : ''}`}>
+                  {activeTab === tab.id && (
+                    <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full"></div>
+                  )}
+                  {tab.icon}
+                </div>
+                
+                <span className={`relative z-10 text-[9px] font-black uppercase tracking-[0.2em] leading-none text-center transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-105' : 'opacity-40'}`}>
+                  {tab.label}
+                </span>
+
+                {activeTab === tab.id && (
+                  <div className="absolute bottom-1 w-1 h-1 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,1)]"></div>
                 )}
               </button>
             ))}
           </div>
         </div>
+
+        {/* Global Shimmer Keyframe */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+          .hide-scrollbar::-webkit-scrollbar { display: none; }
+          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+          .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+          .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        `}} />
       </div>
     </div>
   );

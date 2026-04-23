@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Crown, Gift, Volume2, VolumeX, Lock } from 'lucide-react';
-import { auth, rtdb } from '../firebase';
+import { auth, rtdb } from '../../firebase';
 import confetti from 'canvas-confetti';
 import { getDatabase, ref, onValue, set, get, update, push, serverTimestamp as rtdbTimestamp } from 'firebase/database';
 
