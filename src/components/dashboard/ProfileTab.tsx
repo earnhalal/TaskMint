@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool } from 'lucide-react';
+import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles } from 'lucide-react';
 
 export default function ProfileTab({ 
   name, 
@@ -161,130 +161,143 @@ export default function ProfileTab({
         </div>
       )}
 
-      {/* Profile Header */}
-      <div className={`relative rounded-[2.5rem] p-6 mb-6 overflow-hidden shadow-xl transition-all duration-500 group ${
-        role === 'partner' 
-          ? partnerTier === 'gold'
-            ? 'bg-gradient-to-br from-[#111827] via-[#1f2937] to-[#111827] border border-amber-500/20'
-            : 'bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] border border-blue-500/20'
-          : 'bg-gradient-to-br from-[#1e3a8a] via-[#312e81] to-[#1e1b4b] border border-white/5'
-      }`}>
-        {/* Animated Background Glow */}
-        <div className={`absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl opacity-20 animate-pulse ${
-          role === 'partner' 
-            ? partnerTier === 'gold' ? 'bg-amber-400' : 'bg-blue-400'
-            : 'bg-blue-400'
-        }`}></div>
-        
-        <div className="relative z-10 flex flex-col items-center text-center gap-4">
-          <div className="relative">
-            <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl transform transition-transform group-hover:scale-105 duration-500 p-1 ${
-              role === 'partner'
-                ? partnerTier === 'gold'
-                  ? 'bg-gradient-to-tr from-amber-400 to-yellow-600 shadow-amber-500/30'
-                  : 'bg-gradient-to-tr from-blue-500 to-indigo-600 shadow-blue-500/30'
-                : 'bg-[#0F172A] border-2 border-amber-500'
-            }`}>
-              <div className={`w-full h-full rounded-[20px] flex items-center justify-center text-white text-3xl font-black overflow-hidden ${
-                role === 'partner' ? 'bg-transparent' : 'bg-slate-900'
-              }`}>
-                {avatar ? (
-                  <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  role === 'partner' 
-                    ? partnerTier === 'gold' ? <Crown className="w-10 h-10" /> : <Shield className="w-10 h-10" />
-                    : name.substring(0, 2).toUpperCase()
-                )}
-              </div>
-            </div>
-            {status.toLowerCase() === 'active' && (
-              <div className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-lg flex items-center justify-center border-2 shadow-lg ${
-                role === 'partner'
-                  ? partnerTier === 'gold' ? 'bg-amber-500 border-[#1a1a1a]' : 'bg-blue-500 border-[#0f172a]'
-                  : 'bg-emerald-500 border-[#1e3a8a]'
-              }`}>
-                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-              </div>
-            )}
-          </div>
-          
-          <div className="flex-1 w-full">
-            <div className="flex flex-col items-center gap-0.5">
-              <h2 className="text-3xl font-black text-white tracking-tighter mb-0.5">{name.toLowerCase()}</h2>
-              <p className="text-xs font-medium text-blue-100/60 mb-4">{email}</p>
-              
-              <div className="flex flex-wrap justify-center gap-2">
-                <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/10 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">
-                  ID: <span className={role === 'partner' ? partnerTier === 'gold' ? 'text-amber-400' : 'text-blue-400' : 'text-amber-400'}>{referralCode}</span>
+      {/* Profile Header: Digital Identity Card */}
+      <div className="px-6 mb-8 mt-4">
+        <div className={`relative rounded-[3rem] p-8 overflow-hidden shadow-2xl transition-all duration-700 group hover:scale-[1.02] ${
+            role === 'partner' 
+            ? partnerTier === 'gold'
+                ? 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-amber-500/20 shadow-amber-500/5'
+                : 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-blue-500/20 shadow-blue-500/5'
+            : 'bg-gradient-to-br from-[#1E3A8A] via-[#312E81] to-[#1E1B4B] border border-white/5 shadow-indigo-500/10'
+        }`}>
+            {/* Holographic Overlays */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 animate-pulse" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -ml-32 -mb-32 animate-pulse" style={{ animationDelay: '1s' }} />
+            
+            {/* Card Content */}
+            <div className="relative z-10 flex flex-col items-center">
+                <div className="w-full flex justify-between items-start mb-8">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">MINT NODE ID</span>
+                        <div className="bg-white/5 backdrop-blur-md rounded-lg px-3 py-1 border border-white/10 flex items-center gap-2">
+                            <Fingerprint className="w-3 h-3 text-amber-500" />
+                            <span className="text-xs font-black text-white tracking-widest">{referralCode}</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-end">
+                         <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">NETWORK STATUS</span>
+                         <div className={`flex items-center gap-2 bg-black/20 px-3 py-1 rounded-lg border ${
+                             status.toLowerCase() === 'active' ? 'border-emerald-500/30 text-emerald-400' : 'border-red-500/30 text-red-400'
+                         }`}>
+                             <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                                 status.toLowerCase() === 'active' ? 'bg-emerald-500' : 'bg-red-500'
+                             }`} />
+                             <span className="text-[9px] font-black uppercase tracking-widest">{status}</span>
+                         </div>
+                    </div>
                 </div>
-                {role === 'partner' ? (
-                  partnerTier === 'gold' ? (
-                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-yellow-600 border border-amber-300/30 text-white px-3 py-1.5 rounded-xl text-[9px] font-black shadow-lg shadow-amber-500/20 uppercase tracking-wider">
-                      <Crown className="w-3 h-3 text-white" />
-                      Verified
+
+                <div className="relative mb-6 group-hover:rotate-6 transition-transform duration-500">
+                    <div className={`w-28 h-28 rounded-[2.5rem] p-1 shadow-2xl transition-all duration-500 ${
+                        role === 'partner'
+                            ? partnerTier === 'gold'
+                                ? 'bg-gradient-to-tr from-amber-400 via-yellow-500 to-amber-600'
+                                : 'bg-gradient-to-tr from-blue-500 via-indigo-600 to-blue-700'
+                            : 'bg-gradient-to-tr from-indigo-500 via-purple-600 to-indigo-700'
+                    }`}>
+                        <div className="w-full h-full rounded-[2.3rem] overflow-hidden bg-[#0F172A] flex items-center justify-center border-4 border-black/20">
+                            {avatar ? (
+                                <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="text-4xl font-black text-white italic tracking-tighter">
+                                    {name.substring(0, 2).toUpperCase()}
+                                </div>
+                            )}
+                        </div>
                     </div>
-                  ) : (
-                    <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-400/30 text-white px-3 py-1.5 rounded-xl text-[9px] font-black shadow-lg shadow-blue-500/20 uppercase tracking-wider">
-                      <Shield className="w-3 h-3 text-white" />
-                      Verified
+                    <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute -bottom-1 -right-1 w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-2xl text-slate-900 border-2 border-black/5 active:scale-90 transition-all"
+                    >
+                        <PenTool className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div className="text-center w-full">
+                    <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-1 drop-shadow-2xl">
+                        {name.toLowerCase()}
+                    </h2>
+                    <p className="text-xs font-bold text-white/40 mb-6 flex items-center justify-center gap-2">
+                        <Mail className="w-3 h-3" />
+                        {email}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/5 text-left group/stat hover:bg-white/10 transition-all">
+                             <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">MEMBER SINCE</p>
+                             <p className="text-sm font-black text-white flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-amber-500" />
+                                {joiningDate ? (joiningDate.includes('T') ? new Date(joiningDate).toLocaleDateString() : joiningDate) : 'Jan 2024'}
+                             </p>
+                        </div>
+                        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/5 text-left group/stat hover:bg-white/10 transition-all">
+                             <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">ALPHA RANK</p>
+                             <div className="flex items-center gap-2">
+                                {role === 'partner' ? (
+                                    <Crown className="w-4 h-4 text-amber-500" />
+                                ) : (
+                                    <Users className="w-4 h-4 text-indigo-400" />
+                                )}
+                                <p className="text-sm font-black text-white uppercase italic">{role}</p>
+                             </div>
+                        </div>
                     </div>
-                  )
-                ) : status.toLowerCase() === 'active' ? (
-                  <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider backdrop-blur-sm">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Verified
-                  </div>
-                ) : status.toLowerCase() === 'pending' ? (
-                    <div className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">
-                      <Clock className="w-3 h-3" />
-                      Pending
+                </div>
+
+                {/* Card NFC-style decoration */}
+                <div className="w-full flex justify-center mt-2 opacity-10">
+                    <div className="h-6 w-10 bg-white rounded-sm border-2 border-white/50 relative overflow-hidden">
+                        <div className="absolute inset-x-0 top-1/2 h-px bg-white" />
+                        <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white" />
                     </div>
-                  ) : (
-                    <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">
-                      <Users className="w-3 h-3" />
-                      Member
-                    </div>
-                  )}
-                  {joiningDate && (
-                      <div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 text-slate-300 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider">
-                        Joined: {joiningDate.includes('T') ? new Date(joiningDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : joiningDate}
-                      </div>
-                  )}
-              </div>
+                </div>
             </div>
-          </div>
-          <button onClick={onEditProfile} className="mt-2 text-[10px] font-black text-white bg-white/10 backdrop-blur-md border border-white/20 px-6 py-2 rounded-xl hover:bg-white/20 transition-colors">
-            Edit Profile
-          </button>
         </div>
       </div>
 
-      <Section title="Wallet Overview">
-        <div className="p-4 border-b border-slate-50 flex justify-between items-center bg-white">
-            <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Available Balance</p>
-              <p className="text-2xl font-black text-emerald-600 flex items-baseline gap-1">
-                {balance?.toLocaleString() || 0} 
-                <span className="text-[10px] font-bold text-slate-400">PKR</span>
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-emerald-500" />
+      <Section title="Wallet Intelligence">
+        <div className="p-6 relative overflow-hidden group cursor-pointer" onClick={onManageWalletClick}>
+            <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex justify-between items-center relative z-10">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                    <Wallet className="w-3 h-3" /> Liquid Balance
+                  </p>
+                  <p className="text-4xl font-black text-emerald-600 tracking-tighter flex items-baseline gap-2 italic">
+                    {balance?.toLocaleString() || 0} 
+                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest not-italic">PKR</span>
+                  </p>
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform duration-500">
+                  <BarChart3 className="w-7 h-7 text-emerald-600" />
+                </div>
             </div>
         </div>
-        <Item icon={<History className="w-4 h-4 text-slate-600" />} label="Earning History" onClick={onEarningHistoryClick} />
+        <Item icon={<History className="w-4 h-4" />} label="Digital Yield Ledger" onClick={onEarningHistoryClick} />
         {lockedBalance > 0 && (
-          <div className="p-4 flex justify-between items-center bg-amber-50/20 border-t border-amber-100/30">
+          <div className="p-6 bg-amber-50/20 border-t border-amber-100/30 flex justify-between items-center group">
               <div>
-                <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1">Locked (Pending)</p>
-                <p className="text-xl font-black text-amber-600">{lockedBalance?.toLocaleString() || 0} PKR</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Info className="w-2.5 h-2.5 text-amber-400" />
-                  <p className="text-[8px] text-amber-500 font-bold uppercase">Invite friends to unlock!</p>
+                <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                    <Clock className="w-3 h-3" /> Locked Distribution
+                </p>
+                <p className="text-2xl font-black text-amber-600 italic tracking-tighter">Rs {lockedBalance?.toLocaleString() || 0}</p>
+                <div className="flex items-center gap-2 mt-2 bg-amber-500/10 px-3 py-1 rounded-lg w-fit border border-amber-500/10">
+                  <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
+                  <p className="text-[9px] text-amber-600 font-black uppercase tracking-widest">Protocol Stake Active</p>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-amber-600" />
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 group-hover:rotate-12 transition-transform">
+                <Shield className="w-6 h-6 text-amber-600" />
               </div>
           </div>
         )}

@@ -193,6 +193,40 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
         return quantity * selectedService.price;
     }, [quantity, selectedService]);
 
+    const suggestions = useMemo(() => {
+        if (!selectedService) return { titles: [], descriptions: [] };
+        
+        const serviceName = selectedService.name.toLowerCase();
+        if (serviceName.includes('subscribers')) {
+            return {
+                titles: ['Subscribe to my Channel', 'New Content Coming!', 'Join the Family'],
+                descriptions: ['Please subscribe to help me reach 1k!', 'Quality content daily, subscribe now.', 'Sub for Sub equivalent but high quality.']
+            };
+        }
+        if (serviceName.includes('followers')) {
+            return {
+                titles: ['Road to 10k Followers', 'Follow for amazing reels', 'New Influencer Alert'],
+                descriptions: ['Follow me for daily lifestyle updates.', 'Trying to grow my presence, please follow.', 'Active follower for active friends.']
+            };
+        }
+        if (serviceName.includes('likes')) {
+            return {
+                titles: ['Like my latest post', 'Bust the engagement!', 'Help me go viral'],
+                descriptions: ['Please like this to boost visibility.', 'Viral content needs likes!', 'Double tap if you enjoy my work.']
+            };
+        }
+        if (serviceName.includes('watch')) {
+            return {
+                titles: ['Watch my latest vlog', 'High retention views', 'Help my channel grow'],
+                descriptions: ['Please watch the full video for better engagement.', 'Quality watch time requested.', 'Vlog 2026 - Must watch.']
+            };
+        }
+        return {
+            titles: ['Boost my stats', 'Premium engagement', 'Promote this link'],
+            descriptions: ['Please provide high quality interaction.', 'Fast delivery requested.', 'Boost visibility of this anchor.']
+        };
+    }, [selectedService]);
+
     const handleConfirmOrder = async () => {
         if (!auth.currentUser || !selectedService) return;
         if (!link) {
@@ -378,7 +412,7 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
 
                                                 <div className={`p-6 rounded-3xl ${selectedPlatform.cardBg} shadow-xl`}>
                                                     <label className="text-xs font-black uppercase tracking-widest mb-3 block opacity-90">Promotion Title (Optional)</label>
-                                                    <div className="relative">
+                                                    <div className="relative mb-3">
                                                         <input 
                                                             type="text" 
                                                             placeholder="e.g. My New Video"
@@ -387,11 +421,22 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                                             className={`w-full rounded-2xl py-4 px-5 text-base font-bold focus:outline-none transition-all ${selectedPlatform.inputBg}`}
                                                         />
                                                     </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {suggestions.titles.map((t, idx) => (
+                                                            <button 
+                                                                key={idx} 
+                                                                onClick={() => setTitle(t)}
+                                                                className="text-[9px] font-black px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/20 transition-all uppercase"
+                                                            >
+                                                                {t}
+                                                            </button>
+                                                        ))}
+                                                    </div>
                                                 </div>
 
                                                 <div className={`p-6 rounded-3xl ${selectedPlatform.cardBg} shadow-xl`}>
                                                     <label className="text-xs font-black uppercase tracking-widest mb-3 block opacity-90">Description (Optional)</label>
-                                                    <div className="relative">
+                                                    <div className="relative mb-3">
                                                         <textarea 
                                                             placeholder="Any specific instructions..."
                                                             value={description}
@@ -399,6 +444,17 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                                             rows={3}
                                                             className={`w-full rounded-2xl py-4 px-5 text-base font-bold focus:outline-none transition-all resize-none ${selectedPlatform.inputBg}`}
                                                         />
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {suggestions.descriptions.map((d, idx) => (
+                                                            <button 
+                                                                key={idx} 
+                                                                onClick={() => setDescription(d)}
+                                                                className="text-[9px] font-black px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/20 transition-all uppercase"
+                                                            >
+                                                                {d.length > 20 ? d.substring(0, 20) + '...' : d}
+                                                            </button>
+                                                        ))}
                                                     </div>
                                                 </div>
 

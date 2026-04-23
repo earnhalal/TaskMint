@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Crown, Gift, Volume2, VolumeX, Lock } from 'lucide-react';
+import { X, Crown, Gift, Volume2, VolumeX, Lock, ArrowLeft, ArrowRight, Sparkles, Trophy, Users, Wallet, Clock, Ticket } from 'lucide-react';
 import { auth, rtdb } from '../../firebase';
 import confetti from 'canvas-confetti';
 import { getDatabase, ref, onValue, set, get, update, push, serverTimestamp as rtdbTimestamp } from 'firebase/database';
@@ -315,229 +315,331 @@ export default function SpinWheel({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full h-full pb-24"
+      className="pb-32 max-w-4xl mx-auto px-4 pt-6"
     >
-      <style>
-        {`
-          @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-          }
-          .animate-marquee {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 20s linear infinite;
-          }
-        `}
-      </style>
-
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0, y: 20 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        className="w-full min-h-full sm:rounded-[2rem] border-0 sm:border border-slate-700/50 relative overflow-hidden flex flex-col items-center p-6 lg:p-10 gap-8 shadow-2xl pt-24 sm:pt-24 transition-colors duration-500"
-        style={{ backgroundColor: tiers.find(t => t.id === activeTier)?.bgColor }}
-      >
-        {/* Tier Tabs */}
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-50 flex bg-black/40 p-1 rounded-2xl border border-white/10 backdrop-blur-md">
-          {tiers.map((tier) => (
-            <button
-              key={tier.id}
-              onClick={() => !isSpinning && setActiveTier(tier.id)}
-              className={`px-6 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                activeTier === tier.id 
-                  ? 'bg-white text-black shadow-lg scale-105' 
-                  : 'text-white/60 hover:text-white'
-              }`}
-            >
-              {tier.label}
-              {(tier.id === 50 || tier.id === 100) && <Lock className="w-3 h-3" />}
-            </button>
-          ))}
-        </div>
-
-        {/* Sliding Notification Marquee */}
-        <div className="absolute top-0 left-0 w-full bg-black/20 border-b border-white/5 overflow-hidden py-2 z-50 flex items-center">
-          <div className="w-full overflow-hidden relative h-6">
-            <div className="animate-marquee absolute whitespace-nowrap text-white/80 font-bold text-sm flex gap-12 px-4">
-              {winners.length > 0 ? winners.map((w) => (
-                <span key={w.id}>🎉 {w.userName} just won {w.prize}!</span>
-              )) : (
-                <span>🎉 Spin the wheel to win big prizes!</span>
-              )}
-              {winners.length > 0 && winners.map((w) => (
-                <span key={w.id + '_dup'}>🎉 {w.userName} just won {w.prize}!</span>
-              ))}
-            </div>
+      {/* Premium Header */}
+      <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onClose}
+            className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 hover:bg-slate-50 shadow-sm transition-all active:scale-90"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2">
+              Helix <span className="text-amber-500">Spinner</span> <Sparkles className="w-6 h-6 text-amber-500 animate-pulse" />
+            </h2>
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Protocol Yield Engine</p>
           </div>
         </div>
-
-        {/* Controls (Sound & Close) */}
-        <div className="absolute top-24 sm:top-10 right-4 z-50 flex items-center gap-2">
-          <button 
-            onClick={() => setSoundEnabled(!soundEnabled)} 
-            className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-colors"
-          >
-            {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-          </button>
-          <button 
-            onClick={onClose} 
-            className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white/60 hover:text-white transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
+        
+        <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setSoundEnabled(!soundEnabled)} 
+              className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors border border-slate-200 shadow-sm"
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
         </div>
+      </div>
 
-        {/* Wheel Section */}
-        <div className="flex-1 flex flex-col items-center relative z-10 w-full max-w-sm mx-auto mt-8">
-          <div className="relative w-72 h-72 sm:w-80 sm:h-80">
-            {/* Sparkles for Golden Tier */}
-            {styles.sparkle && (
-              <div className="absolute inset-0 z-0 pointer-events-none">
-                {[...Array(12)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-1.5 h-1.5 bg-amber-200 rounded-full blur-[1px]"
-                    animate={{
-                      scale: [0, 1.5, 0],
-                      opacity: [0, 1, 0],
-                      x: [Math.random() * 400 - 200, Math.random() * 400 - 200],
-                      y: [Math.random() * 400 - 200, Math.random() * 400 - 200],
-                    }}
-                    transition={{
-                      duration: 1.5 + Math.random() * 2,
-                      repeat: Infinity,
-                      delay: Math.random() * 2,
-                      ease: "easeInOut"
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-            {/* Silver Glow for Silver Tier */}
-            {activeTier === 50 && (
-              <div className="absolute inset-0 z-0 pointer-events-none">
-                {[...Array(8)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-2 h-2 bg-slate-200/30 rounded-full blur-[2px]"
-                    animate={{
-                      scale: [1, 2, 1],
-                      opacity: [0.2, 0.5, 0.2],
-                    }}
-                    transition={{
-                      duration: 2 + Math.random() * 2,
-                      repeat: Infinity,
-                      delay: Math.random() * 2,
-                    }}
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-            {/* Pointer */}
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-20 w-10 h-10 drop-shadow-xl">
-              <svg viewBox="0 0 24 24" fill={styles.pointer} className="w-full h-full transition-colors duration-500">
-                <path d="M12 2L22 20H2L12 2Z" transform="rotate(180 12 12)" />
-              </svg>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        {/* Left: The Quantum Wheel */}
+        <div className="lg:col-span-7 flex flex-col items-center">
+            {/* Live Winners Ticker */}
+            <div className="w-full bg-[#0A0B0F] rounded-full py-2.5 px-8 mb-12 border border-white/5 overflow-hidden relative shadow-2xl">
+                 <div className="absolute inset-0 bg-amber-500/5 blur-xl"></div>
+                 <motion.div 
+                    animate={{ x: [400, -1200] }}
+                    transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
+                    className="whitespace-nowrap flex items-center gap-12 relative z-10"
+                 >
+                    {winners.length > 0 ? (
+                        winners.map((winner, idx) => (
+                            <div key={idx} className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></div>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <span className="text-white italic">{winner.userName}</span> captured <span className="text-emerald-400">Rs {winner.prize}</span>
+                                </span>
+                            </div>
+                        ))
+                    ) : (
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic opacity-40">Helix Engine Standby. Awaiting first yield sequence...</span>
+                    )}
+                 </motion.div>
             </div>
 
-            {/* Wheel */}
-            <motion.div 
-              className={`w-full h-full rounded-full border-[8px] ${styles.border} ${styles.glow} relative overflow-hidden transition-all duration-500`}
-              animate={{ rotate: rotation }}
-              transition={{ duration: 5, ease: [0.2, 0.8, 0.1, 1] }}
-              style={{ background: styles.wheelBg }}
-            >
-              {currentSegments.map((seg, i) => (
-                <div
-                  key={seg.id}
-                  className="absolute top-0 left-0 w-full h-full flex flex-col items-center pt-6 sm:pt-8"
-                  style={{ transform: `rotate(${i * 45}deg)` }}
-                >
-                  <span className="font-black text-[10px] sm:text-[11px] text-center leading-tight text-white drop-shadow-md">
-                    {seg.label}<br/>{seg.subLabel}
-                  </span>
+            {/* Wheel Container */}
+            <div className="relative">
+                {/* Outer Portal Glow */}
+                <div className={`absolute inset-[-40px] rounded-full blur-[80px] opacity-20 transition-all duration-1000 ${activeTier === 100 ? 'bg-amber-500' : activeTier === 50 ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
+                
+                {/* Pointer */}
+                <div className="absolute top-[-25px] left-1/2 -translate-x-1/2 z-50 transform pointer-events-none">
+                    <div className="relative">
+                        <div className="absolute inset-[-10px] bg-white blur-2xl opacity-30 animate-pulse"></div>
+                        <div className="w-12 h-14 bg-white rounded-t-full rounded-b-xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] flex items-center justify-center border-2 border-slate-100 relative">
+                            <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+                        </div>
+                    </div>
                 </div>
-              ))}
-              
-              {/* Center Dot */}
-              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 bg-white rounded-full border-4 ${styles.border} shadow-inner z-10 flex items-center justify-center transition-colors duration-500`}>
-                <div className="w-5 h-5 bg-black/10 rounded-full"></div>
-              </div>
-            </motion.div>
-          </div>
 
-          {/* Spin Buttons */}
-          <div className="mt-12 w-full max-w-sm flex flex-col gap-4">
-            <button 
-              onClick={() => spinWheel(true)}
-              disabled={isSpinning || activeTier === 50 || activeTier === 100}
-              className={`w-full py-4 rounded-2xl font-black text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex flex-col items-center justify-center leading-none ${
-                activeTier === 100 ? 'bg-amber-500 text-black' : 
-                activeTier === 50 ? 'bg-slate-200 text-black' : 
-                'bg-yellow-500 text-black'
-              }`}
-            >
-              <span>{(activeTier === 50 || activeTier === 100) ? 'LOCKED' : 'SPIN NOW'}</span>
-              <span className="text-[10px] opacity-60 mt-1">
-                {(activeTier === 50 || activeTier === 100) ? 'Currently Unavailable' : `Cost: Rs. ${activeTier}`}
-              </span>
-            </button>
-            
-            <button 
-              onClick={() => spinWheel(false)}
-              disabled={isSpinning || freeSpins <= 0 || activeTier === 50 || activeTier === 100}
-              className="w-full bg-white/10 text-white font-bold py-3 rounded-2xl hover:bg-white/20 transition-all disabled:opacity-30 text-sm"
-            >
-              Use Free Spin ({freeSpins})
-            </button>
-          </div>
-          
-          {errorMsg && (
-            <p className="text-red-400 text-sm mt-4 text-center font-bold bg-red-400/10 py-2 px-4 rounded-lg border border-red-400/20">
-              {errorMsg}
-            </p>
-          )}
+                {/* The Physical Wheel */}
+                <div className="relative p-5 bg-white rounded-full shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] border-[16px] border-slate-50">
+                    <motion.div 
+                        animate={{ rotate: rotation }}
+                        transition={{ duration: 5, ease: [0.15, 0.85, 0.1, 1] }}
+                        className="relative rounded-full overflow-hidden shadow-inner flex items-center justify-center bg-[#0A0B0F]"
+                        style={{ width: 340, height: 340 }}
+                    >
+                        {/* SVG Segments */}
+                        <svg width="100%" height="100%" viewBox="0 0 100 100" className="transform -rotate-90">
+                            {currentSegments.map((seg, i) => {
+                                const angle = 360 / currentSegments.length;
+                                const startAngle = i * angle;
+                                const x1 = 50 + 50 * Math.cos((startAngle * Math.PI) / 180);
+                                const y1 = 50 + 50 * Math.sin((startAngle * Math.PI) / 180);
+                                const x2 = 50 + 50 * Math.cos(((startAngle + angle) * Math.PI) / 180);
+                                const y2 = 50 + 50 * Math.sin(((startAngle + angle) * Math.PI) / 180);
+                                
+                                return (
+                                    <path
+                                        key={i}
+                                        d={`M 50 50 L ${x1} ${y1} A 50 50 0 0 1 ${x2} ${y2} Z`}
+                                        fill={i % 2 === 0 ? '#12141A' : '#0A0B0F'}
+                                        stroke="rgba(255,255,255,0.03)"
+                                        strokeWidth="0.1"
+                                    />
+                                );
+                            })}
+                        </svg>
+
+                        {/* Sparkles Overlay */}
+                        {styles.sparkle && (
+                            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                                {[...Array(10)].map((_, i) => (
+                                    <motion.div 
+                                        key={i}
+                                        animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5] }}
+                                        transition={{ repeat: Infinity, duration: 2, delay: i * 0.2 }}
+                                        className="absolute w-1 h-1 bg-amber-400 rounded-full blur-[1px]"
+                                        style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Prize Labels */}
+                        {currentSegments.map((seg, i) => (
+                            <div
+                                key={i}
+                                className="absolute text-center select-none"
+                                style={{
+                                    transform: `rotate(${(i * 360) / currentSegments.length + 180 / currentSegments.length}deg) translateY(-130px)`,
+                                    transformOrigin: 'center center',
+                                }}
+                            >
+                                <div className="flex flex-col items-center">
+                                    <p className="text-[10px] font-black italic tracking-tighter text-white opacity-40 mb-1 font-mono">RS</p>
+                                    <p className={`text-xl font-black italic tracking-tighter text-white ${seg.value === 0 ? 'opacity-20' : ''}`}>
+                                        {seg.value === -1 ? 'FS' : seg.value === 0 ? 'X' : seg.value}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Center Hub */}
+                        <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full shadow-2xl flex items-center justify-center z-10 border-4 border-slate-100/50">
+                             <div className="w-14 h-14 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-500 shadow-inner group">
+                                <Sparkles className="w-6 h-6 animate-pulse" />
+                             </div>
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* Spin Controls */}
+            <div className="mt-16 w-full max-w-md space-y-6">
+                <div className="flex bg-slate-50 p-2.5 rounded-[2.5rem] border border-slate-100 shadow-inner">
+                    {tiers.map((t) => {
+                        const isSelected = activeTier === t.id;
+                        const isLocked = t.id === 50 || t.id === 100;
+
+                        return (
+                            <button 
+                                key={t.id}
+                                disabled={isSpinning || isLocked}
+                                onClick={() => setActiveTier(t.id)}
+                                className={`flex-1 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden flex flex-col items-center gap-1 ${
+                                    isSelected 
+                                    ? 'bg-[#0A0B0F] text-white shadow-2xl' 
+                                    : 'text-slate-400 hover:text-slate-900'
+                                } ${isLocked ? 'opacity-30 cursor-not-allowed grayscale' : ''}`}
+                            >
+                                {t.label} {isLocked && <Lock className="w-2 h-2 opacity-50" />}
+                                <span className={`text-[7px] font-bold ${isSelected ? 'text-amber-500/60' : 'text-slate-400/40'}`}>NODE {t.id}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                <div className="flex flex-col gap-4">
+                    <motion.button
+                        whileHover={{ y: -5, scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => spinWheel(true)}
+                        disabled={isSpinning || activeTier === 50 || activeTier === 100 || balance < activeTier}
+                        className={`w-full py-8 rounded-[2.5rem] font-black uppercase tracking-[0.4em] flex flex-col items-center justify-center gap-2 group transition-all shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden ${
+                            isSpinning 
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' 
+                            : (balance < activeTier) 
+                            ? 'bg-red-50 text-red-300 border border-red-100'
+                            : `bg-[#0A0B0F] text-white`
+                        }`}
+                    >
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl group-hover:bg-amber-500/10 transition-colors"></div>
+                        
+                        <span className="text-sm italic tracking-widest flex items-center gap-3">
+                            {isSpinning ? 'PROCESSING...' : `Initiate Sequence`} <ArrowRight className="w-4 h-4 text-amber-500" />
+                        </span>
+                        
+                        {!isSpinning && (
+                            <span className="text-[9px] font-black text-amber-500/60 opacity-60">COST: RS {activeTier} PROTOCOL FEED</span>
+                        )}
+                    </motion.button>
+
+                    <button
+                        onClick={() => spinWheel(false)}
+                        disabled={isSpinning || freeSpins <= 0}
+                        className={`w-full py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all border-2 border-slate-100 bg-white shadow-sm flex items-center justify-center gap-3 hover:bg-slate-50 active:scale-95 disabled:opacity-30 ${freeSpins > 0 ? 'text-indigo-600 border-indigo-100' : 'text-slate-400'}`}
+                    >
+                        <Ticket className="w-4 h-4" /> Use Free Entry ({freeSpins})
+                    </button>
+                </div>
+            </div>
         </div>
-      </motion.div>
 
-      {/* Prize Modal */}
+        {/* Right: Technical Specifications */}
+        <div className="lg:col-span-5 space-y-8">
+            {/* Probability Specs */}
+            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl relative overflow-hidden">
+                <div className="absolute top-6 right-8 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div> LIVE STATS
+                </div>
+                <h3 className="text-xl font-black text-slate-900 tracking-tighter italic mb-8 uppercase">Unit <span className="text-indigo-600">Diagnostics</span></h3>
+                
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:border-indigo-200 transition-all">
+                        <div className="flex items-center gap-5">
+                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover:text-indigo-600 transition-colors">
+                                <Trophy className="w-5 h-5" />
+                             </div>
+                             <div>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Potential Yield</p>
+                                <p className="text-xs font-black text-slate-900 italic uppercase">Jackpot Capacity</p>
+                             </div>
+                        </div>
+                        <p className="text-2xl font-black text-indigo-600 italic tracking-tighter">Rs {Math.max(...currentSegments.map(s => s.value))}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:border-amber-200 transition-all">
+                        <div className="flex items-center gap-5">
+                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover:text-amber-600 transition-colors">
+                                <Users className="w-5 h-5" />
+                             </div>
+                             <div>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Global Load</p>
+                                <p className="text-xs font-black text-slate-900 italic uppercase">Network Entries</p>
+                             </div>
+                        </div>
+                        <p className="text-2xl font-black text-amber-600 italic tracking-tighter">{winners.length * 127}+</p>
+                    </div>
+                </div>
+
+                <div className="mt-8 p-6 bg-[#0A0B0F] rounded-[2rem] text-white border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl"></div>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Protocol Rule</p>
+                    <p className="text-[11px] font-bold text-slate-400 leading-relaxed uppercase italic">Every sequence is verified via decentralized randomization. Higher tiers significantly increase probability of complex yield nodes.</p>
+                </div>
+            </div>
+
+            {/* Achievement / History Grid */}
+            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl flex flex-col h-full min-h-[400px]">
+                 <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-xl font-black text-slate-900 tracking-tighter italic uppercase">Local <span className="text-emerald-600">History</span></h3>
+                    <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                        <Clock className="w-4 h-4" />
+                    </div>
+                 </div>
+
+                 <div className="flex-1 space-y-3 overflow-y-auto pr-2 no-scrollbar">
+                    {winners.filter(w => w.userId === auth.currentUser?.uid).length === 0 ? (
+                        <div className="text-center py-20 opacity-30 flex flex-col items-center">
+                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                                <Ticket className="w-10 h-10 italic" />
+                            </div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No yield sequences logged</p>
+                        </div>
+                    ) : (
+                        winners.filter(w => w.userId === auth.currentUser?.uid).map((entry, idx) => (
+                            <motion.div 
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                key={idx} 
+                                className="flex items-center justify-between p-5 bg-slate-50/50 rounded-[1.75rem] border border-slate-100 group hover:border-emerald-200 hover:bg-white hover:shadow-lg transition-all duration-500"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[10px] font-black text-emerald-500 shadow-sm border border-slate-50 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                                        {entry.prize.substring(0, 1)}
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight italic">Success Response</p>
+                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em]">{new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-lg font-black text-emerald-600 italic tracking-tighter leading-none">{entry.prize}</p>
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1 italic">Verified</p>
+                                </div>
+                            </motion.div>
+                        ))
+                    )}
+                 </div>
+            </div>
+        </div>
+      </div>
+
       <AnimatePresence>
+        {/* Prize Modal */}
         {prize && !showLockedModal && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] bg-[#0A0B0F]/90 backdrop-blur-xl flex items-center justify-center p-8"
           >
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm text-center shadow-2xl"
+              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+              className="bg-white p-10 rounded-[3rem] w-full max-w-sm text-center shadow-2xl relative overflow-hidden border border-slate-100"
             >
-              <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                {prize.value === 0 ? <X className="w-10 h-10 text-white/40" /> : <Gift className="w-10 h-10 text-yellow-400" />}
+              <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
+              <div className="w-24 h-24 bg-emerald-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-inner border border-emerald-100">
+                {prize.value === 0 ? <X className="w-12 h-12 text-red-300" /> : <Gift className="w-12 h-12 text-emerald-500 animate-bounce" />}
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">
-                {prize.value === 0 ? 'Try Again!' : 'Congratulations!'}
+              <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight italic uppercase">
+                {prize.value === 0 ? 'Cycle Failure' : 'Yield Secured'}
               </h3>
-              <p className="text-white/60 mb-6 font-medium">
+              <p className="text-slate-500 font-bold mb-10 text-xs uppercase tracking-widest leading-relaxed">
                 {prize.value === 0 
-                  ? 'Better luck next time.' 
+                  ? 'Theres no yield in this sequence. Re-initialize for better results.' 
                   : prize.value === -1 
-                    ? 'You won a Free Spin!'
-                    : `You won ${prize.label}!`}
+                    ? 'Sequence Bonus: You won an extra Free Entry!'
+                    : `Identity Verified. Rs ${prize.value} has been injected into your hub.`}
               </p>
               <button 
                 onClick={() => setPrize(null)}
-                className="w-full bg-white text-black font-black py-4 rounded-2xl hover:bg-slate-100 transition-colors"
+                className="w-full bg-[#0A0B0F] text-white font-black py-5 rounded-[1.5rem] shadow-xl active:scale-95 transition-all text-[10px] uppercase tracking-[0.3em] italic"
               >
-                Awesome
+                Accept and Continue
               </button>
             </motion.div>
           </motion.div>
@@ -546,44 +648,38 @@ export default function SpinWheel({
         {/* Locked Reward Modal */}
         {showLockedModal && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[130] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-10"
           >
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-amber-500 to-yellow-600 p-8 rounded-[3rem] w-full max-w-sm text-center shadow-[0_0_50px_rgba(245,158,11,0.3)] border border-white/20"
+              initial={{ scale: 0.8, y: 50 }} animate={{ scale: 1, y: 0 }}
+              className="bg-gradient-to-br from-amber-400 to-amber-600 p-1 rounded-[3rem] shadow-[0_40px_80px_rgba(245,158,11,0.3)] w-full max-w-sm"
             >
-              <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner relative">
-                <Crown className="w-12 h-12 text-white" />
-                <div className="absolute -bottom-1 -right-1 bg-black rounded-full p-2 border-2 border-white">
-                  <Lock className="w-4 h-4 text-white" />
+                <div className="bg-[#0A0B0F] rounded-[2.8rem] p-10 text-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+                    <div className="w-24 h-24 bg-amber-500 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-amber-500/40 relative border-4 border-white/5">
+                        <Crown className="w-12 h-12 text-white" />
+                        <div className="absolute -bottom-2 -right-2 bg-slate-900 rounded-full p-2 border-2 border-white shadow-xl">
+                            <Lock className="w-4 h-4 text-white" />
+                        </div>
+                    </div>
+                    <h3 className="text-3xl font-black text-white mb-3 tracking-tighter italic">CRYPTO <span className="text-amber-500">LOCK</span></h3>
+                    <p className="text-slate-400 text-xs font-bold leading-relaxed mb-8 uppercase tracking-widest">
+                        A massive yield of <span className="text-white italic">Rs {showLockedModal.amount}</span> is pending. Verify your network to unlock.
+                    </p>
+                    <div className="bg-white/5 p-6 rounded-2xl mb-10 border border-white/5">
+                        <p className="text-white font-black text-sm uppercase italic tracking-widest">
+                            Required: {showLockedModal.invites} Direct Referrals
+                        </p>
+                        <p className="text-[10px] text-amber-500 font-bold mt-2 uppercase tracking-tight">Active Invites: {activeInvites}</p>
+                    </div>
+                    <button 
+                        onClick={() => { setShowLockedModal(null); setPrize(null); }}
+                        className="w-full bg-white text-slate-900 font-black py-5 rounded-[1.5rem] shadow-xl active:scale-95 transition-all text-[10px] uppercase tracking-[0.3em] italic"
+                    >
+                        Secure Hub
+                    </button>
                 </div>
-              </div>
-              <h3 className="text-3xl font-black text-white mb-3">Mubarak ho! 🎉</h3>
-              <p className="text-white text-lg font-bold mb-2 leading-tight">
-                Aapne <span className="text-black bg-white px-2 rounded">Rs. {showLockedModal.amount}</span> jeet liye hain!
-              </p>
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Lock className="w-4 h-4 text-white/80" />
-                <span className="text-white/90 text-xs font-black uppercase tracking-widest">Reward Locked</span>
-              </div>
-              <div className="bg-black/20 rounded-2xl p-4 mb-8">
-                <p className="text-white/90 text-sm font-medium">
-                  Unlock this reward by inviting <span className="font-black text-white underline">{showLockedModal.invites} friends</span>! 🔥
-                </p>
-              </div>
-              <button 
-                onClick={() => {
-                  setShowLockedModal(null);
-                  setPrize(null);
-                }}
-                className="w-full bg-white text-amber-600 font-black py-4 rounded-2xl hover:bg-slate-50 transition-all shadow-xl"
-              >
-                Theek Hai!
-              </button>
             </motion.div>
           </motion.div>
         )}
@@ -591,40 +687,32 @@ export default function SpinWheel({
         {/* Deposit Popup */}
         {showDepositPopup && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl flex items-center justify-center p-10"
           >
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              className="bg-slate-900 border border-white/10 p-8 rounded-3xl w-full max-w-sm text-center shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              className="bg-white p-10 rounded-[3rem] w-full max-w-sm text-center relative overflow-hidden border border-slate-100"
             >
-              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-4xl">💸</span>
+              <div className="w-24 h-24 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-inner border border-red-100">
+                <Wallet className="w-12 h-12 text-red-500" />
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">
-                Insufficient Balance!
-              </h3>
-              <p className="text-white/60 mb-6 text-sm">
-                Add Rs. {activeTier} to spin again and win up to <span className="text-yellow-400 font-bold">Rs. 5000</span>!
+              <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tighter italic uppercase underline decoration-red-500">Hub Empty</h3>
+              <p className="text-slate-500 font-bold mb-10 text-[10px] uppercase tracking-widest leading-relaxed">
+                Liquidity insufficient for current tier. Deposit Rs {activeTier} to continue the yield sequence.
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-4">
                 <button 
-                  onClick={() => setShowDepositPopup(false)}
-                  className="flex-1 bg-white/10 text-white font-bold py-3 rounded-xl hover:bg-white/20 transition-colors"
+                  onClick={() => { setShowDepositPopup(false); if (onGoToDeposit) onGoToDeposit(); }}
+                  className="w-full bg-[#0A0B0F] text-white font-black py-5 rounded-[1.5rem] shadow-xl active:scale-95 transition-all text-[10px] uppercase tracking-[0.3em] italic"
                 >
-                  Cancel
+                  Reload Assets
                 </button>
                 <button 
-                  onClick={() => {
-                    setShowDepositPopup(false);
-                    if (onGoToDeposit) onGoToDeposit();
-                  }}
-                  className="flex-1 bg-emerald-500 text-white font-bold py-3 rounded-xl hover:bg-emerald-400 transition-colors"
+                  onClick={() => setShowDepositPopup(false)}
+                  className="w-full bg-slate-100 text-slate-400 font-black py-4 rounded-[1.5rem] text-[10px] uppercase tracking-[0.3em] italic"
                 >
-                  Deposit Now
+                  Return to Hub
                 </button>
               </div>
             </motion.div>

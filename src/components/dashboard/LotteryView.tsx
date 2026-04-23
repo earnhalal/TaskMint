@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { ArrowLeft, Ticket, Trophy, Users, Clock, CheckCircle2, AlertCircle, Sparkles, Star, Crown, Flame } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ArrowLeft, Ticket, Trophy, Users, Clock, CheckCircle2, AlertCircle, Sparkles, Star, Crown, Flame, ArrowRight } from 'lucide-react';
 import { collection, onSnapshot, query, where, addDoc, serverTimestamp, doc, updateDoc, increment, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db, auth, rtdb } from '../../firebase';
 import { ref, update, increment as rtdbIncrement } from 'firebase/database';
@@ -204,304 +204,296 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="pb-24 max-w-md mx-auto px-4 pt-4"
+      className="pb-32 max-w-4xl mx-auto px-4 pt-6"
     >
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <button 
-          onClick={onBack}
-          className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 shadow-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <div>
-          <h2 className="text-2xl font-display font-bold text-slate-900 flex items-center gap-2">
-            Mega Lottery <Sparkles className="w-5 h-5 text-amber-500" />
-          </h2>
-          <p className="text-xs text-slate-500 font-medium">Join the draw and win massive prizes!</p>
+      {/* Header - Glassmorphism */}
+      <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onBack}
+            className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 hover:bg-slate-50 shadow-sm transition-all active:scale-90"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2">
+              Mega <span className="text-indigo-600">Protocol</span> <Sparkles className="w-6 h-6 text-amber-500 animate-pulse" />
+            </h2>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Prize Network</p>
+          </div>
+        </div>
+        
+        <div className="hidden sm:flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-2xl">
+           <Users className="w-4 h-4 text-indigo-600" />
+           <span className="text-xs font-black text-indigo-900 uppercase">Live Network</span>
         </div>
       </div>
 
-      {/* Premium Note Banner */}
+      {/* Hero Banner - High Premium */}
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 p-[2px] shadow-lg shadow-orange-500/20"
+        className="mb-10 relative overflow-hidden rounded-[2.5rem] bg-[#0A0B0F] p-8 shadow-2xl border border-white/5"
       >
-        <div className="bg-slate-900 rounded-2xl p-4 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0 shadow-inner">
-              <Flame className="w-5 h-5 text-white" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl -mr-40 -mt-40 animate-pulse-slow"></div>
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-600/5 rounded-full blur-2xl -ml-20 -mb-20"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-1 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full mb-4 text-amber-500 text-[9px] font-black uppercase tracking-widest">
+                   <Flame className="w-3 h-3 fill-current" /> High Stakes Active
+                </div>
+                <h3 className="text-3xl font-black text-white mb-3 tracking-tight italic">Fortune <span className="text-indigo-400">Accelerator</span></h3>
+                <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-sm mb-6">
+                    Our decentralized draw system ensures transparency. Every ticket is a potential entry into the global elite fund.
+                </p>
+                <div className="flex items-center justify-center md:justify-start gap-6">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Payouts</p>
+                        <p className="text-xl font-black text-white italic tracking-tighter">Rs 5M+</p>
+                    </div>
+                    <div className="w-px h-10 bg-white/10"></div>
+                    <div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Active Trials</p>
+                        <p className="text-xl font-black text-white italic tracking-tighter">Instant Draw</p>
+                    </div>
+                </div>
             </div>
-            <div>
-              <p className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-0.5">Special Announcement</p>
-              <p className="text-sm text-white font-medium">Next Mega Draw is filling up fast! Buy your tickets before they sell out.</p>
+            
+            <div className="bg-white/5 backdrop-blur-xl p-8 rounded-[3rem] border border-white/10 shadow-inner shrink-0 text-center w-full md:w-auto">
+               <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-2">Your Liquidity</p>
+               <p className="text-4xl font-black text-white italic tracking-tighter mb-4">Rs {balance.toLocaleString()}</p>
+               <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto border border-indigo-500/30 text-indigo-400">
+                  <Ticket className="w-7 h-7" />
+               </div>
             </div>
-          </div>
         </div>
       </motion.div>
 
-      {/* Balance Card */}
-      <motion.div 
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 rounded-3xl p-5 mb-8 flex items-center justify-between text-white shadow-xl shadow-purple-900/20 border border-purple-500/20 relative overflow-hidden"
-      >
-        <div className="absolute -right-10 -top-10 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
-        <div className="relative z-10">
-          <p className="text-[10px] text-purple-200 uppercase tracking-widest font-bold mb-1">Available Balance</p>
-          <p className="text-3xl font-display font-black tracking-tight">Rs {balance.toLocaleString()}</p>
+      {/* Error / Success Notifications */}
+      <AnimatePresence>
+          {errorMsg && (
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-red-50 text-red-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-red-100 shadow-lg shadow-red-500/5">
+              <AlertCircle className="w-5 h-5 shrink-0" /> {errorMsg}
+            </motion.div>
+          )}
+
+          {showSuccess && (
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-emerald-50 text-emerald-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-emerald-100 shadow-lg shadow-emerald-500/5">
+              <CheckCircle2 className="w-5 h-5 shrink-0" /> Entry Encrypted & Secured
+            </motion.div>
+          )}
+      </AnimatePresence>
+
+      {/* Active Lotteries Grid */}
+      <div className="mb-16">
+        <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
+                <Crown className="w-4 h-4 text-amber-500" /> Active Operations
+            </h3>
+            <div className="w-32 h-1 bg-slate-100 rounded-full overflow-hidden">
+                <motion.div 
+                    animate={{ x: [-128, 128] }} 
+                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    className="w-16 h-full bg-indigo-500"
+                />
+            </div>
         </div>
-        <div className="relative z-10 w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-inner">
-          <Ticket className="w-6 h-6 text-amber-400" />
-        </div>
-      </motion.div>
-
-      {/* Error Message */}
-      {errorMsg && (
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-red-500/10 text-red-600 p-4 rounded-2xl text-sm font-bold flex items-center gap-3 mb-6 border border-red-500/20">
-          <AlertCircle className="w-5 h-5 shrink-0" /> {errorMsg}
-        </motion.div>
-      )}
-
-      {/* Success Message */}
-      {showSuccess && (
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-emerald-500/10 text-emerald-600 p-4 rounded-2xl text-sm font-bold flex items-center gap-3 mb-6 border border-emerald-500/20">
-          <CheckCircle2 className="w-5 h-5 shrink-0" /> Successfully joined the lottery! Good luck!
-        </motion.div>
-      )}
-
-      {/* Active Lotteries */}
-      <div className="space-y-5 mb-10">
-        <h3 className="text-lg font-display font-bold text-slate-900 flex items-center gap-2">
-          <Crown className="w-5 h-5 text-amber-500" /> Active Draws
-        </h3>
         
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-            <div className="w-10 h-10 border-4 border-slate-100 border-t-purple-600 rounded-full animate-spin mb-4"></div>
-            <p className="text-sm font-bold">Loading active draws...</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin mb-6 shadow-xl"></div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Network...</p>
           </div>
         ) : lotteries.length === 0 ? (
-          <div className="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-10 text-center">
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Ticket className="w-8 h-8 text-slate-300" />
+          <div className="bg-white rounded-[3rem] border-2 border-dashed border-slate-100 p-16 text-center shadow-inner">
+            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
+              <Ticket className="w-10 h-10" />
             </div>
-            <p className="text-base font-bold text-slate-900 mb-1">No active draws</p>
-            <p className="text-sm text-slate-500">Check back later for new mega lotteries!</p>
+            <p className="text-xl font-black text-slate-900 mb-2 italic">Zero Active Nodes</p>
+            <p className="text-xs text-slate-400 font-medium">Internal systems are recalibrating. Standby for next cycle.</p>
           </div>
         ) : (
-          lotteries.map((lottery, index) => {
-            const isJoined = joinedLotteries.includes(lottery.id);
-            const userPrize = lottery.prizePool; // 100% to user
-            const fillPercentage = (lottery.currentMembers / lottery.maxMembers) * 100;
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {lotteries.map((lottery, index) => {
+                const isJoined = joinedLotteries.includes(lottery.id);
+                const fillPercentage = (lottery.currentMembers / lottery.maxMembers) * 100;
 
-            return (
-              <motion.div 
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                key={lottery.id} 
-                className={`relative overflow-hidden rounded-[20px] p-[1px] shadow-lg ${isJoined ? 'shadow-slate-100' : 'shadow-indigo-500/10'}`}
-              >
-                {/* Dynamic Border Glow */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${lottery.color || 'from-indigo-600 to-blue-500'} animate-pulse-slow`}></div>
-                
-                {/* Inner Card Wrapper */}
-                <div className="relative bg-[#0F172A] rounded-[19px] overflow-hidden">
-                  
-                  {/* Top Ticket Part (Compact) */}
-                  <div className="p-3 sm:p-5 relative">
-                    <div className="flex justify-between items-start mb-2 sm:mb-4">
-                      <div className="flex flex-col gap-0.5 sm:gap-1">
-                        <div className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[7px] sm:text-[9px] font-black uppercase tracking-wider w-fit">
-                          <Crown className="w-2 sm:w-2.5 h-2 sm:h-2.5 fill-current" /> Premium Draw
-                        </div>
-                        <h4 className="text-base sm:text-2xl font-black text-white tracking-tight flex items-baseline gap-1">
-                           Rs {userPrize.toLocaleString()}
-                           <span className="text-[7px] sm:text-[8px] text-slate-500 font-bold uppercase tracking-widest">Prize</span>
-                        </h4>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[7px] sm:text-[8px] text-slate-500 font-bold uppercase tracking-widest mb-0.5 sm:mb-1">Fee</p>
-                        <div className="bg-white/5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg border border-white/5 backdrop-blur-sm">
-                          <p className="text-[10px] sm:text-base font-black text-amber-400">Rs {lottery.fee}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                       <div className="bg-white/5 rounded-lg p-1.5 sm:p-2.5 border border-white/[0.03]">
-                          <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Spots</p>
-                          <p className="text-[10px] sm:text-xs font-black text-slate-300">{lottery.maxMembers}</p>
-                       </div>
-                       <div className="bg-white/5 rounded-lg p-1.5 sm:p-2.5 border border-white/[0.03]">
-                          <p className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Status</p>
-                          <div className="flex items-center gap-1">
-                             <div className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                             <p className="text-[8px] sm:text-[10px] font-black text-emerald-500 uppercase">OPEN</p>
-                          </div>
-                       </div>
-                    </div>
-                  </div>
-                  
-                  {/* Ticket Notches */}
-                  <div className="relative h-px flex items-center justify-between px-0">
-                    <div className="w-3 h-6 bg-slate-50 rounded-full -ml-1.5 z-10 border-r border-slate-200"></div>
-                    <div className="flex-1 border-t-2 border-dashed border-slate-700/40 mx-1"></div>
-                    <div className="w-3 h-6 bg-slate-50 rounded-full -mr-1.5 z-10 border-l border-slate-200"></div>
-                  </div>
-                  
-                  {/* Bottom Ticket Part (Compact) */}
-                  <div className="p-3 sm:p-5 pt-6 sm:pt-8 bg-gradient-to-t from-slate-900 to-slate-800/20 relative">
-                    <div className="flex justify-between items-end mb-2 sm:mb-3">
-                      <div>
-                        <p className="text-[7px] sm:text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Joined</p>
-                        <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-black text-white">
-                           <Users className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-indigo-400" />
-                           {lottery.currentMembers} <span className="text-[8px] sm:text-[10px] text-slate-600 font-bold">/ {lottery.maxMembers}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[7px] sm:text-[9px] font-bold text-indigo-400/80 uppercase tracking-wider mb-0.5">Win Rate</p>
-                        <p className="text-[8px] sm:text-[10px] font-bold text-slate-400">{(1/lottery.maxMembers * 100).toFixed(1)}%</p>
-                      </div>
-                    </div>
-                    
-                    {/* Compact Progress Bar */}
-                    <div className="w-full h-1 sm:h-2 bg-black/40 rounded-full overflow-hidden mb-4 sm:mb-6">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${fillPercentage}%` }}
-                        transition={{ duration: 1.5 }}
-                        className={`h-full bg-gradient-to-r ${lottery.color || 'from-indigo-600 to-blue-500'} rounded-full`}
-                      />
-                    </div>
-
-                    <motion.button
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleJoin(lottery)}
-                      disabled={isJoined || lottery.currentMembers >= lottery.maxMembers}
-                      className={`w-full py-2 sm:py-3.5 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
-                        isJoined 
-                          ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-none' 
-                          : lottery.currentMembers >= lottery.maxMembers
-                          ? 'bg-slate-800 text-slate-600 border border-slate-700'
-                          : `bg-white text-slate-900 shadow-lg`
-                      }`}
-                    >
-                      {isJoined ? (
-                        <>
-                          <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" /> SECURED
-                        </>
-                      ) : lottery.currentMembers >= lottery.maxMembers ? (
-                        <>
-                          <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" /> SOLD OUT
-                        </>
-                      ) : (
-                        <>
-                          <Ticket className="w-3 h-3 sm:w-4 sm:h-4" /> 
-                          <span>BUY TICKET</span>
-                        </>
-                      )}
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })
-        )}
-      </div>
-
-      {/* Joined History Section */}
-      <div className="mb-8">
-        <h3 className="text-lg font-display font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <Users className="w-5 h-5 text-blue-500" /> Joined History
-        </h3>
-        <div className="bg-white/50 backdrop-blur-sm rounded-3xl border border-slate-100 overflow-hidden">
-          <div className="max-h-64 overflow-y-auto scrollbar-hide p-2">
-            {recentEntries.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-6 font-medium italic">No entries yet. Be the first!</p>
-            ) : (
-              recentEntries.map((entry, i) => {
-                // Mask name for privacy (e.g., Faizullah -> Faiz***)
-                const maskName = (name: string) => {
-                  if (name.length <= 4) return name;
-                  return name.substring(0, 4) + '***';
-                };
                 return (
                   <motion.div 
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    key={entry.id || i} 
-                    className="flex items-center justify-between p-3 hover:bg-white rounded-2xl transition-all border border-transparent hover:border-slate-100 mb-1"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    key={lottery.id} 
+                    className="relative group h-full"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400">
-                        {entry.userName?.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-[11px] font-black text-slate-700">{maskName(entry.userName || 'User')}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Joined Mega Draw</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-black text-emerald-600 tracking-tighter">SUCCESS</p>
-                      <p className="text-[8px] font-bold text-slate-400 uppercase">{entry.timestamp?.toDate ? entry.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'}</p>
+                    <div className="absolute inset-0 bg-indigo-500 blur-2xl opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                    
+                    <div className="relative bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-xl transition-all hover:translate-y-[-8px] hover:shadow-2xl h-full flex flex-col">
+                        {/* Ticket Top */}
+                        <div className="p-8 pb-4 relative flex-1">
+                            <div className="flex justify-between items-start mb-6">
+                                <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-[8px] font-black tracking-widest uppercase border border-indigo-100 italic">Mega Node</span>
+                                <div className="text-right">
+                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Access Fee</p>
+                                    <p className="text-xl font-black text-slate-900 tracking-tighter italic">Rs {lottery.fee}</p>
+                                </div>
+                            </div>
+                            
+                            <p className="text-[8px] font-black text-indigo-500 uppercase tracking-[0.3em] mb-1">Potential Yield</p>
+                            <h4 className="text-4xl font-black text-slate-900 tracking-tighter mb-8 italic">Rs {lottery.prizePool.toLocaleString()}</h4>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Capacity</p>
+                                    <p className="text-xs font-black text-slate-900 font-mono tracking-tight">{lottery.maxMembers} Nodes</p>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Integrity</p>
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        <p className="text-[9px] font-black text-emerald-600 uppercase">Secure</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="relative h-px flex items-center justify-between px-0 overflow-visible">
+                            <div className="w-4 h-8 bg-slate-50 rounded-full -ml-2 z-10 border-r border-slate-100"></div>
+                            <div className="flex-1 border-t-4 border-dotted border-slate-100 mx-4"></div>
+                            <div className="w-4 h-8 bg-slate-50 rounded-full -mr-2 z-10 border-l border-slate-100"></div>
+                        </div>
+
+                        {/* Ticket Bottom */}
+                        <div className="p-8 pt-4 bg-slate-50/50">
+                            <div className="flex justify-between items-end mb-4">
+                                <div>
+                                    <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">Node Progression</p>
+                                    <p className="text-xs font-black text-slate-900 tracking-tight">{lottery.currentMembers} <span className="text-slate-400 font-bold">/ {lottery.maxMembers} Captured</span></p>
+                                </div>
+                                <span className="text-[10px] font-black text-indigo-600 italic">{(1/lottery.maxMembers * 100).toFixed(1)}% Prob.</span>
+                            </div>
+
+                            <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden mb-8 shadow-inner">
+                                <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${fillPercentage}%` }}
+                                    transition={{ duration: 1.5, ease: "easeOut" }}
+                                    className="h-full bg-gradient-to-r from-indigo-500 to-indigo-700 rounded-full relative"
+                                >
+                                    <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                </motion.div>
+                            </div>
+
+                            <motion.button
+                                whileHover={{ y: -2, scale: 1.01 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleJoin(lottery)}
+                                disabled={isJoined || lottery.currentMembers >= lottery.maxMembers}
+                                className={`w-full py-5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] italic transition-all flex items-center justify-center gap-3 ${
+                                    isJoined 
+                                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-none' 
+                                    : lottery.currentMembers >= lottery.maxMembers
+                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                    : `bg-[#0A0B0F] text-white shadow-2xl shadow-slate-900/10`
+                                }`}
+                            >
+                                {isJoined ? (
+                                    <><CheckCircle2 className="w-4 h-4" /> Entry Secure</>
+                                ) : lottery.currentMembers >= lottery.maxMembers ? (
+                                    <><Lock className="w-4 h-4" /> Capacity Full</>
+                                ) : (
+                                    <><ArrowRight className="w-4 h-4 text-indigo-500" /> Acquire Entry Ticket</>
+                                )}
+                            </motion.button>
+                        </div>
                     </div>
                   </motion.div>
                 );
-              })
-            )}
+            })}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Past Winners Announcement */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        <h3 className="text-lg font-display font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-amber-500" /> Hall of Fame
-        </h3>
-        <div className="bg-white rounded-3xl border border-slate-100 p-2 shadow-sm">
-          {pastWinners.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-8 font-medium">No winners announced yet.</p>
-          ) : (
-            pastWinners.map((winner, i) => (
-              <div key={i} className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center border-2 border-white shadow-sm">
-                      <Trophy className="w-6 h-6 text-amber-500" />
-                    </div>
-                    {i === 0 && (
-                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center border-2 border-white">
-                        <Star className="w-3 h-3 text-white" />
-                      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Recent Ledger History */}
+          <div className="space-y-6">
+            <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-500" /> Recent Entries
+            </h3>
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden min-h-[400px]">
+                <div className="p-2 space-y-1">
+                    {recentEntries.length === 0 ? (
+                        <div className="text-center py-20">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-60">System idle. No recent activity.</p>
+                        </div>
+                    ) : (
+                        recentEntries.map((entry, i) => (
+                            <motion.div 
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                key={entry.id || i} 
+                                className="flex items-center justify-between p-5 hover:bg-slate-50 transition-all rounded-[1.5rem] group"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-sm">
+                                        {entry.userName?.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-black text-slate-900 italic tracking-tight">{entry.userName}</p>
+                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Acquired Entry Token</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-emerald-600 italic tracking-widest">VERIFIED</p>
+                                    <p className="text-[8px] font-bold text-slate-400 mt-0.5">{entry.timestamp?.toDate ? entry.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'SYNCING...'}</p>
+                                </div>
+                            </motion.div>
+                        ))
                     )}
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-slate-900">{winner.userName}</p>
-                    <p className="text-xs font-medium text-slate-500">{winner.lotteryName} • {winner.timestamp?.toDate ? winner.timestamp.toDate().toLocaleDateString() : 'Recently'}</p>
-                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Won</p>
-                  <p className="text-lg font-black text-emerald-600">+Rs {winner.prize}</p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </motion.div>
+            </div>
+          </div>
 
+          {/* Hall of Fame - Premium Winners */}
+          <div className="space-y-6">
+            <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-amber-500" /> Hall of Protocol
+            </h3>
+            <div className="bg-[#0A0B0F] rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden min-h-[400px] text-white relative">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl"></div>
+                 <div className="p-2 space-y-1 relative z-10">
+                    {pastWinners.length === 0 ? (
+                        <div className="text-center py-20 opacity-40">
+                             <p className="text-[10px] font-bold uppercase tracking-widest italic leading-relaxed">System history is blank.<br/>The first elite winner is yet to be born.</p>
+                        </div>
+                    ) : (
+                        pastWinners.map((winner, i) => (
+                            <div key={i} className="flex items-center justify-between p-6 hover:bg-white/5 transition-all rounded-[1.5rem] border border-transparent hover:border-white/5">
+                                <div className="flex items-center gap-5">
+                                    <div className="relative">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center border border-white/10 shadow-2xl shadow-amber-500/20">
+                                            <Trophy className="w-7 h-7 text-white" />
+                                        </div>
+                                        <Star className="absolute -top-2 -right-2 w-5 h-5 text-amber-400 fill-current" />
+                                    </div>
+                                    <div>
+                                        <p className="text-lg font-black text-white italic tracking-tighter">{winner.userName}</p>
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1 italic">{winner.lotteryName}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 italic">Yield Unlocked</p>
+                                    <p className="text-2xl font-black text-white italic tracking-tighter">Rs {winner.prize.toLocaleString()}</p>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                 </div>
+            </div>
+          </div>
+      </div>
     </motion.div>
   );
 }
