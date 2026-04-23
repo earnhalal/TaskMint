@@ -66,7 +66,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
     }
 
     return { isOpen, nextWindowText };
-  }, [manualWithdrawUnlock]);
+  }, [manualWithdrawUnlock, isPartner]);
 
   const selectedAccount = accounts.find(a => a.id === selectedAccountId);
 

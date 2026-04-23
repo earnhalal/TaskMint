@@ -30,6 +30,7 @@ export default function ProfileTab({
   onEarningHistoryClick,
   onActivateClick,
   onMailboxClick,
+  unreadUpdatesCount = 0,
   appSettings
 }: { 
   name: string, 
@@ -53,6 +54,7 @@ export default function ProfileTab({
   onEarningHistoryClick?: () => void,
   onActivateClick?: () => void,
   onMailboxClick?: () => void,
+  unreadUpdatesCount?: number,
   appSettings?: any
 }) {
   const { user } = useAuth();
@@ -98,21 +100,30 @@ export default function ProfileTab({
     </div>
   );
 
-  const Item = ({ icon, label, hasToggle = false, isDestructive = false, onClick }: any) => (
+  const Item = ({ icon, label, hasToggle = false, isDestructive = false, onClick, badge }: any) => (
     <div onClick={onClick} className="flex items-center justify-between p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors cursor-pointer">
       <div className="flex items-center gap-3">
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDestructive ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-600'}`}>
           {icon}
         </div>
-        <span className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-slate-700'}`}>{label}</span>
-      </div>
-      {hasToggle ? (
-        <div className="w-10 h-6 bg-slate-200 rounded-full relative">
-          <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+        <div className="flex flex-col">
+          <span className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-slate-700'}`}>{label}</span>
         </div>
-      ) : (
-        <ChevronRight className={`w-4 h-4 ${isDestructive ? 'text-red-300' : 'text-slate-300'}`} />
-      )}
+      </div>
+      <div className="flex items-center gap-2">
+        {badge && (
+          <div className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md min-w-[18px] text-center">
+            {badge}
+          </div>
+        )}
+        {hasToggle ? (
+          <div className="w-10 h-6 bg-slate-200 rounded-full relative">
+            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+          </div>
+        ) : (
+          <ChevronRight className={`w-4 h-4 ${isDestructive ? 'text-red-300' : 'text-slate-300'}`} />
+        )}
+      </div>
     </div>
   );
 
@@ -316,13 +327,6 @@ export default function ProfileTab({
             onClick={onPartnerUpgradeClick} 
           />
         )}
-        {role === 'admin' && (
-          <Item 
-            icon={<Shield className="w-4 h-4 text-slate-900" />} 
-            label="Admin Control Panel" 
-            onClick={onAdminPanelClick} 
-          />
-        )}
       </Section>
 
       <Section title="Withdrawal Account">
@@ -339,7 +343,12 @@ export default function ProfileTab({
       <Section title="Account">
         <Item icon={<ImageIcon className="w-4 h-4" />} label="Change Avatar" onClick={onEditProfile} />
         <Item icon={<Wallet className="w-4 h-4" />} label="Manage Wallet & PIN" onClick={onManageWalletClick} />
-        <Item icon={<Mail className="w-4 h-4" />} label="System Mailbox" onClick={onMailboxClick} />
+        <Item 
+          icon={<Mail className="w-4 h-4" />} 
+          label="System Mailbox" 
+          onClick={onMailboxClick} 
+          badge={unreadUpdatesCount > 0 ? (unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount) : undefined}
+        />
       </Section>
 
       <Section title="Features">

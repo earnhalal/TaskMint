@@ -65,7 +65,6 @@ import LeaderboardView from '../components/dashboard/LeaderboardView';
 import PinLockView from '../components/PinLockView';
 import UpdatesView from '../components/dashboard/UpdatesView';
 import PartnerUpgradeView from '../components/dashboard/PartnerUpgradeView';
-import AdminPanelView from '../components/dashboard/AdminPanelView';
 import ActivationTab from '../components/dashboard/ActivationTab';
 import WannadsSurveyView from '../components/dashboard/WannadsSurveyView';
 
@@ -151,7 +150,8 @@ export default function Dashboard() {
     referralBonusBasic: 100,
     referralBonusPartner: 150,
     indirectReferralBonus: 20,
-    offerExpiryTime: null as any
+    offerExpiryTime: null as any,
+    manualWithdrawUnlock: false
   });
 
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -195,8 +195,8 @@ export default function Dashboard() {
     const unsubscribe = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
-        setBalance(prev => Math.max(prev, data.balance || 0));
-        setTotalEarnings(prev => Math.max(prev, data.totalEarnings || 0));
+        setBalance(data.balance || 0);
+        setTotalEarnings(data.totalEarnings || 0);
         setLockedBalance(data.lockedBalance || 0);
         setUserPin(data.pin || '');
         setSeenUpdates(data.seenUpdates || []);
@@ -371,7 +371,7 @@ export default function Dashboard() {
           totalCommission: data.totalCommission || 0
         });
         // Also update local balance states if they exist in RTDB
-        if (data.balance !== undefined) setBalance(prev => Math.max(prev, data.balance));
+        if (data.balance !== undefined) setBalance(data.balance);
       }
     }, (error) => console.error("Referral Stats RTDB Error:", error));
 
@@ -733,7 +733,10 @@ export default function Dashboard() {
     const isWindow1 = day >= 1 && day <= 3;
     const isWindow2 = day >= 16 && day <= 18;
     
-    if (!isWindow1 && !isWindow2) {
+    // Bypass window lock for partners and manually unlocked users (global or per-user)
+    const isUnlocked = isWindow1 || isWindow2 || manualWithdrawUnlock || appSettings.manualWithdrawUnlock || role === 'partner';
+    
+    if (!isUnlocked) {
       alert("Withdrawal window is currently closed. Please check the withdrawal tab for next window dates.");
       return;
     }
@@ -866,343 +869,9 @@ export default function Dashboard() {
     }
   };
 
-  const handleRejectActivation = async (targetUserId: string, depositId: string) => {
-    try {
-      if (depositId) {
-        await updateDoc(doc(db, 'deposits', depositId), { status: 'Rejected' });
-      }
-      
-      const userRef = doc(db, 'users', targetUserId);
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        
-        // Update feeStatus to rejected
-        await updateDoc(userRef, { feeStatus: 'rejected' });
-        const userStatusRef = ref(rtdb, `users/${targetUserId}`);
-        await update(userStatusRef, { feeStatus: 'rejected' });
-        
-        // Update referral status in RTDB if referred
-        if (userData.referredBy) {
-          const sanitizedRef = userData.referredBy.trim().toLowerCase();
-          let l1Uid = null;
-          const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
-          const querySnapshot = await getDocs(q);
-          
-          if (!querySnapshot.empty) {
-            l1Uid = querySnapshot.docs[0].id;
-          } else {
-            const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
-            if (parentUsernameDoc.exists()) {
-              l1Uid = parentUsernameDoc.data().uid;
-            }
-          }
-
-          if (l1Uid) {
-            const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
-            const referralStatusRef = ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`);
-            await update(referralStatusRef, { status: 'rejected' });
-          }
-        }
-      }
-      
-      alert("Activation request rejected.");
-    } catch (error) {
-      console.error("Error rejecting activation:", error);
-      alert("Error rejecting activation.");
-    }
-  };
-
-  const handleApprovePartner = async (targetUserId: string, requestId: string) => {
-    try {
-      await updateDoc(doc(db, 'users', targetUserId), { 
-        role: 'partner',
-        partnerStatus: 'active'
-      });
-      await updateDoc(doc(db, 'partnerRequests', requestId), { status: 'approved' });
-      alert("Partner request approved!");
-    } catch (error) {
-      console.error("Error approving partner:", error);
-    }
-  };
-
-  const handleApproveDeposit = async (targetUserId: string, depositId: string, amount: number) => {
-    try {
-      console.log(`[ADMIN_ACTION] Approving deposit: ${depositId} for user: ${targetUserId}, amount: ${amount}`);
-      
-      const userRef = doc(db, 'users', targetUserId);
-      const depositRef = doc(db, 'deposits', depositId);
-      const userRtdbRef = ref(rtdb, `users/${targetUserId}`);
-
-      // 1. Update User Balance (Firestore)
-      await updateDoc(userRef, { 
-        balance: increment(amount)
-      });
-      
-      // 2. Update User Balance (RTDB)
-      await update(userRtdbRef, {
-        balance: rtdbIncrement(amount)
-      });
-      console.log(`[ADMIN_ACTION_SUCCESS] User balance incremented by ${amount} in Firestore and RTDB`);
-
-      // 3. Update Deposit Status
-      await updateDoc(depositRef, { 
-        status: 'Approved',
-        approvedAt: new Date().toISOString()
-      });
-      console.log(`[ADMIN_ACTION_SUCCESS] Deposit status updated to Approved`);
-
-      // 4. Notify User
-      await sendDepositApprovedMail(targetUserId, amount);
-      
-      alert("Deposit approved successfully! Balance added to user account.");
-    } catch (error) {
-      console.error("[ADMIN_ACTION_FAILURE] Error approving deposit:", error);
-      alert("Failed to approve deposit. Check console for details.");
-    }
-  };
-
-  const handleRejectWithdrawal = async (targetUserId: string, withdrawalId: string, reason: string) => {
-    try {
-      console.log(`[ADMIN_ACTION] Rejecting withdrawal: ${withdrawalId} for user: ${targetUserId}, Reason: ${reason}`);
-      
-      // 1. Update Firestore
-      const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
-      await updateDoc(withdrawalRef, { 
-        status: 'Rejected',
-        rejectionReason: reason,
-        rejectedAt: new Date().toISOString()
-      });
-      console.log("[ADMIN_ACTION_SUCCESS] Firestore withdrawal status updated to Rejected");
-
-      // 2. Update RTDB
-      const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
-      const snapshot = await get(userWithdrawalsRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        for (const key in data) {
-          if (data[key].firestoreId === withdrawalId) {
-            await update(ref(rtdb, `withdrawals/${targetUserId}/${key}`), {
-              status: 'rejected',
-              rejectionReason: reason,
-              rejectedAt: Date.now()
-            });
-            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal status updated to rejected");
-            break;
-          }
-        }
-      }
-
-      alert("Withdrawal rejected.");
-    } catch (error) {
-      console.error("[ADMIN_ACTION_FAILURE] Error rejecting withdrawal:", error);
-      alert("Failed to reject withdrawal.");
-    }
-  };
-
-  const handleApproveWithdrawal = async (targetUserId: string, withdrawalId: string) => {
-    try {
-      console.log(`[ADMIN_ACTION] Approving withdrawal: ${withdrawalId} for user: ${targetUserId}`);
-      
-      // 1. Update Firestore
-      const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
-      const withdrawalDoc = await getDoc(withdrawalRef);
-      let amount = 0;
-      let method = 'Withdrawal';
-      
-      if (withdrawalDoc.exists()) {
-        const wData = withdrawalDoc.data();
-        amount = wData.amount;
-        method = wData.method || 'Withdrawal';
-        await updateDoc(withdrawalRef, { 
-          status: 'Approved',
-          approvedAt: new Date().toISOString()
-        });
-        console.log("[ADMIN_ACTION_SUCCESS] Firestore withdrawal status updated to Approved");
-      } else {
-        console.warn("[ADMIN_ACTION_WARNING] Withdrawal document not found in Firestore. ID:", withdrawalId);
-        // We still proceed to update RTDB if possible
-      }
-
-      // 2. Update RTDB (Primary for History)
-      // Path structure in RTDB is withdrawals/{userId}/{someId}/{withdrawalId}
-      // We need to find the withdrawal entry under {userId}
-      const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
-      console.log(`[DEBUG] Searching for withdrawal in RTDB at: withdrawals/${targetUserId}`);
-      
-      const snapshot = await get(userWithdrawalsRef);
-      let found = false;
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        // Iterate through the nested structure to find the withdrawal with matching firestoreId
-        for (const key in data) {
-          const subNode = data[key];
-          // Check if the withdrawal is directly under {userId}/{someId}
-          if (subNode.firestoreId === withdrawalId) {
-            await update(ref(rtdb, `withdrawals/${targetUserId}/${key}`), {
-              status: 'approved',
-              approvedAt: Date.now()
-            });
-            console.log(`[ADMIN_ACTION_SUCCESS] RTDB withdrawal updated at path: withdrawals/${targetUserId}/${key}`);
-            found = true;
-            break;
-          }
-        }
-      }
-
-      if (!found) {
-        console.log("[ADMIN_ACTION] Withdrawal not found in RTDB by firestoreId. Creating new entry.");
-        await set(ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`), {
-          amount,
-          method,
-          status: 'approved',
-          timestamp: Date.now(),
-          approvedAt: Date.now(),
-          userId: targetUserId,
-          firestoreId: withdrawalId
-        });
-        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created as fallback");
-      }
-
-      await sendWithdrawalApprovedMail(targetUserId, amount);
-      alert("Withdrawal approved successfully!");
-    } catch (error) {
-      console.error("[ADMIN_ACTION_FAILURE] Error approving withdrawal:", error);
-      alert("Failed to approve withdrawal. Error: " + (error instanceof Error ? error.message : String(error)));
-    }
-  };
-
   const unreadUpdatesCount = notifications.filter(n => n.status === 'unread').length;
 
-  const handleActivateUser = async (targetUserId: string, depositId?: string) => {
-    try {
-      console.log(`[ADMIN_ACTION] Activating user: ${targetUserId}`);
-      const userRef = doc(db, 'users', targetUserId);
-      const userDoc = await getDoc(userRef);
-      if (!userDoc.exists()) {
-        console.error(`[ADMIN_ACTION_FAILURE] User ${targetUserId} not found.`);
-        alert("User document not found.");
-        return;
-      }
-      
-      const userData = userDoc.data();
-      if (userData.status === 'Active') {
-        console.log(`[ADMIN_ACTION] User ${targetUserId} is already active.`);
-        alert("User is already active.");
-        return;
-      }
-
-      // 1. Activate the user
-      await updateDoc(userRef, { 
-        status: 'Active',
-        accountStatus: 'active',
-        feeStatus: 'paid'
-      });
-      
-      // Update RTDB status and feeStatus
-      const userStatusRef = ref(rtdb, `users/${targetUserId}`);
-      await update(userStatusRef, { status: 'Active', accountStatus: 'active', feeStatus: 'paid' });
-      console.log(`[ADMIN_ACTION_SUCCESS] User ${targetUserId} status updated to Active in Firestore and RTDB.`);
-      
-      // Update deposit status if provided
-      if (depositId) {
-        await updateDoc(doc(db, 'deposits', depositId), { status: 'Approved' });
-        console.log(`[ADMIN_ACTION_SUCCESS] Deposit ${depositId} status updated to Approved.`);
-      }
-      
-      // Send internal notification
-      await sendActivationMail(targetUserId);
-
-      // 2. Handle Direct Referral (Level 1)
-      if (userData.referredBy) {
-        console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
-        
-        // Simple sanitization: extract code if it's a URL
-        let rawCode = userData.referredBy;
-        if (rawCode.includes('ref/')) {
-          rawCode = rawCode.split('ref/')[1];
-        } else if (rawCode.includes('=')) { // Handle ?ref=code
-          rawCode = rawCode.split('=')[1];
-        }
-        
-        const sanitizedRef = rawCode.trim().toLowerCase();
-        
-        let l1Uid = null;
-        const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          l1Uid = querySnapshot.docs[0].id;
-        } else {
-          const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
-          if (parentUsernameDoc.exists()) {
-            l1Uid = parentUsernameDoc.data().uid;
-          }
-        }
-        
-        if (l1Uid) {
-          console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
-          
-          // Determine bonus amount based on referrer's role/tier
-          let bonusAmount = appSettings.referralBonusBasic || 100;
-          const referrerDoc = await getDoc(doc(db, 'users', l1Uid));
-          if (referrerDoc.exists()) {
-            const refData = referrerDoc.data();
-            if (refData.role === 'partner') {
-              if (refData.partnerTier === 'gold') {
-                bonusAmount = 200;
-              } else if (refData.partnerTier === 'silver') {
-                bonusAmount = appSettings.referralBonusPartner || 150;
-              } else if (refData.partnerTier === 'bronze') {
-                bonusAmount = 130;
-              } else {
-                bonusAmount = appSettings.referralBonusPartner || 150;
-              }
-            }
-          }
-
-          // Update referral status in RTDB (Replacing Firestore)
-          const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
-          const referralStatusRef = ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`);
-          await update(referralStatusRef, { status: 'paid', commission: bonusAmount });
-
-          // Update referrer stats in Firestore
-          await updateDoc(doc(db, 'users', l1Uid), {
-            activeMembers: increment(1),
-            totalCommission: increment(bonusAmount),
-            balance: increment(bonusAmount),
-            totalEarnings: increment(bonusAmount)
-          });
-          
-          // Also update the balanced sync in RTDB so UI is immediately updated for the referrer
-          const referrerRtdbRef = ref(rtdb, `users/${l1Uid}`);
-          await update(referrerRtdbRef, {
-            balance: rtdbIncrement(bonusAmount),
-            totalEarnings: rtdbIncrement(bonusAmount),
-            activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(bonusAmount)
-          });
-
-          console.log(`[REFERRAL_LOG] Commission of ${bonusAmount} added to referrer ${l1Uid} in Firestore and RTDB`);
-        }
-      }
-      
-      if (targetUserId === user?.uid) {
-        setStatus('Active');
-      }
-      
-      alert("Member activated and commissions distributed successfully!");
-    } catch (error) {
-      console.error("Error activating member:", error);
-      alert("Error during activation. Check console for details.");
-    }
-  };
-
   useEffect(() => {
-    (window as any).simulateActivation = () => {
-      if (user) handleActivateUser(user.uid);
-    };
     (window as any).simulateDepositApproval = async (amount: number) => {
       if (user) {
         await updateDoc(doc(db, 'users', user.uid), { balance: increment(amount) });
@@ -1281,21 +950,11 @@ export default function Dashboard() {
                  onLeaderboardClick={() => setActiveTab('leaderboard')} 
                  onManageWalletClick={() => setActiveTab('manage_wallet')}
                  onPartnerUpgradeClick={() => setActiveTab('premium')}
-                 onAdminPanelClick={() => setActiveTab('admin')}
                  onEarningHistoryClick={() => setActiveTab('earning_history')}
                  onActivateClick={() => setActiveTab('activation')}
                  onMailboxClick={() => setActiveTab('updates')}
+                 unreadUpdatesCount={unreadUpdatesCount}
                  appSettings={activeAppSettings}
-               />;
-      case 'admin':
-        return <AdminPanelView 
-                 onBack={() => setActiveTab('profile')}
-                 onApproveActivation={handleActivateUser}
-                 onRejectActivation={handleRejectActivation}
-                 onApprovePartner={handleApprovePartner}
-                 onApproveDeposit={handleApproveDeposit}
-                 onApproveWithdrawal={handleApproveWithdrawal}
-                 onRejectWithdrawal={handleRejectWithdrawal}
                />;
       case 'partner_upgrade':
         return <PartnerUpgradeView 
@@ -1374,7 +1033,7 @@ export default function Dashboard() {
           onSetupPin={() => { setPinMode('set'); setActiveTab('pin'); }}
           onEditAccount={() => setActiveTab('manage_wallet')}
           accounts={withdrawalAccounts}
-          manualWithdrawUnlock={manualWithdrawUnlock}
+          manualWithdrawUnlock={manualWithdrawUnlock || appSettings.manualWithdrawUnlock}
           isPartner={role === 'partner'}
         />;
       case 'deposit':
@@ -1491,6 +1150,7 @@ export default function Dashboard() {
           onEasyTaskClick={() => setActiveTab('wannads')}
           onOfferWallClick={() => setActiveTab('cpalead')}
           onPartnerToolsClick={() => setActiveTab('partner_tools')}
+          unreadUpdatesCount={unreadUpdatesCount}
           onUpdateBalance={handleUpdateBalance}
           appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}
