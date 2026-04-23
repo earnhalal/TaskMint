@@ -86,7 +86,34 @@ async function startServer() {
             return (currentBalance || 0) + parseFloat(virtual_currency as string);
         });
 
-        console.log(`Successfully credited ${virtual_currency} to user ${subid}`);
+        // 3. Update user's balance in Firestore
+        const amount = parseFloat(virtual_currency as string);
+        const userRef = firestore.collection("users").doc(subid as string);
+        const transRef = firestore.collection("earning_history").doc();
+        
+        await firestore.runTransaction(async (transaction) => {
+          const userDoc = await transaction.get(userRef);
+          if (!userDoc.exists) {
+            console.error(`User ${subid} not found in Firestore`);
+            throw new Error(`User ${subid} not found`);
+          }
+
+          transaction.update(userRef, {
+            balance: admin.firestore.FieldValue.increment(amount),
+            totalEarnings: admin.firestore.FieldValue.increment(amount)
+          });
+
+          transaction.set(transRef, {
+            userId: subid,
+            amount: amount,
+            status: 'completed',
+            type: 'cpalead',
+            description: `CPALead Offer (${transaction_id})`,
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
+          });
+        });
+
+        console.log(`Successfully credited ${virtual_currency} to user ${subid} in both DBs`);
 
         // Response must be strictly '1'
         res.status(200).send('1');
