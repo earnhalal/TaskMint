@@ -185,9 +185,9 @@ async function startServer() {
     res.status(200).send("OK - Status not complete");
   });
 
-  // API route for Wannads postback
-  app.all("/api/postback/wannads", async (req, res) => {
-    console.log("--- Wannads Postback Received ---");
+  // API route for Wannads postback - matching exact URL pattern requested
+  app.all("/postback/wannads.php", async (req, res) => {
+    console.log("--- Wannads Postback Received (PHP route) ---");
     
     // Parameters: user_id, amount, status, trans_id, sig
     const { user_id, amount, status, trans_id, sig } = req.query;
@@ -195,6 +195,7 @@ async function startServer() {
     const secret = process.env.WANNADS_SECRET;
     if (!secret) {
         console.error("WANNADS_SECRET is not defined in environment variables");
+        res.setHeader('Content-Type', 'text/plain');
         return res.status(500).send("Configuration Error");
     }
 
@@ -204,6 +205,7 @@ async function startServer() {
 
     if (sig !== calculatedSignature) {
       console.warn("Signature mismatch! Calculated:", calculatedSignature, "Received:", sig);
+      res.setHeader('Content-Type', 'text/plain');
       return res.status(403).send("ERROR: Invalid Signature");
     }
 
@@ -211,6 +213,7 @@ async function startServer() {
     const userId = user_id as string;
     
     if (isNaN(amountLocal) || !userId) {
+        res.setHeader('Content-Type', 'text/plain');
         return res.status(400).send("Invalid parameters");
     }
 
@@ -226,8 +229,8 @@ async function startServer() {
                 throw new Error("User not found");
             }
 
-            // If status is '1', add the balance. If '2' (revoke), subtract it.
-            const increment = status == "1" ? amountLocal : -Math.abs(amountLocal);
+            // If status is '1' or 'credited', add the balance. If '2' (revoke), subtract it.
+            const increment = (status == "1" || status == "credited") ? amountLocal : -Math.abs(amountLocal);
             
             transaction.update(userRef, {
                 balance: admin.firestore.FieldValue.increment(increment),
@@ -237,16 +240,18 @@ async function startServer() {
             transaction.set(transRef, {
                 type: 'Wannads Reward',
                 amount: increment,
-                status: status == "1" ? 'completed' : 'revoked',
+                status: (status == "1" || status == "credited") ? 'completed' : 'revoked',
                 timestamp: admin.firestore.FieldValue.serverTimestamp(),
                 description: `Wannads Offer (${trans_id})`
             });
         });
         
-        return res.status(200).setHeader('Content-Type', 'text/plain').send("OK");
+        res.setHeader('Content-Type', 'text/plain');
+        return res.status(200).send("OK");
     } catch (error: any) {
         console.error("Wannads Postback Error:", error);
-        return res.status(500).setHeader('Content-Type', 'text/plain').send("Error");
+        res.setHeader('Content-Type', 'text/plain');
+        return res.status(500).send("Error");
     }
   });
 
