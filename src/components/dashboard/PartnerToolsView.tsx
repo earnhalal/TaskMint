@@ -21,7 +21,8 @@ import {
   XCircle,
   TrendingUp,
   Award,
-  Search
+  Search,
+  Clock
 } from 'lucide-react';
 import { DynamicAvatar } from '../ui/DynamicAvatar';
 import { doc, getDoc, updateDoc, serverTimestamp, increment, collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -49,6 +50,7 @@ export default function PartnerToolsView({
   onApproveMember
 }: PartnerToolsViewProps) {
   const isPartner = role === 'partner';
+  const isBronze = partnerTier === 'bronze' || partnerTier === 'silver' || partnerTier === 'gold';
   const isSilver = partnerTier === 'silver' || partnerTier === 'gold';
   const isGold = partnerTier === 'gold';
 
@@ -71,7 +73,7 @@ export default function PartnerToolsView({
 
   // Fetch pending activations for referrals
   useEffect(() => {
-    if (!isPartner || !isSilver || activeTab !== 'approvals') return;
+    if (!isPartner || !isBronze || activeTab !== 'approvals') return;
 
     setLoadingApprovals(true);
     const q = query(
@@ -107,7 +109,7 @@ export default function PartnerToolsView({
         return;
       }
 
-      const ticketsToGrant = isGold ? 5 : 2;
+      const ticketsToGrant = isGold ? 5 : isSilver ? 2 : 1;
       
       await updateDoc(doc(db, 'users', auth.currentUser.uid), {
         freeLotteryTickets: (userData?.freeLotteryTickets || 0) + ticketsToGrant,
@@ -146,8 +148,8 @@ export default function PartnerToolsView({
       name: 'Instant Withdrawal',
       description: 'Your withdrawals are processed with priority (1-10 mins).',
       icon: <Wallet className="w-6 h-6" />,
-      minTier: 'silver',
-      unlocked: isPartner && isSilver,
+      minTier: 'bronze',
+      unlocked: isPartner && isBronze,
       color: 'from-blue-600 to-indigo-700',
       action: onGoToWithdraw,
       actionText: 'Go to Wallet'
@@ -155,10 +157,10 @@ export default function PartnerToolsView({
     {
       id: 'free-tickets',
       name: 'Monthly Free Tickets',
-      description: `Claim your monthly ${isGold ? '5' : '2'} free lottery tickets.`,
+      description: `Claim your monthly ${isGold ? '5' : isSilver ? '2' : '1'} free lottery tickets.`,
       icon: <Ticket className="w-6 h-6" />,
-      minTier: 'silver',
-      unlocked: isPartner && isSilver,
+      minTier: 'bronze',
+      unlocked: isPartner && isBronze,
       color: 'from-purple-600 to-pink-700',
       action: handleClaimTickets,
       actionText: claimStatus === 'claiming' ? 'Claiming...' : 

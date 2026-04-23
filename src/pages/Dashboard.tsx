@@ -148,7 +148,7 @@ export default function Dashboard() {
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
-    referralBonusBasic: 125,
+    referralBonusBasic: 100,
     referralBonusPartner: 150,
     indirectReferralBonus: 20,
     offerExpiryTime: null as any
@@ -1145,13 +1145,17 @@ export default function Dashboard() {
           console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
           
           // Determine bonus amount based on referrer's role/tier
-          let bonusAmount = appSettings.referralBonusBasic;
+          let bonusAmount = appSettings.referralBonusBasic || 100;
           const referrerDoc = await getDoc(doc(db, 'users', l1Uid));
           if (referrerDoc.exists()) {
             const refData = referrerDoc.data();
             if (refData.role === 'partner') {
               if (refData.partnerTier === 'gold') {
                 bonusAmount = 200;
+              } else if (refData.partnerTier === 'silver') {
+                bonusAmount = appSettings.referralBonusPartner || 150;
+              } else if (refData.partnerTier === 'bronze') {
+                bonusAmount = 130;
               } else {
                 bonusAmount = appSettings.referralBonusPartner || 150;
               }

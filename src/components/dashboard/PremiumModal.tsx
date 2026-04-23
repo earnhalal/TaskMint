@@ -62,7 +62,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       tagline: 'Standard Earning Mode',
       adEarnings: 'Rs 5 - 10 / Daily (Min)',
       features: [
-        `Rs ${appSettings?.referralBonusBasic || 125} per Invite`,
+        'Rs 100 per Invite',
         '1.00 Reward per Ad Watch',
         'Standard Daily Tasks',
         'Basic Support'
@@ -73,21 +73,46 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       action: () => {}
     },
     {
+      id: 'bronze',
+      name: 'BRONZE PARTNER',
+      price: 'Rs 500',
+      duration: 'Starter High-Yield',
+      icon: <Zap className="w-6 h-6" />,
+      color: 'from-emerald-600 to-emerald-800',
+      tagline: 'Starter Partner Mode',
+      adEarnings: 'Rs 30 - 60 / Daily',
+      features: [
+        'Rs 130 per Invite',
+        '3.00 Reward per Bronze Ad',
+        '1 Free monthly ticket',
+        'Instant Payout Enabled'
+      ],
+      buttonText: partnerTier === 'bronze' ? 'Current Plan' : 'Purchase Bronze',
+      buttonColor: partnerTier === 'bronze' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl shadow-emerald-600/30',
+      isCurrent: partnerTier === 'bronze',
+      action: () => {
+        if (partnerTier === 'basic') {
+          handleBuyPlan('bronze', 500, 'bronze');
+        }
+      }
+    },
+    {
       id: 'silver',
       name: 'SILVER PARTNER',
       price: `Rs ${appSettings?.partnerFee || 1000}`,
       duration: 'Lifetime High-Yield',
       icon: <Shield className="w-6 h-6" />,
       color: 'from-indigo-600 to-blue-700',
-      tagline: 'High Traffic Partner',
-      adEarnings: 'Rs 75 - 150 / Daily (Min)',
+      tagline: 'Business Pro Partner',
+      adEarnings: 'Rs 125 - 250 / Daily',
       features: [
         `Rs ${appSettings?.referralBonusPartner || 150} per Invite`,
-        '15.00 Reward per VIP Ad',
-        '10% Team Commission',
-        'Priority Withdrawals'
+        '25.00 Reward per VIP Ad',
+        '2 Free monthly tickets',
+        'Team Management Tools',
+        'Priority Admin Support'
       ],
-      buttonText: partnerTier === 'silver' ? 'Current Plan' : 'Purchase Silver',
+      buttonText: partnerTier === 'silver' ? 'Current Plan' : 'Buy Silver Pro',
       buttonColor: partnerTier === 'silver' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/30',
       isCurrent: partnerTier === 'silver',
       action: () => {
@@ -104,14 +129,15 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       icon: <Crown className="w-6 h-6" />,
       color: 'from-amber-500 to-orange-600',
       tagline: 'Maximum Revenue Mode',
-      adEarnings: 'Rs 175 - 350 / Daily (Min)',
+      adEarnings: 'Rs 300 - 600 / Daily',
       features: [
         'Rs 200 per Instant Invite',
-        '35.00 Reward per Elite Ad',
-        '15% Team Commission',
-        'Instant VIP Payouts'
+        '60.00 Reward per Elite Ad',
+        '5 Free monthly tickets',
+        'Full Partner Analytics',
+        'VIP WhatsApp Group Access'
       ],
-      buttonText: partnerTier === 'gold' ? 'Current Plan' : 'Become VIP Elite',
+      buttonText: partnerTier === 'gold' ? 'Current Plan' : 'Go VIP Elite',
       buttonColor: partnerTier === 'gold' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:scale-[1.02] text-white shadow-xl shadow-amber-500/30',
       isPopular: true,
       isCurrent: partnerTier === 'gold',

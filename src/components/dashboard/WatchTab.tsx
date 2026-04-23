@@ -24,7 +24,7 @@ interface VideoAd {
   scriptUrl?: string; // used for Web script
   duration?: number;
   views?: number;
-  tier?: 'basic' | 'silver' | 'gold';
+  tier?: 'basic' | 'bronze' | 'silver' | 'gold';
 }
 
 export default function WatchTab({ onBack, balance, onUpdateBalance, accountStatus, role, partnerTier }: WatchTabProps) {
@@ -112,12 +112,25 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                 finalViews = Math.floor(Math.random() * 15000) + 10000;
                 setDoc(doc.ref, { views: finalViews, title, reward, tier: 'basic' }, { merge: true });
               }
-            } else {
-              // Ensure premium views are always 2k - 4.5k
-              if (finalViews < 2000 || finalViews > 4500) {
-                finalViews = Math.floor(Math.random() * 2500) + 2000;
-                setDoc(doc.ref, { views: finalViews }, { merge: true });
-              }
+            } else if (tier === 'bronze') {
+                reward = 3.00;
+                if (!title) title = `Bronze Node #${doc.id.split('_').pop()}`;
+                if (finalViews < 5000 || finalViews > 10000) {
+                    finalViews = Math.floor(Math.random() * 5000) + 5000;
+                    setDoc(doc.ref, { views: finalViews, title, reward, tier: 'bronze' }, { merge: true });
+                }
+            } else if (tier === 'silver') {
+                reward = 25.00;
+                if (finalViews < 2000 || finalViews > 4500) {
+                    finalViews = Math.floor(Math.random() * 2500) + 2000;
+                    setDoc(doc.ref, { views: finalViews, reward }, { merge: true });
+                }
+            } else if (tier === 'gold') {
+                reward = 60.00;
+                if (finalViews < 1500 || finalViews > 3500) {
+                    finalViews = Math.floor(Math.random() * 2000) + 1500;
+                    setDoc(doc.ref, { views: finalViews, reward }, { merge: true });
+                }
             }
 
             fetchedAds.push({
@@ -135,19 +148,38 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           }
         });
 
-        // Ensure Silver and Gold ads exist with correct view counts (2k-3k)
+        // Ensure Bronze, Silver and Gold ads exist
+        const hasBronze = fetchedAds.some(a => a.tier === 'bronze');
         const hasSilver = fetchedAds.some(a => a.tier === 'silver');
         const hasGold = fetchedAds.some(a => a.tier === 'gold');
 
-        if (!hasSilver || !hasGold) {
+        if (!hasBronze || !hasSilver || !hasGold) {
           const extraAds: VideoAd[] = [];
           
+          if (!hasBronze) {
+            for (let i = 1; i <= 5; i++) {
+              const adId = `ad_bronze_new_${i}`;
+              const adData = {
+                title: `Bronze Starter Task #${i}`,
+                reward: 3.00,
+                limit: 1,
+                status: 'active',
+                scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
+                duration: 60,
+                views: Math.floor(Math.random() * 1000) + 5000,
+                tier: 'bronze' as const
+              };
+              await setDoc(doc(db, 'video_ads', adId), adData);
+              extraAds.push({ id: adId, ...adData });
+            }
+          }
+
           if (!hasSilver) {
             for (let i = 1; i <= 5; i++) {
               const adId = `ad_silver_new_${i}`;
               const adData = {
                 title: `Silver Executive Task #${i}`,
-                reward: 15.00,
+                reward: 25.00,
                 limit: 1,
                 status: 'active',
                 scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
@@ -165,7 +197,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               const adId = `ad_gold_new_${i}`;
               const adData = {
                 title: `Gold VIP Special #${i}`,
-                reward: 35.00,
+                reward: 60.00,
                 limit: 1,
                 status: 'active',
                 scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
@@ -495,14 +527,16 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           ) : (
               videoAds
                 .sort((a, b) => {
-                  const tiers = { basic: 0, silver: 1, gold: 2 };
+                  const tiers = { basic: 0, bronze: 1, silver: 2, gold: 3 };
                   return tiers[a.tier || 'basic'] - tiers[b.tier || 'basic'];
                 })
                 .map((ad, index) => {
-              const isSilver = partnerTier === 'silver' || partnerTier === 'gold' || role === 'partner';
+              const isBronze = partnerTier === 'bronze' || partnerTier === 'silver' || partnerTier === 'gold' || role === 'partner';
+              const isSilver = partnerTier === 'silver' || partnerTier === 'gold';
               const isGold = partnerTier === 'gold';
               let isTierLocked = false;
-              if (ad.tier === 'silver' && !isSilver) isTierLocked = true;
+              if (ad.tier === 'bronze' && !isBronze) isTierLocked = true;
+              else if (ad.tier === 'silver' && !isSilver) isTierLocked = true;
               else if (ad.tier === 'gold' && !isGold) isTierLocked = true;
 
               const lastWatched = adStats[ad.id];
