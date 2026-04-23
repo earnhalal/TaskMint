@@ -185,75 +185,68 @@ async function startServer() {
   });
 
   // API route for Wannads postback
-  app.all("/postback-wannads", async (req, res) => {
+  app.get("/api/postback/wannads", async (req, res) => {
     console.log("--- Wannads Postback Received ---");
-    console.log("Query Params:", JSON.stringify(req.query));
-
-    const { user_id, amount, transaction_id, status, signature } = req.query;
-    const secret = process.env.WANNADS_SECRET_KEY;
+    
+    // Parameters: user_id, amount, status, trans_id, sig
+    const { user_id, amount, status, trans_id, sig } = req.query;
+    
+    const secret = process.env.WANNADS_SECRET;
     if (!secret) {
-        console.error("WANNADS_SECRET_KEY is not defined in environment variables");
+        console.error("WANNADS_SECRET is not defined in environment variables");
         return res.status(500).send("Configuration Error");
     }
 
-    // Verify signature
-    // md5($user_id . $trans_id . $amount . $secret_key)
-    const dataToHash = `${user_id}${transaction_id}${amount}${secret}`;
+    // Verify signature: md5(user_id . trans_id . amount . secret)
+    const dataToHash = `${user_id}${trans_id}${amount}${secret}`;
     const calculatedSignature = crypto.createHash("md5").update(dataToHash).digest("hex");
 
-    if (signature !== calculatedSignature) {
-      console.warn("Signature mismatch! Calculated:", calculatedSignature, "Received:", signature);
+    if (sig !== calculatedSignature) {
+      console.warn("Signature mismatch! Calculated:", calculatedSignature, "Received:", sig);
       return res.status(403).send("ERROR: Invalid Signature");
     }
 
-    // Amount is passed as string, parse it
     const amountLocal = parseFloat(amount as string);
+    const userId = user_id as string;
     
-    console.log(`Debug: userId=${user_id}, amount=${amount}, amountLocal=${amountLocal}, transId=${transaction_id}, status=${status}`);
-
-    if (status == 1) { // 1 = Success
-      try {
-        const firestore = getDb();
-        
-        if (!user_id) throw new Error(`Missing user_id: ${user_id}`);
-        if (isNaN(amountLocal)) throw new Error(`Invalid amount: ${amount}`);
-
-        const userRef = firestore.collection("users").doc(user_id as string);
-        const transRef = userRef.collection("transactions").doc();
-        
-        console.log(`Processing Wannads reward for user: ${user_id}, amount: ${amountLocal}`);
-
-        await firestore.runTransaction(async (transaction) => {
-          const userDoc = await transaction.get(userRef);
-          if (!userDoc.exists) {
-            console.error(`User ${user_id} not found in Firestore`);
-            throw new Error(`User ${user_id} not found`);
-          }
-
-          transaction.update(userRef, {
-            balance: admin.firestore.FieldValue.increment(amountLocal),
-            totalEarnings: admin.firestore.FieldValue.increment(amountLocal)
-          });
-
-          transaction.set(transRef, {
-            type: 'Wannads Reward',
-            amount: amountLocal,
-            status: 'completed',
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-            description: `Wannads Offer (${transaction_id})`
-          });
-        });
-        
-        console.log("Balance and earnings updated successfully.");
-        return res.status(200).send("OK");
-      } catch (error: any) {
-        console.error("Wannads Postback Processing Error:", error.message);
-        return res.status(500).send(`Error: ${error.message}`);
-      }
+    if (isNaN(amountLocal) || !userId) {
+        return res.status(400).send("Invalid parameters");
     }
 
-    console.log(`Wannads Postback ignored: status=${status}`);
-    res.status(200).send("OK");
+    try {
+        const firestore = getDb();
+        const userRef = firestore.collection("users").doc(userId);
+        const transRef = userRef.collection("transactions").doc();
+        
+        await firestore.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+            if (!userDoc.exists) {
+                console.error(`User ${userId} not found`);
+                throw new Error("User not found");
+            }
+
+            // If status is '1', add the balance. If '2' (revoke), subtract it.
+            const increment = status == "1" ? amountLocal : -Math.abs(amountLocal);
+            
+            transaction.update(userRef, {
+                balance: admin.firestore.FieldValue.increment(increment),
+                totalEarnings: admin.firestore.FieldValue.increment(increment)
+            });
+
+            transaction.set(transRef, {
+                type: 'Wannads Reward',
+                amount: increment,
+                status: status == "1" ? 'completed' : 'revoked',
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                description: `Wannads Offer (${trans_id})`
+            });
+        });
+        
+        return res.status(200).send("OK");
+    } catch (error: any) {
+        console.error("Wannads Postback Error:", error);
+        return res.status(500).send("Error");
+    }
   });
 
   // Simple test endpoint
