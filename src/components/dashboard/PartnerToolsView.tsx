@@ -376,45 +376,53 @@ export default function PartnerToolsView({
             {tools.map((tool) => (
               <motion.div
                 key={tool.id}
-                whileHover={tool.unlocked ? { scale: 1.02 } : {}}
-                whileTap={tool.unlocked ? { scale: 0.98 } : {}}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 className={`relative p-5 rounded-[2rem] border overflow-hidden transition-all ${
                   tool.unlocked 
                     ? 'bg-white border-slate-100 shadow-xl shadow-slate-200/50' 
-                    : 'bg-slate-100/50 border-slate-200 opacity-80'
+                    : 'bg-white/40 border-slate-200'
                 }`}
               >
-                {!tool.unlocked && (
-                  <div className="absolute inset-0 bg-slate-900/5 backdrop-blur-[2px] flex flex-col items-center justify-center z-10">
-                    <div className="bg-white/90 p-3 rounded-2xl shadow-xl flex items-center gap-2 mb-2 scale-90 sm:scale-100">
-                      <Lock className="w-4 h-4 text-slate-400" />
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Locked for {tool.minTier.toUpperCase()}</span>
-                    </div>
-                    <button className="text-[9px] font-black text-amber-600 uppercase tracking-widest hover:underline decoration-2 underline-offset-4">Upgrade to Unlock</button>
-                  </div>
-                )}
 
                 <div className="flex items-start gap-5">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-white shadow-lg overflow-hidden shrink-0`}>
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-white shadow-lg overflow-hidden shrink-0 ${!tool.unlocked ? 'grayscale opacity-40' : ''}`}>
                     <div className="absolute inset-0 bg-white/20 transform -translate-x-1/2 -translate-y-1/2 rotate-45 h-32 w-8 blur-md"></div>
                     {tool.icon}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-black text-slate-800 text-sm italic tracking-tight">{tool.name}</h3>
-                      {tool.unlocked && (
-                        <div className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[8px] font-black uppercase tracking-widest rounded-md">Unlocked</div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <h3 className={`font-black text-sm italic tracking-tight ${!tool.unlocked ? 'text-slate-400' : 'text-slate-800'}`}>{tool.name}</h3>
+                        {!tool.unlocked && <Lock className="w-3 h-3 text-slate-300" />}
+                      </div>
+                      <div className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md ${
+                        tool.unlocked ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                      }`}>
+                        {tool.unlocked ? 'Active' : 'Locked'}
+                      </div>
                     </div>
-                    <p className="text-[10px] font-bold text-slate-500 leading-relaxed">{tool.description}</p>
+                    <p className={`text-[10px] font-bold leading-relaxed ${!tool.unlocked ? 'text-slate-400' : 'text-slate-500'}`}>{tool.description}</p>
                     
-                    {tool.unlocked && (
+                    {tool.unlocked ? (
                       <button 
                         onClick={tool.action}
                         className="mt-4 flex items-center gap-2 text-indigo-600 text-[10px] font-black uppercase tracking-widest group"
                       >
                         {tool.actionText} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                       </button>
+                    ) : (
+                      <div className="mt-4 flex flex-col gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1 h-1 rounded-full bg-amber-500" />
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Available for {tool.minTier.toUpperCase()}+</span>
+                        </div>
+                        <button 
+                          className="text-left text-amber-600 text-[9px] font-black uppercase tracking-widest hover:translate-x-1 transition-transform flex items-center gap-1"
+                        >
+                          Show Plans to Unlock <ArrowRight className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

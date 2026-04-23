@@ -30,6 +30,7 @@ interface Winner {
   prize: number;
   lotteryName: string;
   timestamp: any;
+  userAvatar?: string;
 }
 
 export default function LotteryView({ onBack, balance, userName, onUpdateBalance }: LotteryViewProps) {

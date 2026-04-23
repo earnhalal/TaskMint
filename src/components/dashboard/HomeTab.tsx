@@ -119,7 +119,7 @@ const QuickActionBtn: React.FC<{
             )}
             
             <div className="relative z-10 drop-shadow-md transform group-hover:scale-110 transition-transform duration-300">
-                {React.cloneElement(icon as React.ReactElement, { className: "w-8 h-8 sm:w-10 sm:h-10" })}
+                {React.isValidElement(icon) && React.cloneElement(icon as React.ReactElement, { className: "w-8 h-8 sm:w-10 sm:h-10" } as any)}
             </div>
             
             {/* High-end glass reflection */}
