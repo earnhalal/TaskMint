@@ -20,6 +20,10 @@
         "referralCode": { "type": "string" },
         "appBonusClaimed": { "type": "boolean" },
         "lastDailyCheckin": { "type": "string", "format": "date-time" },
+        "role": { "type": "string", "enum": ["user", "partner"] },
+        "partnerStatus": { "type": "string", "enum": ["none", "pending", "active"] },
+        "partnerTier": { "type": "string", "enum": ["basic", "bronze", "silver", "gold"] },
+        "partnerExpiryDate": { "type": "string", "format": "date-time" },
         "referralStats": {
           "type": "object",
           "properties": {

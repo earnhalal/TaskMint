@@ -43,7 +43,6 @@ interface HomeTabProps {
   accountStatus: string;
   role: string;
   topEarners: any[];
-  unreadUpdatesCount?: number;
   onSpinClick: () => void;
   onInviteClick: () => void;
   onDepositClick: () => void;
@@ -167,7 +166,6 @@ export default function HomeTab({
   accountStatus,
   role,
   topEarners,
-  unreadUpdatesCount = 0,
   onSpinClick, 
   onInviteClick, 
   onDepositClick, 
@@ -334,20 +332,6 @@ export default function HomeTab({
           </div>
           
           <div className="flex items-center gap-3">
-              <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onUpdatesClick}
-                  className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-slate-100 relative group"
-              >
-                  <MessageCircle className="w-5 h-5 text-indigo-600 group-hover:text-indigo-400 transition-colors" />
-                  {unreadUpdatesCount > 0 && (
-                    <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-lg flex items-center justify-center border-2 border-white shadow-md animate-pulse">
-                      {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
-                    </div>
-                  )}
-              </motion.button>
-
               <motion.button 
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

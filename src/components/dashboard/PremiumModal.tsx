@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Star, Shield, Crown, Check, AlertCircle, Zap, Wallet } from 'lucide-react';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, increment, getDoc, collection, addDoc, serverTimestamp as firestoreServerTimestamp } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 import { ref, update, increment as rtdbIncrement } from 'firebase/database';
 import { rtdb } from '../../firebase';
@@ -11,11 +11,12 @@ interface PartnerPlansProps {
   balance?: number;
   currentRole?: string;
   partnerTier?: string;
+  referrerId?: string | null;
   onUpdateBalance?: (amount: number, source?: string, description?: string) => Promise<void>;
   appSettings?: any;
 }
 
-export default function PremiumModal({ onClose, balance = 0, currentRole = 'user', partnerTier = 'basic', onUpdateBalance, appSettings }: PartnerPlansProps) {
+export default function PremiumModal({ onClose, balance = 0, currentRole = 'user', partnerTier = 'basic', referrerId, onUpdateBalance, appSettings }: PartnerPlansProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleBuyPlan = async (planId: string, price: number, tier: string) => {
@@ -40,6 +41,35 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
           partnerStatus: 'active',
           partnerTier: tier
         });
+
+        // Referral Bonus logic: 35%
+        if (referrerId) {
+            const referrerRef = doc(db, 'users', referrerId);
+            const referrerSnap = await getDoc(referrerRef);
+            if (referrerSnap.exists()) {
+                const referrerData = referrerSnap.data();
+                if (referrerData.role === 'partner') {
+                    const commission = price * 0.35;
+                    await updateDoc(referrerRef, {
+                        balance: increment(commission),
+                        totalTeamEarnings: increment(commission)
+                    });
+                    await update(ref(rtdb, `users/${referrerId}`), {
+                        balance: rtdbIncrement(commission),
+                        totalTeamEarnings: rtdbIncrement(commission)
+                    });
+                    
+                    // Add earning history
+                    await addDoc(collection(db, 'earning_history'), {
+                        userId: referrerId,
+                        amount: commission,
+                        source: 'commission',
+                        description: `35% Partner commission from ${planId.toUpperCase()} upgrade`,
+                        timestamp: firestoreServerTimestamp()
+                    });
+                }
+            }
+        }
         alert(`Congratulations! You are now a ${tier.toUpperCase()} Partner.`);
         onClose();
       } catch (error) {

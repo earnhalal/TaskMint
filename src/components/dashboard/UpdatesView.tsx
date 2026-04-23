@@ -40,7 +40,6 @@ const getIcon = (type: string) => {
     case 'deposit': return <Wallet className="w-5 h-5 text-blue-500" />;
     case 'withdrawal': return <ArrowRightLeft className="w-5 h-5 text-purple-500" />;
     case 'verification': return <Mail className="w-5 h-5 text-red-500" />;
-    case 'system': return <Mail className="w-5 h-5 text-indigo-500" />;
     default: return <Info className="w-5 h-5 text-slate-500" />;
   }
 };
@@ -176,7 +175,6 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                                             update.type === 'activation' ? 'bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.5)]' :
                                                             update.type === 'withdrawal' ? 'bg-purple-400 shadow-[0_0_5px_rgba(192,132,252,0.5)]' :
                                                             update.type === 'deposit' ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.5)]' :
-                                                            update.type === 'system' ? 'bg-indigo-400 shadow-[0_0_5px_rgba(129,140,248,0.5)]' :
                                                             'bg-slate-400'
                                                         }`} />
                                                         <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{update.type}</span>

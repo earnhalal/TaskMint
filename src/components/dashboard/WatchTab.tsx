@@ -120,13 +120,13 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     setDoc(doc.ref, { views: finalViews, title, reward, tier: 'bronze' }, { merge: true });
                 }
             } else if (tier === 'silver') {
-                reward = 25.00;
+                reward = 10.00;
                 if (finalViews < 2000 || finalViews > 4500) {
                     finalViews = Math.floor(Math.random() * 2500) + 2000;
                     setDoc(doc.ref, { views: finalViews, reward }, { merge: true });
                 }
             } else if (tier === 'gold') {
-                reward = 60.00;
+                reward = 15.00;
                 if (finalViews < 1500 || finalViews > 3500) {
                     finalViews = Math.floor(Math.random() * 2000) + 1500;
                     setDoc(doc.ref, { views: finalViews, reward }, { merge: true });
@@ -241,7 +241,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             const adId = `ad_silver_${i}`;
             const adData = {
               title: `Silver Premium Ad #${i}`,
-              reward: 15.00, 
+              reward: 10.00, 
               limit: 1,
               status: 'active',
               scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
@@ -258,7 +258,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             const adId = `ad_gold_${i}`;
             const adData = {
               title: `Gold VIP Exclusive #${i}`,
-              reward: 35.00,
+              reward: 15.00,
               limit: 1,
               status: 'active',
               scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
