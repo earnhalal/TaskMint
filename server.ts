@@ -186,8 +186,8 @@ async function startServer() {
   });
 
   // API route for Wannads postback - matching exact URL pattern requested
-  app.all("/postback/wannads.php", async (req, res) => {
-    console.log("--- Wannads Postback Received (PHP route) ---");
+  app.all("/api/postback/wannads", async (req, res) => {
+    console.log("--- Wannads Postback Received ---");
     
     // Parameters: user_id, amount, status, trans_id, sig
     const { user_id, amount, status, trans_id, sig } = req.query;
