@@ -85,6 +85,7 @@ function AppContent() {
         <Route path="/terms" element={<Legal />} />
         <Route path="/disclaimer" element={<Legal />} />
         <Route path="/promotion" element={<Legal />} />
+        <Route path="/refund" element={<Legal />} />
         <Route path="/contact" element={<Legal />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />

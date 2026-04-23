@@ -257,7 +257,7 @@ export default function Dashboard() {
         if (!data.referralCode && data.username) {
           const generateCode = async () => {
             const phoneSuffix = (data.phone || '').slice(-3) || Math.floor(100 + Math.random() * 900).toString();
-            const newCode = `${data.username.toLowerCase()}_${phoneSuffix}`;
+            const newCode = `${String(data.username).toLowerCase()}_${phoneSuffix}`;
             await setDoc(doc(db, 'users', user.uid), { referralCode: newCode }, { merge: true });
             setReferralCode(newCode);
             setShowReferralUpdateNotify(true);
@@ -455,7 +455,7 @@ export default function Dashboard() {
         const referralItems = Object.keys(data).map(key => ({
           id: key,
           ...data[key],
-          status: data[key].status ? data[key].status.toLowerCase() : 'pending'
+          status: data[key].status ? String(data[key].status).toLowerCase() : 'pending'
         }));
 
         // Fetch missing names from Firestore if needed

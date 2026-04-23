@@ -60,7 +60,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
   };
 
   const handleShareWhatsApp = () => {
-    const text = `Join TaskMint and start earning Rs 2000+ daily! Use my link to sign up: ${referralLink}`;
+    const text = `Assalam o Alaikum! Join TaskMint and start earning money online daily at home. Click my link to create a free account: ${referralLink}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -69,7 +69,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       try {
         await navigator.share({
           title: 'Join TaskMint',
-          text: 'Join TaskMint and start earning Rs 2000+ daily! Use my link to sign up:',
+          text: 'Assalam o Alaikum! Join TaskMint and start earning money online daily at home. Click my link to create a free account:',
           url: referralLink,
         });
       } catch (err) {
@@ -134,22 +134,22 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                 animate={{ opacity: 1, y: 0 }}
                 className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-6"
             >
-                <Zap className="w-3 h-3" /> System Active
+                <Zap className="w-3 h-3" /> Account Active
             </motion.div>
             <h1 className="text-4xl sm:text-6xl font-black mb-4 leading-[0.9] tracking-tighter italic">
                 INVITE & <br/>
-                <span className="text-amber-500">PROSPER.</span>
+                <span className="text-amber-500">EARN.</span>
             </h1>
             <p className="text-white/60 text-sm font-medium max-w-sm mb-8 leading-relaxed mx-auto md:mx-0">
-                Scale your earnings by connecting new nodes to the TaskMint decentralized network.
+                Invite your friends to TaskMint and earn big bonuses when they join your team.
             </p>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
               <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                <span className="block text-[8px] uppercase tracking-widest text-white/40 mb-1">Direct Node</span>
+                <span className="block text-[8px] uppercase tracking-widest text-white/40 mb-1">Direct Invite</span>
                 <span className="text-xl font-black italic">Rs {currentBonus}</span>
               </div>
               <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                <span className="block text-[8px] uppercase tracking-widest text-white/40 mb-1">Indirect</span>
+                <span className="block text-[8px] uppercase tracking-widest text-white/40 mb-1">Team Bonus</span>
                 <span className="text-xl font-black italic text-indigo-400">Rs {appSettings?.indirectReferralBonus || 20}</span>
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1 w-full">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">Your Personal Node Link</label>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">Your Referral Link</label>
             <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-2 pr-2 shadow-inner">
               <div className="flex-1 px-4 text-xs font-bold text-slate-500 truncate italic">
                 {referralLink}
@@ -194,10 +194,10 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       {/* --- Stats Engine --- */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
         {[
-          { label: 'Total Nodes', value: referralStats.totalInvited, color: 'text-indigo-600', icon: <Users /> },
+          { label: 'Total Friends', value: referralStats.totalInvited, color: 'text-indigo-600', icon: <Users /> },
           { label: 'Active', value: referralStats.activeMembers, color: 'text-emerald-600', icon: <Zap /> },
-          { label: 'Yield Cache', value: `Rs ${referralStats.totalCommission}`, color: 'text-amber-600', icon: <Wallet /> },
-          { label: 'Node Tier', value: partnerTier.toUpperCase(), color: 'text-indigo-900', icon: <Trophy /> }
+          { label: 'Total Earnings', value: `Rs ${referralStats.totalCommission}`, color: 'text-amber-600', icon: <Wallet /> },
+          { label: 'Your Level', value: partnerTier.toUpperCase(), color: 'text-indigo-900', icon: <Trophy /> }
         ].map((stat, i) => (
           <div key={i} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-lg flex flex-col justify-center items-center text-center">
             <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2">{stat.label}</div>
@@ -211,10 +211,10 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div>
-            <h3 className="text-lg font-black text-slate-900 italic tracking-tighter uppercase">Connection <span className="text-indigo-600">History</span></h3>
+            <h3 className="text-lg font-black text-slate-900 italic tracking-tighter uppercase">Referral <span className="text-indigo-600">History</span></h3>
           </div>
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            {referrals.length} Nodes Synchronized
+            {referrals.length} Friends Joined
           </span>
         </div>
 
@@ -222,7 +222,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
           {referrals.length === 0 ? (
             <div className="bg-slate-50 border border-slate-200/50 rounded-[2.5rem] p-16 text-center">
               <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-sm font-black text-slate-400 italic uppercase">No active nodes connected.</p>
+              <p className="text-sm font-black text-slate-400 italic uppercase">No friends joined yet.</p>
             </div>
           ) : (
             referrals.map((r, idx) => (
@@ -238,7 +238,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                   </div>
                   <div className="min-w-0">
                     <h4 className="text-sm sm:text-base font-black text-slate-900 italic tracking-tighter uppercase truncate mb-1">
-                      {r.name || 'Anonymous Node'}
+                      {r.name || 'Anonymous User'}
                     </h4>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">

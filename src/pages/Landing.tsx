@@ -161,16 +161,16 @@ export default function Landing() {
             </div>
 
             <nav className="hidden md:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.2em] text-white/50">
-              <button onClick={() => setActiveModal('how-it-works')} className="hover:text-amber-500 transition-colors">Protocol</button>
-              <button onClick={() => navigate('/blog')} className="hover:text-amber-500 transition-colors">Knowledge</button>
-              <button onClick={() => navigate('/terms')} className="hover:text-amber-500 transition-colors">Governance</button>
-              <button onClick={() => navigate('/contact')} className="hover:text-amber-500 transition-colors">Terminal</button>
+              <button onClick={() => setActiveModal('how-it-works')} className="hover:text-amber-500 transition-colors">How it Works</button>
+              <button onClick={() => navigate('/blog')} className="hover:text-amber-500 transition-colors">Blog</button>
+              <button onClick={() => navigate('/terms')} className="hover:text-amber-500 transition-colors">Rules</button>
+              <button onClick={() => navigate('/contact')} className="hover:text-amber-500 transition-colors">Support</button>
             </nav>
 
             <div className="hidden md:flex items-center gap-6">
-              <button onClick={() => onGetStarted('login')} className="text-white/60 hover:text-white text-xs font-black uppercase tracking-widest transition-colors">Access</button>
+              <button onClick={() => onGetStarted('login')} className="text-white/60 hover:text-white text-xs font-black uppercase tracking-widest transition-colors">Login</button>
               <button onClick={() => onGetStarted('signup')} className="bg-white text-black px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-white/10 hover:bg-amber-500 hover:text-white transition-all active:scale-95">
-                Join Network
+                Create Account
               </button>
             </div>
 
@@ -211,16 +211,16 @@ export default function Landing() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                             </span>
-                            Quantum Earning Protocol v4.0
+                            Start Earning Online Today
                         </motion.div>
                         
                         <h1 className="text-5xl md:text-8xl font-black mb-8 leading-none tracking-tighter italic uppercase">
-                            MONETIZE YOUR <br/>
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">FREE TIME.</span>
+                            EARN MONEY IN <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]">YOUR FREE TIME.</span>
                         </h1>
                         
                         <p className="text-white/40 text-lg md:text-xl mb-14 max-w-2xl font-medium leading-relaxed tracking-tight">
-                            TaskMint is the ultimate marketplace for premium digital labor. Join our decentralized network of 50k+ earners and access high-yield tasks from global research partners.
+                            TaskMint is the best platform to earn money online without hidden fees. Join 50k+ users and make money daily by completing simple tasks on your phone.
                         </p>
                         
                         <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -401,10 +401,10 @@ export default function Landing() {
                         </AnimatePresence>
 
                         <div className="bg-gradient-to-br from-indigo-900 to-indigo-700 rounded-[2.5rem] p-12 flex flex-col justify-center relative overflow-hidden group border border-white/10">
-                            <h4 className="text-3xl font-black mb-6 italic uppercase leading-none">JOIN THE <br/> ECOSYSTEM.</h4>
-                            <p className="text-white/60 mb-10 font-medium font-sans">Start earning from verified global partners within minutes of deployment.</p>
+                            <h4 className="text-3xl font-black mb-6 italic uppercase leading-none">JOIN THE <br/> PLATFORM.</h4>
+                            <p className="text-white/60 mb-10 font-medium font-sans">Start earning from verified global partners within minutes.</p>
                             <button onClick={() => onGetStarted('signup')} className="bg-white text-black px-10 py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-2xl w-fit">
-                                Create Free Identity
+                                Create Free Account
                             </button>
                         </div>
                     </div>
@@ -418,13 +418,13 @@ export default function Landing() {
                     
                     <div className="relative z-10">
                         <h2 className="text-5xl md:text-7xl font-black tracking-tighter italic uppercase mb-10 text-white leading-none">
-                            READY TO <span className="text-amber-500">IGNITE?</span>
+                            READY TO <span className="text-amber-500">START?</span>
                         </h2>
                         <p className="text-xl text-white/40 mb-14 max-w-2xl mx-auto font-medium tracking-tight">
-                            Deploy your account today and experience the next generation of digital value distribution. Verified in Pakistan.
+                            Create your account today and experience the best way to earn money online in Pakistan.
                         </p>
                         <button onClick={() => onGetStarted('signup')} className="bg-white text-black px-12 py-5 rounded-2xl text-base font-black uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all shadow-2xl">
-                            Deploy Account Free
+                            Create Free Account
                         </button>
                     </div>
                 </div>
@@ -442,27 +442,29 @@ export default function Landing() {
                                 <span className="font-black text-2xl tracking-tighter italic text-white uppercase">Task<span className="text-amber-500">Mint</span></span>
                             </div>
                             <p className="text-white/30 font-medium max-w-sm leading-relaxed text-sm">
-                                Pakistan's #1 premium platform for <strong>digital labor</strong> and <strong>high-yield tasks</strong>. Join 50,000+ nodes earning daily.
+                                Pakistan's #1 premium platform for <strong>earning money online</strong> and <strong>high-yield tasks</strong>. Join 50,000+ users earning daily.
                             </p>
                         </div>
                         <div>
-                            <h4 className="text-white font-black uppercase tracking-widest text-[10px] mb-8 text-white/40">Knowledge Base</h4>
+                            <h4 className="text-white font-black uppercase tracking-widest text-[10px] mb-8 text-white/40">Quick Links</h4>
                             <ul className="space-y-4 text-xs font-black uppercase tracking-widest text-white/60">
                                 <li><button onClick={() => navigate('/blog')} className="hover:text-amber-500 transition-colors">Earning Blog</button></li>
-                                <li><button onClick={() => navigate('/app-download')} className="hover:text-amber-500 transition-colors">Download Node</button></li>
-                                <li><button onClick={() => navigate('/contact')} className="hover:text-amber-500 transition-colors">Security Terminal</button></li>
+                                <li><button onClick={() => navigate('/app-download')} className="hover:text-amber-500 transition-colors">Download App</button></li>
+                                <li><button onClick={() => navigate('/contact')} className="hover:text-amber-500 transition-colors">Contact Us</button></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="text-white font-black uppercase tracking-widest text-[10px] mb-8 text-white/40">Governance</h4>
+                            <h4 className="text-white font-black uppercase tracking-widest text-[10px] mb-8 text-white/40">Legal & Ads</h4>
                             <ul className="space-y-4 text-xs font-black uppercase tracking-widest text-white/60">
-                                <li><button onClick={() => navigate('/privacy')} className="hover:text-amber-500 transition-colors">Privacy Protocol</button></li>
-                                <li><button onClick={() => navigate('/terms')} className="hover:text-amber-500 transition-colors">Service Level Agreement</button></li>
+                                <li><button onClick={() => navigate('/privacy')} className="hover:text-amber-500 transition-colors">Privacy Policy</button></li>
+                                <li><button onClick={() => navigate('/terms')} className="hover:text-amber-500 transition-colors">Terms of Service</button></li>
+                                <li><button onClick={() => navigate('/refund')} className="hover:text-amber-500 transition-colors">Refund Policy</button></li>
+                                <li><button onClick={() => navigate('/promotion')} className="hover:text-amber-500 transition-colors">Promotion & Ads</button></li>
                             </ul>
                         </div>
                     </div>
                     <div className="pt-10 border-t border-white/5 flex justify-between items-center">
-                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">© 2026 TASKMINT PROTOCOL</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">© 2026 TASKMINT</p>
                     </div>
                 </div>
             </footer>

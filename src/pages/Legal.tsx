@@ -84,6 +84,28 @@ export default function Legal() {
       );
     }
 
+    if (path === '/refund') {
+      return (
+        <div className="prose prose-slate max-w-none">
+          <h1 className="text-4xl font-display font-bold mb-8">Refund Policy</h1>
+          <p className="text-lg text-slate-600 mb-6">Last updated: April 8, 2026</p>
+          
+          <h2 className="text-2xl font-bold mt-8 mb-4">1. General Policy</h2>
+          <p className="text-slate-600 mb-4">At TaskMint, our priority is providing digital earning services. Because our platform involves distributing fees to active participants and referring members instantly upon account activation, we maintain a strict <strong>No Refund</strong> policy for account activation fees and partner upgrades once the transaction is completed and the account is activated.</p>
+          
+          <h2 className="text-2xl font-bold mt-8 mb-4">2. Exceptions</h2>
+          <p className="text-slate-600 mb-4">Refunds may only be considered under the following exceptional circumstances:</p>
+          <ul className="list-disc pl-6 text-slate-600 mb-4 space-y-2">
+            <li>Duplicate payments made in error (e.g., paying the fee twice for the same account).</li>
+            <li>System errors where your payment was successfully deducted from your bank/wallet, but your TaskMint account was not activated within 48 hours after providing valid proof.</li>
+          </ul>
+
+          <h2 className="text-2xl font-bold mt-8 mb-4">3. Requesting a Refund</h2>
+          <p className="text-slate-600 mb-4">If you believe you qualify for a refund under the exceptions listed above, please contact our support team at <a href="mailto:support@taskmint.click" className="text-emerald-600 hover:underline">support@taskmint.click</a> with your account details, payment proof (Transaction ID), and the reason for your request. All claims must be made within 7 days of the transaction.</p>
+        </div>
+      );
+    }
+
     if (path === '/disclaimer') {
       return (
         <div className="prose prose-slate max-w-none">
@@ -157,17 +179,6 @@ export default function Legal() {
                   <h3 className="font-bold text-xl mb-1">Email Us</h3>
                   <p className="text-slate-600 mb-2">For general inquiries and support.</p>
                   <a href="mailto:support@taskmint.click" className="text-emerald-600 font-semibold hover:underline">support@taskmint.click</a>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-6 h-6 text-emerald-600" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xl mb-1">WhatsApp Us</h3>
-                  <p className="text-slate-600 mb-2">Support available on WhatsApp.</p>
-                  <a href="https://wa.me/923051234567" target="_blank" rel="noopener noreferrer" className="text-emerald-600 font-semibold hover:underline">+92 305 1234567</a>
                 </div>
               </div>
               
