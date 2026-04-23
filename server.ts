@@ -189,56 +189,58 @@ async function startServer() {
     console.log("--- Wannads Postback Received ---");
     console.log("Query Params:", JSON.stringify(req.query));
 
-    const { userId, reward, transId, status, signature } = req.query;
-    const secret = "47642a4158"; // Secret from dashboard
-
-    // Verify signature (Wannads usually uses MD5 or SHA1 for postback signature)
-    // Assuming Wannads uses a simple hash of parameters + secret
-    const dataToHash = `${userId}${reward}${transId}${status}${secret}`;
-    const calculatedSignature = crypto.createHash("md5").update(dataToHash).digest("hex");
-
-    // For now, let's log the signature mismatch but still process if status is credited
-    if (signature && signature !== calculatedSignature) {
-      console.warn("Signature mismatch! Calculated:", calculatedSignature, "Received:", signature);
-      // You might want to uncomment the next line to enforce security
-      // return res.status(403).send("Forbidden: Invalid signature");
+    const { user_id, amount, transaction_id, status, signature } = req.query;
+    const secret = process.env.WANNADS_SECRET_KEY;
+    if (!secret) {
+        console.error("WANNADS_SECRET_KEY is not defined in environment variables");
+        return res.status(500).send("Configuration Error");
     }
 
-    // Wannads might send reward as a string like "1.00"
-    const rewardLocal = parseFloat(reward as string);
-    
-    console.log(`Debug: userId=${userId}, reward=${reward}, rewardLocal=${rewardLocal}, transId=${transId}, status=${status}`);
+    // Verify signature
+    // md5($user_id . $trans_id . $amount . $secret_key)
+    const dataToHash = `${user_id}${transaction_id}${amount}${secret}`;
+    const calculatedSignature = crypto.createHash("md5").update(dataToHash).digest("hex");
 
-    if (status === "credited") {
+    if (signature !== calculatedSignature) {
+      console.warn("Signature mismatch! Calculated:", calculatedSignature, "Received:", signature);
+      return res.status(403).send("ERROR: Invalid Signature");
+    }
+
+    // Amount is passed as string, parse it
+    const amountLocal = parseFloat(amount as string);
+    
+    console.log(`Debug: userId=${user_id}, amount=${amount}, amountLocal=${amountLocal}, transId=${transaction_id}, status=${status}`);
+
+    if (status == 1) { // 1 = Success
       try {
         const firestore = getDb();
         
-        if (!userId || userId === "{userId}") throw new Error(`Missing or placeholder userId: ${userId}`);
-        if (isNaN(rewardLocal)) throw new Error(`Invalid reward amount: ${reward}`);
+        if (!user_id) throw new Error(`Missing user_id: ${user_id}`);
+        if (isNaN(amountLocal)) throw new Error(`Invalid amount: ${amount}`);
 
-        const userRef = firestore.collection("users").doc(userId as string);
+        const userRef = firestore.collection("users").doc(user_id as string);
         const transRef = userRef.collection("transactions").doc();
         
-        console.log(`Processing Wannads reward for user: ${userId}, amount: ${rewardLocal}`);
+        console.log(`Processing Wannads reward for user: ${user_id}, amount: ${amountLocal}`);
 
         await firestore.runTransaction(async (transaction) => {
           const userDoc = await transaction.get(userRef);
           if (!userDoc.exists) {
-            console.error(`User ${userId} not found in Firestore`);
-            throw new Error(`User ${userId} not found`);
+            console.error(`User ${user_id} not found in Firestore`);
+            throw new Error(`User ${user_id} not found`);
           }
 
           transaction.update(userRef, {
-            balance: admin.firestore.FieldValue.increment(rewardLocal),
-            totalEarnings: admin.firestore.FieldValue.increment(rewardLocal)
+            balance: admin.firestore.FieldValue.increment(amountLocal),
+            totalEarnings: admin.firestore.FieldValue.increment(amountLocal)
           });
 
           transaction.set(transRef, {
             type: 'Wannads Reward',
-            amount: rewardLocal,
+            amount: amountLocal,
             status: 'completed',
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
-            description: `Wannads Offer (${transId})`
+            description: `Wannads Offer (${transaction_id})`
           });
         });
         
@@ -251,7 +253,7 @@ async function startServer() {
     }
 
     console.log(`Wannads Postback ignored: status=${status}`);
-    res.status(200).send("OK - Status not credited");
+    res.status(200).send("OK");
   });
 
   // Simple test endpoint
