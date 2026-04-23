@@ -1,1 +1,3 @@
 google.com, pub-9056218549588930, DIRECT, f08c47fec0942fa0
+
+<meta name="clckd" content="78a99e43a79a408eb310e675607d89ef" />
