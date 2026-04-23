@@ -116,6 +116,7 @@ async function startServer() {
         console.log(`Successfully credited ${virtual_currency} to user ${subid} in both DBs`);
 
         // Response must be strictly '1'
+        res.setHeader('Content-Type', 'text/plain');
         res.status(200).send('1');
     } catch (error) {
         console.error("CPALead Postback processing error:", error);
@@ -242,10 +243,10 @@ async function startServer() {
             });
         });
         
-        return res.status(200).send("OK");
+        return res.status(200).setHeader('Content-Type', 'text/plain').send("OK");
     } catch (error: any) {
         console.error("Wannads Postback Error:", error);
-        return res.status(500).send("Error");
+        return res.status(500).setHeader('Content-Type', 'text/plain').send("Error");
     }
   });
 
