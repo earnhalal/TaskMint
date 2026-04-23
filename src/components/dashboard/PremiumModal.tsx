@@ -144,10 +144,10 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
           </motion.div>
           
           <h2 className="text-3xl font-black text-white mb-2 tracking-tighter italic uppercase">
-            Partner <span className="text-amber-500">Nodes</span>
+            Partner <span className="text-amber-500">Plans</span>
           </h2>
           <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] max-w-xs mx-auto mb-6 opacity-60">
-            High-Yield Ad Transmission Protocol
+            More Earnings Every Day
           </p>
           
           <div className="inline-flex items-center gap-3 bg-white/5 backdrop-blur-xl px-5 py-2.5 rounded-2xl border border-white/10">

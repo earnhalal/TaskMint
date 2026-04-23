@@ -8,6 +8,7 @@ import { doc, setDoc, getDoc, updateDoc, increment, query, collection, where, ge
 import { db, rtdb } from '../firebase';
 import { ref, update, increment as rtdbIncrement, set } from 'firebase/database';
 import { sendWelcomeMail } from '../services/notificationService';
+import { maleAvatarIds, femaleAvatarIds } from '../components/ui/DynamicAvatar';
 
 const auth = getAuth(app);
 
@@ -33,6 +34,10 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
+      // Pick random avatar
+      const allAvatars = [...maleAvatarIds, ...femaleAvatarIds];
+      const randomAvatarId = allAvatars[Math.floor(Math.random() * allAvatars.length)];
+
       // Generate unique referral code for the new user
       const phoneSuffix = data.phone.slice(-3) || Math.floor(100 + Math.random() * 900).toString();
       const uniqueReferralCode = `${data.username.toLowerCase()}_${phoneSuffix}`;
@@ -50,7 +55,8 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
         joiningDate: new Date().toISOString(),
         referredBy: data.referralCode || null,
         feeStatus: 'unpaid',
-        referralCode: uniqueReferralCode
+        referralCode: uniqueReferralCode,
+        profile_avatar_id: randomAvatarId
       };
       
       await set(userRef, userData);
@@ -96,7 +102,7 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
         if (parentUid) {
           // Save referral to RTDB: invites/{safeParentRef}/history/{new_uid}
           // We use safeParentRef (username/code) as the key to match common architecture
-          const safeParentRef = sanitizedRef.replace(/[.#$\[\]]/g, '');
+          const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
           await set(ref(rtdb, `invites/${safeParentRef}/history/${user.uid}`), {
             name: data.username,
             status: 'pending',

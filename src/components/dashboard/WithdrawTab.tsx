@@ -208,7 +208,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
       <div className="relative z-10 space-y-4">
         <div className="flex items-center justify-between px-1">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Select Destination</p>
-          <span className="text-[9px] font-bold text-slate-300 italic">{accounts.length} Nodes Connected</span>
+          <span className="text-[9px] font-bold text-slate-300 italic">{accounts.length} Accounts Connected</span>
         </div>
 
         <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar snap-x">
@@ -247,7 +247,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">Protocol ID</p>
+                    <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">Account Number</p>
                     <p className="text-xl font-mono font-black text-white tracking-[0.1em]">
                       {acc.number}
                     </p>
@@ -307,8 +307,8 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                       <Zap className="w-6 h-6 fill-emerald-500" />
                     </div>
                     <div className="text-left">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Status Node</p>
-                      <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic">Open Payout Console</h4>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Status</p>
+                      <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic">Enter Amount</h4>
                     </div>
                  </div>
                  <ArrowRight className="w-6 h-6 text-slate-200 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
@@ -360,7 +360,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                       <p className="text-xs font-black text-slate-900 italic">Rs 0</p>
                    </div>
                    <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">P-Engine</p>
+                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">Method</p>
                       <p className="text-xs font-black text-emerald-600 italic">Instant</p>
                    </div>
                 </div>
@@ -386,7 +386,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
                     <div className="relative z-10 flex items-center justify-center gap-2">
                       <span className="text-xs font-black text-white group-disabled:text-slate-400 uppercase tracking-[0.15em] italic">
-                        {windowInfo.isOpen ? 'Execute Payout' : 'Protocol Locked'}
+                        {windowInfo.isOpen ? 'Execute Payout' : 'Window Locked'}
                       </span>
                       {windowInfo.isOpen ? <ArrowUpRight className="w-4 h-4 text-emerald-400 group-hover/btn:text-white" /> : <Lock className="w-3.5 h-3.5 text-slate-400" />}
                     </div>
@@ -396,7 +396,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                   <div className="mt-4 flex items-center gap-2 p-3 bg-amber-50/50 rounded-xl border border-amber-100/30">
                     <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
                     <p className="text-[9px] font-bold text-amber-700 uppercase tracking-tight italic">
-                      Cycle Checkpoint: {windowInfo.nextWindowText.split(':')[1]} tareek.
+                      Next Update: {windowInfo.nextWindowText.split(':')[1]} tareek.
                     </p>
                   </div>
                 )}
@@ -451,7 +451,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                 <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
                   <History className="w-6 h-6 text-slate-200" />
                 </div>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Protocol History Empty</p>
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">No History</p>
               </div>
             )}
             </div>
@@ -491,7 +491,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               
               <div className="space-y-5">
                 <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Status Node</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Status</span>
                   <span className={`text-[10px] font-black uppercase tracking-widest ${
                     selectedWithdrawal.status === 'Pending' ? 'text-amber-500' : 
                     (selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed') ? 'text-emerald-500' : 
@@ -507,15 +507,15 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                 )}
 
                 <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Reserve Out</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Amount</span>
                   <span className="text-[11px] font-black text-slate-900 italic">Rs {selectedWithdrawal.amount}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Target Node</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Target Account</span>
                   <span className="text-[11px] font-black text-slate-900 uppercase italic leading-none">{selectedWithdrawal.method}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Timestamp</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Date</span>
                   <span className="text-[11px] font-black text-slate-900 italic leading-none">{new Date(selectedWithdrawal.date).toLocaleDateString()}</span>
                 </div>
               </div>
@@ -524,7 +524,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                 onClick={() => setSelectedWithdrawal(null)}
                 className="w-full mt-10 p-5 bg-[#0A0A0B] text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] italic shadow-xl shadow-slate-900/10"
               >
-                Close Protocol
+                Close Receipt
               </button>
             </motion.div>
           </motion.div>
@@ -555,7 +555,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
 
               <h3 className="text-3xl font-black text-slate-900 mb-3 italic tracking-tighter leading-none uppercase">Execution Successful</h3>
               <p className="text-xs text-slate-400 font-bold mb-10 leading-relaxed uppercase tracking-tight">
-                Payout request initiated. Reserve distribution will be completed within <span className="text-emerald-500">24 hours</span>.
+                Payout request initiated. Your money will be sent within <span className="text-emerald-500">24 hours</span>.
               </p>
 
               <button 

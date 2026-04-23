@@ -432,7 +432,7 @@ export default function SpinWheel({
                                         }`}>
                                             {seg.value === -1 ? 'FS' : seg.value === 0 ? 'ERR' : 'OK'}
                                         </div>
-                                        <p className="text-[8px] font-black italic tracking-[0.2em] text-white opacity-20 mb-1 font-mono uppercase">Node</p>
+                                        <p className="text-[8px] font-black italic tracking-[0.2em] text-white opacity-20 mb-1 font-mono uppercase">Ticket</p>
                                         <p className={`text-xl font-black italic tracking-tighter text-white drop-shadow-lg ${seg.value === 0 ? 'opacity-20' : 'text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400'}`}>
                                             {seg.value === -1 ? 'FREE' : seg.value === 0 ? 'LOSS' : `${seg.value}`}
                                         </p>

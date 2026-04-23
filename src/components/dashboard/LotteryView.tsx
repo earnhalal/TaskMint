@@ -209,7 +209,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
           </button>
           <div className="min-w-0">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2 truncate">
-              Mega <span className="text-indigo-600">Protocol</span> <Sparkles className="w-6 h-6 text-amber-500 animate-pulse flex-shrink-0" />
+              Mega <span className="text-indigo-600">Lottery</span> <Sparkles className="w-6 h-6 text-amber-500 animate-pulse flex-shrink-0" />
             </h2>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Prize Network</p>
           </div>
@@ -236,7 +236,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                 </div>
                 <h3 className="text-3xl font-black text-white mb-3 tracking-tight italic">Fortune <span className="text-indigo-400">Accelerator</span></h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-sm mb-6">
-                    Join our decentralized prize pool. Every node connection increases your probability of payout.
+                    Join our decentralized prize pool. Every ticket entry increases your probability of payout.
                 </p>
                 <div className="flex items-center justify-center md:justify-start gap-6">
                     <div>
@@ -252,7 +252,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
             </div>
             
             <div className="bg-white/5 backdrop-blur-xl p-6 sm:p-8 rounded-[3rem] border border-white/10 shadow-inner shrink-0 text-center w-full md:w-auto">
-               <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-2">Available Yield</p>
+               <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-2">Available Balance</p>
                <p className="text-3xl sm:text-4xl font-black text-white italic tracking-tighter mb-4">Rs {balance.toLocaleString()}</p>
                <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto border border-indigo-500/30 text-indigo-400">
                   <Ticket className="w-7 h-7" />
@@ -325,10 +325,10 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                                    <Crown className="w-4 h-4 text-amber-500" />
                                 </div>
-                                <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic">Alpha Node</span>
+                                <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic">Mega Pool</span>
                             </div>
                             <div className="text-right">
-                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Admin Fee</p>
+                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Ticket Fee</p>
                                 <div className="flex items-center justify-end gap-1">
                                     <span className="text-sm font-black text-white italic">Rs {lottery.fee}</span>
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -351,7 +351,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 </div>
                                 <div>
                                     <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Network</p>
-                                    <p className="text-[10px] font-black text-white italic">{lottery.maxMembers} Nodes</p>
+                                    <p className="text-[10px] font-black text-white italic">{lottery.maxMembers} Spots</p>
                                 </div>
                             </div>
                             <div className="bg-white/5 p-3 rounded-2xl border border-white/10 flex items-center gap-3">
@@ -400,15 +400,15 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                             >
                                 {isJoined ? (
                                     <>
-                                        <CheckCircle2 className="w-4 h-4" /> Node Active
+                                        <CheckCircle2 className="w-4 h-4" /> Ticket Bought
                                     </>
                                 ) : lottery.currentMembers >= lottery.maxMembers ? (
                                     <>
-                                        <Clock className="w-4 h-4" /> Full Nodes
+                                        <Clock className="w-4 h-4" /> Room Full
                                     </>
                                 ) : (
                                     <>
-                                        <Zap className="w-4 h-4 fill-current" /> Join Network
+                                        <Zap className="w-4 h-4 fill-current" /> Join Now
                                     </>
                                 )}
                             </motion.button>
@@ -466,7 +466,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
 
           <div className="space-y-6">
             <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-amber-500" /> Hall of Protocol
+                <Trophy className="w-4 h-4 text-amber-500" /> Hall of Fame
             </h3>
             <div className="bg-[#0A0B0F] rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden min-h-[400px] text-white">
                  <div className="p-2 space-y-1 relative z-10">
@@ -494,7 +494,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                     </div>
                                 </div>
                                 <div className="text-right flex-shrink-0">
-                                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 italic">Yield Unlocked</p>
+                                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 italic">Prize Won</p>
                                     <p className="text-2xl font-black text-white italic tracking-tighter">Rs {winner.prize.toLocaleString()}</p>
                                 </div>
                             </div>

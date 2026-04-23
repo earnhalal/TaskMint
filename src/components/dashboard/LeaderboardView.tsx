@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Trophy, Medal, Crown, Star, TrendingUp, Users } from 'lucide-react';
+import { DynamicAvatar } from '../ui/DynamicAvatar';
 
 interface LeaderboardViewProps {
   earners: any[];
@@ -54,17 +55,17 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
             </button>
             <div>
               <h2 className="text-2xl font-black italic tracking-tighter uppercase leading-none">
-                Global <span className="text-amber-500">Node</span> Rankings
+                Global <span className="text-amber-500">User</span> Rankings
               </h2>
               <div className="flex items-center gap-2 mt-1">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Live Telemetry Active</p>
+                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Live Updates Active</p>
               </div>
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
               <Trophy className="w-4 h-4 text-amber-500" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Total Yield: 2.4M PKR</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Total Earning: 2.4M PKR</span>
           </div>
         </div>
       </div>
@@ -86,11 +87,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               <div className="relative group">
                 <div className="absolute inset-0 bg-slate-400 blur-xl opacity-0 group-hover:opacity-40 transition-opacity" />
                 <div className="relative w-20 h-20 rounded-[2rem] bg-[#1a1b23] border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-500">
-                  {topThree[1].avatarUrl ? (
-                    <img src={topThree[1].avatarUrl} alt={topThree[1].username} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-2xl font-black text-slate-400 italic">{topThree[1].username?.substring(0, 1).toUpperCase()}</span>
-                  )}
+                  <DynamicAvatar avatarId={topThree[1].profile_avatar_id} fallbackText={topThree[1].username} className="w-full h-full" />
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0" />
                 </div>
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-400 rounded-xl flex items-center justify-center text-white border-2 border-[#0A0B0F] shadow-lg">
@@ -112,7 +109,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
             </motion.div>
           )}
 
-          {/* 1st Place: Gold Alpha */}
+          {/* 1st Place: Top Earner */}
           {topThree[0] && (
             <motion.div 
               initial={{ opacity: 0, y: 100 }}
@@ -132,11 +129,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                 <div className="absolute inset-0 bg-amber-500 blur-2xl opacity-20 group-hover:opacity-50 transition-opacity" />
                 <div className="relative w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-amber-400 to-yellow-600 p-0.5 shadow-[0_0_40px_rgba(245,158,11,0.2)] transition-transform group-hover:scale-105 duration-500">
                    <div className="w-full h-full rounded-[2.3rem] bg-[#1a1b23] flex items-center justify-center relative overflow-hidden">
-                       {topThree[0].avatarUrl ? (
-                         <img src={topThree[0].avatarUrl} alt={topThree[0].username} className="w-full h-full object-cover" />
-                       ) : (
-                         <span className="text-3xl font-black text-amber-500 italic relative z-10">{topThree[0].username?.substring(0, 1).toUpperCase()}</span>
-                       )}
+                       <DynamicAvatar avatarId={topThree[0].profile_avatar_id} fallbackText={topThree[0].username} className="w-full h-full" />
                        <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-transparent" />
                        <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
                    </div>
@@ -161,7 +154,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
             </motion.div>
           )}
 
-          {/* 3rd Place: Bronze Nexus */}
+          {/* 3rd Place: Third Top Earner */}
           {topThree[2] && (
             <motion.div 
               initial={{ opacity: 0, y: 100 }}
@@ -172,11 +165,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               <div className="relative group">
                 <div className="absolute inset-0 bg-amber-700 blur-xl opacity-0 group-hover:opacity-40 transition-opacity" />
                 <div className="relative w-18 h-18 rounded-[1.8rem] bg-[#1a1b23] border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-500">
-                  {topThree[2].avatarUrl ? (
-                    <img src={topThree[2].avatarUrl} alt={topThree[2].username} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xl font-black text-amber-700 italic">{topThree[2].username?.substring(0, 1).toUpperCase()}</span>
-                  )}
+                  <DynamicAvatar avatarId={topThree[2].profile_avatar_id} fallbackText={topThree[2].username} className="w-full h-full" />
                 </div>
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-800 rounded-xl flex items-center justify-center text-white border-2 border-[#0A0B0F] shadow-lg">
                   <Medal className="w-4 h-4" />
@@ -198,10 +187,10 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
           )}
         </div>
 
-        {/* Global Telemetry List */}
+        {/* All Users List */}
         <div className="space-y-6">
             <div className="flex items-center gap-4 px-2">
-               <h3 className="text-sm font-black italic uppercase tracking-widest text-slate-500">Node Transmission</h3>
+               <h3 className="text-sm font-black italic uppercase tracking-widest text-slate-500">All Users</h3>
                <div className="h-px flex-1 bg-white/5" />
             </div>
 
@@ -226,17 +215,13 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-[1.1rem] sm:rounded-[1.2rem] bg-gradient-to-br from-white/5 to-white/0 flex items-center justify-center text-white/50 font-black text-xs sm:text-sm border border-white/5 group-hover:text-white transition-colors overflow-hidden">
-                        {user.avatarUrl ? (
-                          <img src={user.avatarUrl} alt={user.username} className="w-full h-full object-cover" />
-                        ) : (
-                          user.username ? user.username.substring(0, 2).toUpperCase() : '??'
-                        )}
+                        <DynamicAvatar avatarId={user.profile_avatar_id} fallbackText={user.username} className="w-full h-full" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-black text-white text-sm sm:text-base tracking-tight uppercase italic truncate">{user.username || 'Unknown Node'}</h3>
+                        <h3 className="font-black text-white text-sm sm:text-base tracking-tight uppercase italic truncate">{user.username || 'Unknown User'}</h3>
                         <div className="flex items-center gap-2 mt-0.5">
                            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-emerald-500" />
-                           <span className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] truncate">Quantum Verified</span>
+                           <span className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] truncate">Verified User</span>
                         </div>
                       </div>
                     </div>
@@ -244,7 +229,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
 
                   <div className="text-right flex-shrink-0">
                     <p className="text-sm sm:text-lg font-black text-amber-500 italic tracking-tighter">Rs {user.balance?.toLocaleString() || 0}</p>
-                    <p className="text-[7px] sm:text-[8px] font-black text-slate-600 uppercase tracking-widest leading-none">Accumulated Yield</p>
+                    <p className="text-[7px] sm:text-[8px] font-black text-slate-600 uppercase tracking-widest leading-none">Total Earning</p>
                   </div>
                 </motion.div>
               ))}

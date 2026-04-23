@@ -86,13 +86,13 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
         </div>
         <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Security Check</h2>
         <p className="text-slate-500 mb-10 max-w-xs text-sm font-medium leading-relaxed">
-          Our analysts are verifying your protocol entry. This usually takes <span className="text-amber-600 font-bold">12-24 cycles</span>.
+          Our team is verifying your payment. This usually takes <span className="text-amber-600 font-bold">12-24 hours</span>.
         </p>
         <button 
           onClick={onBack}
           className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black shadow-2xl active:scale-95 transition-all text-xs uppercase tracking-widest"
         >
-          Return to Hub
+          Return to Dashboard
         </button>
       </motion.div>
     );
@@ -147,7 +147,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
         {/* Feature Comparison Table - Redesigned */}
         <div className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm mb-8">
             <div className="bg-slate-50/50 p-6 border-b border-slate-100">
-                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Protocol Comparison</h3>
+                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Plan Comparison</h3>
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -188,7 +188,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
                 </div>
                 <div>
                     <h3 className="text-lg font-black text-slate-900 tracking-tight">Manual Activation</h3>
-                    <p className="text-[10px] text-amber-600 font-black uppercase tracking-wider">Protocol Fee: Rs {appSettings.partnerFee}</p>
+                    <p className="text-[10px] text-amber-600 font-black uppercase tracking-wider">Account Fee: Rs {appSettings.partnerFee}</p>
                 </div>
             </div>
 
@@ -242,7 +242,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
                     {isSubmitting ? (
                         <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
                     ) : (
-                        <>Iniate Upgrade <ArrowRight className="w-4 h-4 text-amber-500" /></>
+                        <>Buy Plan <ArrowRight className="w-4 h-4 text-amber-500" /></>
                     )}
                 </motion.button>
             </div>

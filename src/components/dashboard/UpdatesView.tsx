@@ -87,12 +87,12 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                         <div className="absolute inset-0 bg-indigo-600 opacity-10 group-hover:opacity-20 transition-opacity" />
                         <div className="absolute inset-x-0 bottom-0 h-0.5 bg-indigo-500 scale-x-0 group-hover:scale-x-100 transition-transform" />
                         <span className="relative text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Mark Sync
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Read All
                         </span>
                     </button>
                 ) : (
                     <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol Clear</span>
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Inbox Clear</span>
                     </div>
                 )}
             </div>
@@ -110,8 +110,8 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                 </div>
                             </div>
                         </div>
-                        <h3 className="text-xl font-black text-white italic tracking-tighter uppercase mb-2">Network Idle</h3>
-                        <p className="text-[10px] font-bold text-slate-500 max-w-[240px] uppercase tracking-widest leading-loose">No incoming telemetry detected. All system nodes are currently in standby mode.</p>
+                        <h3 className="text-xl font-black text-white italic tracking-tighter uppercase mb-2">Inbox Empty</h3>
+                        <p className="text-[10px] font-bold text-slate-500 max-w-[240px] uppercase tracking-widest leading-loose">No new messages from the system. You're all caught up!</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -177,7 +177,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                                             update.type === 'deposit' ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.5)]' :
                                                             'bg-slate-400'
                                                         }`} />
-                                                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{update.type} protocol</span>
+                                                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{update.type}</span>
                                                     </div>
                                                     <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
                                                         {new Date(update.timestamp).toLocaleDateString()}
@@ -206,9 +206,9 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                             <Sparkles className="w-6 h-6" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-[10px] font-black text-white uppercase tracking-widest mb-1 italic">Protocol Tip</p>
+                            <p className="text-[10px] font-black text-white uppercase tracking-widest mb-1 italic">Pro Tip</p>
                             <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-loose">
-                                System logs are auto-purged after 30 days. Maintain high network hygiene for optimal response performance.
+                                System logs are auto-cleared after 30 days to keep your inbox clean.
                             </p>
                         </div>
                     </div>

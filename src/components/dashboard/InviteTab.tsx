@@ -116,113 +116,127 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
     }
   };
 
+  const isDark = role === 'partner';
+
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="pb-32 px-4 pt-4 max-w-4xl mx-auto"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="pb-32 px-4 sm:px-6 pt-2 max-w-2xl mx-auto w-full"
     >
-      {/* --- Simple Premium Header --- */}
-      <div className="relative mb-10 overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-900 to-slate-900 p-8 sm:p-12 text-white shadow-2xl border border-white/5">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] -mr-32 -mt-32"></div>
-        <div className="absolute -bottom-24 -left-24 w-56 h-56 bg-purple-500/10 rounded-full blur-[80px]"></div>
+      {/* Premium Hero Card */}
+      <div className={`relative mb-8 overflow-hidden rounded-[2rem] p-8 sm:p-10 ${isDark ? 'bg-gradient-to-br from-[#1A1A1B] via-[#0A0A0B] to-[#1A1A1B] border-white/10' : 'bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 border-indigo-500/20'} shadow-[0_20px_50px_rgba(0,0,0,0.3)] border`}>
+        {/* Decorative Gradients */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/20 rounded-full blur-[80px] -mr-32 -mt-32 mix-blend-screen pointer-events-none"></div>
+        <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-indigo-500/30 rounded-full blur-[80px] mix-blend-screen pointer-events-none"></div>
         
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div className="flex-1 text-center md:text-left">
-            <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-6"
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-amber-400 mb-6 shadow-xl"
+          >
+              <Zap className="w-3 h-3 text-amber-500 fill-amber-500" /> Supercharged Earnings
+          </motion.div>
+          
+          <h1 className="text-4xl sm:text-5xl font-black mb-4 leading-none tracking-tighter italic text-white uppercase">
+            Invite & <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">Earn</span>
+          </h1>
+          
+          <p className="text-white/60 text-sm font-medium max-w-[280px] mb-8 leading-relaxed">
+            Build your team. Get <strong className="text-white">Rs {currentBonus}</strong> for every direct invite, plus passive rewards.
+          </p>
+
+          {/* Quick Stats in Hero */}
+          <div className="flex items-center justify-center gap-3 w-full">
+            <div className="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col items-center shadow-inner">
+              <span className="text-2xl font-black text-white italic tracking-tighter">Rs {currentBonus}</span>
+              <span className="text-[8px] font-black text-white/40 uppercase tracking-widest mt-1">Direct Bonus</span>
+            </div>
+            <div className="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col items-center relative overflow-hidden shadow-inner">
+              <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-transparent"></div>
+              <span className="text-2xl font-black text-amber-400 italic tracking-tighter relative z-10">Rs {appSettings?.indirectReferralBonus || 20}</span>
+              <span className="text-[8px] font-black text-white/40 uppercase tracking-widest mt-1 relative z-10">Team Bonus</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Referral Link & Actions */}
+      <div className={`mb-8 rounded-[2rem] p-6 shadow-xl border relative overflow-hidden ${isDark ? 'bg-[#0A0A0B] border-white/5' : 'bg-white border-slate-100'}`}>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <label className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-slate-400' : 'text-slate-400'}`}>Your Invite Link</label>
+            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-500'}`}>{referralCode}</span>
+          </div>
+          
+          <div className={`flex items-center p-2 pl-4 rounded-2xl border mb-4 ${isDark ? 'bg-[#151515] border-white/5' : 'bg-slate-50 border-slate-200'}`}>
+            <span className={`flex-1 text-xs sm:text-sm font-semibold truncate mr-3 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+              {referralLink}
+            </span>
+            <button 
+              onClick={handleCopy}
+              className={`h-12 shrink-0 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/30'}`}
             >
-                <Zap className="w-3 h-3" /> Account Active
-            </motion.div>
-            <h1 className="text-4xl sm:text-6xl font-black mb-4 leading-[0.9] tracking-tighter italic">
-                INVITE & <br/>
-                <span className="text-amber-500">EARN.</span>
-            </h1>
-            <p className="text-white/60 text-sm font-medium max-w-sm mb-8 leading-relaxed mx-auto md:mx-0">
-                Invite your friends to TaskMint and earn big bonuses when they join your team.
-            </p>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-              <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                <span className="block text-[8px] uppercase tracking-widest text-white/40 mb-1">Direct Invite</span>
-                <span className="text-xl font-black italic">Rs {currentBonus}</span>
-              </div>
-              <div className="px-5 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                <span className="block text-[8px] uppercase tracking-widest text-white/40 mb-1">Team Bonus</span>
-                <span className="text-xl font-black italic text-indigo-400">Rs {appSettings?.indirectReferralBonus || 20}</span>
-              </div>
-            </div>
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
           </div>
 
-          <div className="w-full md:w-auto flex flex-col items-center">
-            <div className="relative p-1 bg-gradient-to-tr from-amber-500 to-indigo-500 rounded-[2rem] shadow-2xl">
-              <div className="bg-white p-4 rounded-[1.8rem] w-36 h-36 flex flex-col items-center justify-center text-slate-900 group">
-                <UserPlus className="w-12 h-12 text-indigo-600 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-30">{referralCode}</span>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-3">
+            <button 
+              onClick={handleShareWhatsApp} 
+              className="flex items-center justify-center gap-2 h-12 rounded-xl bg-[#25D366] text-white font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-[#25D366]/20"
+            >
+              <MessageCircle className="w-4 h-4 fill-current" /> WhatsApp
+            </button>
+            <button 
+              onClick={handleShare} 
+              className={`flex items-center justify-center gap-2 h-12 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'}`}
+            >
+              <Share2 className="w-4 h-4" /> Share Options
+            </button>
           </div>
         </div>
       </div>
 
-      {/* --- Unified Link Card --- */}
-      <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-slate-100 mb-8 overflow-hidden relative group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1 w-full">
-            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">Your Referral Link</label>
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl p-2 pr-2 shadow-inner">
-              <div className="flex-1 px-4 text-xs font-bold text-slate-500 truncate italic">
-                {referralLink}
-              </div>
-              <button 
-                onClick={handleCopy}
-                className={`h-11 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all shrink-0 ${copied ? 'bg-emerald-500 text-white' : 'bg-slate-900 text-white hover:bg-indigo-600'}`}
-              >
-                {copied ? 'Copied' : 'Copy'}
-              </button>
-            </div>
-          </div>
-          <div className="flex gap-3">
-              <button onClick={handleShareWhatsApp} className="w-11 h-11 rounded-xl bg-[#25D366] text-white flex items-center justify-center shadow-lg hover:scale-110 transition-all"><MessageCircle className="w-5 h-5" /></button>
-              <button onClick={handleShare} className="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-all"><Share2 className="w-5 h-5" /></button>
-          </div>
-        </div>
-      </div>
-
-      {/* --- Stats Engine --- */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+      {/* Network Stats */}
+      <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 pl-2 border-l-2 ${isDark ? 'text-slate-500 border-amber-500' : 'text-slate-400 border-indigo-500'}`}>Live Network Stats</h3>
+      <div className="grid grid-cols-2 gap-3 mb-8">
         {[
-          { label: 'Total Friends', value: referralStats.totalInvited, color: 'text-indigo-600', icon: <Users /> },
-          { label: 'Active', value: referralStats.activeMembers, color: 'text-emerald-600', icon: <Zap /> },
-          { label: 'Total Earnings', value: `Rs ${referralStats.totalCommission}`, color: 'text-amber-600', icon: <Wallet /> },
-          { label: 'Your Level', value: partnerTier.toUpperCase(), color: 'text-indigo-900', icon: <Trophy /> }
+          { label: 'Total Friends', value: referralStats.totalInvited, color: isDark ? 'text-white' : 'text-slate-900', icon: <Users size={16} /> },
+          { label: 'Active Friends', value: referralStats.activeMembers, color: 'text-emerald-500', icon: <Zap size={16} /> },
+          { label: 'Total Invite Income', value: `Rs ${referralStats.totalCommission}`, color: 'text-amber-500', icon: <Wallet size={16} /> },
+          { label: 'Access Tier', value: partnerTier.toUpperCase(), color: 'text-indigo-500', icon: <Trophy size={16} /> }
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-lg flex flex-col justify-center items-center text-center">
-            <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2">{stat.label}</div>
-            <div className={`text-xl font-black italic tracking-tight ${stat.color}`}>{stat.value}</div>
+          <div key={i} className={`p-4 rounded-[1.5rem] border flex flex-col justify-between ${isDark ? 'bg-[#0A0A0B] border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-3 ${isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-50 text-slate-400'}`}>
+              {stat.icon}
+            </div>
+            <div>
+              <div className={`text-lg font-black italic tracking-tighter ${stat.color}`}>{stat.value}</div>
+              <div className={`text-[8px] font-black uppercase tracking-widest mt-0.5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{stat.label}</div>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* --- History Feed --- */}
-      <div className="space-y-6">
+      {/* Activity Feed */}
+      <div className="space-y-4">
         <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-3">
-            <div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div>
-            <h3 className="text-lg font-black text-slate-900 italic tracking-tighter uppercase">Referral <span className="text-indigo-600">History</span></h3>
-          </div>
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            {referrals.length} Friends Joined
+          <h3 className={`text-lg font-black italic tracking-tighter uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            Invite <span className={isDark ? 'text-amber-500' : 'text-indigo-600'}>Log</span>
+          </h3>
+          <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+            {referrals.length} Joined
           </span>
         </div>
 
-        <div className="grid gap-3">
+        <div className="flex flex-col gap-3">
           {referrals.length === 0 ? (
-            <div className="bg-slate-50 border border-slate-200/50 rounded-[2.5rem] p-16 text-center">
-              <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-sm font-black text-slate-400 italic uppercase">No friends joined yet.</p>
+            <div className={`rounded-[2rem] p-12 text-center border border-dashed ${isDark ? 'bg-[#0A0A0B] border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+              <Users className={`w-10 h-10 mx-auto mb-3 opacity-20 ${isDark ? 'text-white' : 'text-slate-900'}`} />
+              <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>No activity yet</p>
             </div>
           ) : (
             referrals.map((r, idx) => (
@@ -230,32 +244,39 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                 key={r.id || idx}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-100 shadow-md flex items-center justify-between gap-4 group hover:border-indigo-100 transition-all"
+                transition={{ delay: idx * 0.05 }}
+                className={`p-4 rounded-3xl border flex items-center justify-between group transition-all ${isDark ? 'bg-[#0A0A0B] border-white/5 hover:bg-white/5' : 'bg-white border-slate-100 shadow-sm hover:border-indigo-100 hover:shadow-md'}`}
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center font-black text-xl shrink-0 transition-all duration-500 group-hover:scale-105 ${r.status === 'paid' ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-300 border border-slate-100'}`}>
+                  <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center font-black text-lg shrink-0 transition-transform group-hover:scale-105 ${r.status === 'paid' ? (isDark ? 'bg-amber-500 text-[#0A0A0B]' : 'bg-indigo-600 text-white') : (isDark ? 'bg-[#151515] text-slate-600 border border-white/5' : 'bg-slate-50 text-slate-400 border border-slate-100')}`}>
                     {r.name ? r.name.substring(0, 1).toUpperCase() : '?'}
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-sm sm:text-base font-black text-slate-900 italic tracking-tighter uppercase truncate mb-1">
+                    <h4 className={`text-sm font-black italic tracking-tighter uppercase truncate mb-0.5 ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
                       {r.name || 'Anonymous User'}
                     </h4>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                        <Clock className="w-2.5 h-2.5" /> {formatDate(r.timestamp)}
-                      </span>
-                    </div>
+                    <span className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                      <Clock className="w-2.5 h-2.5" /> {formatDate(r.timestamp) || 'Recent'}
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
-                    r.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                  }`}>
-                    {r.status === 'paid' ? 'Active' : 'Pending'}
-                  </div>
-                  {r.status === 'paid' && (
-                    <span className="text-base sm:text-lg font-black text-emerald-600 italic tracking-tighter">+Rs {currentBonus}</span>
+                <div className="shrink-0 text-right">
+                  {r.status === 'paid' ? (
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${isDark ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                        Paid
+                      </span>
+                      {r.commission && <span className={`text-xs font-black italic tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'}`}>+Rs {r.commission}</span>}
+                    </div>
+                  ) : r.status === 'rejected' ? (
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${isDark ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-rose-50 text-rose-600 border border-rose-100'}`}>
+                      Invalid
+                    </span>
+                  ) : (
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${isDark ? 'bg-white/5 text-slate-400 border border-white/10' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                      Pending
+                    </span>
                   )}
                 </div>
               </motion.div>

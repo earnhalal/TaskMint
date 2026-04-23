@@ -406,8 +406,8 @@ export default function HomeTab({
                 <Lock className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-black text-rose-900 uppercase tracking-tighter">System Locked</p>
-                <p className="text-[10px] text-rose-600 font-bold">Pay Rs {appSettings.activationFee} to verify node</p>
+                <p className="text-sm font-black text-rose-900 uppercase tracking-tighter">Account Inactive</p>
+                <p className="text-[10px] text-rose-600 font-bold">Pay Rs {appSettings.activationFee} to verify account</p>
               </div>
             </div>
             <div className="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-600 group-hover:translate-x-1 transition-transform">
@@ -458,7 +458,7 @@ export default function HomeTab({
                             </div>
                         )}
                     </div>
-                    <p className="text-indigo-300/40 text-[9px] font-black uppercase tracking-[0.3em] mt-2">Active Protocol Member</p>
+                    <p className="text-indigo-300/40 text-[9px] font-black uppercase tracking-[0.3em] mt-2">Active App Member</p>
                 </div>
               </div>
               <button 
@@ -638,7 +638,7 @@ export default function HomeTab({
               
               <div className="flex items-center justify-between bg-white/5 rounded-2xl p-4 border border-white/10 border-dashed">
                 <div>
-                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Commission Node</p>
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Commission Earned</p>
                   <p className="text-xl font-black text-amber-500 italic">Rs 125.00</p>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">

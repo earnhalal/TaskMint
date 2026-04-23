@@ -6,11 +6,13 @@ import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles } from 'lucide-react';
 
+import { DynamicAvatar } from '../ui/DynamicAvatar';
+
 export default function ProfileTab({ 
   name, 
   email, 
   gender,
-  avatarUrl,
+  profileAvatarId,
   status, 
   role, 
   partnerTier = 'basic',
@@ -33,7 +35,7 @@ export default function ProfileTab({
   name: string, 
   email: string, 
   gender?: string,
-  avatarUrl?: string,
+  profileAvatarId?: string,
   status: string, 
   role: string, 
   partnerTier?: string,
@@ -54,32 +56,8 @@ export default function ProfileTab({
   appSettings?: any
 }) {
   const { user } = useAuth();
-  const [avatar, setAvatar] = React.useState<string | null>(avatarUrl || null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const [showJobsModal, setShowJobsModal] = React.useState(false);
-
-  React.useEffect(() => {
-    if (avatarUrl) {
-      setAvatar(avatarUrl);
-    } else {
-      setAvatar(localStorage.getItem('taskmint_avatar'));
-    }
-  }, [avatarUrl]);
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        localStorage.setItem('taskmint_avatar', base64String);
-        setAvatar(base64String);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
   const handleLogout = async () => {
@@ -144,7 +122,6 @@ export default function ProfileTab({
       animate={{ opacity: 1, y: 0 }}
       className="pb-24"
     >
-      <input type="file" accept="image/*" ref={fileInputRef} onChange={handleAvatarChange} className="hidden" />
       
       {/* Profile Completion Alert */}
       {(!name || !gender || !accountNumber || status.toLowerCase() !== 'active') && (
@@ -211,14 +188,14 @@ export default function ProfileTab({
             <div className="relative z-10 flex flex-col items-center">
                 <div className="w-full flex justify-between items-start mb-8">
                     <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">MINT NODE ID</span>
+                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">USER ID</span>
                         <div className="bg-white/5 backdrop-blur-md rounded-lg px-3 py-1 border border-white/10 flex items-center gap-2">
                             <Fingerprint className="w-3 h-3 text-amber-500" />
                             <span className="text-xs font-black text-white tracking-widest">{referralCode}</span>
                         </div>
                     </div>
                     <div className="flex flex-col items-end">
-                         <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">NETWORK STATUS</span>
+                         <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">ACCOUNT STATUS</span>
                          <div className={`flex items-center gap-2 bg-black/20 px-3 py-1 rounded-lg border ${
                              status.toLowerCase() === 'active' ? 'border-emerald-500/30 text-emerald-400' : 'border-red-500/30 text-red-400'
                          }`}>
@@ -239,18 +216,12 @@ export default function ProfileTab({
                             : 'bg-gradient-to-tr from-indigo-500 via-purple-600 to-indigo-700'
                     }`}>
                         <div className="w-full h-full rounded-[2.3rem] overflow-hidden bg-[#0F172A] flex items-center justify-center border-4 border-black/20">
-                            {avatar ? (
-                                <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="text-4xl font-black text-white italic tracking-tighter">
-                                    {name.substring(0, 2).toUpperCase()}
-                                </div>
-                            )}
+                            <DynamicAvatar avatarId={profileAvatarId} fallbackText={name} className="w-full h-full" />
                         </div>
                     </div>
                     <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="absolute -bottom-1 -right-1 w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-2xl text-slate-900 border-2 border-black/5 active:scale-90 transition-all"
+                        onClick={onEditProfile}
+                        className="absolute -bottom-1 -right-1 w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-2xl text-slate-900 border-2 border-black/5 active:scale-90 transition-all hover:bg-amber-100 hover:text-amber-600"
                     >
                         <PenTool className="w-5 h-5" />
                     </button>
@@ -366,7 +337,7 @@ export default function ProfileTab({
       </Section>
 
       <Section title="Account">
-        <Item icon={<ImageIcon className="w-4 h-4" />} label="Change Avatar" onClick={() => fileInputRef.current?.click()} />
+        <Item icon={<ImageIcon className="w-4 h-4" />} label="Change Avatar" onClick={onEditProfile} />
         <Item icon={<Wallet className="w-4 h-4" />} label="Manage Wallet & PIN" onClick={onManageWalletClick} />
         <Item icon={<Mail className="w-4 h-4" />} label="System Mailbox" onClick={onMailboxClick} />
       </Section>

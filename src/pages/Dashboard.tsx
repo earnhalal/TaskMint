@@ -79,6 +79,7 @@ import ManageWalletView from '../components/dashboard/ManageWalletView';
 import LotteryView from '../components/dashboard/LotteryView';
 import StreakRewardView from '../components/dashboard/StreakRewardView';
 import SpinWheel from '../components/dashboard/SpinWheel';
+import { DynamicAvatar } from '../components/ui/DynamicAvatar';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -93,7 +94,7 @@ export default function Dashboard() {
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
   const [userGender, setUserGender] = useState('');
-  const [userAvatar, setUserAvatar] = useState('');
+  const [profileAvatarId, setProfileAvatarId] = useState('');
   const [withdrawalAccounts, setWithdrawalAccounts] = useState<any[]>([]);
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [joiningDate, setJoiningDate] = useState('');
@@ -202,7 +203,7 @@ export default function Dashboard() {
         setUserEmail(data.email || '');
         setUserPhone(data.phone || '');
         setUserGender(data.gender || '');
-        setUserAvatar(data.avatarUrl || '');
+        setProfileAvatarId(data.profile_avatar_id || '');
         setWithdrawalAccounts(data.withdrawalAccounts || []);
         setTwoFactorAuth(data.twoFactorAuth || false);
         setJoiningDate(data.joiningDate || '');
@@ -448,8 +449,8 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user || !referralCode) return;
 
-    // RTDB paths cannot contain ., #, $, [, or ]
-    const safeRefCode = referralCode.replace(/[.#$\[\]]/g, '');
+    // RTDB paths cannot contain ., #, $, [, ], or /
+    const safeRefCode = referralCode.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
     const invitesRef = ref(rtdb, `invites/${safeRefCode}/history`);
     const unsubscribeReferrals = onValue(invitesRef, async (snapshot) => {
       if (snapshot.exists()) {
@@ -897,7 +898,7 @@ export default function Dashboard() {
           }
 
           if (l1Uid) {
-            const safeParentRef = sanitizedRef.replace(/[.#$\[\]]/g, '');
+            const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
             const referralStatusRef = ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`);
             await update(referralStatusRef, { status: 'rejected' });
           }
@@ -1157,7 +1158,7 @@ export default function Dashboard() {
           }
 
           // Update referral status in RTDB (Replacing Firestore)
-          const safeParentRef = sanitizedRef.replace(/[.#$\[\]]/g, '');
+          const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
           const referralStatusRef = ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`);
           await update(referralStatusRef, { status: 'paid', commission: bonusAmount });
 
@@ -1261,7 +1262,7 @@ export default function Dashboard() {
                  name={userName}
                  email={userEmail}
                  gender={userGender}
-                 avatarUrl={userAvatar}
+                 profileAvatarId={profileAvatarId}
                  status={status}
                  role={role}
                  partnerTier={partnerTier}
@@ -1305,7 +1306,7 @@ export default function Dashboard() {
                  email={userEmail}
                  phone={userPhone}
                  gender={userGender}
-                 avatarUrl={userAvatar}
+                 profileAvatarId={profileAvatarId}
                  accountNumber={withdrawalAccounts[0]?.number || ''}
                  accountTitle={withdrawalAccounts[0]?.title || ''}
                  onBack={() => setActiveTab('profile')} 
@@ -1608,7 +1609,7 @@ export default function Dashboard() {
               </h1>
               <div className={`flex items-center gap-1 ${role === 'partner' ? 'text-amber-500/60' : 'text-indigo-600/40'}`}>
                  <div className="w-1 h-1 rounded-full bg-current"></div>
-                 <span className="text-[8px] font-black uppercase tracking-[0.3em]">Protocol v2</span>
+                 <span className="text-[8px] font-black uppercase tracking-[0.3em]">Version 2.0</span>
               </div>
             </div>
           </div>
@@ -1630,9 +1631,13 @@ export default function Dashboard() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveTab('profile')}
-              className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group ${activeTab === 'profile' ? 'ring-2 ring-amber-500 bg-amber-50' : ''}`}
+              className={`relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group ${activeTab === 'profile' ? 'ring-2 ring-amber-500 bg-amber-50' : ''}`}
             >
-              <UserCircle className={`w-6 h-6 ${role === 'partner' ? 'text-white' : (activeTab === 'profile' ? 'text-amber-600' : 'text-slate-600')} transition-colors group-hover:text-amber-600`} />
+              {profileAvatarId ? (
+                 <DynamicAvatar avatarId={profileAvatarId} fallbackText={userName} />
+              ) : (
+                 <UserCircle className={`w-6 h-6 ${role === 'partner' ? 'text-white' : (activeTab === 'profile' ? 'text-amber-600' : 'text-slate-600')} transition-colors group-hover:text-amber-600`} />
+              )}
             </motion.button>
           </div>
         </div>
@@ -1646,8 +1651,8 @@ export default function Dashboard() {
                   <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/10 rounded-full -mr-24 -mt-24 blur-[80px]"></div>
                   <div className="flex items-center justify-between mb-6 relative z-10">
                     <div className="flex flex-col">
-                      <h3 className="font-black text-xl text-white tracking-tighter italic uppercase">Network Analytics</h3>
-                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Partner Access Protocol</p>
+                      <h3 className="font-black text-xl text-white tracking-tighter italic uppercase">Network Details</h3>
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Partner Access</p>
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                       <Crown className="w-6 h-6 text-amber-500" />
@@ -1708,49 +1713,47 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Floating Modern Tab Bar */}
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
-          <div className="bg-[#0A0A0B]/80 backdrop-blur-2xl border border-white/10 rounded-[32px] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-between relative overflow-hidden">
-             {/* Decorative shine */}
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>
-            
-            {[
-              { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },
-              { id: 'watch', icon: <Tv2 className="w-6 h-6" />, label: 'WATCH' },
-              { id: 'task_wall', icon: <Rocket className="w-6 h-6" />, label: 'SURVEYS' },
-              { id: 'tasks', icon: <Zap className="w-6 h-6" />, label: 'TASKS' },
-              { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PRO' },
-            ].map((tab) => (
-              <button 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-14 relative transition-all duration-300 ${activeTab === tab.id ? 'text-amber-500' : 'text-slate-500 hover:text-slate-300'}`}
-              >
-                {activeTab === tab.id && (
-                  <motion.div 
-                    layoutId="activeTab"
-                    className="absolute inset-0 bg-white/5 rounded-2xl border border-white/5 shadow-inner"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
+        {/* Fixed Bottom Tab Bar */}
+        <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#0A0A0B]/95 border-t border-white/10' : 'bg-white/95 border-t border-slate-200'} backdrop-blur-2xl px-2 pt-2 pb-6 flex items-center justify-around shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-colors duration-500`}>
+          {/* Decorative shine only for partner */}
+          {role === 'partner' && <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>}
+          
+          {[
+            { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },
+            { id: 'watch', icon: <Tv2 className="w-6 h-6" />, label: 'WATCH' },
+            { id: 'task_wall', icon: <Rocket className="w-6 h-6" />, label: 'SURVEYS' },
+            { id: 'tasks', icon: <Zap className="w-6 h-6" />, label: 'TASKS' },
+            { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PRO' },
+          ].map((tab) => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-14 relative transition-all duration-300 ${activeTab === tab.id ? 'text-amber-500' : (role === 'partner' ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600')}`}
+            >
+              {activeTab === tab.id && (
+                <motion.div 
+                  layoutId="activeTab"
+                  className={`absolute inset-0 rounded-2xl border ${role === 'partner' ? 'bg-white/5 border-white/5 shadow-inner' : 'bg-amber-50 border-amber-100'} -mb-4`}
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              
+              <div className={`relative z-10 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-1' : ''}`}>
+                {activeTab === tab.id && role === 'partner' && (
+                  <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full"></div>
                 )}
-                
-                <div className={`relative z-10 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-1' : ''}`}>
-                  {activeTab === tab.id && (
-                    <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full"></div>
-                  )}
-                  {tab.icon}
-                </div>
-                
-                <span className={`relative z-10 text-[9px] font-black uppercase tracking-[0.2em] leading-none text-center transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-105' : 'opacity-40'}`}>
-                  {tab.label}
-                </span>
+                {tab.icon}
+              </div>
+              
+              <span className={`relative z-10 text-[9px] font-black uppercase tracking-[0.2em] leading-none text-center transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-105' : 'opacity-80'}`}>
+                {tab.label}
+              </span>
 
-                {activeTab === tab.id && (
-                  <div className="absolute bottom-1 w-1 h-1 bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,1)]"></div>
-                )}
-              </button>
-            ))}
-          </div>
+              {activeTab === tab.id && (
+                <div className={`absolute -bottom-2 w-1.5 h-1.5 rounded-full ${role === 'partner' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,1)]' : 'bg-amber-500'}`}></div>
+              )}
+            </button>
+          ))}
         </div>
 
         {/* Global Shimmer Keyframe */}

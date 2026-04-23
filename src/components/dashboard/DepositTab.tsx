@@ -131,12 +131,12 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
                <Wallet className="w-3 h-3" /> Secure Gateway
             </div>
             <h2 className="text-4xl font-black text-white tracking-tighter mb-3 italic">
-              {type === 'activation' ? 'Initiate <span className="text-emerald-500">Activation</span>' : 'Reload <span className="text-emerald-500">Assets</span>'}
+              {type === 'activation' ? 'Initiate Activation' : 'Add Cash'}
             </h2>
             <p className="text-slate-400 text-sm max-w-sm font-medium leading-relaxed">
               {type === 'activation' 
-                ? `Unlock full potential of the platform by paying a one-time Rs ${appSettings.activationFee} protocol fee.` 
-                : 'Inject funds into your secure wallet for upgrades and task generation.'}
+                ? `Unlock full potential of the platform by paying a one-time Rs ${appSettings.activationFee} account fee.` 
+                : 'Add funds into your wallet.'}
             </p>
           </div>
           
@@ -155,7 +155,7 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
             <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100/50 relative group">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h3 className="font-black text-slate-900 text-xl tracking-tight italic">01. Select Node</h3>
+                        <h3 className="font-black text-slate-900 text-xl tracking-tight italic">01. Source Account</h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Available Payment Channels</p>
                     </div>
                 </div>
