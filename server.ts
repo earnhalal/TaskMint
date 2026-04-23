@@ -185,7 +185,7 @@ async function startServer() {
   });
 
   // API route for Wannads postback
-  app.get("/api/postback/wannads", async (req, res) => {
+  app.all("/api/postback/wannads", async (req, res) => {
     console.log("--- Wannads Postback Received ---");
     
     // Parameters: user_id, amount, status, trans_id, sig
