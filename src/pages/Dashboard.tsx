@@ -448,7 +448,9 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user || !referralCode) return;
 
-    const invitesRef = ref(rtdb, `invites/${referralCode}/history`);
+    // RTDB paths cannot contain ., #, $, [, or ]
+    const safeRefCode = referralCode.replace(/[.#$\[\]]/g, '');
+    const invitesRef = ref(rtdb, `invites/${safeRefCode}/history`);
     const unsubscribeReferrals = onValue(invitesRef, async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
@@ -895,7 +897,8 @@ export default function Dashboard() {
           }
 
           if (l1Uid) {
-            const referralStatusRef = ref(rtdb, `invites/${l1Uid}/history/${targetUserId}`);
+            const safeParentRef = sanitizedRef.replace(/[.#$\[\]]/g, '');
+            const referralStatusRef = ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`);
             await update(referralStatusRef, { status: 'rejected' });
           }
         }
@@ -1154,7 +1157,8 @@ export default function Dashboard() {
           }
 
           // Update referral status in RTDB (Replacing Firestore)
-          const referralStatusRef = ref(rtdb, `invites/${l1Uid}/history/${targetUserId}`);
+          const safeParentRef = sanitizedRef.replace(/[.#$\[\]]/g, '');
+          const referralStatusRef = ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`);
           await update(referralStatusRef, { status: 'paid', commission: bonusAmount });
 
           // Update referrer stats in Firestore
