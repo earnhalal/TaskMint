@@ -52,39 +52,41 @@ async function startServer() {
       // return res.status(403).send("Forbidden");
     }
 
-    const { subid: uid, virtual_currency: amount, transaction_id: lead_id } = req.query;
+    const { subid, virtual_currency, transaction_id } = req.query;
 
-    if (!uid || !amount || !lead_id) {
+    if (!subid || !virtual_currency || !transaction_id) {
         console.error("Missing required parameters in CPALead postback");
         return res.status(400).send("Missing parameters");
     }
+
+    console.log('Updating balance for:', subid, 'Amount:', virtual_currency);
 
     try {
         const firestore = getDb();
         const rtdbAdmin = admin.database();
 
         // 1. Log transaction to /leads/{lead_id} path in RTDB to prevent duplicate
-        const leadRef = rtdbAdmin.ref(`leads/${lead_id}`);
+        const leadRef = rtdbAdmin.ref(`leads/${transaction_id}`);
         const leadSnapshot = await leadRef.once('value');
         
         if (leadSnapshot.exists()) {
-            console.log(`Duplicate lead detected: ${lead_id}`);
+            console.log(`Duplicate lead detected: ${transaction_id}`);
             return res.status(200).send('1'); // Return 1 to stop multiple processing
         }
 
         await leadRef.set({
-            uid,
-            amount: parseFloat(amount as string),
+            subid,
+            amount: parseFloat(virtual_currency as string),
             timestamp: admin.database.ServerValue.TIMESTAMP
         });
 
         // 2. Update user's credit_balance in Realtime Database
-        const userBalanceRef = rtdbAdmin.ref(`users/${uid}/credit_balance`);
+        const userBalanceRef = rtdbAdmin.ref(`users/${subid}/credit_balance`);
         await userBalanceRef.transaction((currentBalance) => {
-            return (currentBalance || 0) + parseFloat(amount as string);
+            return (currentBalance || 0) + parseFloat(virtual_currency as string);
         });
 
-        console.log(`Successfully credited ${amount} to user ${uid}`);
+        console.log(`Successfully credited ${virtual_currency} to user ${subid}`);
 
         // Response must be strictly '1'
         res.status(200).send('1');
