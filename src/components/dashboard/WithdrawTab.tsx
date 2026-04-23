@@ -18,6 +18,7 @@ interface WithdrawTabProps {
   onEditAccount: () => void;
   accounts: Account[];
   manualWithdrawUnlock?: boolean;
+  isPartner?: boolean;
 }
 
 const CardChip = () => (
@@ -30,7 +31,7 @@ const CardChip = () => (
     </div>
 );
 
-export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts, manualWithdrawUnlock = false }: WithdrawTabProps) {
+export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts, manualWithdrawUnlock = false, isPartner = false }: WithdrawTabProps) {
   const [amount, setAmount] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
   const [error, setError] = useState('');
@@ -48,11 +49,13 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
 
     const isWindow1 = day >= 1 && day <= 3;
     const isWindow2 = day >= 16 && day <= 18;
-    const isOpen = isWindow1 || isWindow2 || manualWithdrawUnlock;
+    const isOpen = isWindow1 || isWindow2 || manualWithdrawUnlock || isPartner;
 
     let nextWindowText = "";
     if (manualWithdrawUnlock) {
       nextWindowText = "Admin Access Granted";
+    } else if (isPartner) {
+      nextWindowText = "Instant Partner Access Active";
     } else if (day <= 3) {
       nextWindowText = "Window: 1st - 3rd " + now.toLocaleString('default', { month: 'short' });
     } else if (day <= 18) {
@@ -172,6 +175,12 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                 <h3 className="text-2xl font-black text-white italic uppercase tracking-tight">
                   {windowInfo.nextWindowText}
                 </h3>
+                {isPartner && (
+                  <div className="flex items-center gap-1.5 bg-amber-500/10 w-fit px-2 py-0.5 rounded-lg border border-amber-500/20">
+                    <Zap className="w-2.5 h-2.5 text-amber-500 animate-pulse fill-amber-500" />
+                    <span className="text-[8px] font-black uppercase text-amber-500 tracking-wider">Instant Payout Active</span>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-2">

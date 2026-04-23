@@ -61,6 +61,7 @@ interface HomeTabProps {
   onEasyTaskClick: () => void;
   onSocialTaskPlusClick: () => void;
   onOfferWallClick: () => void;
+  onPartnerToolsClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
   appSettings: {
     activationFee: number;
@@ -183,6 +184,7 @@ export default function HomeTab({
   onEasyTaskClick,
   onSocialTaskPlusClick,
   onOfferWallClick,
+  onPartnerToolsClick,
   onUpdateBalance,
   appSettings,
   appBonusClaimed,
@@ -609,6 +611,13 @@ export default function HomeTab({
             colorClass="bg-gradient-to-br from-[#5ee7df] to-[#b490ca]" 
             shadowColor="shadow-indigo-500/40"
             labelColor="text-blue-900" delay={1000}
+          />
+          <QuickActionBtn 
+            icon={<Crown />} label="Partner Tools" 
+            onClick={onPartnerToolsClick} 
+            colorClass="bg-gradient-to-br from-[#8e2de2] to-[#4a00e0]" 
+            shadowColor="shadow-purple-700/40"
+            labelColor="text-[#8e2de2]" delay={1100}
           />
         </div>
       </div>

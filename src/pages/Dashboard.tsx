@@ -79,6 +79,7 @@ import ManageWalletView from '../components/dashboard/ManageWalletView';
 import LotteryView from '../components/dashboard/LotteryView';
 import StreakRewardView from '../components/dashboard/StreakRewardView';
 import SpinWheel from '../components/dashboard/SpinWheel';
+import PartnerToolsView from '../components/dashboard/PartnerToolsView';
 import { DynamicAvatar } from '../components/ui/DynamicAvatar';
 
 export default function Dashboard() {
@@ -1187,9 +1188,9 @@ export default function Dashboard() {
         setStatus('Active');
       }
       
-      alert("User activated and commissions distributed successfully!");
+      alert("Member activated and commissions distributed successfully!");
     } catch (error) {
-      console.error("Error activating user:", error);
+      console.error("Error activating member:", error);
       alert("Error during activation. Check console for details.");
     }
   };
@@ -1370,6 +1371,7 @@ export default function Dashboard() {
           onEditAccount={() => setActiveTab('manage_wallet')}
           accounts={withdrawalAccounts}
           manualWithdrawUnlock={manualWithdrawUnlock}
+          isPartner={role === 'partner'}
         />;
       case 'deposit':
         return <DepositTab
@@ -1446,6 +1448,17 @@ export default function Dashboard() {
         />;
       case 'leaderboard':
         return <LeaderboardView earners={topEarners} onBack={() => setActiveTab('home')} />;
+      case 'partner_tools':
+        return <PartnerToolsView 
+                 onBack={() => setActiveTab('home')} 
+                 role={role} 
+                 partnerTier={partnerTier} 
+                 onGoToWithdraw={() => setActiveTab('withdraw')}
+                 onGoToLottery={() => setActiveTab('lottery')}
+                 referrals={partnerReferrals}
+                 referralStats={referralStats}
+                 onApproveMember={handleActivateUser}
+               />;
       // Add other tabs as needed
       default:
         return <HomeTab 
@@ -1473,6 +1486,7 @@ export default function Dashboard() {
           onSocialTaskPlusClick={() => setActiveTab('social_task_plus')}
           onEasyTaskClick={() => setActiveTab('wannads')}
           onOfferWallClick={() => setActiveTab('cpalead')}
+          onPartnerToolsClick={() => setActiveTab('partner_tools')}
           onUpdateBalance={handleUpdateBalance}
           appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}
@@ -1486,7 +1500,7 @@ export default function Dashboard() {
       {!isProfileLoaded && (
         <div className="absolute inset-0 z-[200] bg-white flex flex-col items-center justify-center">
           <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mb-4"></div>
-          <p className="text-xs font-black text-slate-900 uppercase tracking-widest animate-pulse">Loading Profile...</p>
+          <p className="text-xs font-black text-slate-900 uppercase tracking-widest animate-pulse">Loading Member Profile...</p>
         </div>
       )}
       {/* Referral Update Notification */}

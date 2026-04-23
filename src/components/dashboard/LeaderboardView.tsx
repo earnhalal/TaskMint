@@ -55,7 +55,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
             </button>
             <div>
               <h2 className="text-2xl font-black italic tracking-tighter uppercase leading-none">
-                Global <span className="text-amber-500">User</span> Rankings
+                Global <span className="text-amber-500">Member</span> Rankings
               </h2>
               <div className="flex items-center gap-2 mt-1">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />

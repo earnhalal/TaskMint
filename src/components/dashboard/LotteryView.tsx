@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Ticket, Trophy, Users, Clock, CheckCircle2, AlertCircle, Sparkles, Star, Crown, Flame, ArrowRight, Zap, Shield, Lock } from 'lucide-react';
-import { collection, onSnapshot, query, where, addDoc, serverTimestamp, doc, updateDoc, increment, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, addDoc, serverTimestamp, doc, updateDoc, increment, orderBy, limit, getDocs, getDoc } from 'firebase/firestore';
 import { db, auth, rtdb } from '../../firebase';
 import { ref, update, increment as rtdbIncrement } from 'firebase/database';
+import { DynamicAvatar } from '../ui/DynamicAvatar';
 
 interface LotteryViewProps {
   onBack: () => void;
@@ -24,6 +25,7 @@ interface Lottery {
 }
 
 interface Winner {
+  userId: string;
   userName: string;
   prize: number;
   lotteryName: string;
@@ -35,7 +37,58 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
   const [joinedLotteries, setJoinedLotteries] = useState<string[]>([]);
   const [pastWinners, setPastWinners] = useState<Winner[]>([]);
   const [recentEntries, setRecentEntries] = useState<any[]>([]);
+  const [resolvedNames, setResolvedNames] = useState<Record<string, string>>({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [freeTickets, setFreeTickets] = useState(0);
+
+  useEffect(() => {
+    const resolveGenericNames = async () => {
+      const allItems = [...pastWinners, ...recentEntries];
+      const genericItems = allItems.filter(item => 
+        item && item.userId && (
+          !item.userName || 
+          item.userName === 'Member' || 
+          item.userName.toLowerCase() === 'user' ||
+          item.userName.toLowerCase() === 'member'
+        )
+      );
+      
+      if (genericItems.length === 0) return;
+
+      const newResolved = { ...resolvedNames };
+      let changed = false;
+
+      for (const item of genericItems) {
+        if (item.userId && !newResolved[item.userId]) {
+          try {
+            // Use a local variable to check firestore doc to avoid redundant requests in short time
+            const userDoc = await getDocs(query(collection(db, 'users'), where('__name__', '==', item.userId)));
+            if (!userDoc.empty) {
+              const data = userDoc.docs[0].data();
+              const username = data.username || data.name;
+              if (username && username.toLowerCase() !== 'user') {
+                newResolved[item.userId] = username;
+                changed = true;
+              }
+            }
+          } catch (e) {
+            console.error("Error resolving name:", e);
+          }
+        }
+      }
+
+      if (changed) {
+        setResolvedNames(newResolved);
+      }
+    };
+
+    resolveGenericNames();
+  }, [pastWinners, recentEntries]);
+
+  // Helper to get the best name
+  const getDisplayName = (item: any) => {
+    return resolvedNames[item.userId] || item.userName || item.username || 'Member';
+  };
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -59,9 +112,16 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
         setJoinedLotteries(ids);
       });
 
+      const unsubscribeUser = onSnapshot(doc(db, 'users', auth.currentUser.uid), (doc) => {
+        if (doc.exists()) {
+          setFreeTickets(doc.data().freeLotteryTickets || 0);
+        }
+      });
+
       return () => {
         unsubscribeLotteries();
         unsubscribeEntries();
+        unsubscribeUser();
       };
     }
 
@@ -76,7 +136,16 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
       limit(10)
     );
     const unsubscribeWinners = onSnapshot(winnersQuery, (snapshot) => {
-      const winners = snapshot.docs.map(doc => doc.data() as Winner);
+      const winners = snapshot.docs.map(doc => {
+        const data = doc.data();
+        let name = data.userName || data.username || 'Member';
+        if (name.toLowerCase() === 'user') name = 'Member';
+        return {
+          userId: data.userId || '',
+          ...data,
+          userName: name
+        } as Winner;
+      });
       setPastWinners(winners);
     });
 
@@ -87,7 +156,16 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
       limit(10)
     );
     const unsubscribeRecent = onSnapshot(recentQuery, (snapshot) => {
-      const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const entries = snapshot.docs.map(doc => {
+        const data = doc.data();
+        let name = data.userName || data.username || 'Member';
+        if (name.toLowerCase() === 'user') name = 'Member';
+        return {
+          id: doc.id,
+          ...data,
+          userName: name
+        };
+      });
       setRecentEntries(entries);
     });
 
@@ -100,15 +178,31 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
   const handleJoin = async (lottery: Lottery) => {
     if (!auth.currentUser) return;
     
-    if (balance < lottery.fee) {
-      setErrorMsg(`Insufficient balance. You need Rs ${lottery.fee} to join.`);
-      setTimeout(() => setErrorMsg(''), 3000);
-      return;
-    }
-
     try {
+      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+      const userData = userDoc.exists() ? userDoc.data() : {};
+      const freeTickets = userData.freeLotteryTickets || 0;
+      const latestName = userData.username || null;
+
+      if (freeTickets <= 0 && balance < lottery.fee) {
+        setErrorMsg(`Insufficient balance. You need Rs ${lottery.fee} to join.`);
+        setTimeout(() => setErrorMsg(''), 3000);
+        return;
+      }
+      
       const storedName = localStorage.getItem('taskmint_name');
-      const entryName = userName || storedName || auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || 'Member';
+      const authName = auth.currentUser.displayName || auth.currentUser.email?.split('@')[0];
+      
+      const entryName = (latestName && latestName !== 'user' && latestName !== 'User') 
+        ? latestName 
+        : (userName && userName !== 'user' && userName !== 'User') 
+        ? userName 
+        : (storedName && storedName !== 'user' && storedName !== 'User')
+        ? storedName
+        : (authName && authName !== 'user' && authName !== 'User')
+        ? authName
+        : 'Member';
+        
       const userAvatar = localStorage.getItem('taskmint_avatar') || '';
       
       await addDoc(collection(db, 'lottery_entries'), {
@@ -119,7 +213,13 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
         timestamp: serverTimestamp()
       });
 
-      await onUpdateBalance(-lottery.fee);
+      if (freeTickets > 0) {
+        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+          freeLotteryTickets: increment(-1)
+        });
+      } else {
+        await onUpdateBalance(-lottery.fee);
+      }
       
       const newMemberCount = lottery.currentMembers + 1;
 
@@ -157,7 +257,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
             lotteryId: lottery.id,
             lotteryName: `Mega Draw (Rs ${lottery.prizePool})`,
             userId: winner.userId,
-            userName: winner.userName || 'Member', 
+            userName: winner.userName || winner.username || 'Member', 
             userAvatar: winner.userAvatar || '',
             prize: lottery.prizePool,
             timestamp: serverTimestamp()
@@ -170,7 +270,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
               title: uid === winner.userId ? '🎉 You won the Lottery!' : 'Lottery Results',
               message: uid === winner.userId 
                 ? `Congratulations! You won Rs ${lottery.prizePool} in the Mega Draw!` 
-                : `The Mega Draw has ended. ${winner.userName || 'Someone'} won the prize. Better luck next time!`,
+                : `The Mega Draw has ended. ${winner.userName || winner.username || 'Someone'} won the prize. Better luck next time!`,
               type: 'lottery',
               status: 'unread',
               timestamp: serverTimestamp()
@@ -254,6 +354,18 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
             <div className="bg-white/5 backdrop-blur-xl p-6 sm:p-8 rounded-[3rem] border border-white/10 shadow-inner shrink-0 text-center w-full md:w-auto">
                <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-2">Available Balance</p>
                <p className="text-3xl sm:text-4xl font-black text-white italic tracking-tighter mb-4">Rs {balance.toLocaleString()}</p>
+               
+               {freeTickets > 0 && (
+                 <motion.div 
+                   initial={{ opacity: 0, y: 10 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   className="mb-4 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-2xl flex items-center justify-center gap-2"
+                 >
+                   <Crown className="w-3 h-3 text-amber-500" />
+                   <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Free Tickets Available: {freeTickets}</span>
+                 </motion.div>
+               )}
+
                <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto border border-indigo-500/30 text-indigo-400">
                   <Ticket className="w-7 h-7" />
                </div>
@@ -408,7 +520,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                     </>
                                 ) : (
                                     <>
-                                        <Zap className="w-4 h-4 fill-current" /> Join Now
+                                        <Zap className="w-4 h-4 fill-current" /> {freeTickets > 0 ? "Free Entry" : "Join Now"}
                                     </>
                                 )}
                             </motion.button>
@@ -441,15 +553,15 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 className="flex items-center justify-between p-5 hover:bg-slate-50 transition-all rounded-[1.5rem] group"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-sm overflow-hidden">
-                                        {entry.userAvatar ? (
-                                          <img src={entry.userAvatar} alt={entry.userName} className="w-full h-full object-cover" />
-                                        ) : (
-                                          entry.userName?.substring(0, 2).toUpperCase() || '??'
-                                        )}
+                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shadow-sm overflow-hidden border border-slate-200">
+                                        <DynamicAvatar 
+                                          avatarId={entry.userAvatar} 
+                                          fallbackText={getDisplayName(entry)} 
+                                          className="w-full h-full" 
+                                        />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-black text-slate-900 italic tracking-tight">{entry.userName}</p>
+                                        <p className="text-xs font-black text-slate-900 italic tracking-tight">{getDisplayName(entry)}</p>
                                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Acquired Entry</p>
                                     </div>
                                 </div>
@@ -479,17 +591,17 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                             <div key={i} className="flex items-center justify-between p-6 hover:bg-white/5 transition-all rounded-[1.5rem] border border-transparent hover:border-white/5">
                                 <div className="flex items-center gap-5">
                                     <div className="relative">
-                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center border border-white/10 shadow-2xl shadow-amber-500/20 overflow-hidden">
-                                            {winner.userAvatar ? (
-                                              <img src={winner.userAvatar} alt={winner.userName} className="w-full h-full object-cover opacity-80" />
-                                            ) : (
-                                              <Trophy className="w-7 h-7 text-white" />
-                                            )}
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center border border-white/10 shadow-2xl shadow-amber-500/20 overflow-hidden p-0.5">
+                                            <DynamicAvatar 
+                                              avatarId={winner.userAvatar} 
+                                              fallbackText={getDisplayName(winner)} 
+                                              className="w-full h-full" 
+                                            />
                                         </div>
                                         <Star className="absolute -top-2 -right-2 w-5 h-5 text-amber-400 fill-current" />
                                     </div>
                                     <div>
-                                        <p className="text-lg font-black text-white italic tracking-tighter">{winner.userName}</p>
+                                        <p className="text-lg font-black text-white italic tracking-tighter">{getDisplayName(winner)}</p>
                                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1 italic truncate max-w-[120px]">{winner.lotteryName}</p>
                                     </div>
                                 </div>
