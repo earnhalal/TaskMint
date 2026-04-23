@@ -13,34 +13,34 @@ const tiers = [
 
 const tierPrizes: Record<number, any[]> = {
   5: [
-    { id: 0, label: 'Rs. 1', subLabel: 'Cash', probability: 35, value: 1 },
-    { id: 1, label: 'Try Again', subLabel: '', probability: 35, value: 0 },
-    { id: 2, label: 'Rs. 5', subLabel: 'Cash', probability: 15, value: 5 },
-    { id: 3, label: 'Rs. 10', subLabel: 'Cash', probability: 8, value: 10 },
-    { id: 4, label: 'Rs. 20', subLabel: 'Cash', probability: 4, value: 20 },
-    { id: 5, label: 'Rs. 40', subLabel: 'Cash', probability: 2, value: 40 },
-    { id: 6, label: 'Rs. 50', subLabel: 'Cash', probability: 1, value: 50 },
-    { id: 7, label: 'Try Again', subLabel: '', probability: 0, value: 0 },
+    { id: 0, label: 'Rs. 1', subLabel: 'Cash', probability: 0.0001, value: 1 },
+    { id: 1, label: 'Try Again', subLabel: '', probability: 49.999, value: 0 },
+    { id: 2, label: 'Rs. 5', subLabel: 'Cash', probability: 0.0001, value: 5 },
+    { id: 3, label: 'Rs. 10', subLabel: 'Cash', probability: 0.0001, value: 10 },
+    { id: 4, label: 'Rs. 20', subLabel: 'Cash', probability: 0.0001, value: 20 },
+    { id: 5, label: 'Rs. 40', subLabel: 'Cash', probability: 0.0001, value: 40 },
+    { id: 6, label: 'Rs. 50', subLabel: 'Cash', probability: 0.0001, value: 50 },
+    { id: 7, label: 'Try Again', subLabel: '', probability: 50.0004, value: 0 },
   ],
   50: [
-    { id: 0, label: 'Rs. 50', subLabel: 'Cash', probability: 40, value: 50 },
-    { id: 1, label: 'Rs. 80', subLabel: 'Cash', probability: 30, value: 80 },
-    { id: 2, label: 'Rs. 100', subLabel: 'Cash', probability: 20, value: 100 },
-    { id: 3, label: 'Rs. 150', subLabel: 'Cash', probability: 8, value: 150 },
-    { id: 4, label: 'Rs. 200', subLabel: 'Cash', probability: 0.8, value: 200 },
-    { id: 5, label: 'Rs. 300', subLabel: 'Cash', probability: 0.7, value: 300 },
-    { id: 6, label: 'Rs. 400', subLabel: 'Cash', probability: 0.5, value: 400 },
-    { id: 7, label: 'Try Again', subLabel: '', probability: 0, value: 0 },
+    { id: 0, label: 'Rs. 50', subLabel: 'Cash', probability: 0.0001, value: 50 },
+    { id: 1, label: 'Rs. 80', subLabel: 'Cash', probability: 0.0001, value: 80 },
+    { id: 2, label: 'Rs. 100', subLabel: 'Cash', probability: 0.0001, value: 100 },
+    { id: 3, label: 'Rs. 150', subLabel: 'Cash', probability: 0.0001, value: 150 },
+    { id: 4, label: 'Rs. 200', subLabel: 'Cash', probability: 0.0001, value: 200 },
+    { id: 5, label: 'Rs. 300', subLabel: 'Cash', probability: 0.0001, value: 300 },
+    { id: 6, label: 'Rs. 400', subLabel: 'Cash', probability: 0.0001, value: 400 },
+    { id: 7, label: 'Try Again', subLabel: '', probability: 99.9993, value: 0 },
   ],
   100: [
-    { id: 0, label: 'Rs. 500', subLabel: 'Cash', probability: 0.0002, value: 500 },
-    { id: 1, label: 'Rs. 800', subLabel: 'Cash', probability: 0.0002, value: 800 },
-    { id: 2, label: 'Rs. 1000', subLabel: 'Cash', probability: 0.0002, value: 1000 },
-    { id: 3, label: 'Rs. 2000', subLabel: 'Cash', probability: 0.0002, value: 2000 },
+    { id: 0, label: 'Rs. 500', subLabel: 'Cash', probability: 0.0001, value: 500 },
+    { id: 1, label: 'Rs. 800', subLabel: 'Cash', probability: 0.0001, value: 800 },
+    { id: 2, label: 'Rs. 1000', subLabel: 'Cash', probability: 0.0001, value: 1000 },
+    { id: 3, label: 'Rs. 2000', subLabel: 'Cash', probability: 0.0001, value: 2000 },
     { id: 4, label: 'Rs. 3000', subLabel: 'Cash', probability: 0.0001, value: 3000 },
     { id: 5, label: 'Rs. 5000', subLabel: 'Cash', probability: 0.0001, value: 5000 },
-    { id: 6, label: 'Free Spin', subLabel: '', probability: 40, value: -1 }, // -1 for free spin
-    { id: 7, label: 'Try Again', subLabel: '', probability: 59.999, value: 0 },
+    { id: 6, label: 'Free Spin', subLabel: '', probability: 0.0001, value: -1 }, // -1 for free spin
+    { id: 7, label: 'Try Again', subLabel: '', probability: 99.9993, value: 0 },
   ]
 };
 
@@ -147,12 +147,6 @@ export default function SpinWheel({
     if (isSpinning || !auth.currentUser) return;
     setErrorMsg('');
 
-    // Lock 50 and 100 PKR tiers as requested
-    if (activeTier === 50 || activeTier === 100) {
-      setErrorMsg("Currently unavailable. Please try again later!");
-      return;
-    }
-
     const cost = isPaid ? activeTier : 0;
 
     if (isPaid) {
@@ -168,10 +162,10 @@ export default function SpinWheel({
     }
 
     // RTDB Quota Check
+    const today = new Date().toDateString();
     const spinRef = ref(rtdb, `users/${auth.currentUser.uid}/spins`);
     const snapshot = await get(spinRef);
     const spinData = snapshot.val();
-    const today = new Date().toDateString();
 
     if (spinData && spinData.lastSpinTime === today && spinData.count >= 20) {
         setErrorMsg("Daily spin quota reached! Try again tomorrow.");
@@ -179,7 +173,7 @@ export default function SpinWheel({
     }
     
     if (isPaid) {
-      onUpdateBalance(-cost);
+      onUpdateBalance(-cost, 'spin', `Paid ${cost} PKR for Helix Spin`);
     } else {
       onUseFreeSpin();
     }
@@ -315,7 +309,7 @@ export default function SpinWheel({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pb-32 max-w-4xl mx-auto px-4 pt-6"
+      className="pb-32 max-w-4xl mx-auto px-4 pt-6 perspective-[2000px]"
     >
       {/* Premium Header */}
       <div className="flex items-center justify-between mb-10">
@@ -330,7 +324,7 @@ export default function SpinWheel({
             <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2">
               Helix <span className="text-amber-500">Spinner</span> <Sparkles className="w-6 h-6 text-amber-500 animate-pulse" />
             </h2>
-            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Protocol Yield Engine</p>
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">3D Quantum Yield Engine</p>
           </div>
         </div>
         
@@ -345,7 +339,7 @@ export default function SpinWheel({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-        {/* Left: The Quantum Wheel */}
+        {/* Left: The 3D Quantum Wheel */}
         <div className="lg:col-span-7 flex flex-col items-center">
             {/* Live Winners Ticker */}
             <div className="w-full bg-[#0A0B0F] rounded-full py-2.5 px-8 mb-12 border border-white/5 overflow-hidden relative shadow-2xl">
@@ -370,92 +364,99 @@ export default function SpinWheel({
                  </motion.div>
             </div>
 
-            {/* Wheel Container */}
-            <div className="relative">
+            {/* 3D Wheel Container */}
+            <div className="relative pt-12 pb-20 group" style={{ perspective: '1200px' }}>
                 {/* Outer Portal Glow */}
-                <div className={`absolute inset-[-40px] rounded-full blur-[80px] opacity-20 transition-all duration-1000 ${activeTier === 100 ? 'bg-amber-500' : activeTier === 50 ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
+                <div className={`absolute inset-[-60px] rounded-full blur-[100px] opacity-20 transition-all duration-1000 ${activeTier === 100 ? 'bg-amber-500' : activeTier === 50 ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
                 
-                {/* Pointer */}
-                <div className="absolute top-[-25px] left-1/2 -translate-x-1/2 z-50 transform pointer-events-none">
+                {/* Pointer (3D Pin) */}
+                <div className="absolute top-[20px] left-1/2 -translate-x-1/2 z-[60] transform group-hover:scale-110 transition-transform duration-500">
                     <div className="relative">
-                        <div className="absolute inset-[-10px] bg-white blur-2xl opacity-30 animate-pulse"></div>
-                        <div className="w-12 h-14 bg-white rounded-t-full rounded-b-xl shadow-[0_15px_40px_rgba(0,0,0,0.15)] flex items-center justify-center border-2 border-slate-100 relative">
-                            <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+                        <div className="absolute inset-[-15px] bg-white blur-3xl opacity-40 animate-pulse"></div>
+                        <div className="w-14 h-16 bg-white rounded-t-full rounded-b-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex items-center justify-center border-4 border-slate-50 relative overflow-hidden">
+                            <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-slate-100 to-transparent"></div>
+                            <div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.8)] z-10"></div>
                         </div>
                     </div>
                 </div>
 
-                {/* The Physical Wheel */}
-                <div className="relative p-5 bg-white rounded-full shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)] border-[16px] border-slate-50">
-                    <motion.div 
-                        animate={{ rotate: rotation }}
-                        transition={{ duration: 5, ease: [0.15, 0.85, 0.1, 1] }}
-                        className="relative rounded-full overflow-hidden shadow-inner flex items-center justify-center bg-[#0A0B0F]"
-                        style={{ width: 340, height: 340 }}
-                    >
-                        {/* SVG Segments */}
-                        <svg width="100%" height="100%" viewBox="0 0 100 100" className="transform -rotate-90">
-                            {currentSegments.map((seg, i) => {
-                                const angle = 360 / currentSegments.length;
-                                const startAngle = i * angle;
-                                const x1 = 50 + 50 * Math.cos((startAngle * Math.PI) / 180);
-                                const y1 = 50 + 50 * Math.sin((startAngle * Math.PI) / 180);
-                                const x2 = 50 + 50 * Math.cos(((startAngle + angle) * Math.PI) / 180);
-                                const y2 = 50 + 50 * Math.sin(((startAngle + angle) * Math.PI) / 180);
-                                
-                                return (
-                                    <path
-                                        key={i}
-                                        d={`M 50 50 L ${x1} ${y1} A 50 50 0 0 1 ${x2} ${y2} Z`}
-                                        fill={i % 2 === 0 ? '#12141A' : '#0A0B0F'}
-                                        stroke="rgba(255,255,255,0.03)"
-                                        strokeWidth="0.1"
-                                    />
-                                );
-                            })}
-                        </svg>
+                {/* 3D Base Station */}
+                <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 w-[380px] h-[40px] bg-slate-200/50 rounded-full blur-3xl opacity-50 z-0"></div>
 
-                        {/* Sparkles Overlay */}
-                        {styles.sparkle && (
-                            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                                {[...Array(10)].map((_, i) => (
-                                    <motion.div 
-                                        key={i}
-                                        animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5] }}
-                                        transition={{ repeat: Infinity, duration: 2, delay: i * 0.2 }}
-                                        className="absolute w-1 h-1 bg-amber-400 rounded-full blur-[1px]"
-                                        style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                {/* The Physical 3D Wheel Deck */}
+                <div className="relative transform-gpu" style={{ transformStyle: 'preserve-3d', transform: 'rotateX(35deg)' }}>
+                    {/* Shadow Plate */}
+                    <div className="absolute inset-[30px] rounded-full bg-black/40 blur-2xl transform translate-z-[-50px]"></div>
 
-                        {/* Prize Labels */}
-                        {currentSegments.map((seg, i) => (
-                            <div
-                                key={i}
-                                className="absolute text-center select-none"
-                                style={{
-                                    transform: `rotate(${(i * 360) / currentSegments.length + 180 / currentSegments.length}deg) translateY(-130px)`,
-                                    transformOrigin: 'center center',
-                                }}
-                            >
-                                <div className="flex flex-col items-center">
-                                    <p className="text-[10px] font-black italic tracking-tighter text-white opacity-40 mb-1 font-mono">RS</p>
-                                    <p className={`text-xl font-black italic tracking-tighter text-white ${seg.value === 0 ? 'opacity-20' : ''}`}>
-                                        {seg.value === -1 ? 'FS' : seg.value === 0 ? 'X' : seg.value}
-                                    </p>
+                    {/* Side Thickness (Depth) */}
+                    <div className="absolute inset-0 rounded-full bg-slate-900 translate-z-[-20px] shadow-2xl border-b-8 border-slate-800"></div>
+
+                    {/* Main Disk Surface */}
+                    <div className="relative p-7 bg-white rounded-full shadow-[inset_0_0_80px_rgba(0,0,0,0.05)] border-[16px] border-slate-100/80 backdrop-blur-sm transform-gpu group-hover:border-white transition-all duration-700">
+                        <motion.div 
+                            animate={{ rotate: rotation }}
+                            transition={{ duration: 5, ease: [0.15, 0.85, 0.1, 1] }}
+                            className="relative rounded-full overflow-hidden shadow-2xl flex items-center justify-center bg-[#090A0F] transform-gpu"
+                            style={{ 
+                                width: 320, 
+                                height: 320,
+                                transformStyle: 'preserve-3d',
+                                boxShadow: '0 0 40px rgba(0,0,0,0.5), inset 0 0 100px rgba(99,102,241,0.1)'
+                            }}
+                        >
+                            {/* Technical Grid Overlay */}
+                            <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+
+                            {/* 3D Segment Dividers */}
+                            {currentSegments.map((_, i) => (
+                                <div 
+                                    key={i}
+                                    className="absolute inset-0 bg-white/5 opacity-40 origin-center"
+                                    style={{ transform: `rotate(${i * (360/currentSegments.length)}deg)`, width: '1px', left: '50%' }}
+                                />
+                            ))}
+
+                            {/* Prize Nodes */}
+                            {currentSegments.map((seg, i) => (
+                                <div
+                                    key={i}
+                                    className="absolute text-center select-none transform-gpu"
+                                    style={{
+                                        transform: `rotate(${(i * 360) / currentSegments.length + 180 / currentSegments.length}deg) translateY(-120px)`,
+                                        transformOrigin: 'center center',
+                                    }}
+                                >
+                                    <div className="flex flex-col items-center">
+                                        <div className={`w-8 h-8 rounded-lg mb-2 flex items-center justify-center text-[8px] font-black shadow-inner ${
+                                            seg.value === 0 ? 'bg-white/5 text-slate-700' : 'bg-white/10 text-white'
+                                        }`}>
+                                            {seg.value === -1 ? 'FS' : seg.value === 0 ? 'ERR' : 'OK'}
+                                        </div>
+                                        <p className="text-[8px] font-black italic tracking-[0.2em] text-white opacity-20 mb-1 font-mono uppercase">Node</p>
+                                        <p className={`text-xl font-black italic tracking-tighter text-white drop-shadow-lg ${seg.value === 0 ? 'opacity-20' : 'text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400'}`}>
+                                            {seg.value === -1 ? 'FREE' : seg.value === 0 ? 'LOSS' : `${seg.value}`}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
 
-                        {/* Center Hub */}
-                        <div className="absolute inset-0 m-auto w-20 h-20 bg-white rounded-full shadow-2xl flex items-center justify-center z-10 border-4 border-slate-100/50">
-                             <div className="w-14 h-14 bg-slate-950 rounded-2xl flex items-center justify-center text-amber-500 shadow-inner group">
-                                <Sparkles className="w-6 h-6 animate-pulse" />
-                             </div>
-                        </div>
-                    </motion.div>
+                            {/* Center Reactor Core */}
+                            <div className="absolute inset-0 m-auto w-24 h-24 bg-white rounded-full shadow-[0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center z-10 border-8 border-slate-100 transform translate-z-[40px]">
+                                 <div className="w-16 h-16 bg-[#0A0B0F] rounded-2xl flex items-center justify-center text-amber-500 shadow-inner group overflow-hidden relative">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent animate-pulse"></div>
+                                    <Sparkles className="w-8 h-8 animate-pulse z-10" />
+                                    {/* Spinner Internal Light */}
+                                    {isSpinning && (
+                                        <motion.div 
+                                            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.8, 0.5] }}
+                                            transition={{ repeat: Infinity, duration: 1 }}
+                                            className="absolute inset-0 bg-amber-500/20 blur-xl"
+                                        />
+                                    )}
+                                 </div>
+                            </div>
+                        </motion.div>
+                    </div>
                 </div>
             </div>
 
@@ -464,7 +465,7 @@ export default function SpinWheel({
                 <div className="flex bg-slate-50 p-2.5 rounded-[2.5rem] border border-slate-100 shadow-inner">
                     {tiers.map((t) => {
                         const isSelected = activeTier === t.id;
-                        const isLocked = t.id === 50 || t.id === 100;
+                        const isLocked = false; // Tiers unlocked as requested
 
                         return (
                             <button 
@@ -477,7 +478,7 @@ export default function SpinWheel({
                                     : 'text-slate-400 hover:text-slate-900'
                                 } ${isLocked ? 'opacity-30 cursor-not-allowed grayscale' : ''}`}
                             >
-                                {t.label} {isLocked && <Lock className="w-2 h-2 opacity-50" />}
+                                {t.label}
                                 <span className={`text-[7px] font-bold ${isSelected ? 'text-amber-500/60' : 'text-slate-400/40'}`}>NODE {t.id}</span>
                             </button>
                         );
@@ -489,7 +490,7 @@ export default function SpinWheel({
                         whileHover={{ y: -5, scale: 1.01 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => spinWheel(true)}
-                        disabled={isSpinning || activeTier === 50 || activeTier === 100 || balance < activeTier}
+                        disabled={isSpinning || balance < activeTier}
                         className={`w-full py-8 rounded-[2.5rem] font-black uppercase tracking-[0.4em] flex flex-col items-center justify-center gap-2 group transition-all shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden ${
                             isSpinning 
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' 

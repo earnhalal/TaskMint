@@ -9,6 +9,8 @@ import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Finger
 export default function ProfileTab({ 
   name, 
   email, 
+  gender,
+  avatarUrl,
   status, 
   role, 
   partnerTier = 'basic',
@@ -30,6 +32,8 @@ export default function ProfileTab({
 }: { 
   name: string, 
   email: string, 
+  gender?: string,
+  avatarUrl?: string,
   status: string, 
   role: string, 
   partnerTier?: string,
@@ -50,14 +54,18 @@ export default function ProfileTab({
   appSettings?: any
 }) {
   const { user } = useAuth();
-  const [avatar, setAvatar] = React.useState<string | null>(null);
+  const [avatar, setAvatar] = React.useState<string | null>(avatarUrl || null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const [showJobsModal, setShowJobsModal] = React.useState(false);
 
   React.useEffect(() => {
-    setAvatar(localStorage.getItem('taskmint_avatar'));
-  }, []);
+    if (avatarUrl) {
+      setAvatar(avatarUrl);
+    } else {
+      setAvatar(localStorage.getItem('taskmint_avatar'));
+    }
+  }, [avatarUrl]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -138,6 +146,31 @@ export default function ProfileTab({
     >
       <input type="file" accept="image/*" ref={fileInputRef} onChange={handleAvatarChange} className="hidden" />
       
+      {/* Profile Completion Alert */}
+      {(!name || !gender || !accountNumber || status.toLowerCase() !== 'active') && (
+        <motion.div 
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          className="mb-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 shadow-sm"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+              <AlertCircle className="w-5 h-5 text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-black text-amber-900 uppercase tracking-tighter">Complete Profile (Alert)</h4>
+              <p className="text-[11px] font-bold text-amber-700/70 mb-3">Please fill all details including Gender & Withdrawal Account to use all features.</p>
+              <button 
+                onClick={onEditProfile}
+                className="bg-amber-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md shadow-amber-600/20 active:scale-95 transition-all"
+              >
+                Fix Now
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Activation Status Indicator - Moved from Invite Tab */}
       {status.toLowerCase() !== 'active' && (
         <div className="mb-6 p-4 rounded-2xl flex items-center justify-between border-2 bg-red-50 border-red-100 text-red-700">

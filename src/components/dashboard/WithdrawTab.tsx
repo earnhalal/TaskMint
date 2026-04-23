@@ -35,6 +35,8 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isAmountVisible, setIsAmountVisible] = useState(false);
+  const [isCardExpanded, setIsCardExpanded] = useState(false);
 
   const minWithdrawal = 500;
 
@@ -252,10 +254,10 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                   </div>
 
                   <div className="flex justify-between items-end border-t border-white/5 pt-4">
-                    <div className="flex flex-col">
-                      <p className="text-[7px] font-black text-white/30 uppercase tracking-widest mb-0.5">Account Label</p>
-                      <p className="text-[11px] font-black text-white uppercase tracking-wider italic">{acc.title}</p>
-                    </div>
+                        <div className="flex flex-col">
+                          <p className="text-[7px] font-black text-white/30 uppercase tracking-widest mb-0.5">Account Label</p>
+                          <p className="text-[11px] font-black text-white uppercase tracking-wider italic truncate max-w-[150px]">{acc.title}</p>
+                        </div>
                     <div className="text-right">
                        <CardChip />
                     </div>
@@ -292,72 +294,113 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
 
       {/* Futuristic Amount Engine - Compact Version */}
       <div className="relative z-10 px-1">
-        <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-xl relative overflow-hidden group/input">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-3xl -mr-12 -mt-12"></div>
-            
-            <div className="flex items-center justify-between mb-4">
-               <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Order Amount</label>
-               {parseFloat(amount) > 0 && (
-                 <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md tracking-tighter">Verified</span>
-               )}
-            </div>
-            
-            <div className="relative flex items-center mb-6 border-b border-slate-100 pb-2">
-                <span className="text-slate-900 font-black text-xl italic mr-3">RS</span>
-                <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => { setAmount(e.target.value); setError(''); }}
-                    placeholder="0.00"
-                    className="w-full bg-transparent rounded-none text-slate-900 font-black text-4xl focus:outline-none placeholder:text-slate-100 tracking-tighter"
-                />
-            </div>
+        <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl relative overflow-hidden group/input">
+            {!isCardExpanded ? (
+               <motion.button 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={() => setIsCardExpanded(true)}
+                className="w-full p-8 flex items-center justify-between group hover:bg-slate-50 transition-all font-black"
+               >
+                 <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600">
+                      <Zap className="w-6 h-6 fill-emerald-500" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Status Node</p>
+                      <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic">Open Payout Console</h4>
+                    </div>
+                 </div>
+                 <ArrowRight className="w-6 h-6 text-slate-200 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+               </motion.button>
+            ) : (
+             <motion.div 
+               initial={{ height: 0, opacity: 0 }}
+               animate={{ height: 'auto', opacity: 1 }}
+               className="p-6 relative"
+             >
+                <button 
+                  onClick={() => setIsCardExpanded(false)}
+                  className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full text-slate-300 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
 
-            <div className="grid grid-cols-2 gap-3 mb-6">
-               <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                  <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">Net Fee</p>
-                  <p className="text-xs font-black text-slate-900 italic">Rs 0</p>
-               </div>
-               <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                  <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">P-Engine</p>
-                  <p className="text-xs font-black text-emerald-600 italic">Instant</p>
-               </div>
-            </div>
-
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -5 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                className="flex items-center gap-2 text-red-600 mb-4 bg-red-50 p-3 rounded-xl border border-red-100"
-              >
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span className="text-[10px] font-black uppercase tracking-tight leading-tight">{error}</span>
-              </motion.div>
-            )}
-            
-            <motion.button 
-                whileHover={{ scale: 1.01, y: -1 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={handleWithdraw}
-                disabled={!selectedAccount || parseFloat(amount) < minWithdrawal || !windowInfo.isOpen}
-                className="relative w-full h-12 bg-[#0A0A0B] disabled:bg-slate-100 disabled:cursor-not-allowed group/btn overflow-hidden rounded-[18px] transition-all shadow-lg"
-            >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
-                <div className="relative z-10 flex items-center justify-center gap-2">
-                  <span className="text-xs font-black text-white group-disabled:text-slate-400 uppercase tracking-[0.15em] italic">
-                    {windowInfo.isOpen ? 'Execute Payout' : 'Protocol Locked'}
-                  </span>
-                  {windowInfo.isOpen ? <ArrowUpRight className="w-4 h-4 text-emerald-400 group-hover/btn:text-white" /> : <Lock className="w-3.5 h-3.5 text-slate-400" />}
+                <div className="absolute top-0 right-12 w-24 h-24 bg-emerald-500/5 rounded-full blur-3xl -mr-12 -mt-12"></div>
+                
+                <div className="flex items-center justify-between mb-4">
+                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Order Amount</label>
+                   <div className="flex items-center gap-2">
+                     <button 
+                      onClick={() => setIsAmountVisible(!isAmountVisible)}
+                      className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+                     >
+                       {isAmountVisible ? <Lock className="w-3 h-3 text-slate-300" /> : <ShieldCheck className="w-3 h-3 text-emerald-500" />}
+                     </button>
+                     {parseFloat(amount) > 0 && (
+                       <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md tracking-tighter">Verified</span>
+                     )}
+                   </div>
                 </div>
-            </motion.button>
+                
+                <div className="relative flex items-center mb-6 border-b border-slate-100 pb-2">
+                    <span className="text-slate-900 font-black text-xl italic mr-3">RS</span>
+                    <input
+                        type={isAmountVisible ? "number" : "password"}
+                        value={amount}
+                        onChange={(e) => { setAmount(e.target.value); setError(''); }}
+                        placeholder="0.00"
+                        className="w-full bg-transparent rounded-none text-slate-900 font-black text-4xl focus:outline-none placeholder:text-slate-100 tracking-tighter"
+                    />
+                </div>
 
-            {!windowInfo.isOpen && (
-              <div className="mt-4 flex items-center gap-2 p-3 bg-amber-50/50 rounded-xl border border-amber-100/30">
-                <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
-                <p className="text-[9px] font-bold text-amber-700 uppercase tracking-tight italic">
-                  Cycle Checkpoint: {windowInfo.nextWindowText.split(':')[1]} tareek.
-                </p>
-              </div>
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                   <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
+                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">Net Fee</p>
+                      <p className="text-xs font-black text-slate-900 italic">Rs 0</p>
+                   </div>
+                   <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
+                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">P-Engine</p>
+                      <p className="text-xs font-black text-emerald-600 italic">Instant</p>
+                   </div>
+                </div>
+
+                {error && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -5 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    className="flex items-center gap-2 text-red-600 mb-4 bg-red-50 p-3 rounded-xl border border-red-100"
+                  >
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span className="text-[10px] font-black uppercase tracking-tight leading-tight">{error}</span>
+                  </motion.div>
+                )}
+                
+                <motion.button 
+                    whileHover={{ scale: 1.01, y: -1 }}
+                    whileTap={{ scale: 0.99 }}
+                    onClick={handleWithdraw}
+                    disabled={!selectedAccount || parseFloat(amount) < minWithdrawal || !windowInfo.isOpen}
+                    className="relative w-full h-12 bg-[#0A0A0B] disabled:bg-slate-100 disabled:cursor-not-allowed group/btn overflow-hidden rounded-[18px] transition-all shadow-lg"
+                >
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+                    <div className="relative z-10 flex items-center justify-center gap-2">
+                      <span className="text-xs font-black text-white group-disabled:text-slate-400 uppercase tracking-[0.15em] italic">
+                        {windowInfo.isOpen ? 'Execute Payout' : 'Protocol Locked'}
+                      </span>
+                      {windowInfo.isOpen ? <ArrowUpRight className="w-4 h-4 text-emerald-400 group-hover/btn:text-white" /> : <Lock className="w-3.5 h-3.5 text-slate-400" />}
+                    </div>
+                </motion.button>
+
+                {!windowInfo.isOpen && (
+                  <div className="mt-4 flex items-center gap-2 p-3 bg-amber-50/50 rounded-xl border border-amber-100/30">
+                    <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
+                    <p className="text-[9px] font-bold text-amber-700 uppercase tracking-tight italic">
+                      Cycle Checkpoint: {windowInfo.nextWindowText.split(':')[1]} tareek.
+                    </p>
+                  </div>
+                )}
+             </motion.div>
             )}
         </div>
 
@@ -371,33 +414,30 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest border border-slate-100 px-3 py-1 rounded-full">Feed</span>
             </div>
             
-            <div className="space-y-4">
-            {displayHistory.length > 0 ? displayHistory.slice(0, 5).map((item, i) => (
+            <div className="space-y-3">
+            {displayHistory.length > 0 ? displayHistory.slice(0, 8).map((item, i) => (
                 <motion.div 
                   key={item.id ? `withdraw-${item.id}` : `withdraw-idx-${i}`} 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.05 }}
                   onClick={() => setSelectedWithdrawal(item.raw)}
-                  className="group bg-white p-6 rounded-[32px] border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-xl hover:border-emerald-500/20 transition-all cursor-pointer relative overflow-hidden"
+                  className="group bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md hover:border-emerald-500/10 transition-all cursor-pointer relative overflow-hidden h-16"
                 >
-                  <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors"></div>
-                  <div className="flex items-center gap-5 relative z-10">
-                      <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-900 flex items-center justify-center shrink-0 border border-slate-100 group-hover:bg-white transition-colors">
-                        <Landmark className="w-6 h-6 text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                  <div className="flex items-center gap-4 relative z-10">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100 group-hover:text-emerald-500 group-hover:bg-emerald-50 transition-all">
+                        <History className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="font-black text-slate-900 text-[13px] uppercase italic tracking-tight">{item.title}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                           <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{item.subtitle}</span>
-                        </div>
+                        <h4 className="font-black text-slate-900 text-[11px] uppercase italic tracking-tight leading-none mb-1">{item.title}</h4>
+                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-none">{item.subtitle}</p>
                       </div>
                   </div>
                   <div className="text-right relative z-10">
-                      <div className="font-black text-lg text-slate-900 italic tracking-tighter">
+                      <div className="font-black text-sm text-slate-900 italic tracking-tighter leading-none mb-1">
                         {item.amount}
                       </div>
-                      <div className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-1 rounded-lg mt-1 inline-block border ${
+                      <div className={`text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border ${
                         item.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' : 
                         (item.status === 'APPROVED' || item.status === 'COMPLETED') ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                         item.status === 'REJECTED' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-slate-50 text-slate-400 border-slate-100'

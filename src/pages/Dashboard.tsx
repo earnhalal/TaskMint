@@ -78,6 +78,7 @@ import TasksTab from '../components/dashboard/TasksTab';
 import ManageWalletView from '../components/dashboard/ManageWalletView';
 import LotteryView from '../components/dashboard/LotteryView';
 import StreakRewardView from '../components/dashboard/StreakRewardView';
+import SpinWheel from '../components/dashboard/SpinWheel';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -91,6 +92,8 @@ export default function Dashboard() {
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
+  const [userGender, setUserGender] = useState('');
+  const [userAvatar, setUserAvatar] = useState('');
   const [withdrawalAccounts, setWithdrawalAccounts] = useState<any[]>([]);
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [joiningDate, setJoiningDate] = useState('');
@@ -198,6 +201,8 @@ export default function Dashboard() {
         setUserName(data.username || '');
         setUserEmail(data.email || '');
         setUserPhone(data.phone || '');
+        setUserGender(data.gender || '');
+        setUserAvatar(data.avatarUrl || '');
         setWithdrawalAccounts(data.withdrawalAccounts || []);
         setTwoFactorAuth(data.twoFactorAuth || false);
         setJoiningDate(data.joiningDate || '');
@@ -1251,6 +1256,8 @@ export default function Dashboard() {
         return <ProfileTab 
                  name={userName}
                  email={userEmail}
+                 gender={userGender}
+                 avatarUrl={userAvatar}
                  status={status}
                  role={role}
                  partnerTier={partnerTier}
@@ -1293,6 +1300,8 @@ export default function Dashboard() {
                  name={userName}
                  email={userEmail}
                  phone={userPhone}
+                 gender={userGender}
+                 avatarUrl={userAvatar}
                  accountNumber={withdrawalAccounts[0]?.number || ''}
                  accountTitle={withdrawalAccounts[0]?.title || ''}
                  onBack={() => setActiveTab('profile')} 
@@ -1335,6 +1344,16 @@ export default function Dashboard() {
         return <StreakRewardView 
           onBack={() => setActiveTab('home')} 
           onUpdateBalance={handleUpdateBalance} 
+        />;
+      case 'spin':
+        return <SpinWheel 
+          onClose={() => setActiveTab('home')}
+          balance={balance}
+          onUpdateBalance={handleUpdateBalance}
+          freeSpins={freeSpins}
+          onUseFreeSpin={handleUseFreeSpin}
+          onGoToDeposit={() => setActiveTab('deposit')}
+          activeInvites={referralStats.activeMembers}
         />;
       case 'withdraw':
         return <WithdrawTab 
