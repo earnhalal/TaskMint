@@ -204,23 +204,21 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       </div>
 
       {/* Pending Indirect Commission Claim */}
-      {pendingIndirect > 0 && (
-        <div className="bg-slate-900 rounded-2xl p-6 shadow-xl border border-amber-500/30 mb-8 mt-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-white">
-                <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">Indirect Commission Available</p>
-                <p className="text-xs text-slate-300">Click below to add to Balance & Earnings</p>
-            </div>
-            <p className="text-3xl font-black text-white">Rs {pendingIndirect.toLocaleString()}</p>
+      <div className="bg-slate-900 rounded-2xl p-6 shadow-xl border border-amber-500/30 mb-8 mt-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-white">
+              <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">Indirect Commission</p>
+              <p className="text-xs text-slate-300">Click below to claim earnings</p>
           </div>
-          <button 
-              onClick={onClaimIndirect}
-              className="w-full bg-amber-500 text-slate-900 py-4 rounded-xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-amber-500/20"
-          >
-              Claim Indirect Earnings Now
-          </button>
+          <p className="text-3xl font-black text-white">Rs {pendingIndirect.toLocaleString()}</p>
         </div>
-      )}
+        <button 
+            onClick={onClaimIndirect}
+            className="w-full bg-amber-500 text-slate-900 py-4 rounded-xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-amber-500/20"
+        >
+            {pendingIndirect > 0 ? "Claim Now" : "Check for Earnings"}
+        </button>
+      </div>
 
       {/* Network Stats */}
       <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 pl-2 border-l-2 ${isDark ? 'text-slate-500 border-amber-500' : 'text-slate-400 border-indigo-500'}`}>Live Network Stats</h3>

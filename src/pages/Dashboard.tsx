@@ -217,6 +217,7 @@ export default function Dashboard() {
         setPartnerTier(data.partnerTier || (data.role === 'partner' ? 'silver' : 'basic'));
         setTotalTeamEarnings(data.totalTeamEarnings || 0);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
+        if (data.pendingIndirect !== undefined) setPendingIndirect(data.pendingIndirect);
         setReferredBy(data.referredBy || null);
         setReferralCode(data.referralCode || '');
         setAppBonusClaimed(data.appBonusClaimed || false);
