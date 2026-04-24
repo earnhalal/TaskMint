@@ -383,7 +383,10 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     // Check if locked
     const lastWatched = adStats[ad.id];
     if (lastWatched) {
-      const lockTime = 60 * 60 * 1000; // 1 hour in MS
+      let lockTime = 60 * 60 * 1000; // 1 hour in MS
+      if (ad.tier === 'silver' || ad.tier === 'gold') {
+        lockTime = 12 * 60 * 60 * 1000; // 12 hours in MS (twice a day)
+      }
       const lastTime = lastWatched.toMillis ? lastWatched.toMillis() : new Date(lastWatched).getTime();
       const diff = Date.now() - lastTime;
       if (diff < lockTime) {
@@ -543,15 +546,18 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               let isTimeLocked = false;
               let remainingText = "";
               if (lastWatched) {
-                const lockTime = 60 * 60 * 1000;
+                let lockTime = 60 * 60 * 1000;
+                if (ad.tier === 'silver' || ad.tier === 'gold') {
+                    lockTime = 12 * 60 * 60 * 1000; // 12 hours
+                }
                 const lastTime = lastWatched.toMillis ? lastWatched.toMillis() : new Date(lastWatched).getTime();
                 const diff = Date.now() - lastTime;
                 if (diff < lockTime) {
                   isTimeLocked = true;
                   const remainingMs = lockTime - diff;
-                  const minutes = Math.floor(remainingMs / (1000 * 60));
-                  const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
-                  remainingText = `${minutes}m ${seconds}s`;
+                  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+                  const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+                  remainingText = `${hours}h ${minutes}m`;
                 }
               }
               const isLocked = isTimeLocked || isTierLocked;
