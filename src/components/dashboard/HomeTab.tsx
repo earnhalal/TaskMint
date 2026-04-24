@@ -40,6 +40,8 @@ interface HomeTabProps {
   name: string;
   balance: number;
   spinBalance?: number;
+  totalEarnings?: number;
+  totalIndirectCommission?: number;
   lockedBalance: number;
   accountStatus: string;
   role: string;
@@ -178,6 +180,9 @@ const AnimatedCounter = ({ value }: { value: number }) => {
 export default function HomeTab({ 
   name, 
   balance, 
+  spinBalance,
+  totalEarnings = 0,
+  totalIndirectCommission = 0,
   lockedBalance,
   accountStatus,
   role,
@@ -640,6 +645,32 @@ export default function HomeTab({
             colorClass="bg-gradient-to-br from-[#8e2de2] to-[#4a00e0]" 
             shadowColor="shadow-purple-700/40"
             labelColor="text-[#8e2de2]" delay={1100}
+          />
+        </div>
+      </div>
+
+      {/* Live Earnings Stats Section */}
+      <div className="relative z-10 space-y-4">
+        <div className="flex items-center gap-2 px-1">
+          <Trophy className="w-5 h-5 text-indigo-600" />
+          <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase font-sans">Your Earnings</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard 
+            icon={<EarnIcon className="w-5 h-5" />} 
+            label="Total Earnings" 
+            value={`Rs ${totalEarnings.toFixed(2)}`} 
+            bgClass="bg-gradient-to-br from-indigo-50 to-white" 
+            iconColor="text-indigo-600" 
+            delay={0} 
+          />
+          <StatCard 
+            icon={<SparklesIcon className="w-5 h-5" />} 
+            label="Indirect Income" 
+            value={`Rs ${totalIndirectCommission.toFixed(2)}`} 
+            bgClass="bg-gradient-to-br from-amber-50 to-white" 
+            iconColor="text-amber-500" 
+            delay={100} 
           />
         </div>
       </div>

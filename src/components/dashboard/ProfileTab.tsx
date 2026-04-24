@@ -18,6 +18,7 @@ export default function ProfileTab({
   partnerTier = 'basic',
   balance, 
   lockedBalance, 
+  totalIndirectCommission = 0,
   accountNumber, 
   accountTitle, 
   joiningDate, 
@@ -40,6 +41,7 @@ export default function ProfileTab({
   partnerTier?: string,
   balance: number, 
   lockedBalance: number, 
+  totalIndirectCommission?: number,
   accountNumber: string, 
   accountTitle: string, 
   joiningDate: string, 
@@ -254,6 +256,24 @@ export default function ProfileTab({
                              </div>
                         </div>
                     </div>
+
+                    {totalIndirectCommission > 0 && (
+                    <div className="w-full bg-amber-500/10 backdrop-blur-md border border-amber-500/20 rounded-2xl p-4 mb-4 flex items-center justify-between group/indirect">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 group-hover/indirect:scale-110 transition-transform">
+                                <Sparkles className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-[0.2em] mb-0.5">Indirect Income</p>
+                                <p className="text-lg font-black text-amber-500 tracking-tighter">Rs {totalIndirectCommission.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div className="opacity-20 flex flex-col items-end">
+                            <TrendingUp className="w-4 h-4 text-amber-500" />
+                            <span className="text-[7px] font-black uppercase text-amber-500 mt-1">Level 2 Reward</span>
+                        </div>
+                    </div>
+                    )}
                 </div>
 
                 {/* Card NFC-style decoration */}

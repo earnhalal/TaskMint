@@ -961,31 +961,35 @@ export default function Dashboard() {
       if (userData.referredBy) {
         console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
         
-        // Simple sanitization: extract code if it's a URL
-        let rawCode = userData.referredBy;
-        if (rawCode.includes('ref/')) {
-          rawCode = rawCode.split('ref/')[1];
-        } else if (rawCode.includes('=')) { // Handle ?ref=code
-          rawCode = rawCode.split('=')[1];
-        }
-        
-        const sanitizedRef = rawCode.trim().toLowerCase();
+        // Helper to parse referral code
+        const getCleanCode = (raw: string) => {
+          let code = raw;
+          if (code.toLowerCase().includes('ref/')) code = code.split(/ref\//i)[1];
+          else if (code.includes('=')) code = code.split('=')[1];
+          return (code || '').trim().toLowerCase();
+        };
+
+        const sanitizedRef = getCleanCode(userData.referredBy);
         
         let l1Uid = null;
-        const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          l1Uid = querySnapshot.docs[0].id;
-        } else {
-          const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
-          if (parentUsernameDoc.exists()) {
-            l1Uid = parentUsernameDoc.data().uid;
+        if (sanitizedRef) {
+          console.log(`[REFERRAL_LOG] Sanitized L1 Ref: ${sanitizedRef}`);
+          const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            l1Uid = querySnapshot.docs[0].id;
+            console.log(`[REFERRAL_LOG] L1 Found via referralCode: ${l1Uid}`);
+          } else {
+            const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
+            if (parentUsernameDoc.exists()) {
+              l1Uid = parentUsernameDoc.data().uid;
+              console.log(`[REFERRAL_LOG] L1 Found via usernames: ${l1Uid}`);
+            }
           }
         }
         
         if (l1Uid) {
-          console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
+          console.log(`[REFERRAL_LOG] Processing L1 parent: ${l1Uid}`);
           
           // Determine bonus amount based on referrer's role/tier
           let bonusAmount = activeAppSettings.referralBonusBasic || 100;
@@ -993,42 +997,45 @@ export default function Dashboard() {
           const referrerDoc = await getDoc(doc(db, 'users', l1Uid));
           if (referrerDoc.exists()) {
             const refData = referrerDoc.data();
+            console.log(`[REFERRAL_LOG] L1 Data:`, refData);
+            
             if (refData.role === 'partner') {
-              if (refData.partnerTier === 'gold') {
-                bonusAmount = 200;
-              } else if (refData.partnerTier === 'silver') {
-                bonusAmount = activeAppSettings.referralBonusPartner || 150;
-              } else if (refData.partnerTier === 'bronze') {
-                bonusAmount = 130;
-              } else {
-                bonusAmount = activeAppSettings.referralBonusPartner || 150;
-              }
+              if (refData.partnerTier === 'gold') bonusAmount = 200;
+              else if (refData.partnerTier === 'silver') bonusAmount = activeAppSettings.referralBonusPartner || 150;
+              else if (refData.partnerTier === 'bronze') bonusAmount = 130;
+              else bonusAmount = activeAppSettings.referralBonusPartner || 150;
             }
             
             // Extract Level 2 parent
             if (refData.referredBy) {
-              let rCode = refData.referredBy;
-              if (rCode.includes('ref/')) rCode = rCode.split('ref/')[1];
-              else if (rCode.includes('=')) rCode = rCode.split('=')[1];
-              rCode = rCode.trim().toLowerCase();
+              const sanitizedL2Ref = getCleanCode(refData.referredBy);
+              console.log(`[REFERRAL_LOG] Sanitized L2 Ref: ${sanitizedL2Ref}`);
               
-              const q2 = query(collection(db, 'users'), where('referralCode', '==', rCode));
-              const snap2 = await getDocs(q2);
-              if (!snap2.empty) {
-                l2Uid = snap2.docs[0].id;
-              } else {
-                const uDoc = await getDoc(doc(db, 'usernames', rCode));
-                if (uDoc.exists()) l2Uid = uDoc.data().uid;
+              if (sanitizedL2Ref) {
+                const q2 = query(collection(db, 'users'), where('referralCode', '==', sanitizedL2Ref));
+                const snap2 = await getDocs(q2);
+                if (!snap2.empty) {
+                  l2Uid = snap2.docs[0].id;
+                  console.log(`[REFERRAL_LOG] L2 Found via referralCode: ${l2Uid}`);
+                } else {
+                  const uDoc = await getDoc(doc(db, 'usernames', sanitizedL2Ref));
+                  if (uDoc.exists()) {
+                    l2Uid = uDoc.data().uid;
+                    console.log(`[REFERRAL_LOG] L2 Found via usernames: ${l2Uid}`);
+                  }
+                }
               }
             }
           }
 
-          // Update referral status in RTDB (Replacing Firestore)
+          // Update referral status in RTDB (L1 History)
           const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
-          const referralStatusRef = ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`);
-          await update(referralStatusRef, { status: 'paid', commission: bonusAmount });
+          await update(ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`), { 
+            status: 'paid', 
+            commission: bonusAmount 
+          });
 
-          // Update referrer stats in Firestore
+          // Update referrer stats in Firestore (L1)
           await updateDoc(doc(db, 'users', l1Uid), {
             activeMembers: increment(1),
             totalCommission: increment(bonusAmount),
@@ -1036,16 +1043,15 @@ export default function Dashboard() {
             totalEarnings: increment(bonusAmount)
           });
           
-          // Also update the balanced sync in RTDB so UI is immediately updated for the referrer
-          const referrerRtdbRef = ref(rtdb, `users/${l1Uid}`);
-          await update(referrerRtdbRef, {
+          // Sync L1 to RTDB
+          await update(ref(rtdb, `users/${l1Uid}`), {
             balance: rtdbIncrement(bonusAmount),
             totalEarnings: rtdbIncrement(bonusAmount),
             activeMembers: rtdbIncrement(1),
             totalCommission: rtdbIncrement(bonusAmount)
           });
           
-          // Add to Earning History
+          // L1 Earning History
           await addDoc(collection(db, 'earning_history'), {
             userId: l1Uid,
             amount: bonusAmount,
@@ -1056,9 +1062,9 @@ export default function Dashboard() {
 
           console.log(`[REFERRAL_LOG] L1 Commission of ${bonusAmount} added to referrer ${l1Uid}`);
           
-          // Process Level 2 Commission
+          // 3. Process Level 2 Commission (Indirect)
           if (l2Uid) {
-            console.log(`[REFERRAL_LOG] Found Level 2 Parent UID: ${l2Uid}`);
+            console.log(`[REFERRAL_LOG] Final L2 Parent UID identified: ${l2Uid}`);
             const l2Bonus = activeAppSettings.indirectReferralBonus || 10;
             
             await updateDoc(doc(db, 'users', l2Uid), {
@@ -1081,8 +1087,12 @@ export default function Dashboard() {
               timestamp: serverTimestamp()
             });
             
-            console.log(`[REFERRAL_LOG] L2 Commission of ${l2Bonus} added to parent ${l2Uid}`);
+            console.log(`[REFERRAL_LOG] L2 Commission of ${l2Bonus} successfully added to parent ${l2Uid}`);
+          } else {
+            console.warn(`[REFERRAL_LOG] L2 Parent Not Found for L1 parent ${l1Uid}`);
           }
+        } else {
+          console.warn(`[REFERRAL_LOG] L1 Parent Not Found for code: ${sanitizedRef}`);
         }
       }
       
@@ -1157,6 +1167,7 @@ export default function Dashboard() {
                  partnerTier={partnerTier}
                  balance={balance}
                  lockedBalance={lockedBalance}
+                 totalIndirectCommission={totalIndirectCommission}
                  accountNumber={withdrawalAccounts[0]?.number || ''}
                  accountTitle={withdrawalAccounts[0]?.title || ''}
                  joiningDate={joiningDate}
@@ -1349,6 +1360,8 @@ export default function Dashboard() {
           name={userName}
           balance={balance}
           spinBalance={spinBalance}
+          totalEarnings={totalEarnings}
+          totalIndirectCommission={totalIndirectCommission}
           lockedBalance={lockedBalance}
           accountStatus={accountStatus}
           role={role}
