@@ -65,7 +65,6 @@ import LeaderboardView from '../components/dashboard/LeaderboardView';
 import PinLockView from '../components/PinLockView';
 import UpdatesView from '../components/dashboard/UpdatesView';
 import PartnerUpgradeView from '../components/dashboard/PartnerUpgradeView';
-import AdminPanelView from '../components/dashboard/AdminPanelView';
 import ActivationTab from '../components/dashboard/ActivationTab';
 import WannadsSurveyView from '../components/dashboard/WannadsSurveyView';
 
@@ -106,6 +105,7 @@ export default function Dashboard() {
   const [partnerStatus, setPartnerStatus] = useState('none');
   const [partnerTier, setPartnerTier] = useState('basic');
   const [totalTeamEarnings, setTotalTeamEarnings] = useState(0);
+  const [totalIndirectCommission, setTotalIndirectCommission] = useState(0);
   const [referralStats, setReferralStats] = useState({
     totalInvited: 0,
     activeMembers: 0,
@@ -129,6 +129,7 @@ export default function Dashboard() {
   ];
 
   const [balance, setBalance] = useState(0);
+  const [spinBalance, setSpinBalance] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
   const [appBonusClaimed, setAppBonusClaimed] = useState(false);
@@ -150,7 +151,7 @@ export default function Dashboard() {
     paymentName: 'M-WASEEM',
     referralBonusBasic: 100,
     referralBonusPartner: 150,
-    indirectReferralBonus: 20,
+    indirectReferralBonus: 10,
     offerExpiryTime: null as any,
     manualWithdrawUnlock: false
   });
@@ -197,6 +198,7 @@ export default function Dashboard() {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setBalance(data.balance || 0);
+        setSpinBalance(data.spinBalance || 0);
         setTotalEarnings(data.totalEarnings || 0);
         setLockedBalance(data.lockedBalance || 0);
         setUserPin(data.pin || '');
@@ -213,6 +215,7 @@ export default function Dashboard() {
         setPartnerStatus(data.partnerStatus || 'none');
         setPartnerTier(data.partnerTier || (data.role === 'partner' ? 'silver' : 'basic'));
         setTotalTeamEarnings(data.totalTeamEarnings || 0);
+        setTotalIndirectCommission(data.totalIndirectCommission || 0);
         setReferredBy(data.referredBy || null);
         setReferralCode(data.referralCode || '');
         setAppBonusClaimed(data.appBonusClaimed || false);
@@ -386,6 +389,8 @@ export default function Dashboard() {
         });
         // Also update local balance states if they exist in RTDB
         if (data.balance !== undefined) setBalance(data.balance);
+        if (data.spinBalance !== undefined) setSpinBalance(data.spinBalance);
+        if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
       }
     }, (error) => console.error("Referral Stats RTDB Error:", error));
 
@@ -608,21 +613,46 @@ export default function Dashboard() {
   const handleUpdateBalance = async (amount: number, source: string = 'system', description: string = '') => {
     if (!user) return;
     try {
-      // 1. Update Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        balance: increment(amount),
-        totalEarnings: amount > 0 ? increment(amount) : increment(0)
-      }, { merge: true });
+      let spinAmt = 0;
+      let balAmt = 0;
+      
+      if (source === 'app_bonus') {
+        spinAmt = amount;
+      } else if (source === 'spin' && amount < 0) {
+        if (spinBalance >= Math.abs(amount)) {
+            spinAmt = amount;
+        } else {
+            spinAmt = -spinBalance;
+            balAmt = amount - spinAmt;
+        }
+      } else {
+        balAmt = amount;
+      }
 
-      // 2. Update RTDB for real-time sync
-      const userStatusRef = ref(rtdb, `users/${user.uid}`);
-      await update(userStatusRef, { 
-        balance: rtdbIncrement(amount),
-        totalEarnings: amount > 0 ? rtdbIncrement(amount) : rtdbIncrement(0)
-      });
+      const updates: any = {};
+      const rtdbUpdates: any = {};
+      
+      if (balAmt !== 0) {
+        updates.balance = increment(balAmt);
+        rtdbUpdates.balance = rtdbIncrement(balAmt);
+        if (balAmt > 0 && source !== 'spin') {
+            updates.totalEarnings = increment(balAmt);
+            rtdbUpdates.totalEarnings = rtdbIncrement(balAmt);
+        }
+      }
+      
+      if (spinAmt !== 0) {
+        updates.spinBalance = increment(spinAmt);
+        rtdbUpdates.spinBalance = rtdbIncrement(spinAmt);
+      }
+
+      if (Object.keys(updates).length > 0) {
+          await setDoc(doc(db, 'users', user.uid), updates, { merge: true });
+          await update(ref(rtdb, `users/${user.uid}`), rtdbUpdates);
+      }
 
       // 3. Record Earning History if amount > 0
-      if (amount > 0) {
+      if (balAmt > 0 || spinAmt > 0) {
         await addDoc(collection(db, 'earning_history'), {
           userId: user.uid,
           amount: amount,
@@ -632,7 +662,7 @@ export default function Dashboard() {
         });
       }
       
-      console.log(`[BALANCE_SYNC] Updated balance by ${amount} from ${source} in Firestore and RTDB`);
+      console.log(`[BALANCE_SYNC] Updated balances from ${source} in Firestore and RTDB`);
 
       // Team Commission Logic: If user has a referrer who is a Partner, give them 10%
       if (amount > 0 && referredBy) {
@@ -1187,6 +1217,7 @@ export default function Dashboard() {
           
           // Determine bonus amount based on referrer's role/tier
           let bonusAmount = appSettings.referralBonusBasic || 100;
+          let l2Uid = null;
           const referrerDoc = await getDoc(doc(db, 'users', l1Uid));
           if (referrerDoc.exists()) {
             const refData = referrerDoc.data();
@@ -1199,6 +1230,23 @@ export default function Dashboard() {
                 bonusAmount = 130;
               } else {
                 bonusAmount = appSettings.referralBonusPartner || 150;
+              }
+            }
+            
+            // Extract Level 2 parent
+            if (refData.referredBy) {
+              let rCode = refData.referredBy;
+              if (rCode.includes('ref/')) rCode = rCode.split('ref/')[1];
+              else if (rCode.includes('=')) rCode = rCode.split('=')[1];
+              rCode = rCode.trim().toLowerCase();
+              
+              const q2 = query(collection(db, 'users'), where('referralCode', '==', rCode));
+              const snap2 = await getDocs(q2);
+              if (!snap2.empty) {
+                l2Uid = snap2.docs[0].id;
+              } else {
+                const uDoc = await getDoc(doc(db, 'usernames', rCode));
+                if (uDoc.exists()) l2Uid = uDoc.data().uid;
               }
             }
           }
@@ -1224,8 +1272,45 @@ export default function Dashboard() {
             activeMembers: rtdbIncrement(1),
             totalCommission: rtdbIncrement(bonusAmount)
           });
+          
+          // Add to Earning History
+          await addDoc(collection(db, 'earning_history'), {
+            userId: l1Uid,
+            amount: bonusAmount,
+            source: 'invite_commission',
+            description: `Rs. ${bonusAmount} Team Income from Referral`,
+            timestamp: serverTimestamp()
+          });
 
-          console.log(`[REFERRAL_LOG] Commission of ${bonusAmount} added to referrer ${l1Uid} in Firestore and RTDB`);
+          console.log(`[REFERRAL_LOG] L1 Commission of ${bonusAmount} added to referrer ${l1Uid}`);
+          
+          // Process Level 2 Commission (10 Rs)
+          if (l2Uid) {
+            console.log(`[REFERRAL_LOG] Found Level 2 Parent UID: ${l2Uid}`);
+            const l2Bonus = 10;
+            
+            await updateDoc(doc(db, 'users', l2Uid), {
+              totalIndirectCommission: increment(l2Bonus),
+              balance: increment(l2Bonus),
+              totalEarnings: increment(l2Bonus)
+            });
+            
+            await update(ref(rtdb, `users/${l2Uid}`), {
+              totalIndirectCommission: rtdbIncrement(l2Bonus),
+              balance: rtdbIncrement(l2Bonus),
+              totalEarnings: rtdbIncrement(l2Bonus)
+            });
+            
+            await addDoc(collection(db, 'earning_history'), {
+              userId: l2Uid,
+              amount: l2Bonus,
+              source: 'indirect_invite_commission',
+              description: `Rs. ${l2Bonus} Indirect Team Income from Referral`,
+              timestamp: serverTimestamp()
+            });
+            
+            console.log(`[REFERRAL_LOG] L2 Commission of ${l2Bonus} added to parent ${l2Uid}`);
+          }
         }
       }
       
@@ -1322,21 +1407,10 @@ export default function Dashboard() {
                  onLeaderboardClick={() => setActiveTab('leaderboard')} 
                  onManageWalletClick={() => setActiveTab('manage_wallet')}
                  onPartnerUpgradeClick={() => setActiveTab('premium')}
-                 onAdminPanelClick={() => setActiveTab('admin')}
                  onEarningHistoryClick={() => setActiveTab('earning_history')}
                  onActivateClick={() => setActiveTab('activation')}
                  onMailboxClick={() => setActiveTab('updates')}
                  appSettings={activeAppSettings}
-               />;
-      case 'admin':
-        return <AdminPanelView 
-                 onBack={() => setActiveTab('profile')}
-                 onApproveActivation={handleActivateUser}
-                 onRejectActivation={handleRejectActivation}
-                 onApprovePartner={handleApprovePartner}
-                 onApproveDeposit={handleApproveDeposit}
-                 onApproveWithdrawal={handleApproveWithdrawal}
-                 onRejectWithdrawal={handleRejectWithdrawal}
                />;
       case 'partner_upgrade':
         return <PartnerUpgradeView 
@@ -1364,13 +1438,18 @@ export default function Dashboard() {
                  onBack={() => setActiveTab('profile')} 
                />;
       case 'earning_history':
-        return <EarningHistoryView onBack={() => setActiveTab('profile')} totalEarnings={totalEarnings} />;
+        return <EarningHistoryView onBack={() => setActiveTab('profile')} totalEarnings={totalEarnings} totalIndirectCommission={totalIndirectCommission} />;
       case 'social_task_plus':
         return <SocialTaskPlusView onBack={() => setActiveTab('home')} userName={userName} />;
       case 'invite':
         return <InviteTab 
           status={status}
-          referralStats={referralStats}
+          referralStats={{
+            totalInvited: referralStats.totalInvited,
+            activeMembers: referralStats.activeMembers,
+            totalCommission: referralStats.totalCommission,
+            totalIndirectCommission: totalIndirectCommission
+          }}
           referralCode={referralCode || userName || ''}
           onActivateClick={() => setActiveTab('activation')}
           referrals={partnerReferrals}
@@ -1400,6 +1479,7 @@ export default function Dashboard() {
         return <SpinWheel 
           onClose={() => setActiveTab('home')}
           balance={balance}
+          spinBalance={spinBalance}
           onUpdateBalance={handleUpdateBalance}
           freeSpins={freeSpins}
           onUseFreeSpin={handleUseFreeSpin}
@@ -1510,6 +1590,7 @@ export default function Dashboard() {
         return <HomeTab 
           name={userName}
           balance={balance}
+          spinBalance={spinBalance}
           lockedBalance={lockedBalance}
           accountStatus={accountStatus}
           role={role}

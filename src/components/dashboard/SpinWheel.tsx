@@ -47,6 +47,7 @@ const tierPrizes: Record<number, any[]> = {
 export default function SpinWheel({ 
   onClose, 
   balance, 
+  spinBalance = 0,
   onUpdateBalance, 
   freeSpins, 
   onUseFreeSpin,
@@ -56,6 +57,7 @@ export default function SpinWheel({
 }: { 
   onClose: () => void;
   balance: number;
+  spinBalance?: number;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
   freeSpins: number;
   onUseFreeSpin: () => void;
@@ -150,7 +152,7 @@ export default function SpinWheel({
     const cost = isPaid ? activeTier : 0;
 
     if (isPaid) {
-      if (balance < cost) {
+      if ((balance + spinBalance) < cost) {
         setShowDepositPopup(true);
         return;
       }
@@ -490,11 +492,11 @@ export default function SpinWheel({
                         whileHover={{ y: -5, scale: 1.01 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => spinWheel(true)}
-                        disabled={isSpinning || balance < activeTier}
+                        disabled={isSpinning || (balance + spinBalance) < activeTier}
                         className={`w-full py-8 rounded-[2.5rem] font-black uppercase tracking-[0.4em] flex flex-col items-center justify-center gap-2 group transition-all shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] relative overflow-hidden ${
                             isSpinning 
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' 
-                            : (balance < activeTier) 
+                            : ((balance + spinBalance) < activeTier) 
                             ? 'bg-red-50 text-red-300 border border-red-100'
                             : `bg-[#0A0B0F] text-white`
                         }`}

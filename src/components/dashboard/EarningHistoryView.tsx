@@ -20,9 +20,10 @@ import { db, auth } from '../../firebase';
 interface EarningHistoryViewProps {
   onBack: () => void;
   totalEarnings?: number;
+  totalIndirectCommission?: number;
 }
 
-export default function EarningHistoryView({ onBack, totalEarnings = 0 }: EarningHistoryViewProps) {
+export default function EarningHistoryView({ onBack, totalEarnings = 0, totalIndirectCommission = 0 }: EarningHistoryViewProps) {
   const [history, setHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -67,7 +68,10 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0 }: Earnin
       case 'task': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
       case 'spin': return <Sparkles className="w-5 h-5 text-amber-500" />;
       case 'lottery': return <Gift className="w-5 h-5 text-purple-500" />;
-      case 'referral': return <Users className="w-5 h-5 text-blue-500" />;
+      case 'referral':
+      case 'invite_commission': 
+      case 'indirect_invite_commission': 
+        return <Users className="w-5 h-5 text-blue-500" />;
       case 'app_bonus': return <Wallet className="w-5 h-5 text-rose-500" />;
       case 'daily_reward': return <Calendar className="w-5 h-5 text-indigo-500" />;
       case 'commission': return <TrendingUp className="w-5 h-5 text-orange-500" />;
@@ -104,22 +108,32 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0 }: Earnin
       </div>
 
       {/* Summary Card */}
-      <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white mb-6 relative overflow-hidden shadow-2xl shadow-slate-900/20">
+      <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white mb-6 relative overflow-hidden shadow-2xl shadow-slate-900/20 flex flex-col gap-6">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-        <div className="relative z-10">
-          <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Lifetime Rewards Earned</p>
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black tracking-tighter">Rs. {totalEarnings.toFixed(2)}</span>
-            <span className="text-emerald-400 text-xs font-bold flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> Lifetime
-            </span>
-          </div>
+        <div className="relative z-10 flex flex-col sm:flex-row justify-between gap-6">
+            <div>
+              <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Lifetime Rewards Earned</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-black tracking-tighter">Rs. {totalEarnings.toFixed(2)}</span>
+                <span className="text-emerald-400 text-xs font-bold flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" /> Lifetime
+                </span>
+              </div>
+            </div>
+            {totalIndirectCommission > 0 && (
+            <div className="pt-4 sm:pt-0 sm:pl-6 sm:border-l border-white/10">
+              <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Indirect Team Income</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-amber-400 tracking-tighter">Rs. {totalIndirectCommission.toFixed(2)}</span>
+              </div>
+            </div>
+            )}
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar mb-4">
-        {['all', 'ad_watch', 'task', 'spin', 'lottery', 'referral', 'app_bonus', 'daily_reward', 'commission'].map((f) => (
+        {['all', 'ad_watch', 'task', 'spin', 'lottery', 'invite_commission', 'indirect_invite_commission', 'app_bonus', 'daily_reward'].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}

@@ -26,7 +26,6 @@ export default function ProfileTab({
   onLeaderboardClick, 
   onManageWalletClick, 
   onPartnerUpgradeClick, 
-  onAdminPanelClick,
   onEarningHistoryClick,
   onActivateClick,
   onMailboxClick,
@@ -49,7 +48,6 @@ export default function ProfileTab({
   onLeaderboardClick?: () => void, 
   onManageWalletClick?: () => void, 
   onPartnerUpgradeClick?: () => void, 
-  onAdminPanelClick?: () => void,
   onEarningHistoryClick?: () => void,
   onActivateClick?: () => void,
   onMailboxClick?: () => void,
@@ -314,13 +312,6 @@ export default function ProfileTab({
             icon={<Crown className="w-4 h-4 text-amber-500" />} 
             label="Upgrade to Partner" 
             onClick={onPartnerUpgradeClick} 
-          />
-        )}
-        {role === 'admin' && (
-          <Item 
-            icon={<Shield className="w-4 h-4 text-slate-900" />} 
-            label="Admin Control Panel" 
-            onClick={onAdminPanelClick} 
           />
         )}
       </Section>

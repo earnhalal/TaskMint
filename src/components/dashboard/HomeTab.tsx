@@ -39,6 +39,7 @@ import { ref, update } from 'firebase/database';
 interface HomeTabProps {
   name: string;
   balance: number;
+  spinBalance?: number;
   lockedBalance: number;
   accountStatus: string;
   role: string;
@@ -227,6 +228,11 @@ export default function HomeTab({
 
   const handleClaimAppBonus = async () => {
     if (!auth.currentUser || isClaiming) return;
+    if (accountStatus.toLowerCase() !== 'active') {
+        alert("App Install Bonus sirf active accounts (joining fee paid) ko milta hai. Pehle account activate karein!");
+        return;
+    }
+    
     setIsClaiming(true);
     try {
       console.log("[BONUS_CLAIM] Starting APK Bonus Claim...");

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Users, CheckCircle2, Wallet, Trophy, UserPlus, Gift, Copy, Phone, MessageCircle, Share2, Star, ChevronRight, AlertCircle, ExternalLink, Clock, Zap } from 'lucide-react';
+import { Users, CheckCircle2, Wallet, Trophy, UserPlus, Gift, Copy, Phone, MessageCircle, Share2, Star, ChevronRight, AlertCircle, ExternalLink, Clock, Zap, Sparkles } from 'lucide-react';
 
 interface InviteTabProps {
   status: string;
@@ -8,6 +8,7 @@ interface InviteTabProps {
     totalInvited: number;
     activeMembers: number;
     totalCommission: number;
+    totalIndirectCommission?: number;
   };
   referralCode: string;
   onActivateClick: () => void;
@@ -156,7 +157,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             </div>
             <div className="flex-1 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col items-center relative overflow-hidden shadow-inner">
               <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-transparent"></div>
-              <span className="text-2xl font-black text-amber-400 italic tracking-tighter relative z-10">Rs {appSettings?.indirectReferralBonus || 20}</span>
+              <span className="text-2xl font-black text-amber-400 italic tracking-tighter relative z-10">Rs {appSettings?.indirectReferralBonus || 10}</span>
               <span className="text-[8px] font-black text-white/40 uppercase tracking-widest mt-1 relative z-10">Team Bonus</span>
             </div>
           </div>
@@ -207,7 +208,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
           { label: 'Total Friends', value: referralStats.totalInvited, color: isDark ? 'text-white' : 'text-slate-900', icon: <Users size={16} /> },
           { label: 'Active Friends', value: referralStats.activeMembers, color: 'text-emerald-500', icon: <Zap size={16} /> },
           { label: 'Total Invite Income', value: `Rs ${referralStats.totalCommission}`, color: 'text-amber-500', icon: <Wallet size={16} /> },
-          { label: 'Access Tier', value: partnerTier.toUpperCase(), color: 'text-indigo-500', icon: <Trophy size={16} /> }
+          { label: 'Indirect Income', value: `Rs ${referralStats.totalIndirectCommission || 0}`, color: 'text-purple-500', icon: <Sparkles size={16} /> },
         ].map((stat, i) => (
           <div key={i} className={`p-4 rounded-[1.5rem] border flex flex-col justify-between ${isDark ? 'bg-[#0A0A0B] border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-3 ${isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-50 text-slate-400'}`}>
