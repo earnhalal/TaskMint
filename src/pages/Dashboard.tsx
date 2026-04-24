@@ -387,10 +387,13 @@ export default function Dashboard() {
           activeMembers: data.activeMembers || 0,
           totalCommission: data.totalCommission || 0
         });
-        // Also update local balance states if they exist in RTDB
+        
+        // Priority Sync for Real-time Balance & Commission
         if (data.balance !== undefined) setBalance(data.balance);
         if (data.spinBalance !== undefined) setSpinBalance(data.spinBalance);
+        if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
+        if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
       }
     }, (error) => console.error("Referral Stats RTDB Error:", error));
 
@@ -1094,6 +1097,24 @@ export default function Dashboard() {
     }
   };
 
+  const reloadData = async () => {
+    if (!user) return;
+    try {
+      // Force get from server to bypass cache
+      const userRef = doc(db, 'users', user.uid);
+      const snapshot = await getDoc(userRef);
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setBalance(data.balance || 0);
+        setTotalEarnings(data.totalEarnings || 0);
+        setTotalIndirectCommission(data.totalIndirectCommission || 0);
+        console.log("[SYNC] Manually re-synced from Firestore");
+      }
+    } catch (error) {
+      console.error("Manual sync error:", error);
+    }
+  };
+
   const renderTabContent = () => {
     // Restriction logic
     const currentAccountStatus = accountStatus.toLowerCase();
@@ -1352,6 +1373,7 @@ export default function Dashboard() {
           onOfferWallClick={() => setActiveTab('cpalead')}
           onPartnerToolsClick={() => setActiveTab('partner_tools')}
           onUpdateBalance={handleUpdateBalance}
+          onReloadData={reloadData}
           appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}
           lastDailyCheckin={lastDailyCheckin}

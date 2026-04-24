@@ -64,6 +64,7 @@ interface HomeTabProps {
   onOfferWallClick: () => void;
   onPartnerToolsClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
+  onReloadData?: () => void;
   appSettings: {
     activationFee: number;
   };
@@ -134,28 +135,42 @@ const QuickActionBtn: React.FC<{
     </motion.button>
 );
 
-const AnimatedCounter = ({ value, trigger }: { value: number, trigger: number }) => {
-  const [displayValue, setDisplayValue] = React.useState(0);
+const AnimatedCounter = ({ value }: { value: number }) => {
+  const [displayValue, setDisplayValue] = React.useState(value);
+  const prevValueRef = React.useRef(value);
 
   React.useEffect(() => {
     let startTimestamp: number;
-    const duration = 1500; // 1.5 seconds
-    const startValue = 0; // Always start from 0 on trigger
+    const duration = 1000; // 1 second
+    const startValue = prevValueRef.current;
     const endValue = value;
 
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / duration, 1);
       const easeProgress = 1 - Math.pow(1 - progress, 4);
-      setDisplayValue(startValue + (endValue - startValue) * easeProgress);
+      const current = startValue + (endValue - startValue) * easeProgress;
+      setDisplayValue(current);
       if (progress < 1) {
         window.requestAnimationFrame(step);
       } else {
         setDisplayValue(endValue);
+        prevValueRef.current = endValue;
       }
     };
-    window.requestAnimationFrame(step);
-  }, [value, trigger]);
+    
+    if (startValue !== endValue) {
+      window.requestAnimationFrame(step);
+    } else {
+      setDisplayValue(value);
+    }
+
+    return () => {
+      // No cleanup needed for requestAnimationFrame as it dies anyway, 
+      // but we update ref to ensure next update starts from correct point
+      prevValueRef.current = endValue;
+    };
+  }, [value]);
 
   return <>{displayValue.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
 };
@@ -187,6 +202,7 @@ export default function HomeTab({
   onOfferWallClick,
   onPartnerToolsClick,
   onUpdateBalance,
+  onReloadData,
   appSettings,
   appBonusClaimed,
   lastDailyCheckin
@@ -206,7 +222,7 @@ export default function HomeTab({
 
   const handleReloadBalance = () => {
     setIsReloading(true);
-    setReloadTrigger(prev => prev + 1);
+    if (onReloadData) onReloadData();
     setTimeout(() => setIsReloading(false), 1500);
   };
 
@@ -480,7 +496,7 @@ export default function HomeTab({
             <div className="flex flex-col">
               <div className="flex items-baseline gap-3">
                 <span className="text-5xl sm:text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                  <AnimatedCounter value={Math.floor(balance)} trigger={reloadTrigger} />
+                  <AnimatedCounter value={balance} />
                 </span>
                 <span className="text-xl font-black text-indigo-500 tracking-tighter italic">RS</span>
               </div>
