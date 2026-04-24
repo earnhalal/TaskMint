@@ -983,8 +983,17 @@ export default function Dashboard() {
     try {
       console.log(`[ADMIN_ACTION] Rejecting withdrawal: ${withdrawalId} for user: ${targetUserId}, Reason: ${reason}`);
       
-      // 1. Update Firestore
+      // Get withdrawal amount
       const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
+      const withdrawalDoc = await getDoc(withdrawalRef);
+      let amountToRefund = 0;
+      
+      if (withdrawalDoc.exists()) {
+        const wData = withdrawalDoc.data();
+        amountToRefund = wData.amount || 0;
+      }
+
+      // 1. Update Firestore
       await updateDoc(withdrawalRef, { 
         status: 'Rejected',
         rejectionReason: reason,
@@ -992,7 +1001,22 @@ export default function Dashboard() {
       });
       console.log("[ADMIN_ACTION_SUCCESS] Firestore withdrawal status updated to Rejected");
 
-      // 2. Update RTDB
+      // 2. Refund balance
+      if (amountToRefund > 0) {
+        const userRef = doc(db, 'users', targetUserId);
+        const userRtdbRef = ref(rtdb, `users/${targetUserId}`);
+        
+        await updateDoc(userRef, { 
+          balance: increment(amountToRefund)
+        });
+        
+        await update(userRtdbRef, {
+          balance: rtdbIncrement(amountToRefund)
+        });
+        console.log(`[ADMIN_ACTION_SUCCESS] Refunded ${amountToRefund} to user ${targetUserId}`);
+      }
+
+      // 3. Update RTDB
       const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
       const snapshot = await get(userWithdrawalsRef);
       if (snapshot.exists()) {
