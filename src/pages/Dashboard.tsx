@@ -130,6 +130,7 @@ export default function Dashboard() {
 
   const [balance, setBalance] = useState(0);
   const [spinBalance, setSpinBalance] = useState(0);
+  const [pendingIndirect, setPendingIndirect] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
   const [appBonusClaimed, setAppBonusClaimed] = useState(false);
@@ -957,10 +958,11 @@ export default function Dashboard() {
       // Send internal notification
       await sendActivationMail(targetUserId);
 
-      // 2. Handle Direct & Indirect Referral Chains
+      // 2. Handle Direct Referral (Level 1)
       if (userData.referredBy) {
         console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
         
+        // Helper to parse referral code
         const getCleanCode = (raw: string) => {
           let code = raw;
           if (code.toLowerCase().includes('ref/')) code = code.split(/ref\//i)[1];
@@ -968,112 +970,118 @@ export default function Dashboard() {
           return (code || '').trim().toLowerCase();
         };
 
-        const resolveUidFromRef = async (refCode: string) => {
-          if (!refCode) return null;
-          const sanitized = getCleanCode(refCode);
-          if (!sanitized) return null;
-          
-          let uid = null;
-          const q = query(collection(db, 'users'), where('referralCode', '==', sanitized));
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            uid = snap.docs[0].id;
+        const sanitizedRef = getCleanCode(userData.referredBy);
+        
+        let l1Uid = null;
+        if (sanitizedRef) {
+          console.log(`[REFERRAL_LOG] Sanitized L1 Ref: ${sanitizedRef}`);
+          const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            l1Uid = querySnapshot.docs[0].id;
+            console.log(`[REFERRAL_LOG] L1 Found via referralCode: ${l1Uid}`);
           } else {
-            const uDoc = await getDoc(doc(db, 'usernames', sanitized));
-            if (uDoc.exists()) uid = uDoc.data().uid;
+            const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
+            if (parentUsernameDoc.exists()) {
+              l1Uid = parentUsernameDoc.data().uid;
+              console.log(`[REFERRAL_LOG] L1 Found via usernames: ${l1Uid}`);
+            }
           }
-          return uid;
-        };
-
-        const l1Uid = await resolveUidFromRef(userData.referredBy);
+        }
         
         if (l1Uid) {
-          console.log(`[REFERRAL_LOG] Process Level 1 Parent (Direct): ${l1Uid}`);
-          let l1BonusAmount = activeAppSettings.referralBonusBasic || 100;
-          let l2Uid = null;
+          console.log(`[REFERRAL_LOG] Processing L1 parent: ${l1Uid}`);
           
-          const l1Doc = await getDoc(doc(db, 'users', l1Uid));
-          if (l1Doc.exists()) {
-            const l1Data = l1Doc.data();
+          // Determine bonus amount based on referrer's role/tier
+          let bonusAmount = activeAppSettings.referralBonusBasic || 100;
+          let l2Uid = null;
+          const referrerDoc = await getDoc(doc(db, 'users', l1Uid));
+          if (referrerDoc.exists()) {
+            const refData = referrerDoc.data();
+            console.log(`[REFERRAL_LOG] L1 Data:`, refData);
             
-            // Adjust bonus for partner roles
-            if (l1Data.role === 'partner') {
-              if (l1Data.partnerTier === 'gold') l1BonusAmount = 200;
-              else if (l1Data.partnerTier === 'silver') l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
-              else if (l1Data.partnerTier === 'bronze') l1BonusAmount = 130;
-              else l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
+            if (refData.role === 'partner') {
+              if (refData.partnerTier === 'gold') bonusAmount = 200;
+              else if (refData.partnerTier === 'silver') bonusAmount = activeAppSettings.referralBonusPartner || 150;
+              else if (refData.partnerTier === 'bronze') bonusAmount = 130;
+              else bonusAmount = activeAppSettings.referralBonusPartner || 150;
             }
-
-            // Chain to Level 2
-            if (l1Data.referredBy) {
-               console.log(`[REFERRAL_LOG] Checking for Level 2 Parent using L1's referredBy: ${l1Data.referredBy}`);
-               l2Uid = await resolveUidFromRef(l1Data.referredBy);
-               if (l2Uid) {
-                 console.log(`[REFERRAL_LOG] Level 2 Parent (Indirect) identified: ${l2Uid}`);
-               } else {
-                 console.log(`[REFERRAL_LOG] Invalid L2 reference found.`);
-               }
+            
+            // Extract Level 2 parent
+            if (refData.referredBy) {
+              const sanitizedL2Ref = getCleanCode(refData.referredBy);
+              console.log(`[REFERRAL_LOG] Sanitized L2 Ref: ${sanitizedL2Ref}`);
+              
+              if (sanitizedL2Ref) {
+                const q2 = query(collection(db, 'users'), where('referralCode', '==', sanitizedL2Ref));
+                const snap2 = await getDocs(q2);
+                if (!snap2.empty) {
+                  l2Uid = snap2.docs[0].id;
+                  console.log(`[REFERRAL_LOG] L2 Found via referralCode: ${l2Uid}`);
+                } else {
+                  const uDoc = await getDoc(doc(db, 'usernames', sanitizedL2Ref));
+                  if (uDoc.exists()) {
+                    l2Uid = uDoc.data().uid;
+                    console.log(`[REFERRAL_LOG] L2 Found via usernames: ${l2Uid}`);
+                  }
+                }
+              }
             }
           }
 
-          // === APPLY L1 (Direct) REWARD ===
-          const safeParentRef = getCleanCode(userData.referredBy).replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
+          // Update referral status in RTDB (L1 History)
+          const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
           await update(ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`), { 
             status: 'paid', 
-            commission: l1BonusAmount 
+            commission: bonusAmount 
           });
 
+          // Update referrer stats in Firestore (L1)
           await updateDoc(doc(db, 'users', l1Uid), {
             activeMembers: increment(1),
-            totalCommission: increment(l1BonusAmount),
-            balance: increment(l1BonusAmount),
-            totalEarnings: increment(l1BonusAmount)
+            totalCommission: increment(bonusAmount),
+            balance: increment(bonusAmount),
+            totalEarnings: increment(bonusAmount)
           });
           
+          // Sync L1 to RTDB
           await update(ref(rtdb, `users/${l1Uid}`), {
-            balance: rtdbIncrement(l1BonusAmount),
-            totalEarnings: rtdbIncrement(l1BonusAmount),
+            balance: rtdbIncrement(bonusAmount),
+            totalEarnings: rtdbIncrement(bonusAmount),
             activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(l1BonusAmount)
+            totalCommission: rtdbIncrement(bonusAmount)
           });
           
+          // L1 Earning History
           await addDoc(collection(db, 'earning_history'), {
             userId: l1Uid,
-            amount: l1BonusAmount,
+            amount: bonusAmount,
             source: 'invite_commission',
-            description: `Rs. ${l1BonusAmount} Team Income from Referral`,
+            description: `Rs. ${bonusAmount} Team Income from Referral`,
             timestamp: serverTimestamp()
           });
-          console.log(`[REFERRAL_LOG] Successfully rewarded L1 (Direct) Admin: ${l1Uid} with ${l1BonusAmount}`);
 
-          // === APPLY L2 (Indirect) REWARD ===
+          console.log(`[REFERRAL_LOG] L1 Commission of ${bonusAmount} added to referrer ${l1Uid}`);
+          
+          // 3. Process Level 2 Commission (Manual Claimable)
           if (l2Uid) {
-            const l2Bonus = activeAppSettings.indirectReferralBonus || 10;
-            console.log(`[REFERRAL_LOG] Processing L2 reward of ${l2Bonus} for: ${l2Uid}`);
+            console.log(`[REFERRAL_LOG] Final L2 Parent UID identified: ${l2Uid}`);
+            const l2Bonus = 10;
             
             await updateDoc(doc(db, 'users', l2Uid), {
-              totalIndirectCommission: increment(l2Bonus),
-              balance: increment(l2Bonus),
-              totalEarnings: increment(l2Bonus)
+              pendingIndirect: increment(l2Bonus)
             });
             
             await update(ref(rtdb, `users/${l2Uid}`), {
-              totalIndirectCommission: rtdbIncrement(l2Bonus),
-              balance: rtdbIncrement(l2Bonus),
-              totalEarnings: rtdbIncrement(l2Bonus)
+              pendingIndirect: rtdbIncrement(l2Bonus)
             });
             
-            await addDoc(collection(db, 'earning_history'), {
-              userId: l2Uid,
-              amount: l2Bonus,
-              source: 'indirect_invite_commission',
-              description: `Rs. ${l2Bonus} Indirect Team Income from Referral`,
-              timestamp: serverTimestamp()
-            });
-            console.log(`[REFERRAL_LOG] Successfully rewarded L2 (Indirect) Admin: ${l2Uid} with ${l2Bonus}`);
+            console.log(`[REFERRAL_LOG] Successfully added Rs. ${l2Bonus} to pendingIndirect for ${l2Uid}`);
+          } else {
+            console.warn(`[REFERRAL_LOG] L2 Parent Not Found for L1 parent ${l1Uid}`);
           }
         } else {
-          console.warn(`[REFERRAL_LOG] Could not resolve L1 UID for code: ${userData.referredBy}`);
+          console.warn(`[REFERRAL_LOG] L1 Parent Not Found for code: ${sanitizedRef}`);
         }
       }
       
@@ -1088,6 +1096,43 @@ export default function Dashboard() {
     }
   };
 
+  const claimPendingIndirect = async () => {
+    if (!user) return;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) return;
+      
+      const data = userDoc.data();
+      const pendingAmount = data.pendingIndirect || 0;
+      
+      if (pendingAmount > 0) {
+        await updateDoc(userRef, {
+          balance: increment(pendingAmount),
+          totalEarnings: increment(pendingAmount),
+          totalIndirectCommission: increment(pendingAmount),
+          pendingIndirect: 0
+        });
+        
+        await update(ref(rtdb, `users/${user.uid}`), {
+          balance: rtdbIncrement(pendingAmount),
+          totalEarnings: rtdbIncrement(pendingAmount),
+          totalIndirectCommission: rtdbIncrement(pendingAmount),
+          pendingIndirect: 0
+        });
+        
+        reloadData();
+        alert(`Successfully claimed Rs. ${pendingAmount}`);
+      } else {
+        alert("No pending indirect commission to claim.");
+      }
+    } catch (error) {
+      console.error("Claim error:", error);
+      alert("Error claiming commission.");
+    }
+  };
+
   const reloadData = async () => {
     if (!user) return;
     try {
@@ -1099,6 +1144,7 @@ export default function Dashboard() {
         setBalance(data.balance || 0);
         setTotalEarnings(data.totalEarnings || 0);
         setTotalIndirectCommission(data.totalIndirectCommission || 0);
+        setPendingIndirect(data.pendingIndirect || 0);
         console.log("[SYNC] Manually re-synced from Firestore");
       }
     } catch (error) {
@@ -1206,6 +1252,8 @@ export default function Dashboard() {
           appSettings={activeAppSettings}
           role={role}
           partnerTier={partnerTier}
+          pendingIndirect={pendingIndirect}
+          onClaimIndirect={claimPendingIndirect}
         />;
       case 'activation':
         return <ActivationTab 
@@ -1346,6 +1394,8 @@ export default function Dashboard() {
           lockedBalance={lockedBalance}
           accountStatus={accountStatus}
           role={role}
+          pendingIndirect={pendingIndirect}
+          onClaimIndirect={claimPendingIndirect}
           topEarners={topEarners}
           onSpinClick={() => setActiveTab('spin')} 
           onInviteClick={() => setActiveTab('invite')}
