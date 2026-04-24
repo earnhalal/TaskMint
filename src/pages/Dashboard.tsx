@@ -198,10 +198,10 @@ export default function Dashboard() {
     const unsubscribe = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
-        setBalance(data.balance || 0);
-        setSpinBalance(data.spinBalance || 0);
-        setTotalEarnings(data.totalEarnings || 0);
-        setLockedBalance(data.lockedBalance || 0);
+        if (data.balance !== undefined) setBalance(data.balance);
+        if (data.spinBalance !== undefined) setSpinBalance(data.spinBalance);
+        if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
+        if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
         setUserPin(data.pin || '');
         setSeenUpdates(data.seenUpdates || []);
         setUserName(data.username || '');
@@ -216,7 +216,7 @@ export default function Dashboard() {
         setPartnerStatus(data.partnerStatus || 'none');
         setPartnerTier(data.partnerTier || (data.role === 'partner' ? 'silver' : 'basic'));
         setTotalTeamEarnings(data.totalTeamEarnings || 0);
-        setTotalIndirectCommission(data.totalIndirectCommission || 0);
+        if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         setReferredBy(data.referredBy || null);
         setReferralCode(data.referralCode || '');
         setAppBonusClaimed(data.appBonusClaimed || false);
@@ -1141,10 +1141,10 @@ export default function Dashboard() {
       const snapshot = await getDoc(userRef);
       if (snapshot.exists()) {
         const data = snapshot.data();
-        setBalance(data.balance || 0);
-        setTotalEarnings(data.totalEarnings || 0);
-        setTotalIndirectCommission(data.totalIndirectCommission || 0);
-        setPendingIndirect(data.pendingIndirect || 0);
+        if (data.balance !== undefined) setBalance(data.balance);
+        if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
+        if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
+        if (data.pendingIndirect !== undefined) setPendingIndirect(data.pendingIndirect);
         console.log("[SYNC] Manually re-synced from Firestore");
       }
     } catch (error) {
