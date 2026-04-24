@@ -913,237 +913,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleRejectActivation = async (targetUserId: string, depositId: string) => {
-    try {
-      if (depositId) {
-        await updateDoc(doc(db, 'deposits', depositId), { status: 'Rejected' });
-      }
-      
-      const userRef = doc(db, 'users', targetUserId);
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        
-        // Update feeStatus to rejected
-        await updateDoc(userRef, { feeStatus: 'rejected' });
-        const userStatusRef = ref(rtdb, `users/${targetUserId}`);
-        await update(userStatusRef, { feeStatus: 'rejected' });
-        
-        // Update referral status in RTDB if referred
-        if (userData.referredBy) {
-          const sanitizedRef = userData.referredBy.trim().toLowerCase();
-          let l1Uid = null;
-          const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
-          const querySnapshot = await getDocs(q);
-          
-          if (!querySnapshot.empty) {
-            l1Uid = querySnapshot.docs[0].id;
-          } else {
-            const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
-            if (parentUsernameDoc.exists()) {
-              l1Uid = parentUsernameDoc.data().uid;
-            }
-          }
-
-          if (l1Uid) {
-            const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
-            const referralStatusRef = ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`);
-            await update(referralStatusRef, { status: 'rejected' });
-          }
-        }
-      }
-      
-      alert("Activation request rejected.");
-    } catch (error) {
-      console.error("Error rejecting activation:", error);
-      alert("Error rejecting activation.");
-    }
-  };
-
-  const handleApprovePartner = async (targetUserId: string, requestId: string) => {
-    try {
-      await updateDoc(doc(db, 'users', targetUserId), { 
-        role: 'partner',
-        partnerStatus: 'active'
-      });
-      await updateDoc(doc(db, 'partnerRequests', requestId), { status: 'approved' });
-      alert("Partner request approved!");
-    } catch (error) {
-      console.error("Error approving partner:", error);
-    }
-  };
-
-  const handleApproveDeposit = async (targetUserId: string, depositId: string, amount: number) => {
-    try {
-      console.log(`[ADMIN_ACTION] Approving deposit: ${depositId} for user: ${targetUserId}, amount: ${amount}`);
-      
-      const userRef = doc(db, 'users', targetUserId);
-      const depositRef = doc(db, 'deposits', depositId);
-      const userRtdbRef = ref(rtdb, `users/${targetUserId}`);
-
-      // 1. Update User Balance (Firestore)
-      await updateDoc(userRef, { 
-        balance: increment(amount)
-      });
-      
-      // 2. Update User Balance (RTDB)
-      await update(userRtdbRef, {
-        balance: rtdbIncrement(amount)
-      });
-      console.log(`[ADMIN_ACTION_SUCCESS] User balance incremented by ${amount} in Firestore and RTDB`);
-
-      // 3. Update Deposit Status
-      await updateDoc(depositRef, { 
-        status: 'Approved',
-        approvedAt: new Date().toISOString()
-      });
-      console.log(`[ADMIN_ACTION_SUCCESS] Deposit status updated to Approved`);
-
-      // 4. Notify User
-      await sendDepositApprovedMail(targetUserId, amount);
-      
-      alert("Deposit approved successfully! Balance added to user account.");
-    } catch (error) {
-      console.error("[ADMIN_ACTION_FAILURE] Error approving deposit:", error);
-      alert("Failed to approve deposit. Check console for details.");
-    }
-  };
-
-  const handleRejectWithdrawal = async (targetUserId: string, withdrawalId: string, reason: string) => {
-    try {
-      console.log(`[ADMIN_ACTION] Rejecting withdrawal: ${withdrawalId} for user: ${targetUserId}, Reason: ${reason}`);
-      
-      // Get withdrawal amount
-      const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
-      const withdrawalDoc = await getDoc(withdrawalRef);
-      let amountToRefund = 0;
-      
-      if (withdrawalDoc.exists()) {
-        const wData = withdrawalDoc.data();
-        amountToRefund = wData.amount || 0;
-      }
-
-      // 1. Update Firestore
-      await updateDoc(withdrawalRef, { 
-        status: 'Rejected',
-        rejectionReason: reason,
-        rejectedAt: new Date().toISOString()
-      });
-      console.log("[ADMIN_ACTION_SUCCESS] Firestore withdrawal status updated to Rejected");
-
-      // 2. Refund balance
-      if (amountToRefund > 0) {
-        const userRef = doc(db, 'users', targetUserId);
-        const userRtdbRef = ref(rtdb, `users/${targetUserId}`);
-        
-        await updateDoc(userRef, { 
-          balance: increment(amountToRefund)
-        });
-        
-        await update(userRtdbRef, {
-          balance: rtdbIncrement(amountToRefund)
-        });
-        console.log(`[ADMIN_ACTION_SUCCESS] Refunded ${amountToRefund} to user ${targetUserId}`);
-      }
-
-      // 3. Update RTDB
-      const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
-      const snapshot = await get(userWithdrawalsRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        for (const key in data) {
-          if (data[key].firestoreId === withdrawalId) {
-            await update(ref(rtdb, `withdrawals/${targetUserId}/${key}`), {
-              status: 'rejected',
-              rejectionReason: reason,
-              rejectedAt: Date.now()
-            });
-            console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal status updated to rejected");
-            break;
-          }
-        }
-      }
-
-      alert("Withdrawal rejected.");
-    } catch (error) {
-      console.error("[ADMIN_ACTION_FAILURE] Error rejecting withdrawal:", error);
-      alert("Failed to reject withdrawal.");
-    }
-  };
-
-  const handleApproveWithdrawal = async (targetUserId: string, withdrawalId: string) => {
-    try {
-      console.log(`[ADMIN_ACTION] Approving withdrawal: ${withdrawalId} for user: ${targetUserId}`);
-      
-      // 1. Update Firestore
-      const withdrawalRef = doc(db, 'withdrawals', withdrawalId);
-      const withdrawalDoc = await getDoc(withdrawalRef);
-      let amount = 0;
-      let method = 'Withdrawal';
-      
-      if (withdrawalDoc.exists()) {
-        const wData = withdrawalDoc.data();
-        amount = wData.amount;
-        method = wData.method || 'Withdrawal';
-        await updateDoc(withdrawalRef, { 
-          status: 'Approved',
-          approvedAt: new Date().toISOString()
-        });
-        console.log("[ADMIN_ACTION_SUCCESS] Firestore withdrawal status updated to Approved");
-      } else {
-        console.warn("[ADMIN_ACTION_WARNING] Withdrawal document not found in Firestore. ID:", withdrawalId);
-        // We still proceed to update RTDB if possible
-      }
-
-      // 2. Update RTDB (Primary for History)
-      // Path structure in RTDB is withdrawals/{userId}/{someId}/{withdrawalId}
-      // We need to find the withdrawal entry under {userId}
-      const userWithdrawalsRef = ref(rtdb, `withdrawals/${targetUserId}`);
-      console.log(`[DEBUG] Searching for withdrawal in RTDB at: withdrawals/${targetUserId}`);
-      
-      const snapshot = await get(userWithdrawalsRef);
-      let found = false;
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        // Iterate through the nested structure to find the withdrawal with matching firestoreId
-        for (const key in data) {
-          const subNode = data[key];
-          // Check if the withdrawal is directly under {userId}/{someId}
-          if (subNode.firestoreId === withdrawalId) {
-            await update(ref(rtdb, `withdrawals/${targetUserId}/${key}`), {
-              status: 'approved',
-              approvedAt: Date.now()
-            });
-            console.log(`[ADMIN_ACTION_SUCCESS] RTDB withdrawal updated at path: withdrawals/${targetUserId}/${key}`);
-            found = true;
-            break;
-          }
-        }
-      }
-
-      if (!found) {
-        console.log("[ADMIN_ACTION] Withdrawal not found in RTDB by firestoreId. Creating new entry.");
-        await set(ref(rtdb, `withdrawals/${targetUserId}/${withdrawalId}`), {
-          amount,
-          method,
-          status: 'approved',
-          timestamp: Date.now(),
-          approvedAt: Date.now(),
-          userId: targetUserId,
-          firestoreId: withdrawalId
-        });
-        console.log("[ADMIN_ACTION_SUCCESS] RTDB withdrawal created as fallback");
-      }
-
-      await sendWithdrawalApprovedMail(targetUserId, amount);
-      alert("Withdrawal approved successfully!");
-    } catch (error) {
-      console.error("[ADMIN_ACTION_FAILURE] Error approving withdrawal:", error);
-      alert("Failed to approve withdrawal. Error: " + (error instanceof Error ? error.message : String(error)));
-    }
-  };
-
   const unreadUpdatesCount = notifications.filter(n => n.status === 'unread').length;
 
   const handleActivateUser = async (targetUserId: string, depositId?: string) => {
@@ -1216,7 +985,7 @@ export default function Dashboard() {
           console.log(`[REFERRAL_LOG] Found Level 1 Parent UID: ${l1Uid}`);
           
           // Determine bonus amount based on referrer's role/tier
-          let bonusAmount = appSettings.referralBonusBasic || 100;
+          let bonusAmount = activeAppSettings.referralBonusBasic || 100;
           let l2Uid = null;
           const referrerDoc = await getDoc(doc(db, 'users', l1Uid));
           if (referrerDoc.exists()) {
@@ -1225,11 +994,11 @@ export default function Dashboard() {
               if (refData.partnerTier === 'gold') {
                 bonusAmount = 200;
               } else if (refData.partnerTier === 'silver') {
-                bonusAmount = appSettings.referralBonusPartner || 150;
+                bonusAmount = activeAppSettings.referralBonusPartner || 150;
               } else if (refData.partnerTier === 'bronze') {
                 bonusAmount = 130;
               } else {
-                bonusAmount = appSettings.referralBonusPartner || 150;
+                bonusAmount = activeAppSettings.referralBonusPartner || 150;
               }
             }
             
@@ -1284,10 +1053,10 @@ export default function Dashboard() {
 
           console.log(`[REFERRAL_LOG] L1 Commission of ${bonusAmount} added to referrer ${l1Uid}`);
           
-          // Process Level 2 Commission (10 Rs)
+          // Process Level 2 Commission
           if (l2Uid) {
             console.log(`[REFERRAL_LOG] Found Level 2 Parent UID: ${l2Uid}`);
-            const l2Bonus = 10;
+            const l2Bonus = activeAppSettings.indirectReferralBonus || 10;
             
             await updateDoc(doc(db, 'users', l2Uid), {
               totalIndirectCommission: increment(l2Bonus),
@@ -1324,38 +1093,6 @@ export default function Dashboard() {
       alert("Error during activation. Check console for details.");
     }
   };
-
-  useEffect(() => {
-    (window as any).simulateActivation = () => {
-      if (user) handleActivateUser(user.uid);
-    };
-    (window as any).simulateDepositApproval = async (amount: number) => {
-      if (user) {
-        await updateDoc(doc(db, 'users', user.uid), { balance: increment(amount) });
-        await sendDepositApprovedMail(user.uid, amount);
-      }
-    };
-    (window as any).simulateWithdrawalApproval = async (amount: number) => {
-      if (user) {
-        await sendWithdrawalApprovedMail(user.uid, amount);
-      }
-    };
-    (window as any).simulatePartnerApproval = async () => {
-      if (user) {
-        await updateDoc(doc(db, 'users', user.uid), { 
-          role: 'partner',
-          partnerStatus: 'active'
-        });
-        alert("Account upgraded to Partner!");
-      }
-    };
-    return () => {
-      delete (window as any).simulateActivation;
-      delete (window as any).simulateDepositApproval;
-      delete (window as any).simulateWithdrawalApproval;
-      delete (window as any).simulatePartnerApproval;
-    };
-  }, [user]);
 
   const renderTabContent = () => {
     // Restriction logic
