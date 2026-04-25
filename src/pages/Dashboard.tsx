@@ -79,6 +79,7 @@ import LotteryView from '../components/dashboard/LotteryView';
 import StreakRewardView from '../components/dashboard/StreakRewardView';
 import SpinWheel from '../components/dashboard/SpinWheel';
 import PartnerToolsView from '../components/dashboard/PartnerToolsView';
+import ProductDrawView from '../components/dashboard/ProductDrawView';
 import { DynamicAvatar } from '../components/ui/DynamicAvatar';
 
 export default function Dashboard() {
@@ -1393,6 +1394,13 @@ export default function Dashboard() {
                  referralStats={referralStats}
                  onApproveMember={handleActivateUser}
                />;
+      case 'product-draw':
+        return <ProductDrawView 
+            onBack={() => setActiveTab('home')} 
+            balance={balance} 
+            userName={userName}
+            onUpdateBalance={handleUpdateBalance} 
+        />;
       // Add other tabs as needed
       default:
         return <HomeTab 
@@ -1426,6 +1434,7 @@ export default function Dashboard() {
           onEasyTaskClick={() => setActiveTab('wannads')}
           onOfferWallClick={() => setActiveTab('cpalead')}
           onPartnerToolsClick={() => setActiveTab('partner_tools')}
+          onProductDrawClick={() => setActiveTab('product-draw')}
           onUpdateBalance={handleUpdateBalance}
           onReloadData={reloadData}
           appSettings={activeAppSettings}

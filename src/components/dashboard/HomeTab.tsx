@@ -65,6 +65,7 @@ interface HomeTabProps {
   onSocialTaskPlusClick: () => void;
   onOfferWallClick: () => void;
   onPartnerToolsClick: () => void;
+  onProductDrawClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string) => void;
   onReloadData?: () => void;
   appSettings: {
@@ -206,6 +207,7 @@ export default function HomeTab({
   onSocialTaskPlusClick,
   onOfferWallClick,
   onPartnerToolsClick,
+  onProductDrawClick,
   onUpdateBalance,
   onReloadData,
   appSettings,
@@ -646,6 +648,41 @@ export default function HomeTab({
             shadowColor="shadow-purple-700/40"
             labelColor="text-[#8e2de2]" delay={1100}
           />
+        </div>
+      </div>
+
+      {/* Product Draw */}
+      <div className="relative z-10 px-1 py-4">
+        <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-4">Product Draws</h2>
+        <div className="overflow-hidden bg-[#0A0A0B] rounded-3xl p-4 border border-white/10 shadow-lg">
+            <motion.div 
+                className="flex gap-4"
+                animate={{ x: ["0%", "-100%"] }}
+                transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+            >
+                {[
+                    { name: "Wireless Earbuds", price: "3,500", image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&q=80", entryFee: 100 },
+                    { name: "Romoss SW10PF Power Bank", price: "6,999", image: "https://images.unsplash.com/photo-1609592813106-c79d6882269a?w=300&q=80", entryFee: 100 },
+                    { name: "Headphones", price: "3,500", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80", entryFee: 100 },
+                ].concat([
+                    { name: "Wireless Earbuds", price: "3,500", image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&q=80", entryFee: 100 },
+                    { name: "Romoss SW10PF Power Bank", price: "6,999", image: "https://images.unsplash.com/photo-1609592813106-c79d6882269a?w=300&q=80", entryFee: 100 },
+                    { name: "Headphones", price: "3,500", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80", entryFee: 100 },
+                ]).map((item, i) => (
+                    <div key={i} className="min-w-[140px] bg-white/5 rounded-2xl p-3 border border-white/5 flex flex-col items-center">
+                        <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl mb-2 object-cover" />
+                        <p className="text-[10px] font-bold text-white uppercase text-center line-clamp-1">{item.name}</p>
+                        <p className="text-[10px] text-slate-500 font-bold line-through">Rs. {item.price}</p>
+                        <p className="text-xs text-amber-500 font-black mb-2">Rs. {item.entryFee}</p>
+                        <button 
+                            onClick={onProductDrawClick}
+                            className="bg-indigo-600 text-[9px] font-bold text-white px-3 py-1.5 rounded-lg w-full"
+                        >
+                            Participate
+                        </button>
+                    </div>
+                ))}
+            </motion.div>
         </div>
       </div>
 

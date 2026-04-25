@@ -28,6 +28,7 @@ export default function ProfileTab({
   onEarningHistoryClick,
   onActivateClick,
   onMailboxClick,
+  onProductDrawClick,
   appSettings,
   accountNumber,
   accountTitle
@@ -51,6 +52,7 @@ export default function ProfileTab({
   onEarningHistoryClick?: () => void,
   onActivateClick?: () => void,
   onMailboxClick?: () => void,
+  onProductDrawClick?: () => void,
   appSettings?: any,
   accountNumber?: string,
   accountTitle?: string
@@ -332,6 +334,11 @@ export default function ProfileTab({
           icon={<Briefcase className="w-4 h-4" />} 
           label="Premium Jobs" 
           onClick={() => setShowJobsModal(true)}
+        />
+        <Item 
+          icon={<Sparkles className="w-4 h-4" />} 
+          label="Product Draws" 
+          onClick={onProductDrawClick}
         />
       </Section>
 
