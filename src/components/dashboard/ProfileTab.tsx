@@ -19,8 +19,6 @@ export default function ProfileTab({
   balance, 
   lockedBalance, 
   totalIndirectCommission = 0,
-  accountNumber, 
-  accountTitle, 
   joiningDate, 
   referralCode, 
   onEditProfile, 
@@ -30,7 +28,9 @@ export default function ProfileTab({
   onEarningHistoryClick,
   onActivateClick,
   onMailboxClick,
-  appSettings
+  appSettings,
+  accountNumber,
+  accountTitle
 }: { 
   name: string, 
   email: string, 
@@ -42,8 +42,6 @@ export default function ProfileTab({
   balance: number, 
   lockedBalance: number, 
   totalIndirectCommission?: number,
-  accountNumber: string, 
-  accountTitle: string, 
   joiningDate: string, 
   referralCode: string, 
   onEditProfile?: () => void, 
@@ -53,7 +51,9 @@ export default function ProfileTab({
   onEarningHistoryClick?: () => void,
   onActivateClick?: () => void,
   onMailboxClick?: () => void,
-  appSettings?: any
+  appSettings?: any,
+  accountNumber?: string,
+  accountTitle?: string
 }) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -124,7 +124,7 @@ export default function ProfileTab({
     >
       
       {/* Profile Completion Alert */}
-      {(!name || !gender || !accountNumber || status.toLowerCase() !== 'active') && (
+      {(!name || !gender || status.toLowerCase() !== 'active') && (
         <motion.div 
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
@@ -320,16 +320,6 @@ export default function ProfileTab({
         )}
       </Section>
 
-      <Section title="Withdrawal Account">
-        <div className="p-4 border-b border-slate-50">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Account Title</p>
-            <p className="text-sm font-bold text-slate-900">{accountTitle || 'Not Set'}</p>
-        </div>
-        <div className="p-4">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Account Number</p>
-            <p className="text-sm font-bold text-slate-900 font-mono">{accountNumber || 'Not Set'}</p>
-        </div>
-      </Section>
 
       <Section title="Account">
         <Item icon={<ImageIcon className="w-4 h-4" />} label="Change Avatar" onClick={onEditProfile} />

@@ -440,6 +440,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                       <div>
                         <h4 className="font-black text-slate-900 text-[11px] uppercase italic tracking-tight leading-none mb-1">{item.title}</h4>
                         <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-none">{item.subtitle}</p>
+                        <p className="text-[8px] font-black uppercase text-red-500 tracking-wider mt-1">View Receipt</p>
                       </div>
                   </div>
                   <div className="text-right relative z-10">
@@ -492,46 +493,87 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               </button>
               
               <div className="text-center mb-8">
-                 <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                    <History className="w-8 h-8 text-slate-900" />
+                 <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg ${
+                     selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20' :
+                     selectedWithdrawal.status === 'Rejected' ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/20' :
+                     'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20'
+                 }`}>
+                    {selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? <CheckCircle2 className="w-10 h-10 text-white" /> : <AlertCircle className="w-10 h-10 text-white" />}
                  </div>
-                 <h3 className="text-2xl font-black text-slate-900 italic uppercase">Transaction Log</h3>
+                 <h3 className="text-2xl font-black text-slate-900 italic uppercase tracking-tighter">Payment Receipt</h3>
+                 <div className={`mt-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block ${
+                     selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
+                     selectedWithdrawal.status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                     'bg-amber-100 text-amber-700'
+                 }`}>
+                    {selectedWithdrawal.status || 'Pending'}
+                 </div>
+                 <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-widest">Sent by TaskMint Official</p>
               </div>
               
-              <div className="space-y-5">
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Status</span>
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${
-                    selectedWithdrawal.status === 'Pending' ? 'text-amber-500' : 
-                    (selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed') ? 'text-emerald-500' : 
-                    'text-red-500'
-                  }`}>{selectedWithdrawal.status}</span>
-                </div>
+              {/* Receipt Body - Premium Dark Theme */}
+              <div className="bg-gradient-to-b from-[#111] to-[#050505] p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-[60px]"></div>
+                
+                {/* Transaction Data */}
+                <div className="space-y-6 relative z-10">
+                    {/* Header Section */}
+                    <div className="flex justify-between items-center border-b border-white/5 pb-6">
+                        <div>
+                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Transaction ID</p>
+                            <p className="text-sm font-mono font-medium text-white tracking-wider">{selectedWithdrawal.id?.substring(0, 12).toUpperCase() || 'TXN-PENDING'}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Approved Date</p>
+                            <p className="text-xs font-semibold text-white">{selectedWithdrawal.date ? new Date(selectedWithdrawal.date).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                    </div>
 
-                {selectedWithdrawal.status === 'Rejected' && selectedWithdrawal.rejectionReason && (
-                  <div className="bg-red-50 p-5 rounded-3xl border border-red-100">
-                    <span className="text-[9px] font-black text-red-600 uppercase tracking-widest block mb-2 leading-none">Security Flag Reason:</span>
-                    <p className="text-xs font-bold text-red-900 italic leading-tight">{selectedWithdrawal.rejectionReason}</p>
-                  </div>
-                )}
+                    {/* Amount Highlight - Center Stage */}
+                    <div className="text-center py-4">
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mb-2">Total Amount Received</p>
+                        <p className="text-4xl font-black text-emerald-400 italic tracking-tighter">Rs {selectedWithdrawal.amount.toLocaleString()}</p>
+                    </div>
 
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Amount</span>
-                  <span className="text-[11px] font-black text-slate-900 italic">Rs {selectedWithdrawal.amount}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Target Account</span>
-                  <span className="text-[11px] font-black text-slate-900 uppercase italic leading-none">{selectedWithdrawal.method}</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Date</span>
-                  <span className="text-[11px] font-black text-slate-900 italic leading-none">{new Date(selectedWithdrawal.date).toLocaleDateString()}</span>
+                    {/* Detailed Grid */}
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-5 border-t border-white/5 pt-6">
+                        <div>
+                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Username</p>
+                            <p className="text-xs font-semibold text-white tracking-wide truncate">{selectedWithdrawal.username || selectedWithdrawal.userName || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Referral ID</p>
+                            <p className="text-xs font-semibold text-white tracking-wide">{selectedWithdrawal.referralId || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Method</p>
+                            <p className="text-xs font-semibold text-white uppercase">{selectedWithdrawal.method}</p>
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Status</p>
+                            <p className={`text-xs font-bold uppercase ${selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'text-emerald-500' : 'text-amber-500'}`}>{selectedWithdrawal.status}</p>
+                        </div>
+                    </div>
+
+                    {/* Payment Details */}
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                        <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-2">Account Information</p>
+                        <div className="flex justify-between items-center">
+                            <p className="text-xs font-semibold text-white">{selectedWithdrawal.accountName || 'N/A'}</p>
+                            <p className="text-xs font-mono text-emerald-400">{selectedWithdrawal.accountNumber || 'N/A'}</p>
+                        </div>
+                    </div>
                 </div>
               </div>
+              
+              <div className="text-center mt-6">
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em]">Withdrawal by TaskMint Official Pakistan</p>
+              </div>
+
 
               <button 
                 onClick={() => setSelectedWithdrawal(null)}
-                className="w-full mt-10 p-5 bg-[#0A0A0B] text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] italic shadow-xl shadow-slate-900/10"
+                className="w-full mt-8 p-5 bg-[#0A0A0B] text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] italic shadow-xl shadow-slate-900/10"
               >
                 Close Receipt
               </button>

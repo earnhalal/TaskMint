@@ -275,7 +275,7 @@ export default function HomeTab({
       await onUpdateBalance(100, 'app_bonus', 'APK Install Welcome Bonus');
       console.log("[BONUS_CLAIM] Balance updated successfully");
 
-      alert("Mubarak ho! Rs. 100 App Welcome Bonus aapke wallet mein add kar diya gaya hai.");
+      alert("Mubarak ho! Rs. 100 App Welcome Bonus aapke main balance mein add kar diya gaya hai.");
     } catch (error) {
       console.error("Error claiming app bonus:", error);
       alert("Bonus claim karne mein masla hua. Dobara koshish karein. Error: " + (error instanceof Error ? error.message : String(error)));

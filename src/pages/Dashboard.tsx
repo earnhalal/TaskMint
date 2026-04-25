@@ -523,9 +523,6 @@ export default function Dashboard() {
           
           // Calculate if there's a "missing" amount (commissions not yet in DB)
           const missingInDb = Math.max(0, commissions - prev.totalCommission);
-          if (missingInDb > 0) {
-            setBalance(currentBalance => currentBalance + missingInDb);
-          }
 
           return {
             totalInvited: Math.max(prev.totalInvited, totalCount),
@@ -800,14 +797,19 @@ export default function Dashboard() {
       console.log(`[WITHDRAWAL_START] Amount: ${amount}, Method: ${method}, User: ${user.uid}`);
       // 2. Deduct balance in Firestore
       await handleUpdateBalance(-amount);
+      const balanceAfter = balance - amount;
 
       // 3. Save to Firestore (for Admin Panel)
       console.log("[WITHDRAWAL_FIRESTORE] Attempting to save to Firestore...");
       const withdrawalDocRef = await addDoc(collection(db, 'withdrawals'), {
         userId: user.uid,
         userName: userName,
+        referralId: referralCode,
         amount,
+        balanceBefore: balance,
+        balanceAfter: balanceAfter,
         method,
+        accountNumber: withdrawalAccounts[0]?.number || 'N/A',
         status: 'Pending',
         date: new Date().toISOString(),
         timestamp: firestoreServerTimestamp()
@@ -826,6 +828,10 @@ export default function Dashboard() {
         method,
         accountNumber: account.number || 'Not Set',
         accountName: account.title || 'Not Set',
+        username: userName,
+        referralId: referralCode,
+        balanceBefore: balance,
+        balanceAfter: balanceAfter,
         status: 'pending',
         timestamp: Date.now(),
         userId: user.uid,
@@ -834,6 +840,7 @@ export default function Dashboard() {
       };
       
       await set(withdrawalRef, newTx);
+
       console.log("[WITHDRAWAL_RTDB_SUCCESS] Saved to withdrawals list");
       
       // 5. Send internal notification

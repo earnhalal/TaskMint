@@ -12,19 +12,19 @@ interface EditProfileViewProps {
   phone: string;
   gender: string;
   profileAvatarId: string;
-  accountNumber: string;
-  accountTitle: string;
+  country?: string;
+  city?: string;
   onBack: () => void;
 }
 
-export default function EditProfileView({ name: propName, email: propEmail, phone: propPhone, gender: propGender, profileAvatarId: propProfileAvatarId, accountNumber: propAccountNumber, accountTitle: propAccountTitle, onBack }: EditProfileViewProps) {
+export default function EditProfileView({ name: propName, email: propEmail, phone: propPhone, gender: propGender, profileAvatarId: propProfileAvatarId, country: propCountry, city: propCity, onBack }: EditProfileViewProps) {
   const { user } = useAuth();
   const [name, setName] = useState(propName);
   const [email, setEmail] = useState(propEmail);
   const [phone, setPhone] = useState(propPhone);
   const [gender, setGender] = useState(propGender || 'male');
-  const [accountNumber, setAccountNumber] = useState(propAccountNumber);
-  const [accountTitle, setAccountTitle] = useState(propAccountTitle);
+  const [country, setCountry] = useState(propCountry || '');
+  const [city, setCity] = useState(propCity || '');
   const [isSaved, setIsSaved] = useState(false);
   const [avatarId, setAvatarId] = useState<string>(propProfileAvatarId || 'm1');
 
@@ -46,9 +46,9 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
         email: email,
         phone: phone,
         gender: gender,
-        profile_avatar_id: avatarId,
-        withdrawalAccountNumber: accountNumber,
-        withdrawalAccountTitle: accountTitle
+        country: country,
+        city: city,
+        profile_avatar_id: avatarId
       });
       
       setIsSaved(true);
@@ -150,31 +150,34 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
           </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-        <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-          Withdrawal Details
-        </h3>
-        <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Account Title</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Country</label>
             <input 
-              type="text"
-              placeholder="e.g. John Doe"
-              value={accountTitle}
-              onChange={(e) => setAccountTitle(e.target.value)}
+              list="countries"
+              type="text" 
+              placeholder="Search or enter country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
+            <datalist id="countries">
+              <option value="Pakistan" />
+              <option value="India" />
+              <option value="United States" />
+              <option value="United Kingdom" />
+              <option value="United Arab Emirates" />
+              <option value="Saudi Arabia" />
+              <option value="Canada" />
+              <option value="Australia" />
+            </datalist>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Account Number (Easypaisa/JazzCash)</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">City</label>
             <input 
               type="text" 
-              placeholder="03XXXXXXXXX"
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
+              placeholder="Enter your city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
           </div>
