@@ -1352,6 +1352,8 @@ export default function Dashboard() {
           accountStatus={accountStatus}
           role={role}
           partnerTier={partnerTier}
+          pendingIndirect={pendingIndirect}
+          onClaimIndirect={claimPendingIndirect}
         />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {

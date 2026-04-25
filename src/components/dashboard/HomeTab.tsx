@@ -649,31 +649,6 @@ export default function HomeTab({
         </div>
       </div>
 
-      {/* Live Earnings Stats Section */}
-      <div className="relative z-10 space-y-4">
-        <div className="flex items-center gap-2 px-1">
-          <Trophy className="w-5 h-5 text-indigo-600" />
-          <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase font-sans">Your Earnings</h2>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard 
-            icon={<EarnIcon className="w-5 h-5" />} 
-            label="Total Earnings" 
-            value={`Rs ${totalEarnings.toFixed(2)}`} 
-            bgClass="bg-gradient-to-br from-indigo-50 to-white" 
-            iconColor="text-indigo-600" 
-            delay={0} 
-          />
-          <StatCard 
-            icon={<SparklesIcon className="w-5 h-5" />} 
-            label="Indirect Income" 
-            value={`Rs ${totalIndirectCommission.toFixed(2)}`} 
-            bgClass="bg-gradient-to-br from-amber-50 to-white" 
-            iconColor="text-amber-500" 
-            delay={100} 
-          />
-        </div>
-      </div>
 
       {/* Promotions Section */}
       <QuickPromotions balance={balance} onUpdateBalance={onUpdateBalance} />

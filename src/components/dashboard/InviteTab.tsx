@@ -210,13 +210,13 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
               <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">Indirect Commission</p>
               <p className="text-xs text-slate-300">Click below to claim earnings</p>
           </div>
-          <p className="text-3xl font-black text-white">Rs {pendingIndirect.toLocaleString()}</p>
+          <p className="text-3xl font-black text-white">Rs {pendingIndirect?.toLocaleString() || 0}</p>
         </div>
         <button 
             onClick={onClaimIndirect}
             className="w-full bg-amber-500 text-slate-900 py-4 rounded-xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-amber-500/20"
         >
-            {pendingIndirect > 0 ? "Claim Now" : "Check for Earnings"}
+            {pendingIndirect && pendingIndirect > 0 ? "Claim Now" : "Check for Earnings"}
         </button>
       </div>
 
@@ -227,7 +227,6 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
           { label: 'Total Friends', value: referralStats.totalInvited, color: isDark ? 'text-white' : 'text-slate-900', icon: <Users size={16} /> },
           { label: 'Active Friends', value: referralStats.activeMembers, color: 'text-emerald-500', icon: <Zap size={16} /> },
           { label: 'Total Invite Income', value: `Rs ${referralStats.totalCommission}`, color: 'text-amber-500', icon: <Wallet size={16} /> },
-          { label: 'Indirect Income', value: `Rs ${referralStats.totalIndirectCommission || 0}`, color: 'text-purple-500', icon: <Sparkles size={16} /> },
         ].map((stat, i) => (
           <div key={i} className={`p-4 rounded-[1.5rem] border flex flex-col justify-between ${isDark ? 'bg-[#0A0A0B] border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-3 ${isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-50 text-slate-400'}`}>
