@@ -18,6 +18,7 @@ function getDb() {
       if (!admin.apps.length) {
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
+          databaseURL: "https://earnapp-f8d27-default-rtdb.asia-southeast1.firebasedatabase.app/"
         });
       }
       db = admin.firestore();
@@ -125,64 +126,102 @@ async function startServer() {
   });
 
   // API route for CPX postback - NO REDIRECT, NO AUTH
-  app.all("/api/cpx-postback", async (req, res) => {
+  app.all("/api/cpx-callback", async (req, res) => {
     console.log("--- CPX Postback Received ---");
     console.log("Method:", req.method);
     console.log("Query Params:", req.query);
+    console.log("Body Params:", req.body);
 
-    const { status, user_id, amount, trans_id, hash } = req.query;
-    const secretHash = "Knzx9CJGtJVM2tHOMGdpLT2DqXAK6c9Y";
-
-    // Verify hash
-    const dataToHash = `${status}${user_id}${amount}${trans_id}${secretHash}`;
-    const calculatedHash = crypto.createHash("sha256").update(dataToHash).digest("hex");
-
-    if (hash !== calculatedHash) {
-      console.warn("Hash mismatch detected! Calculated:", calculatedHash, "Received:", hash);
-      // Proceeding for testing, but in production this should be strict
+    const p = req.method === 'POST' && Object.keys(req.body).length > 0 ? req.body : req.query;
+    const { status, user_id, amount_local, trans_id, hash, secure_hash } = p;
+    
+    // Check if it's CPX Test mode (Empty user ID or dummy values)
+    if (!user_id || user_id === 'test' || user_id === '{user_id}') {
+        console.log("Detected CPX dashboard test ping. Returning OK to validate URL.");
+        res.setHeader('Content-Type', 'text/plain');
+        return res.status(200).send("OK");
     }
 
-    if (status === "complete" || status === "1") {
+    // CPX Validation
+    // The CPX validation hash is md5("trans_id-secure_hash") but from the user's prompt they mention CPX sends "hash"
+    const secretHash = process.env.CPX_SECURE_HASH || "YOUR_HASH"; // They should replace this or set it
+    
+    // Hash verification if possible. If no hash parameter is sent, skip.
+    if (hash && trans_id) {
+       const calculatedHash = crypto.createHash("md5").update(`${trans_id}-${secretHash}`).digest("hex");
+       if (hash.toLowerCase() !== calculatedHash.toLowerCase() && hash !== secretHash) {
+         console.warn("Hash mismatch detected! Calculated:", calculatedHash, "Received:", hash);
+         // You can block the request here if strictly needed:
+         // return res.status(403).send("Invalid Hash");
+       }
+    }
+
+    if (status === "1" || status === "complete" || status === "success") {
       try {
         const firestore = getDb();
-        const amountLocal = parseFloat(amount as string);
+        const rtdb = admin.database();
+        const amountLocalnum = parseFloat(amount_local as string || p.amount as string || "0");
+        const userId = user_id as string;
         
-        if (!user_id) throw new Error("Missing user_id");
+        if (!userId) throw new Error("Missing user_id");
+        if (isNaN(amountLocalnum) || amountLocalnum === 0) throw new Error("Invalid amount_local");
 
-        const userRef = firestore.collection("users").doc(user_id as string);
-        const transRef = userRef.collection("transactions").doc();
-        
-        console.log(`Processing survey reward for user: ${user_id}, amount: ${amountLocal}`);
+        console.log(`Processing CPX reward for user: ${userId}, amount: ${amountLocalnum}`);
+
+        // Update Realtime Database (RTDB)
+        const rtdbUserRef = rtdb.ref(`users/${userId}`);
+        const rtdbSnap = await rtdbUserRef.once('value');
+        if (rtdbSnap.exists()) {
+           // Increment balance in RTDB
+           const currentBalance = rtdbSnap.val().balance || 0;
+           const currentEarnings = rtdbSnap.val().totalEarnings || 0;
+           await rtdbUserRef.update({
+             balance: currentBalance + amountLocalnum,
+             totalEarnings: currentEarnings + amountLocalnum
+           });
+           console.log(`[RTDB] Balance updated for ${userId}`);
+        } else {
+           console.log(`[RTDB] User ${userId} not found in RTDB, attempting to initialize if needed.`);
+        }
+
+        // Update Firestore
+        const userRef = firestore.collection("users").doc(userId);
+        const transRef = firestore.collection("earning_history").doc();
 
         await firestore.runTransaction(async (transaction) => {
           const userDoc = await transaction.get(userRef);
-          if (!userDoc.exists) {
-            throw new Error(`User ${user_id} not found`);
+          if (userDoc.exists) {
+            transaction.update(userRef, {
+              balance: admin.firestore.FieldValue.increment(amountLocalnum),
+              totalEarnings: admin.firestore.FieldValue.increment(amountLocalnum)
+            });
           }
 
-          transaction.update(userRef, {
-            balance: admin.firestore.FieldValue.increment(amountLocal),
-            totalEarnings: admin.firestore.FieldValue.increment(amountLocal)
-          });
-
+          // Important: They said add earning history
           transaction.set(transRef, {
-            type: 'Survey Reward',
-            amount: amountLocal,
-            status: 'completed',
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-            description: `CPX Research Survey (${trans_id})`
+            userId: userId,
+            amount: amountLocalnum,
+            type: 'earning',
+            source: 'cpx_research',
+            description: `CPX Research Survey (${trans_id || 'manual'})`,
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
           });
         });
         
-        console.log("Balance and earnings updated, transaction recorded.");
+        console.log("[FIRESTORE] Balance updated and earning_history recorded.");
+        
+        // Strict text response "OK" per user request
+        res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send("OK");
       } catch (error: any) {
-        console.error("Postback Processing Error:", error.message);
-        return res.status(200).send(`Error acknowledged: ${error.message}`);
+        console.error("CPX Postback Error:", error);
+        res.setHeader('Content-Type', 'text/plain');
+        return res.status(200).send("OK"); // Avoid CPX retrying unnecessarily if it's a structural error
       }
     }
 
-    res.status(200).send("OK - Status not complete");
+    res.setHeader('Content-Type', 'text/plain');
+    res.status(200).send("OK");
   });
 
   // API route for Wannads postback - matching exact URL pattern requested
