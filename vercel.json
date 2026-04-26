@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/postback/wannads",
+      "destination": "/api/wannads.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1.js"
     },

@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
     try {
         const userRef = db.collection("users").doc(user_id);
-        const transRef = userRef.collection("transactions").doc();
+        const transRef = db.collection("earning_history").doc();
         
         await db.runTransaction(async (transaction) => {
             const userDoc = await transaction.get(userRef);
@@ -51,11 +51,12 @@ export default async function handler(req, res) {
             });
 
             transaction.set(transRef, {
-                type: 'Wannads Reward',
+                userId: user_id,
                 amount: increment,
-                status: status === "credited" || status === "1" ? 'completed' : 'revoked',
-                timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                description: `Wannads Offer (${trans_id})`
+                type: increment < 0 ? 'expense' : 'earning',
+                source: 'wannads',
+                description: `Wannads Offer (${trans_id})`,
+                timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
         });
         

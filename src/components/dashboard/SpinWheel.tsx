@@ -314,37 +314,37 @@ export default function SpinWheel({
       className="pb-32 max-w-4xl mx-auto px-4 pt-6 perspective-[2000px]"
     >
       {/* Premium Header */}
-      <div className="flex items-center justify-between mb-10">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between mb-6 sm:mb-10">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button 
             onClick={onClose}
-            className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 hover:bg-slate-50 shadow-sm transition-all active:scale-90"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-[1rem] sm:rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 hover:bg-slate-50 shadow-sm transition-all active:scale-90 shrink-0"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
           <div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2">
-              Helix <span className="text-amber-500">Spinner</span> <Sparkles className="w-6 h-6 text-amber-500 animate-pulse" />
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2">
+              Helix <span className="text-amber-500">Spinner</span> <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 animate-pulse" />
             </h2>
-            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">3D Quantum Yield Engine</p>
+            <p className="text-[8px] sm:text-[10px] text-slate-400 font-black uppercase tracking-widest">3D Quantum Yield Engine</p>
           </div>
         </div>
         
         <div className="flex items-center gap-3">
             <button 
               onClick={() => setSoundEnabled(!soundEnabled)} 
-              className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors border border-slate-200 shadow-sm"
+              className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors border border-slate-200 shadow-sm shrink-0"
             >
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 items-center">
         {/* Left: The 3D Quantum Wheel */}
         <div className="lg:col-span-7 flex flex-col items-center">
             {/* Live Winners Ticker */}
-            <div className="w-full bg-[#0A0B0F] rounded-full py-2.5 px-8 mb-12 border border-white/5 overflow-hidden relative shadow-2xl">
+            <div className="w-full bg-[#0A0B0F] rounded-full py-2.5 px-6 sm:px-8 mb-4 sm:mb-12 border border-white/5 overflow-hidden relative shadow-2xl">
                  <div className="absolute inset-0 bg-amber-500/5 blur-xl"></div>
                  <motion.div 
                     animate={{ x: [400, -1200] }}
@@ -355,19 +355,20 @@ export default function SpinWheel({
                         winners.map((winner, idx) => (
                             <div key={idx} className="flex items-center gap-3">
                                 <div className="w-2 h-2 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></div>
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                     <span className="text-white italic">{winner.userName}</span> captured <span className="text-emerald-400">Rs {winner.prize}</span>
                                 </span>
                             </div>
                         ))
                     ) : (
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic opacity-40">Helix Engine Standby. Awaiting first yield sequence...</span>
+                        <span className="text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest italic opacity-40">Helix Engine Standby. Awaiting first yield sequence...</span>
                     )}
                  </motion.div>
             </div>
 
             {/* 3D Wheel Container */}
-            <div className="relative pt-12 pb-20 group" style={{ perspective: '1200px' }}>
+            <div className="relative pt-6 sm:pt-12 pb-6 sm:pb-20 w-full flex justify-center items-center group overflow-hidden sm:overflow-visible" style={{ perspective: '1200px' }}>
+              <div className="transform scale-[0.68] sm:scale-100 origin-center">
                 {/* Outer Portal Glow */}
                 <div className={`absolute inset-[-60px] rounded-full blur-[100px] opacity-20 transition-all duration-1000 ${activeTier === 100 ? 'bg-amber-500' : activeTier === 50 ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
                 
@@ -460,10 +461,11 @@ export default function SpinWheel({
                         </motion.div>
                     </div>
                 </div>
+              </div>
             </div>
 
             {/* Spin Controls */}
-            <div className="mt-16 w-full max-w-md space-y-6">
+            <div className="mt-4 sm:mt-16 w-full max-w-md space-y-4 sm:space-y-6">
                 <div className="flex bg-slate-50 p-2.5 rounded-[2.5rem] border border-slate-100 shadow-inner">
                     {tiers.map((t) => {
                         const isSelected = activeTier === t.id;

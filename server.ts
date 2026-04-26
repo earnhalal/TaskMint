@@ -220,7 +220,7 @@ async function startServer() {
     try {
         const firestore = getDb();
         const userRef = firestore.collection("users").doc(userId);
-        const transRef = userRef.collection("transactions").doc();
+        const transRef = firestore.collection("earning_history").doc();
         
         await firestore.runTransaction(async (transaction) => {
             const userDoc = await transaction.get(userRef);
@@ -238,11 +238,12 @@ async function startServer() {
             });
 
             transaction.set(transRef, {
-                type: 'Wannads Reward',
+                userId: userId,
                 amount: increment,
-                status: (status == "1" || status == "credited") ? 'completed' : 'revoked',
-                timestamp: admin.firestore.FieldValue.serverTimestamp(),
-                description: `Wannads Offer (${trans_id})`
+                type: increment < 0 ? 'expense' : 'earning',
+                source: 'wannads',
+                description: `Wannads Offer (${trans_id})`,
+                timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
         });
         
