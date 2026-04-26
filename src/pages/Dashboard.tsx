@@ -73,7 +73,6 @@ import EditProfileView from '../components/dashboard/EditProfileView';
 
 import TaskWall from '../components/dashboard/TaskWall';
 import WatchTab from '../components/dashboard/WatchTab';
-import WatchAndEarn from '../components/dashboard/WatchAndEarn';
 import TasksTab from '../components/dashboard/TasksTab';
 import ManageWalletView from '../components/dashboard/ManageWalletView';
 import LotteryView from '../components/dashboard/LotteryView';
@@ -1402,13 +1401,6 @@ export default function Dashboard() {
           role={role}
           partnerTier={partnerTier}
         />;
-      case 'watch_and_earn':
-        return <WatchAndEarn 
-          onBack={() => setActiveTab('home')}
-          balance={balance}
-          onUpdateBalance={handleUpdateBalance}
-          accountStatus={accountStatus}
-        />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {
           return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} />;
@@ -1464,7 +1456,6 @@ export default function Dashboard() {
           onDepositClick={() => setActiveTab('deposit')}
           onWithdrawClick={() => setActiveTab('withdraw')}
           onWatchAdsClick={() => setActiveTab('watch')}
-          onWatchEarnClick={() => setActiveTab('watch_and_earn')}
           onTasksClick={() => setActiveTab('tasks')}
           onProfileClick={() => setActiveTab('profile')}
           onLotteryClick={() => setActiveTab('lottery')}
