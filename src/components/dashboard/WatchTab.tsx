@@ -313,109 +313,92 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     let isMounted = true;
     let pushAttempted = false;
 
-    // AppCreator24 Callback Registration
+    // AppCreator24 Callbacks (Native APK)
     (window as any).onVideoRewardAdFinished = () => {
-      console.log("AppCreator24: Ad Finished - Rewarding User");
+      console.log("AppCreator24: Ad Finished Successfully");
       if (activeAdRef.current) {
         handleProcessReward(activeAdRef.current);
       }
     };
 
     (window as any).onVideoRewardAdError = () => {
-      console.error("AppCreator24: Ad Error");
+      console.error("AppCreator24: Ad Failed to Show");
       setIsWatching(null);
       setActiveAd(null);
+      setAdMobReady(false);
     };
 
-    const loadAd = () => {
-      if (!isMounted || (window as any).adMobInitializing) return;
-      
-      // If we are in AppCreator24, we might not need the web adsbygoogle, 
-      // but we'll keep it as a fallback if the web functions aren't found.
+    const initFlow = () => {
+      if (!isMounted) return;
+
+      // 1. Check for AppCreator24 Script Presence (Native)
       if ((window as any).showVideoRewardAd) {
-        console.log("AppCreator24 detected. Using native ads.");
+        console.log("AppCreator24 Native Ads Detected");
         setAdMobReady(true);
+        setMessage(null);
         return;
       }
 
-      try {
-        const adsbygoogle = (window as any).adsbygoogle || [];
-        
-        // Mark as initializing to prevent parallel attempts
-        (window as any).adMobInitializing = true;
-        setAdMobError(null);
-        
-        console.log("Attempting AdMob Rewarded Push...");
-        adsbygoogle.push({
-          google_ad_client: "ca-pub-9056218549588930",
-          google_ad_slot: "6057025504",
-          google_ad_format: "rewarded",
-          on_ready: (showAd: () => void) => {
-            if (!isMounted) return;
-            console.log("AdMob Rewarded Ad Ready Callback");
-            setAdMobReady(true);
-            setShowAdFn(() => showAd);
-            (window as any).adMobInitializing = false;
-            setMessage(null);
-          },
-          on_reward: (reward: any) => {
-            console.log("AdMob Reward Triggered", reward);
-            if (activeAdRef.current) {
-              handleProcessReward(activeAdRef.current);
-            }
-          },
-          on_close: () => {
-            if (!isMounted) return;
-            console.log("AdMob Ad Closed");
-            setIsWatching(null);
-            setAdMobReady(false);
-            (window as any).adMobInitializing = false;
-            // Pre-load next after a delay
-            setTimeout(loadAd, 5000);
-          },
-          on_error: (err: any) => {
-            console.error("AdMob Error Event", err);
-            if (isMounted) {
+      // 2. Web AdMob Fallback
+      if ((window as any).adsbygoogle && !pushAttempted && !(window as any).adMobInitializing) {
+        try {
+          (window as any).adMobInitializing = true;
+          const adsbygoogle = (window as any).adsbygoogle || [];
+          
+          adsbygoogle.push({
+            google_ad_client: "ca-pub-9056218549588930",
+            google_ad_slot: "6057025504",
+            google_ad_format: "rewarded",
+            on_ready: (showAd: () => void) => {
+              if (!isMounted) return;
+              console.log("Web AdMob Ready");
+              setAdMobReady(true);
+              setShowAdFn(() => showAd);
+              (window as any).adMobInitializing = false;
+              setMessage(null);
+            },
+            on_reward: (reward: any) => {
+              if (activeAdRef.current) handleProcessReward(activeAdRef.current);
+            },
+            on_close: () => {
+              setIsWatching(null);
               setAdMobReady(false);
-              setAdMobError("Ad load failed. Possible causes: Ad blocker, VPN, or unapproved domain.");
+              (window as any).adMobInitializing = false;
+              setTimeout(initFlow, 5000); // Reload next
+            },
+            on_error: (err: any) => {
+              console.warn("Web AdMob Error:", err);
+              if (isMounted) setAdMobReady(false);
+              (window as any).adMobInitializing = false;
             }
-            (window as any).adMobInitializing = false;
+          });
+          pushAttempted = true;
+        } catch (e: any) {
+          (window as any).adMobInitializing = false;
+          if (e.message && e.message.includes('already have ads')) {
+            // If already pushed, it might already be ready
+            console.log("AdMob already pushed.");
           }
-        });
-        pushAttempted = true;
-      } catch (e: any) {
-        (window as any).adMobInitializing = false;
-        if (e.message && e.message.includes('already have ads')) {
-          console.log("AdMob slot busy.");
-        } else {
-          console.error("AdMob Push Catch Error:", e);
         }
       }
     };
 
-    // Expose for manual retry
+    // Polling check for AppCreator24 initialization
+    const checkTimer = setInterval(initFlow, 2000);
+    
     (window as any).retryAdMobInit = () => {
-      console.log("Manual AdMob Retry Triggered");
       pushAttempted = false;
       (window as any).adMobInitializing = false;
-      setAdMobReady(false);
-      loadAd();
+      initFlow();
     };
-
-    // Check availability
-    const checkScript = setInterval(() => {
-      if ((window as any).adsbygoogle && !pushAttempted) {
-        clearInterval(checkScript);
-        loadAd();
-      }
-    }, 1000);
 
     return () => {
       isMounted = false;
-      clearInterval(checkScript);
+      clearInterval(checkTimer);
       delete (window as any).retryAdMobInit;
+      // Note: We don't delete onVideoRewardAdFinished because it's a global APK callback
     };
-  }, []); // Run once on mount
+  }, []);
 
   // Use ref to keep track of active ad for the callback
   const activeAdRef = React.useRef<VideoAd | null>(null);
