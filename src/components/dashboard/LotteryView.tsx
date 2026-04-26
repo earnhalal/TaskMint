@@ -10,7 +10,7 @@ interface LotteryViewProps {
   onBack: () => void;
   balance: number;
   userName: string;
-  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => Promise<boolean>;
 }
 
 interface Lottery {

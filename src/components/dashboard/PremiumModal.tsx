@@ -12,7 +12,7 @@ interface PartnerPlansProps {
   currentRole?: string;
   partnerTier?: string;
   referrerId?: string | null;
-  onUpdateBalance?: (amount: number, source?: string, description?: string) => Promise<void>;
+  onUpdateBalance?: (amount: number, source?: string, description?: string) => Promise<boolean>;
   appSettings?: any;
 }
 

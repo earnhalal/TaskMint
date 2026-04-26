@@ -8,7 +8,7 @@ import { db, auth } from '../../firebase';
 interface WatchTabProps {
   onBack: () => void;
   balance: number;
-  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => Promise<boolean>;
   accountStatus: string;
   role: string;
   partnerTier: string;

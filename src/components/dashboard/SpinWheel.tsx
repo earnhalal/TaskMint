@@ -58,7 +58,7 @@ export default function SpinWheel({
   onClose: () => void;
   balance: number;
   spinBalance?: number;
-  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => Promise<boolean>;
   freeSpins: number;
   onUseFreeSpin: () => void;
   onGoToDeposit?: () => void;

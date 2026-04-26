@@ -613,8 +613,18 @@ export default function Dashboard() {
     localStorage.setItem('taskmint_last_spin', Date.now().toString());
   };
 
+  const [isBalanceUpdating, setIsBalanceUpdating] = useState(false);
+
   const handleUpdateBalance = async (amount: number, source: string = 'system', description: string = '') => {
-    if (!user) return;
+    if (!user || isBalanceUpdating) return false;
+    
+    // If it's a deduction, check balance strictly
+    if (amount < 0 && balance < Math.abs(amount)) {
+      console.error("[BALANCE_SHIELD] Prevented negative balance update:", { balance, amount, source });
+      return false;
+    }
+
+    setIsBalanceUpdating(true);
     try {
       let spinAmt = 0;
       let balAmt = 0;
@@ -630,6 +640,12 @@ export default function Dashboard() {
         }
       } else {
         balAmt = amount;
+      }
+
+      // Re-verify after logic
+      if (balAmt < 0 && balance < Math.abs(balAmt)) {
+        setIsBalanceUpdating(false);
+        return false;
       }
 
       const updates: any = {};
@@ -650,8 +666,11 @@ export default function Dashboard() {
       }
 
       if (Object.keys(updates).length > 0) {
-          await setDoc(doc(db, 'users', user.uid), updates, { merge: true });
-          await update(ref(rtdb, `users/${user.uid}`), rtdbUpdates);
+          const userDocRef = doc(db, 'users', user.uid);
+          const userRtdbRef = ref(rtdb, `users/${user.uid}`);
+          
+          await setDoc(userDocRef, updates, { merge: true });
+          await update(userRtdbRef, rtdbUpdates);
       }
 
       // 3. Record Earning History if amount > 0
@@ -722,10 +741,14 @@ export default function Dashboard() {
           }
         }
       }
+      return true;
     } catch (error) {
       console.error("Error updating balance:", error);
       // Fallback to local state if Firestore fails
       setBalance(prev => prev + amount);
+      return false;
+    } finally {
+      setIsBalanceUpdating(false);
     }
   };
 
@@ -1232,8 +1255,6 @@ export default function Dashboard() {
                  phone={userPhone}
                  gender={userGender}
                  profileAvatarId={profileAvatarId}
-                 accountNumber={withdrawalAccounts[0]?.number || ''}
-                 accountTitle={withdrawalAccounts[0]?.title || ''}
                  onBack={() => setActiveTab('profile')} 
                />;
       case 'manage_wallet':
@@ -1360,8 +1381,6 @@ export default function Dashboard() {
           accountStatus={accountStatus}
           role={role}
           partnerTier={partnerTier}
-          pendingIndirect={pendingIndirect}
-          onClaimIndirect={claimPendingIndirect}
         />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {
@@ -1412,8 +1431,6 @@ export default function Dashboard() {
           lockedBalance={lockedBalance}
           accountStatus={accountStatus}
           role={role}
-          pendingIndirect={pendingIndirect}
-          onClaimIndirect={claimPendingIndirect}
           topEarners={topEarners}
           onSpinClick={() => setActiveTab('spin')} 
           onInviteClick={() => setActiveTab('invite')}

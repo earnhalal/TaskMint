@@ -4,7 +4,7 @@ import { Check, Lock, ArrowLeft, Calendar, Gift } from 'lucide-react';
 
 interface StreakRewardViewProps {
   onBack: () => void;
-  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => Promise<boolean>;
 }
 
 export default function StreakRewardView({ onBack, onUpdateBalance }: StreakRewardViewProps) {

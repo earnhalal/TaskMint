@@ -66,7 +66,7 @@ interface HomeTabProps {
   onOfferWallClick: () => void;
   onPartnerToolsClick: () => void;
   onProductDrawClick: () => void;
-  onUpdateBalance: (amount: number, source?: string, description?: string) => void;
+  onUpdateBalance: (amount: number, source?: string, description?: string) => Promise<boolean>;
   onReloadData?: () => void;
   appSettings: {
     activationFee: number;
