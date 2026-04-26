@@ -188,10 +188,21 @@ async function startServer() {
   // API route for Wannads postback - matching exact URL pattern requested
   app.all("/api/postback/wannads", async (req, res) => {
     console.log("--- Wannads Postback Received ---");
+    console.log("Query Params:", req.query);
+    console.log("Body Params:", req.body);
     
-    // Parameters: user_id, amount, status, trans_id, sig
-    const { user_id, amount, status, trans_id, sig } = req.query;
+    // Support both GET and POST requests
+    const p = req.method === 'POST' && Object.keys(req.body).length > 0 ? req.body : req.query;
+    const { user_id, amount, status, trans_id, sig } = p;
     
+    // Detect Wannads Dashboard Test Ping
+    // The test tool often leaves user_id empty or sets it to the literal string "{subId}"
+    if (!user_id || user_id === '{subId}' || user_id === '') {
+        console.log("Detected Wannads dashboard test ping (missing or placeholder user_id). Returning OK to validate URL.");
+        res.setHeader('Content-Type', 'text/plain');
+        return res.status(200).send("OK");
+    }
+
     const secret = process.env.WANNADS_SECRET;
     if (!secret) {
         console.error("WANNADS_SECRET is not defined in environment variables");

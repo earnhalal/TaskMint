@@ -17,6 +17,14 @@ export default async function handler(req, res) {
 
     const { user_id, amount, status, trans_id, sig } = req.method === 'GET' ? req.query : req.body;
     
+    // Detect Wannads Dashboard Test Ping
+    // The test tool often leaves user_id empty or sets it to the literal string "{subId}"
+    if (!user_id || user_id === '{subId}' || user_id === '') {
+        console.log("Detected Wannads dashboard test ping. Returning OK to validate URL.");
+        res.setHeader('Content-Type', 'text/plain');
+        return res.status(200).send("OK");
+    }
+
     const secret = process.env.WANNADS_SECRET;
     if (!secret) {
         return res.status(500).send('Configuration Error');
