@@ -489,15 +489,18 @@ export default function Dashboard() {
 
         // Fetch missing names from Firestore if needed
         const enrichedReferrals = await Promise.all(referralItems.map(async (r) => {
-          if (!r.name || r.name === 'Anonymous') {
-            try {
-              const uDoc = await getDoc(doc(db, 'users', r.id));
-              if (uDoc.exists()) {
-                return { ...r, name: uDoc.data().username || 'User' };
-              }
-            } catch (e) {
-              console.error("Error fetching username for referral:", e);
+          try {
+            const uDoc = await getDoc(doc(db, 'users', r.id));
+            if (uDoc.exists()) {
+              const uData = uDoc.data();
+              return { 
+                ...r, 
+                name: r.name && r.name !== 'Anonymous' ? r.name : (uData.username || uData.name || 'User'),
+                referralCode: uData.referralCode || uData.username || ''
+              };
             }
+          } catch (e) {
+            console.error("Error fetching username for referral:", e);
           }
           return r;
         }));
@@ -990,7 +993,7 @@ export default function Dashboard() {
       // Send internal notification
       await sendActivationMail(targetUserId);
 
-      // 2. Handle Direct Referral (Level 1)
+      // 2. Handle Multi-Level Referrals (Level 1, Level 2, Level 3)
       if (userData.referredBy) {
         console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
         
@@ -1002,118 +1005,133 @@ export default function Dashboard() {
           return (code || '').trim().toLowerCase();
         };
 
-        const sanitizedRef = getCleanCode(userData.referredBy);
-        
-        let l1Uid = null;
-        if (sanitizedRef) {
-          console.log(`[REFERRAL_LOG] Sanitized L1 Ref: ${sanitizedRef}`);
-          const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
-          const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-            l1Uid = querySnapshot.docs[0].id;
-            console.log(`[REFERRAL_LOG] L1 Found via referralCode: ${l1Uid}`);
+        const resolveRef = async (refCode: string) => {
+          if (!refCode) return null;
+          const sanitized = getCleanCode(refCode);
+          if (!sanitized) return null;
+          
+          let uid = null;
+          let docData = null;
+          
+          const q = query(collection(db, 'users'), where('referralCode', '==', sanitized));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            uid = snap.docs[0].id;
+            docData = snap.docs[0].data();
           } else {
-            const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
-            if (parentUsernameDoc.exists()) {
-              l1Uid = parentUsernameDoc.data().uid;
-              console.log(`[REFERRAL_LOG] L1 Found via usernames: ${l1Uid}`);
+            const uDoc = await getDoc(doc(db, 'usernames', sanitized));
+            if (uDoc.exists()) {
+              uid = uDoc.data().uid;
+              const rDoc = await getDoc(doc(db, 'users', uid));
+              if (rDoc.exists()) {
+                docData = rDoc.data();
+              }
             }
           }
-        }
+          return uid && docData ? { uid, data: docData, code: sanitized } : null;
+        };
+
+        const currentUserName = userData.username || userData.name || 'New Member';
+        const l1 = await resolveRef(userData.referredBy);
         
-        if (l1Uid) {
-          console.log(`[REFERRAL_LOG] Processing L1 parent: ${l1Uid}`);
+        if (l1) {
+          console.log(`[REFERRAL_LOG] L1 Parent found: ${l1.uid}`);
           
-          // Determine bonus amount based on referrer's role/tier
-          let bonusAmount = activeAppSettings.referralBonusBasic || 100;
-          let l2Uid = null;
-          const referrerDoc = await getDoc(doc(db, 'users', l1Uid));
-          if (referrerDoc.exists()) {
-            const refData = referrerDoc.data();
-            console.log(`[REFERRAL_LOG] L1 Data:`, refData);
-            
-            if (refData.role === 'partner') {
-              if (refData.partnerTier === 'gold') bonusAmount = 200;
-              else if (refData.partnerTier === 'silver') bonusAmount = activeAppSettings.referralBonusPartner || 150;
-              else if (refData.partnerTier === 'bronze') bonusAmount = 130;
-              else bonusAmount = activeAppSettings.referralBonusPartner || 150;
-            }
-            
-            // Extract Level 2 parent
-            if (refData.referredBy) {
-              const sanitizedL2Ref = getCleanCode(refData.referredBy);
-              console.log(`[REFERRAL_LOG] Sanitized L2 Ref: ${sanitizedL2Ref}`);
+          let l1BonusAmount = activeAppSettings.referralBonusBasic || 100;
+          if (l1.data.role === 'partner') {
+             if (l1.data.partnerTier === 'gold') l1BonusAmount = 200;
+             else if (l1.data.partnerTier === 'silver') l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
+             else if (l1.data.partnerTier === 'bronze') l1BonusAmount = 130;
+             else l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
+          }
+
+          const safeParentRef = l1.code.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
+          await update(ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`), { 
+            status: 'paid', 
+            commission: l1BonusAmount 
+          });
+
+          await updateDoc(doc(db, 'users', l1.uid), {
+            activeMembers: increment(1),
+            totalCommission: increment(l1BonusAmount),
+            balance: increment(l1BonusAmount),
+            totalEarnings: increment(l1BonusAmount)
+          });
+          
+          await update(ref(rtdb, `users/${l1.uid}`), {
+            balance: rtdbIncrement(l1BonusAmount),
+            totalEarnings: rtdbIncrement(l1BonusAmount),
+            activeMembers: rtdbIncrement(1),
+            totalCommission: rtdbIncrement(l1BonusAmount)
+          });
+          
+          await addDoc(collection(db, 'earning_history'), {
+            userId: l1.uid,
+            amount: l1BonusAmount,
+            source: 'invite_commission',
+            description: `Rs. ${l1BonusAmount} Direct Income from ${currentUserName}`,
+            timestamp: serverTimestamp()
+          });
+
+          // Level 2 Logic
+          if (l1.data.referredBy) {
+            const l2 = await resolveRef(l1.data.referredBy);
+            if (l2) {
+              console.log(`[REFERRAL_LOG] L2 Parent found: ${l2.uid}`);
+              const l2Bonus = 15;
               
-              if (sanitizedL2Ref) {
-                const q2 = query(collection(db, 'users'), where('referralCode', '==', sanitizedL2Ref));
-                const snap2 = await getDocs(q2);
-                if (!snap2.empty) {
-                  l2Uid = snap2.docs[0].id;
-                  console.log(`[REFERRAL_LOG] L2 Found via referralCode: ${l2Uid}`);
-                } else {
-                  const uDoc = await getDoc(doc(db, 'usernames', sanitizedL2Ref));
-                  if (uDoc.exists()) {
-                    l2Uid = uDoc.data().uid;
-                    console.log(`[REFERRAL_LOG] L2 Found via usernames: ${l2Uid}`);
-                  }
+              await updateDoc(doc(db, 'users', l2.uid), {
+                balance: increment(l2Bonus),
+                totalEarnings: increment(l2Bonus),
+                totalIndirectCommission: increment(l2Bonus)
+              });
+              
+              await update(ref(rtdb, `users/${l2.uid}`), {
+                balance: rtdbIncrement(l2Bonus),
+                totalEarnings: rtdbIncrement(l2Bonus),
+                totalIndirectCommission: rtdbIncrement(l2Bonus)
+              });
+              
+              await addDoc(collection(db, 'earning_history'), {
+                userId: l2.uid,
+                amount: l2Bonus,
+                source: 'indirect_commission',
+                description: `Indirect Bonus (L2) from ${currentUserName}`,
+                timestamp: serverTimestamp()
+              });
+
+              // Level 3 Logic
+              if (l2.data.referredBy) {
+                const l3 = await resolveRef(l2.data.referredBy);
+                if (l3) {
+                  console.log(`[REFERRAL_LOG] L3 Parent found: ${l3.uid}`);
+                  const l3Bonus = 10;
+                  
+                  await updateDoc(doc(db, 'users', l3.uid), {
+                    balance: increment(l3Bonus),
+                    totalEarnings: increment(l3Bonus),
+                    totalIndirectCommission: increment(l3Bonus)
+                  });
+                  
+                  await update(ref(rtdb, `users/${l3.uid}`), {
+                    balance: rtdbIncrement(l3Bonus),
+                    totalEarnings: rtdbIncrement(l3Bonus),
+                    totalIndirectCommission: rtdbIncrement(l3Bonus)
+                  });
+                  
+                  await addDoc(collection(db, 'earning_history'), {
+                    userId: l3.uid,
+                    amount: l3Bonus,
+                    source: 'indirect_commission',
+                    description: `Indirect Bonus (L3) from ${currentUserName}`,
+                    timestamp: serverTimestamp()
+                  });
                 }
               }
             }
           }
-
-          // Update referral status in RTDB (L1 History)
-          const safeParentRef = sanitizedRef.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
-          await update(ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`), { 
-            status: 'paid', 
-            commission: bonusAmount 
-          });
-
-          // Update referrer stats in Firestore (L1)
-          await updateDoc(doc(db, 'users', l1Uid), {
-            activeMembers: increment(1),
-            totalCommission: increment(bonusAmount),
-            balance: increment(bonusAmount),
-            totalEarnings: increment(bonusAmount)
-          });
-          
-          // Sync L1 to RTDB
-          await update(ref(rtdb, `users/${l1Uid}`), {
-            balance: rtdbIncrement(bonusAmount),
-            totalEarnings: rtdbIncrement(bonusAmount),
-            activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(bonusAmount)
-          });
-          
-          // L1 Earning History
-          await addDoc(collection(db, 'earning_history'), {
-            userId: l1Uid,
-            amount: bonusAmount,
-            source: 'invite_commission',
-            description: `Rs. ${bonusAmount} Team Income from Referral`,
-            timestamp: serverTimestamp()
-          });
-
-          console.log(`[REFERRAL_LOG] L1 Commission of ${bonusAmount} added to referrer ${l1Uid}`);
-          
-          // 3. Process Level 2 Commission (Manual Claimable)
-          if (l2Uid) {
-            console.log(`[REFERRAL_LOG] Final L2 Parent UID identified: ${l2Uid}`);
-            const l2Bonus = 10;
-            
-            await updateDoc(doc(db, 'users', l2Uid), {
-              pendingIndirect: increment(l2Bonus)
-            });
-            
-            await update(ref(rtdb, `users/${l2Uid}`), {
-              pendingIndirect: rtdbIncrement(l2Bonus)
-            });
-            
-            console.log(`[REFERRAL_LOG] Successfully added Rs. ${l2Bonus} to pendingIndirect for ${l2Uid}`);
-          } else {
-            console.warn(`[REFERRAL_LOG] L2 Parent Not Found for L1 parent ${l1Uid}`);
-          }
         } else {
-          console.warn(`[REFERRAL_LOG] L1 Parent Not Found for code: ${sanitizedRef}`);
+          console.warn(`[REFERRAL_LOG] L1 Parent Not Found for code: ${userData.referredBy}`);
         }
       }
       
