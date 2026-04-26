@@ -308,14 +308,36 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const [adMobError, setAdMobError] = useState<string | null>(null);
   const [showAdFn, setShowAdFn] = useState<(() => void) | null>(null);
 
-  // Initialize AdMob Rewarded Ad
+  // Initialize AdMob / AppCreator24 Rewarded Ad
   useEffect(() => {
     let isMounted = true;
     let pushAttempted = false;
 
+    // AppCreator24 Callback Registration
+    (window as any).onVideoRewardAdFinished = () => {
+      console.log("AppCreator24: Ad Finished - Rewarding User");
+      if (activeAdRef.current) {
+        handleProcessReward(activeAdRef.current);
+      }
+    };
+
+    (window as any).onVideoRewardAdError = () => {
+      console.error("AppCreator24: Ad Error");
+      setIsWatching(null);
+      setActiveAd(null);
+    };
+
     const loadAd = () => {
       if (!isMounted || (window as any).adMobInitializing) return;
       
+      // If we are in AppCreator24, we might not need the web adsbygoogle, 
+      // but we'll keep it as a fallback if the web functions aren't found.
+      if ((window as any).showVideoRewardAd) {
+        console.log("AppCreator24 detected. Using native ads.");
+        setAdMobReady(true);
+        return;
+      }
+
       try {
         const adsbygoogle = (window as any).adsbygoogle || [];
         
@@ -451,6 +473,23 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       }
     }
 
+    setMessage(null);
+    setActiveAd(ad);
+    setIsWatching(ad.id);
+    
+    // 1. AppCreator24 Native Support
+    if ((window as any).showVideoRewardAd) {
+      console.log("AppCreator24: Triggering showVideoRewardAd()");
+      try {
+        (window as any).showVideoRewardAd();
+        return; // AppCreator24 handles the rest via global callback onVideoRewardAdFinished
+      } catch (e) {
+        console.error("AppCreator24 Error:", e);
+        // continue to fallback if error
+      }
+    }
+
+    // 2. Web AdMob Fallback
     if (!adMobReady || !showAdFn) {
       setMessage({ 
         type: 'error', 
@@ -463,10 +502,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       return;
     }
 
-    setMessage(null);
-    setActiveAd(ad);
-    setIsWatching(ad.id);
-    
     // Trigger AdMob Rewarded
     try {
       showAdFn();
