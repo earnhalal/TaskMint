@@ -140,13 +140,22 @@ export default function WatchAndEarn({ onBack, balance, onUpdateBalance, account
       window.showVideoRewardAd();
     } else {
       console.warn("AppCreator24 showVideoRewardAd bridge not found. Simulating completion for testing.");
-      // Simulation for testing in browser (REMOVE OR COMMENT IN PRODUCTION)
-      if (window.location.hostname === 'localhost' || window.location.hostname.includes('run.app')) {
+      
+      const isTestEnv = 
+        window.location.hostname === 'localhost' || 
+        window.location.hostname.includes('run.app') || 
+        window.location.hostname.includes('taskmint.click');
+
+      if (isTestEnv) {
+          // Simulation for testing
           setTimeout(() => {
-            if (window.onVideoRewardAdFinished) window.onVideoRewardAdFinished();
-          }, 2000);
+            if (window.onVideoRewardAdFinished) {
+               console.log("Simulating Ad Finished");
+               window.onVideoRewardAdFinished();
+            }
+          }, 3000); // 3 seconds wait for test
       } else {
-          alert("Ye feature sirf TaskMint App (APK) ke liye hai.");
+          alert("Ye feature sirf TaskMint App (APK) ke liye hai. Please official app download karein.");
       }
     }
   };
