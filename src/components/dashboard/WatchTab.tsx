@@ -310,19 +310,31 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
 
   // Initialize AdMob Rewarded Ad
   useEffect(() => {
+    let isMounted = true;
+    let pushAttempted = false;
+
     const loadAd = () => {
+      if (!isMounted || (window as any).adMobInitializing) return;
+      
       try {
         const adsbygoogle = (window as any).adsbygoogle || [];
-        // Clear any previous error
+        
+        // Mark as initializing to prevent parallel attempts
+        (window as any).adMobInitializing = true;
         setAdMobError(null);
         
+        console.log("Attempting AdMob Rewarded Push...");
         adsbygoogle.push({
+          google_ad_client: "ca-pub-9056218549588930",
           google_ad_slot: "6057025504",
           google_ad_format: "rewarded",
           on_ready: (showAd: () => void) => {
-            console.log("AdMob Rewarded Ad Ready");
+            if (!isMounted) return;
+            console.log("AdMob Rewarded Ad Ready Callback");
             setAdMobReady(true);
             setShowAdFn(() => showAd);
+            (window as any).adMobInitializing = false;
+            setMessage(null);
           },
           on_reward: (reward: any) => {
             console.log("AdMob Reward Triggered", reward);
@@ -331,39 +343,57 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             }
           },
           on_close: () => {
+            if (!isMounted) return;
             console.log("AdMob Ad Closed");
             setIsWatching(null);
             setAdMobReady(false);
-            // Pre-load next
+            (window as any).adMobInitializing = false;
+            // Pre-load next after a delay
             setTimeout(loadAd, 5000);
           },
           on_error: (err: any) => {
             console.error("AdMob Error Event", err);
-            // Silent error handling for ux
-            setAdMobReady(false);
+            if (isMounted) {
+              setAdMobReady(false);
+              setAdMobError("Ad load failed. Possible causes: Ad blocker, VPN, or unapproved domain.");
+            }
+            (window as any).adMobInitializing = false;
           }
         });
+        pushAttempted = true;
       } catch (e: any) {
-        // If the push fails because elements are full, we just wait for the user to try again
+        (window as any).adMobInitializing = false;
         if (e.message && e.message.includes('already have ads')) {
-          console.log("AdMob already initialized or slot full.");
-          // We don't set error here, just wait
+          console.log("AdMob slot busy.");
         } else {
-          console.error("AdMob Push Error:", e);
+          console.error("AdMob Push Catch Error:", e);
         }
       }
     };
 
-    // Wait for window.adsbygoogle to be available
+    // Expose for manual retry
+    (window as any).retryAdMobInit = () => {
+      console.log("Manual AdMob Retry Triggered");
+      pushAttempted = false;
+      (window as any).adMobInitializing = false;
+      setAdMobReady(false);
+      loadAd();
+    };
+
+    // Check availability
     const checkScript = setInterval(() => {
-      if ((window as any).adsbygoogle) {
+      if ((window as any).adsbygoogle && !pushAttempted) {
         clearInterval(checkScript);
         loadAd();
       }
     }, 1000);
 
-    return () => clearInterval(checkScript);
-  }, []);
+    return () => {
+      isMounted = false;
+      clearInterval(checkScript);
+      delete (window as any).retryAdMobInit;
+    };
+  }, []); // Run once on mount
 
   // Use ref to keep track of active ad for the callback
   const activeAdRef = React.useRef<VideoAd | null>(null);
@@ -422,8 +452,14 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     }
 
     if (!adMobReady || !showAdFn) {
-      setMessage({ type: 'error', text: "Ad abhi loading mein hai. Thora intezar karein." });
-      // Try to re-init if not ready
+      setMessage({ 
+        type: 'error', 
+        text: "Ad abhi loading mein hai. Thora intezar karein ya connection check karein (VPN off rakhein)." 
+      });
+      // Allow manual retry after 5 seconds
+      setTimeout(() => {
+        (window as any).adMobInitializing = false;
+      }, 5000);
       return;
     }
 
@@ -457,6 +493,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       animate={{ opacity: 1 }}
       className="min-h-screen pb-24 bg-[#0A0F1D] text-white overflow-x-hidden relative w-full"
     >
+      {/* Hidden AdMob Helper Tag */}
+      <ins className="adsbygoogle"
+           style={{ display: 'none' }}
+           data-ad-client="ca-pub-9056218549588930"
+           data-ad-slot="6057025504"></ins>
+           
       {/* Neural Background Layers */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-20%] left-[-10%] w-full h-full bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent blur-[120px] rounded-full animate-pulse" />
@@ -515,13 +557,38 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`p-4 rounded-2xl border flex items-center gap-3 ${
+            className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${
               message.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
             }`}
           >
-            {message.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-            <p className="text-[10px] font-black uppercase tracking-widest">{message.text}</p>
+            <div className="flex items-center gap-3">
+              {message.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+              <p className="text-[10px] font-black uppercase tracking-widest">{message.text}</p>
+            </div>
+            {!adMobReady && message.type === 'error' && (
+              <button 
+                onClick={() => (window as any).retryAdMobInit?.()}
+                className="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all"
+              >
+                Retry init
+              </button>
+            )}
           </motion.div>
+        )}
+
+        {!adMobReady && !message && (
+          <div className="p-4 rounded-2xl bg-indigo-500/5 border border-dashed border-indigo-500/20 flex items-center justify-between">
+            <div className="flex items-center gap-3 text-indigo-400">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <p className="text-[10px] font-black uppercase tracking-widest">Initializing Ad Nodes...</p>
+            </div>
+            <button 
+              onClick={() => (window as any).retryAdMobInit?.()}
+              className="px-3 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg text-[8px] font-black uppercase tracking-widest text-indigo-300 transition-all"
+            >
+              Force Load
+            </button>
+          </div>
         )}
 
         {accountStatus.toLowerCase() !== 'active' && (
