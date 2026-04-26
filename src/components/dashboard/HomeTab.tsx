@@ -51,6 +51,7 @@ interface HomeTabProps {
   onDepositClick: () => void;
   onWithdrawClick: () => void;
   onWatchAdsClick: () => void;
+  onWatchEarnClick: () => void;
   onTasksClick: () => void;
   onProfileClick: () => void;
   onLotteryClick: () => void;
@@ -193,6 +194,7 @@ export default function HomeTab({
   onDepositClick, 
   onWithdrawClick, 
   onWatchAdsClick, 
+  onWatchEarnClick, 
   onTasksClick, 
   onProfileClick, 
   onLotteryClick, 
@@ -573,6 +575,13 @@ export default function HomeTab({
             colorClass="bg-gradient-to-br from-[#FF4B2B] to-[#FF416C]" 
             shadowColor="shadow-rose-500/40"
             labelColor="text-rose-600" delay={100}
+          />
+          <QuickActionBtn 
+            icon={<GiftIcon />} label="Watch & Earn" badge="PREMIUM" 
+            onClick={onWatchEarnClick} 
+            colorClass="bg-gradient-to-br from-[#FFD700] to-[#FFA500]" 
+            shadowColor="shadow-amber-500/40"
+            labelColor="text-amber-600" delay={150}
           />
           <QuickActionBtn 
             icon={<Clock />} label="Tasks" 
