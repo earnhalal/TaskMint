@@ -310,47 +310,59 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
 
   // Initialize AdMob Rewarded Ad
   useEffect(() => {
-    const initAdMob = () => {
+    const loadAd = () => {
       try {
         const adsbygoogle = (window as any).adsbygoogle || [];
+        // Clear any previous error
+        setAdMobError(null);
+        
         adsbygoogle.push({
           google_ad_slot: "6057025504",
           google_ad_format: "rewarded",
           on_ready: (showAd: () => void) => {
-            console.log("AdMob Rewarded Ad is ready!");
+            console.log("AdMob Rewarded Ad Ready");
             setAdMobReady(true);
             setShowAdFn(() => showAd);
           },
           on_reward: (reward: any) => {
-            console.log("User earned reward from AdMob:", reward);
-            // We use the reward amount from our ad metadata for flexibility,
-            // or we could use the amount from AdMob if they set it there.
+            console.log("AdMob Reward Triggered", reward);
             if (activeAdRef.current) {
-               handleProcessReward(activeAdRef.current);
+              handleProcessReward(activeAdRef.current);
             }
           },
           on_close: () => {
-            console.log("AdMob Rewarded Ad closed.");
+            console.log("AdMob Ad Closed");
             setIsWatching(null);
-            setAdMobReady(false); // Ad is used, need to load next one
-            initAdMob(); // Pre-load next ad
-          },
-          on_error: (error: any) => {
-            console.error("AdMob Error:", error);
-            setAdMobError("Ad failed to load. Please try again.");
             setAdMobReady(false);
-            // Retry after 10s
-            setTimeout(initAdMob, 10000);
+            // Pre-load next
+            setTimeout(loadAd, 5000);
+          },
+          on_error: (err: any) => {
+            console.error("AdMob Error Event", err);
+            // Silent error handling for ux
+            setAdMobReady(false);
           }
         });
-      } catch (e) {
-        console.error("AdMob Init Error:", e);
+      } catch (e: any) {
+        // If the push fails because elements are full, we just wait for the user to try again
+        if (e.message && e.message.includes('already have ads')) {
+          console.log("AdMob already initialized or slot full.");
+          // We don't set error here, just wait
+        } else {
+          console.error("AdMob Push Error:", e);
+        }
       }
     };
 
-    // Delay init slightly to ensure scripts are ready
-    const timer = setTimeout(initAdMob, 2000);
-    return () => clearTimeout(timer);
+    // Wait for window.adsbygoogle to be available
+    const checkScript = setInterval(() => {
+      if ((window as any).adsbygoogle) {
+        clearInterval(checkScript);
+        loadAd();
+      }
+    }, 1000);
+
+    return () => clearInterval(checkScript);
   }, []);
 
   // Use ref to keep track of active ad for the callback
