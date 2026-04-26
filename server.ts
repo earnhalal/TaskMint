@@ -206,7 +206,7 @@ async function startServer() {
     if (sig !== calculatedSignature) {
       console.warn("Signature mismatch! Calculated:", calculatedSignature, "Received:", sig);
       res.setHeader('Content-Type', 'text/plain');
-      return res.status(403).send("ERROR: Invalid Signature");
+      return res.status(403).send(`ERROR: Invalid Signature. Expected MD5 of user_id+trans_id+amount+secret. Got sig: ${sig}, but we calculated: ${calculatedSignature}. Hash string (without secret): ${user_id}${trans_id}${amount}`);
     }
 
     const amountLocal = parseFloat(amount as string);
