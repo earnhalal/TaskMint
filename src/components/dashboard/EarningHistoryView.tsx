@@ -75,6 +75,8 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
       case 'app_bonus': return <Wallet className="w-5 h-5 text-rose-500" />;
       case 'daily_reward': return <Calendar className="w-5 h-5 text-indigo-500" />;
       case 'commission': return <TrendingUp className="w-5 h-5 text-orange-500" />;
+      case 'partner_upgrade': return <Star className="w-5 h-5 text-indigo-500" />;
+      case 'withdrawal': return <Wallet className="w-5 h-5 text-purple-500" />;
       default: return <History className="w-5 h-5 text-slate-500" />;
     }
   };
@@ -176,7 +178,9 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-emerald-600 font-black text-sm">+Rs. {item.amount.toFixed(2)}</span>
+                <span className={`font-black text-sm ${(item.type === 'expense' || item.amount < 0) ? 'text-red-500' : 'text-emerald-600'}`}>
+                  {(item.type === 'expense' || item.amount < 0) ? '-' : '+'}Rs. {Math.abs(item.amount).toFixed(2)}
+                </span>
                 <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5">
                   {getSourceLabel(item.source)}
                 </p>

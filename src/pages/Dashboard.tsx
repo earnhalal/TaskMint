@@ -676,13 +676,14 @@ export default function Dashboard() {
           await update(userRtdbRef, rtdbUpdates);
       }
 
-      // 3. Record Earning History if amount > 0
-      if (balAmt > 0 || spinAmt > 0) {
+      // 3. Record Earning History if amount !== 0
+      if (balAmt !== 0 || spinAmt !== 0) {
         await addDoc(collection(db, 'earning_history'), {
           userId: user.uid,
           amount: amount,
+          type: amount < 0 ? 'expense' : 'earning',
           source: source,
-          description: description || `Earned from ${source.replace('_', ' ')}`,
+          description: description || (amount < 0 ? `Spent on ${source.replace('_', ' ')}` : `Earned from ${source.replace('_', ' ')}`),
           timestamp: firestoreServerTimestamp()
         });
       }
@@ -823,7 +824,7 @@ export default function Dashboard() {
     try {
       console.log(`[WITHDRAWAL_START] Amount: ${amount}, Method: ${method}, User: ${user.uid}`);
       // 2. Deduct balance in Firestore
-      await handleUpdateBalance(-amount);
+      await handleUpdateBalance(-amount, 'withdrawal', `Requested Withdrawal to ${method}`);
       const balanceAfter = balance - amount;
 
       // 3. Save to Firestore (for Admin Panel)

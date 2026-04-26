@@ -219,7 +219,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
           freeLotteryTickets: increment(-1)
         });
       } else {
-        await onUpdateBalance(-lottery.fee);
+        await onUpdateBalance(-lottery.fee, 'lottery', 'Purchased Lottery Ticket');
       }
       
       const newMemberCount = lottery.currentMembers + 1;
