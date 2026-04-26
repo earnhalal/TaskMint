@@ -297,9 +297,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
 
   // Player State
   const [activeAd, setActiveAd] = useState<VideoAd | null>(null);
-  const [timeLeft, setTimeLeft] = useState(60);
-  const [totalTime, setTotalTime] = useState(60);
-  const [adLoaded, setAdLoaded] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState<{ 
     amount: number;
@@ -307,75 +304,92 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     timestamp: string;
   } | null>(null);
 
-  useEffect(() => {
-    let timerId: NodeJS.Timeout;
-    if (activeAd && adLoaded && timeLeft > 0) { 
-      timerId = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            clearInterval(timerId);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timerId);
-  }, [activeAd, adLoaded, timeLeft]);
+  const [adMobReady, setAdMobReady] = useState(false);
+  const [adMobError, setAdMobError] = useState<string | null>(null);
+  const [showAdFn, setShowAdFn] = useState<(() => void) | null>(null);
 
-  const finishAdWatch = async () => {
-    if (!auth.currentUser || !activeAd) return;
+  // Initialize AdMob Rewarded Ad
+  useEffect(() => {
+    const initAdMob = () => {
+      try {
+        const adsbygoogle = (window as any).adsbygoogle || [];
+        adsbygoogle.push({
+          google_ad_slot: "6057025504",
+          google_ad_format: "rewarded",
+          on_ready: (showAd: () => void) => {
+            console.log("AdMob Rewarded Ad is ready!");
+            setAdMobReady(true);
+            setShowAdFn(() => showAd);
+          },
+          on_reward: (reward: any) => {
+            console.log("User earned reward from AdMob:", reward);
+            // We use the reward amount from our ad metadata for flexibility,
+            // or we could use the amount from AdMob if they set it there.
+            if (activeAdRef.current) {
+               handleProcessReward(activeAdRef.current);
+            }
+          },
+          on_close: () => {
+            console.log("AdMob Rewarded Ad closed.");
+            setIsWatching(null);
+            setAdMobReady(false); // Ad is used, need to load next one
+            initAdMob(); // Pre-load next ad
+          },
+          on_error: (error: any) => {
+            console.error("AdMob Error:", error);
+            setAdMobError("Ad failed to load. Please try again.");
+            setAdMobReady(false);
+            // Retry after 10s
+            setTimeout(initAdMob, 10000);
+          }
+        });
+      } catch (e) {
+        console.error("AdMob Init Error:", e);
+      }
+    };
+
+    // Delay init slightly to ensure scripts are ready
+    const timer = setTimeout(initAdMob, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Use ref to keep track of active ad for the callback
+  const activeAdRef = React.useRef<VideoAd | null>(null);
+  useEffect(() => {
+    activeAdRef.current = activeAd;
+  }, [activeAd]);
+
+  const handleProcessReward = async (ad: VideoAd) => {
     setIsClaiming(true);
     try {
-      // Update Ad Views in DB
-      const adRef = doc(db, 'video_ads', activeAd.id);
-      const adSnap = await getDoc(adRef);
-      if (adSnap.exists()) {
-        const currentViews = adSnap.data().views || 0;
-        await setDoc(adRef, { views: currentViews + 1 }, { merge: true });
-      }
-
-      const statsRef = doc(db, 'user_ad_locks', auth.currentUser.uid);
-      await setDoc(statsRef, {
-        [activeAd.id]: serverTimestamp()
-      }, { merge: true });
-
-      // Update Balance
       const isUserActive = accountStatus.toLowerCase() === 'active';
-      const rewardAmount = isUserActive ? activeAd.reward : 0;
+      const rewardAmount = isUserActive ? ad.reward : 0;
       
       if (isUserActive) {
-        await onUpdateBalance(rewardAmount, 'ad_watch', `Watched ${activeAd.title}`);
+        await onUpdateBalance(rewardAmount, 'ad_watch', `AdMob Reward: ${ad.title}`);
+        
+        setShowSuccessPopup({ 
+          amount: rewardAmount,
+          adTitle: ad.title,
+          timestamp: new Date().toLocaleString()
+        });
       }
 
-      setAdStats(prev => ({ ...prev, [activeAd.id]: new Date() }));
+      // Update Ad Stats
+      const statsRef = doc(db, 'user_ad_locks', auth.currentUser!.uid);
+      await setDoc(statsRef, {
+        [ad.id]: serverTimestamp()
+      }, { merge: true });
       
-      // Clear watching states
-      const adTitle = activeAd.title;
-      setActiveAd(null);
-      setIsWatching(null);
+      setAdStats(prev => ({ ...prev, [ad.id]: new Date() }));
       
-      // Show Success Popup with details
-      setShowSuccessPopup({ 
-        amount: rewardAmount,
-        adTitle: adTitle,
-        timestamp: new Date().toLocaleString('en-US', { 
-          day: 'numeric', 
-          month: 'short', 
-          year: 'numeric',
-          hour: '2-digit', 
-          minute: '2-digit'
-        })
-      });
-      
-      if (!isUserActive) {
-        setMessage({ type: 'error', text: "Account inactive hone ki wajah se balance add nahi hua." });
-      }
     } catch (error) {
       console.error("Error rewarding ad:", error);
       setMessage({ type: 'error', text: "Reward add karne mein masla hua." });
     } finally {
       setIsClaiming(false);
+      setActiveAd(null);
+      setIsWatching(null);
     }
   };
 
@@ -383,45 +397,38 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     // Check if locked
     const lastWatched = adStats[ad.id];
     if (lastWatched) {
-      let lockTime = 60 * 60 * 1000; // 1 hour in MS
+      let lockTime = 60 * 60 * 1000; // 1 hour
       if (ad.tier === 'silver' || ad.tier === 'gold') {
-        lockTime = 12 * 60 * 60 * 1000; // 12 hours in MS (twice a day)
+        lockTime = 12 * 60 * 60 * 1000; // 12 hours
       }
       const lastTime = lastWatched.toMillis ? lastWatched.toMillis() : new Date(lastWatched).getTime();
       const diff = Date.now() - lastTime;
       if (diff < lockTime) {
-        setMessage({ type: 'error', text: "Yeh ad abhi locked hai. Agle watch ke liye intezar karein." });
+        setMessage({ type: 'error', text: "Yeh ad abhi locked hai." });
         return;
       }
     }
 
-    setIsWatching(ad.id);
+    if (!adMobReady || !showAdFn) {
+      setMessage({ type: 'error', text: "Ad abhi loading mein hai. Thora intezar karein." });
+      // Try to re-init if not ready
+      return;
+    }
+
     setMessage(null);
     setActiveAd(ad);
-    setTimeLeft(60); // Strictly 60 seconds
-    setTotalTime(60);
-    setAdLoaded(false);
-
-    // Initial load check
-    if (!ad.scriptUrl) {
-      setAdLoaded(true);
+    setIsWatching(ad.id);
+    
+    // Trigger AdMob Rewarded
+    try {
+      showAdFn();
+    } catch (e) {
+      console.error("Error showing AdMob:", e);
+      setMessage({ type: 'error', text: "Ad show karne mein masla hua." });
+      setIsWatching(null);
+      setActiveAd(null);
     }
   };
-
-  // Automated fallback to start timer even if script load events are messy
-  useEffect(() => {
-    if (activeAd && !adLoaded) {
-      const fallback = setTimeout(() => {
-        setAdLoaded(true);
-        console.log("Fallback ad load triggered");
-      }, 8000); // 8 second max wait for script load
-      return () => clearTimeout(fallback);
-    }
-  }, [activeAd, adLoaded]);
-
-  useEffect(() => {
-    // Scripts are now handled via iframes in the list and modal as per request.
-  }, [activeAd]);
 
   if (isLoading) {
     return (
@@ -656,239 +663,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       </div>
 
 
-      {/* Player Modal */}
-      <AnimatePresence>
-        {activeAd && (
-          <div className={`fixed inset-0 z-[110] flex flex-col ${
-            activeAd.tier === 'gold' ? 'bg-[#150F02]' : 
-            activeAd.tier === 'silver' ? 'bg-[#0A101F]' :
-            'bg-slate-900'
-          }`}>
-            {/* Enchanted background glow */}
-            <div className={`absolute inset-0 opacity-40 blur-[150px] pointer-events-none ${
-              activeAd.tier === 'gold' ? 'bg-amber-500/20' : 
-              activeAd.tier === 'silver' ? 'bg-blue-500/20' :
-              'bg-indigo-500/10'
-            }`} />
-
-            {/* Progress Bar Top */}
-            <div className="h-1.5 w-full bg-white/5 relative z-[120]">
-              <motion.div 
-                initial={{ width: '0%' }}
-                animate={{ width: adLoaded ? `${((totalTime - timeLeft) / totalTime) * 100}%` : '0%' }}
-                transition={{ duration: 0.5 }}
-                className={`h-full shadow-[0_0_20px_rgba(255,255,255,0.3)] ${
-                  activeAd.tier === 'gold' ? 'bg-gradient-to-r from-amber-500 to-yellow-300' : 
-                  activeAd.tier === 'silver' ? 'bg-gradient-to-r from-blue-500 to-indigo-300' :
-                  'bg-indigo-500'
-                }`}
-              />
-            </div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="flex-1 flex flex-col h-full w-full max-w-md mx-auto relative overflow-hidden"
-            >
-              {/* Top Bar */}
-              <div className="flex items-center justify-between p-6 border-b border-white/5 bg-black/20 backdrop-blur-xl relative z-20">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center p-[1px] ${
-                    activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-amber-500 to-yellow-300' : 
-                    activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-500 to-indigo-300' :
-                    'bg-white/10'
-                  }`}>
-                    <div className="w-full h-full bg-slate-900 rounded-[calc(1rem-1px)] flex items-center justify-center">
-                      <PlayCircle className={`w-6 h-6 ${
-                        activeAd.tier === 'gold' ? 'text-amber-400' : 
-                        activeAd.tier === 'silver' ? 'text-blue-400' :
-                        'text-indigo-400'
-                      }`} />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-white font-black text-base tracking-tight leading-none mb-1">{activeAd.title}</h3>
-                    <div className="flex items-center gap-2">
-                       <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
-                         activeAd.tier === 'gold' ? 'text-amber-400 border-amber-500/30' : 
-                         activeAd.tier === 'silver' ? 'text-blue-400 border-blue-500/30' :
-                         'text-indigo-400 border-indigo-500/30'
-                       }`}>
-                         {activeAd.tier || 'Standard'} Mode
-                       </span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className={`flex flex-col items-center gap-0.5 ${timeLeft > 0 ? 'text-white' : 'text-emerald-400'}`}>
-                   <span className="text-[20px] font-mono font-black tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-                     {timeLeft > 0 ? timeLeft : 'CLAIM'}
-                   </span>
-                   <span className="text-[7px] font-bold uppercase tracking-widest opacity-60">
-                     {timeLeft > 0 ? 'Watching' : 'Ready'}
-                   </span>
-                </div>
-              </div>
-
-              {/* Main Ad Area */}
-              <div className="flex-1 bg-black flex flex-col justify-center items-center relative overflow-hidden">
-                {!adLoaded && (
-                  <div className="absolute inset-0 z-10 bg-[#0B1120] flex flex-col items-center justify-center">
-                    <motion.div 
-                      animate={{ 
-                        rotate: 360,
-                        scale: [1, 1.1, 1]
-                      }}
-                      transition={{ 
-                        rotate: { duration: 3, repeat: Infinity, ease: 'linear' },
-                        scale: { duration: 2, repeat: Infinity }
-                      }}
-                      className="w-16 h-16 rounded-full border-t-2 border-r-2 border-indigo-500 mb-6 shadow-[0_0_30px_rgba(99,102,241,0.2)]"
-                    />
-                    <p className="text-white font-black uppercase tracking-[0.4em] text-[10px] animate-pulse">Initializing Portal</p>
-                    <p className="text-slate-500 text-[9px] mt-4 font-bold max-w-[200px] text-center uppercase tracking-widest">establishing secure transmission link...</p>
-                  </div>
-                )}
-                
-                {/* Script Container */}
-                <div id="ad-script-container" className="w-full h-full flex items-center justify-center relative z-0 bg-black">
-                  {/* Neon border decoration */}
-                  <div className={`absolute inset-4 border rounded-[2rem] pointer-events-none opacity-20 ${
-                    activeAd.tier === 'gold' ? 'border-amber-500 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 
-                    activeAd.tier === 'silver' ? 'border-blue-500 shadow-[0_0_50px_rgba(59,130,246,0.2)]' :
-                    'border-indigo-500'
-                  }`} />
-                  
-                  {activeAd.scriptUrl ? (
-                    <iframe
-                      title="Ad Player"
-                      srcDoc={`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                          <meta charset="utf-8">
-                          <meta name="viewport" content="width=device-width, initial-scale=1">
-                          <style>
-                            body { margin: 0; padding: 0; background: #000; color: #fff; height: 100vh; overflow: hidden; font-family: -apple-system, sans-serif; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;}
-                            #banner-container { width: 100%; text-align: center; margin-bottom: 10px; }
-                          </style>
-                        </head>
-                        <body>
-                          <div id="banner-container">
-                            <script>
-                            (function(ljf){
-                            var d = document,
-                                s = d.createElement('script'),
-                                l = d.scripts[d.scripts.length - 1];
-                            s.settings = ljf || {};
-                            s.src = "//superbjudgment.com/bJXYVSs.dtGbl/0cYiWucZ/_e/mc9tumZjU/lUkXP/TGYf5PNJzVUK4GNpTQcqtFNljPkp3tNJTQgY2NMuQG";
-                            s.async = true;
-                            s.referrerPolicy = 'no-referrer-when-downgrade';
-                            l.parentNode.insertBefore(s, l);
-                            })({})
-                            </script>
-                          </div>
-                          <script>
-                            (function(wzuuy){
-                              var d = document,
-                                  s = d.createElement('script'),
-                                  l = d.scripts[d.scripts.length - 1];
-                              s.settings = wzuuy || {};
-                              s.src = "${activeAd.scriptUrl.startsWith('//') ? 'https:' + activeAd.scriptUrl : activeAd.scriptUrl.startsWith('http') ? activeAd.scriptUrl : 'https://' + activeAd.scriptUrl}";
-                              s.async = true;
-                              s.referrerPolicy = 'no-referrer-when-downgrade';
-                              l.parentNode.insertBefore(s, l);
-                            })({});
-                          </script>
-                        </body>
-                        </html>
-                      `}
-                      className="w-full h-full border-none relative z-10"
-                      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-forms allow-top-navigation-by-user-activation"
-                      onLoad={() => {
-                        console.log("Ad Player Iframe Loaded");
-                        // We give it a moment to actually show stuff or let script start
-                        setTimeout(() => setAdLoaded(true), 3000);
-                      }}
-                    />
-                  ) : (
-                    <p className="text-slate-500 text-xs text-center uppercase tracking-[0.3em]">No Signal</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Bottom Instructions and Action */}
-              <div className="p-8 bg-black/40 backdrop-blur-2xl border-t border-white/5 relative z-20">
-                {timeLeft > 0 ? (
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-center px-4">
-                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Node Syncing</span>
-                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{Math.round(((totalTime - timeLeft) / totalTime) * 100)}% Complete</span>
-                    </div>
-                    
-                    <div className="bg-white/5 p-6 rounded-[2rem] border border-white/10 text-center relative group overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-2000"></div>
-                      <p className="text-white text-xs font-black tracking-widest uppercase mb-2">Maintain Connection</p>
-                      <p className="text-slate-500 font-bold text-[9px] uppercase tracking-widest mb-4">do not interrupt the neural stream</p>
-                      
-                      <div className="pt-4 border-t border-white/5">
-                        <p className="text-rose-500 text-[10px] font-black uppercase tracking-widest animate-pulse flex items-center justify-center gap-2 italic">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          Node closure results in reward loss
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <motion.div 
-                      animate={{ 
-                        boxShadow: activeAd.tier === 'gold' ? ['0 0 20px rgba(245,158,11,0.2)', '0 0 50px rgba(245,158,11,0.6)', '0 0 20px rgba(245,158,11,0.2)'] : []
-                      }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className={`p-4 rounded-[1.5rem] border text-center transition-all ${
-                        activeAd.tier === 'gold' ? 'bg-amber-500/10 border-amber-500/30' : 
-                        activeAd.tier === 'silver' ? 'bg-blue-500/10 border-blue-500/30' :
-                        'bg-emerald-500/10 border-emerald-500/30'
-                      }`}
-                    >
-                      <p className={`text-sm font-black uppercase tracking-[0.3em] ${
-                        activeAd.tier === 'gold' ? 'text-amber-400' : 
-                        activeAd.tier === 'silver' ? 'text-blue-400' :
-                        'text-emerald-400'
-                      }`}>Transmission Finalized</p>
-                    </motion.div>
-                    
-                    <motion.button
-                      initial={{ scale: 0.95, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={finishAdWatch}
-                      disabled={isClaiming}
-                      className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden group transition-all duration-500 ${
-                        activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-amber-600 to-yellow-400 text-black' : 
-                        activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-600 to-indigo-400 text-white shadow-blue-500/30' :
-                        'bg-indigo-600 text-white shadow-indigo-600/30 font-black'
-                      }`}
-                    >
-                      <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                      {isClaiming ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <Sparkles className={`w-5 h-5 ${activeAd.tier === 'gold' ? 'text-black' : 'text-amber-300'}`} />
-                      )}
-                      {isClaiming ? 'Extracting...' : `Harvest Reward (Rs. ${activeAd.reward})`}
-                    </motion.button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Success Reward Popup */}
+      {/* AdMob Success Reward Popup */}
       <AnimatePresence>
         {showSuccessPopup && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center px-6">
