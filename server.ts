@@ -35,6 +35,82 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  // API route for CPX postback - NO REDIRECT, NO AUTH, NO TRAILING SLASH ISSUES
+  app.all("/api/cpx-callback", async (req, res) => {
+    console.log("--- CPX Postback Received ---");
+    
+    // Support both GET and POST (form-urlencoded or JSON)
+    const p = (req.method === 'POST') ? { ...req.query, ...req.body } : req.query;
+    const { status, user_id, amount_local, trans_id, hash } = p;
+    
+    console.log("Unified Params:", p);
+
+    // Detect CPX dashboard test ping
+    if (!user_id || user_id === 'test' || user_id === '{user_id}' || user_id.includes('{')) {
+        console.log("Detected CPX dashboard test ping. Returning OK.");
+        res.setHeader('Content-Type', 'text/plain');
+        return res.status(200).send("OK");
+    }
+
+    // Status 1 means success in CPX
+    if (status === "1" || status === "complete") {
+      try {
+        const firestore = getDb();
+        const rtdb = admin.database();
+        const amountNum = parseFloat(amount_local as string || p.amount as string || "0");
+        const userId = user_id as string;
+        
+        if (!userId) throw new Error("Missing user_id");
+
+        console.log(`Crediting CPX Reward: ${userId} -> ${amountNum}`);
+
+        // 1. Update Realtime Database (RTDB)
+        const rtdbUserRef = rtdb.ref(`users/${userId}`);
+        const rtdbSnap = await rtdbUserRef.once('value');
+        if (rtdbSnap.exists()) {
+           const currentBalance = rtdbSnap.val().balance || 0;
+           const currentEarnings = rtdbSnap.val().totalEarnings || 0;
+           await rtdbUserRef.update({
+             balance: currentBalance + amountNum,
+             totalEarnings: currentEarnings + amountNum
+           });
+        }
+
+        // 2. Update Firestore & Earning History
+        const userRef = firestore.collection("users").doc(userId);
+        const historyRef = firestore.collection("earning_history").doc();
+
+        await firestore.runTransaction(async (transaction) => {
+          const userDoc = await transaction.get(userRef);
+          if (userDoc.exists) {
+            transaction.update(userRef, {
+              balance: admin.firestore.FieldValue.increment(amountNum),
+              totalEarnings: admin.firestore.FieldValue.increment(amountNum)
+            });
+          }
+
+          transaction.set(historyRef, {
+            userId: userId,
+            amount: amountNum,
+            type: 'earning',
+            source: 'cpx_research',
+            description: `CPX Survey Reward (${trans_id || 'N/A'})`,
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
+          });
+        });
+
+        console.log("CPX Reward Processed Successfully");
+      } catch (error) {
+        console.error("CPX Processing Error:", error);
+      }
+    }
+
+    // Always return 200 OK to CPX to avoid retries/redirect loops
+    res.setHeader('Content-Type', 'text/plain');
+    return res.status(200).send("OK");
+  });
 
   // API route for CPALead callback
   app.all("/api/cpalead-callback", async (req, res) => {
@@ -123,105 +199,6 @@ async function startServer() {
         console.error("CPALead Postback processing error:", error);
         res.status(500).send("Error processing postback");
     }
-  });
-
-  // API route for CPX postback - NO REDIRECT, NO AUTH
-  app.all("/api/cpx-callback", async (req, res) => {
-    console.log("--- CPX Postback Received ---");
-    console.log("Method:", req.method);
-    console.log("Query Params:", req.query);
-    console.log("Body Params:", req.body);
-
-    const p = req.method === 'POST' && Object.keys(req.body).length > 0 ? req.body : req.query;
-    const { status, user_id, amount_local, trans_id, hash, secure_hash } = p;
-    
-    // Check if it's CPX Test mode (Empty user ID or dummy values)
-    if (!user_id || user_id === 'test' || user_id === '{user_id}') {
-        console.log("Detected CPX dashboard test ping. Returning OK to validate URL.");
-        res.setHeader('Content-Type', 'text/plain');
-        return res.status(200).send("OK");
-    }
-
-    // CPX Validation
-    // The CPX validation hash is md5("trans_id-secure_hash") but from the user's prompt they mention CPX sends "hash"
-    const secretHash = process.env.CPX_SECURE_HASH || "YOUR_HASH"; // They should replace this or set it
-    
-    // Hash verification if possible. If no hash parameter is sent, skip.
-    if (hash && trans_id) {
-       const calculatedHash = crypto.createHash("md5").update(`${trans_id}-${secretHash}`).digest("hex");
-       if (hash.toLowerCase() !== calculatedHash.toLowerCase() && hash !== secretHash) {
-         console.warn("Hash mismatch detected! Calculated:", calculatedHash, "Received:", hash);
-         // You can block the request here if strictly needed:
-         // return res.status(403).send("Invalid Hash");
-       }
-    }
-
-    if (status === "1" || status === "complete" || status === "success") {
-      try {
-        const firestore = getDb();
-        const rtdb = admin.database();
-        const amountLocalnum = parseFloat(amount_local as string || p.amount as string || "0");
-        const userId = user_id as string;
-        
-        if (!userId) throw new Error("Missing user_id");
-        if (isNaN(amountLocalnum) || amountLocalnum === 0) throw new Error("Invalid amount_local");
-
-        console.log(`Processing CPX reward for user: ${userId}, amount: ${amountLocalnum}`);
-
-        // Update Realtime Database (RTDB)
-        const rtdbUserRef = rtdb.ref(`users/${userId}`);
-        const rtdbSnap = await rtdbUserRef.once('value');
-        if (rtdbSnap.exists()) {
-           // Increment balance in RTDB
-           const currentBalance = rtdbSnap.val().balance || 0;
-           const currentEarnings = rtdbSnap.val().totalEarnings || 0;
-           await rtdbUserRef.update({
-             balance: currentBalance + amountLocalnum,
-             totalEarnings: currentEarnings + amountLocalnum
-           });
-           console.log(`[RTDB] Balance updated for ${userId}`);
-        } else {
-           console.log(`[RTDB] User ${userId} not found in RTDB, attempting to initialize if needed.`);
-        }
-
-        // Update Firestore
-        const userRef = firestore.collection("users").doc(userId);
-        const transRef = firestore.collection("earning_history").doc();
-
-        await firestore.runTransaction(async (transaction) => {
-          const userDoc = await transaction.get(userRef);
-          if (userDoc.exists) {
-            transaction.update(userRef, {
-              balance: admin.firestore.FieldValue.increment(amountLocalnum),
-              totalEarnings: admin.firestore.FieldValue.increment(amountLocalnum)
-            });
-          }
-
-          // Important: They said add earning history
-          transaction.set(transRef, {
-            userId: userId,
-            amount: amountLocalnum,
-            type: 'earning',
-            source: 'cpx_research',
-            description: `CPX Research Survey (${trans_id || 'manual'})`,
-            timestamp: admin.firestore.FieldValue.serverTimestamp()
-          });
-        });
-        
-        console.log("[FIRESTORE] Balance updated and earning_history recorded.");
-        
-        // Strict text response "OK" per user request
-        res.setHeader('Content-Type', 'text/plain');
-        return res.status(200).send("OK");
-      } catch (error: any) {
-        console.error("CPX Postback Error:", error);
-        res.setHeader('Content-Type', 'text/plain');
-        return res.status(200).send("OK"); // Avoid CPX retrying unnecessarily if it's a structural error
-      }
-    }
-
-    res.setHeader('Content-Type', 'text/plain');
-    res.status(200).send("OK");
   });
 
   // API route for Wannads postback - matching exact URL pattern requested

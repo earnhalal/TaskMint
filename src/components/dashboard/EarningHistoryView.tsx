@@ -12,7 +12,8 @@ import {
   Calendar,
   Wallet,
   Loader2,
-  Search
+  Search,
+  Star
 } from 'lucide-react';
 import { collection, query, where, orderBy, onSnapshot, limit } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
