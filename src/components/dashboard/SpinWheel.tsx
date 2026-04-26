@@ -368,7 +368,7 @@ export default function SpinWheel({
 
             {/* 3D Wheel Container */}
             <div className="relative pt-6 sm:pt-12 pb-6 sm:pb-20 w-full flex justify-center items-center group overflow-hidden sm:overflow-visible" style={{ perspective: '1200px' }}>
-              <div className="transform scale-[0.68] sm:scale-100 origin-center">
+              <div className="transform scale-[0.6] sm:scale-100 origin-center -my-16 sm:my-0">
                 {/* Outer Portal Glow */}
                 <div className={`absolute inset-[-60px] rounded-full blur-[100px] opacity-20 transition-all duration-1000 ${activeTier === 100 ? 'bg-amber-500' : activeTier === 50 ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
                 
