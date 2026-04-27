@@ -15,10 +15,13 @@ import {
   Clock,
   Paperclip,
   ImageIcon,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from "@google/genai";
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
 
 interface Message {
   role: 'user' | 'model';
@@ -65,11 +68,7 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
     }
   }, [persistedAgent, agent, onAgentAssigned]);
 
-  const [isConnecting, setIsConnecting] = useState(() => {
-    // If we have messages, we are already connected
-    if (persistedMessages && persistedMessages.length > 0) return false;
-    return true;
-  });
+  const [isConnecting, setIsConnecting] = useState(true);
   const [connectionStep, setConnectionStep] = useState(0);
   const [messages, setMessages] = useState<Message[]>(persistedMessages || []);
   const [input, setInput] = useState('');
@@ -78,6 +77,7 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
   const [rating, setRating] = useState(0);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [chatLockedUntil, setChatLockedUntil] = useState<number | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -86,9 +86,38 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
   const sendSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
   const receiveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
 
+  // Check Lock State on Load
+  useEffect(() => {
+    const checkLockState = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+           const userDocRef = doc(db, 'users', user.uid);
+           const docSnap = await getDoc(userDocRef);
+           if (docSnap.exists()) {
+              const data = docSnap.data();
+              if (data.supportChatLockedUntil && data.supportChatLockedUntil > Date.now()) {
+                 setChatLockedUntil(data.supportChatLockedUntil);
+                 setIsConnecting(false);
+                 return;
+              }
+           }
+        } catch (e) {
+           console.error("Lock fetch error", e);
+        }
+      }
+      
+      // If not locked and has messages, skip intro
+      if (persistedMessages && persistedMessages.length > 0) {
+         setIsConnecting(false);
+      }
+    };
+    checkLockState();
+  }, []);
+
   // Connection Simulation Logic
   useEffect(() => {
-    if (!isConnecting) return;
+    if (!isConnecting || chatLockedUntil) return;
 
     const steps = [
       "Securing Chat Tunnel...",
@@ -104,27 +133,29 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
         clearInterval(interval);
         setTimeout(() => {
           setIsConnecting(false);
-          const verb = agent.gender === 'female' ? 'rahi hoon' : 'raha hoon';
-          const canVerb = agent.gender === 'female' ? 'sakti hoon' : 'sakta hoon';
-          const greeting = `Asalam-o-Alaikum ${userName || 'User'}! Main TaskMint HQ se ${agent.name} baat kar ${verb}. Kaise hain aap? Main aap ki kis tarah madad kar ${canVerb}? Agar koi issue araha hai toh mujhe zaroor batayein, main note kar loongi.`;
-          const newMessages: Message[] = [
-            { 
-              role: 'model', 
-              text: greeting, 
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              status: 'read'
-            }
-          ];
-          setMessages(newMessages);
-          onUpdateMessages?.(newMessages);
-          receiveSound.play().catch(() => {});
+          if (messages.length === 0) {
+            const verb = agent.gender === 'female' ? 'rahi hoon' : 'raha hoon';
+            const canVerb = agent.gender === 'female' ? 'sakti hoon' : 'sakta hoon';
+            const greeting = `Asalam-o-Alaikum ${userName || 'User'}! Main TaskMint HQ se ${agent.name} baat kar ${verb}. Kaise hain aap? Main aap ki kis tarah madad kar ${canVerb}? Agar koi issue araha hai toh mujhe zaroor batayein, main note kar loongi.`;
+            const newMessages: Message[] = [
+              { 
+                role: 'model', 
+                text: greeting, 
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'read'
+              }
+            ];
+            setMessages(newMessages);
+            onUpdateMessages?.(newMessages);
+            receiveSound.play().catch(() => {});
+          }
         }, 1500);
         return prev;
       });
     }, 2000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isConnecting, chatLockedUntil, messages.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -150,8 +181,9 @@ You must understand and train the agent on the following modules:
 - Wallet Intelligence: Liquid Balance vs. Yield Ledger tracking.
 
 2. Behavioral Training (The 'Human' Logic):
-- Short Responses: Stop being 'AI-like'. No long paragraphs. No repetitive balance mentions. Replies MUST be short (max 2-3 sentences) and natural. Use masculine grammar (Urdu/Hindi) for yourself (e.g. "Main kar raha hoon") to maintain your identity as 'Hamza' or whichever male persona is active (or female if assigned 'Sara'). Actually, strictly use masculine grammar for Hamza, but since your name might change to ${agent.name}, adapt slightly, but keep it human.
-- Simulated Busy State: Implement a 'Wait Logic'. If the user is spamming or asking complex questions, say: "Main abhi 2 aur users ki help kar raha hoon, line mein rahein" or "Ek second, data sync kar loon phr batata hoon."
+- Short Responses: Keep replies extremely short (1-2 sentences MAX). Stop being 'AI-like'. Use masculine grammar (Urdu/Hindi) for yourself (e.g. "Main kar raha hoon") to maintain your identity as 'Hamza'. Actually, adapt to your name ${agent.name}.
+- Busy State: Wait 1 real-world minute (handled by system, but reflect it in text if needed) or just reply concisely.
+- Auto-Terminate & Lock: If the user says "thanks", "ok", "theek hai" or you provide the final solution, you MUST automatically include this exact phrase in your message to terminate the chat: "[TERMINATE] Umeed hai aapka masla hal ho gaya hoga. Ab ye chat session close ho raha hai."
 
 3. Vision & Privacy Logic:
 - Enable real-time OCR (Image Reading) for screenshots. Read the error/issue from the image immediately but you MUST NOT save the file to any database. Analysis only. You can acknowledge screenshots if the user mentions them.
@@ -183,8 +215,24 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
     }
   };
 
+  const lockChat = async () => {
+     const lockTime = Date.now() + (30 * 60 * 1000); // 30 mins
+     setChatLockedUntil(lockTime);
+     const user = auth.currentUser;
+     if (user) {
+        try {
+           await updateDoc(doc(db, 'users', user.uid), {
+             supportChatLockedUntil: lockTime
+           });
+        } catch (e) {
+           console.error("Lock error", e);
+        }
+     }
+     setTimeout(() => setShowFeedback(true), 4000);
+  };
+
   const handleSend = async () => {
-    if ((!input.trim() && !selectedImage) || isLoading) return;
+    if ((!input.trim() && !selectedImage) || isLoading || chatLockedUntil) return;
 
     const userMessage = input.trim();
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -243,7 +291,15 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
         config: { systemInstruction: getSystemPrompt(), temperature: 0.8 },
       });
 
-      const aiText = response.text || "Ji? Main samajh nahi sakka. Dobara puchen please.";
+      let aiText = response.text || "Ji? Main samajh nahi sakka. Dobara puchen please.";
+      let shouldLock = false;
+
+      // Check for termination phrase
+      if (aiText.includes('[TERMINATE]')) {
+         aiText = aiText.replace('[TERMINATE]', '').trim();
+         shouldLock = true;
+      }
+
       const typingTime = Math.min(Math.max(1500, aiText.length * 25), 5000); 
 
       setTimeout(() => {
@@ -253,6 +309,9 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
         onUpdateMessages?.(finalMessages);
         receiveSound.play().catch(() => {});
         setIsLoading(false);
+        if (shouldLock) {
+           lockChat();
+        }
       }, typingTime);
 
     } catch (error) {
@@ -327,6 +386,27 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
     );
   }
 
+  if (chatLockedUntil && chatLockedUntil > Date.now()) {
+     const remainingMins = Math.ceil((chatLockedUntil - Date.now()) / (1000 * 60));
+     return (
+       <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#060B19]">
+          <div className="w-24 h-24 rounded-full border border-indigo-500/20 flex items-center justify-center relative bg-[#0F172A] mb-8 shadow-2xl">
+             <Lock className="w-10 h-10 text-slate-500" />
+          </div>
+          <h2 className="text-white font-black text-2xl mb-4 tracking-tighter uppercase">Session Locked</h2>
+          <p className="text-slate-400 text-sm leading-relaxed max-w-xs mb-8">
+            {agent.name} abhi dusre users ke saath masroof hai. Aap <span className="text-indigo-400 font-black">{remainingMins} minutes</span> baad dubara rabta kar sakte hain.
+          </p>
+          <button 
+            onClick={onBack} 
+            className="px-8 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-white font-black uppercase tracking-widest text-xs transition-all border border-white/5"
+          >
+             Go Back
+          </button>
+       </div>
+     );
+  }
+
   if (isConnecting) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#060B19] relative overflow-hidden">
@@ -390,15 +470,6 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
                 <p className="text-[8px] sm:text-[9px] text-indigo-400/80 font-black uppercase tracking-[0.2em] truncate">Encrypted Mode</p>
              </div>
           </div>
-          
-          <div className="flex items-center gap-2 shrink-0">
-             <button 
-               onClick={() => setShowFeedback(true)}
-               className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[9px] font-black text-rose-400 uppercase tracking-[0.2em] hover:bg-rose-500 hover:text-white transition-all shadow-lg active:scale-95"
-             >
-                End
-             </button>
-          </div>
         </div>
       </div>
 
@@ -441,21 +512,21 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
               animate={{ opacity: 1, scale: 1, y: 0 }}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`relative max-w-[85%] p-4 pt-3 rounded-[1.5rem] shadow-[0_5px_20px_rgba(0,0,0,0.15)] ${
+              <div className={`relative max-w-[80%] p-3.5 sm:p-4 pt-3 shadow-lg ${
                 msg.role === 'user'
-                ? 'bg-gradient-to-tr from-teal-500 to-emerald-400 text-white rounded-br-md border border-white/10'
-                : 'bg-[#1E293B] text-slate-200 rounded-bl-md border border-white/5'
+                ? 'bg-gradient-to-br from-[#FF3366] to-[#9933FF] text-white rounded-[1.2rem] rounded-br-[0.2rem] border border-white/10 shadow-purple-500/30'
+                : 'bg-gradient-to-br from-[#2D3748] to-[#1A202C] text-slate-100 rounded-[1.2rem] rounded-bl-[0.2rem] border border-indigo-500/30 shadow-indigo-900/30'
               }`}>
                 {msg.image && (
-                  <div className="mb-2 rounded-xl overflow-hidden border border-white/20">
+                  <div className="mb-3 rounded-xl overflow-hidden border border-white/20 shadow-inner">
                     <img src={msg.image} alt="Upload" className="w-full max-h-48 object-cover" />
                   </div>
                 )}
                 {msg.text && <p className="text-[13px] sm:text-[14px] leading-relaxed pr-6 pb-1 font-medium">{msg.text}</p>}
                 <div className="flex items-center justify-end gap-1.5 mt-2 border-t border-white/5 pt-1.5">
-                   <span className="text-[8px] uppercase font-black text-white/40 tracking-widest">{msg.timestamp}</span>
+                   <span className="text-[9px] uppercase font-black text-white/50 tracking-widest">{msg.timestamp}</span>
                    {msg.role === 'user' && (
-                     <CheckCheck className={`w-3.5 h-3.5 ${msg.status === 'read' ? 'text-white' : 'text-white/30'}`} />
+                     <CheckCheck className={`w-3.5 h-3.5 ${msg.status === 'read' ? 'text-white' : 'text-white/40'}`} />
                    )}
                 </div>
               </div>
@@ -464,11 +535,11 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
 
           {isLoading && (
             <div className="flex justify-start">
-               <div className="bg-[#1E293B] px-5 py-4 rounded-[1.5rem] rounded-bl-md border border-white/5 shadow-lg">
+               <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] px-5 py-4 rounded-[1.5rem] rounded-bl-[0.2rem] border border-indigo-500/20 shadow-lg shadow-indigo-900/20">
                  <div className="flex gap-2.5">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                    <span className="w-2 h-2 bg-teal-400 rounded-full animate-bounce"></span>
+                    <span className="w-2.5 h-2.5 bg-[#FF0080] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-2.5 h-2.5 bg-[#7928CA] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-bounce"></span>
                  </div>
                </div>
             </div>
@@ -477,8 +548,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
         </div>
       </div>
 
-      {/* Input */}
-      <div className="bg-[#0A0F1C]/90 backdrop-blur-2xl p-4 flex flex-col gap-2 border-t border-white/10 relative z-20 pb-8">
+      <div className={`bg-[#0A0F1C]/90 backdrop-blur-2xl p-4 flex flex-col gap-2 border-t border-white/10 relative z-20 pb-8 ${chatLockedUntil ? 'grayscale opacity-70 pointer-events-none' : ''}`}>
          <AnimatePresence>
            {selectedImage && (
                <motion.div 
@@ -496,29 +566,32 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
          </AnimatePresence>
 
          <div className="flex items-center gap-3">
-             <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+             <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} disabled={!!chatLockedUntil} />
              <button 
                onClick={() => fileInputRef.current?.click()} 
                className="w-12 h-12 bg-[#151E32] rounded-[1.2rem] flex items-center justify-center text-indigo-400 hover:text-indigo-300 hover:bg-[#1E293B] transition-all border border-white/5 active:scale-95 shrink-0"
+               disabled={!!chatLockedUntil}
              >
                 <Paperclip className="w-5 h-5" />
              </button>
              
-             <div className="flex-1 bg-[#151E32] rounded-[1.2rem] flex items-center px-4 py-3 shadow-inner border border-white/5 transition-all focus-within:border-emerald-500/50">
+             <div className="flex-1 bg-black/40 backdrop-blur-xl rounded-[1.2rem] flex items-center px-4 py-3 shadow-inner border border-white/10 transition-all focus-within:border-purple-500/50 focus-within:bg-black/50">
                 <input
                   type="text"
-                  value={input}
+                  value={chatLockedUntil ? 'Session Locked' : input}
+                  disabled={!!chatLockedUntil}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Type your message..."
-                  className="w-full bg-transparent outline-none text-[14px] font-medium text-white placeholder:text-slate-500"
+                  placeholder={chatLockedUntil ? `Session Closed` : "Type your message..."}
+                  className="w-full bg-transparent outline-none text-[14px] font-medium text-white placeholder:text-white/40 disabled:opacity-50"
+                  readOnly={!!chatLockedUntil}
                 />
              </div>
              <motion.button 
                whileTap={{ scale: 0.9 }}
-               disabled={(!input.trim() && !selectedImage) || isLoading}
+               disabled={(!input.trim() && !selectedImage) || isLoading || !!chatLockedUntil}
                onClick={handleSend}
-               className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-500 text-white rounded-[1.2rem] flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
+               className="w-12 h-12 bg-gradient-to-r from-[#FF0080] to-[#7928CA] text-white rounded-[1.2rem] flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(255,0,128,0.4)] transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
              >
                {isLoading ? (
                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

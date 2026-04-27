@@ -36,6 +36,7 @@ import QuickPromotions from './QuickPromotions';
 import { db, auth, rtdb } from '../../firebase';
 import { doc, updateDoc, increment, serverTimestamp, setDoc } from 'firebase/firestore';
 import { ref, update } from 'firebase/database';
+import { useCurrency } from '../../context/CurrencyContext';
 
 interface HomeTabProps {
   name: string;
@@ -143,6 +144,7 @@ const QuickActionBtn: React.FC<{
 );
 
 const AnimatedCounter = ({ value }: { value: number }) => {
+  const { currency } = useCurrency();
   const [displayValue, setDisplayValue] = React.useState(value);
   const prevValueRef = React.useRef(value);
 
@@ -173,13 +175,11 @@ const AnimatedCounter = ({ value }: { value: number }) => {
     }
 
     return () => {
-      // No cleanup needed for requestAnimationFrame as it dies anyway, 
-      // but we update ref to ensure next update starts from correct point
       prevValueRef.current = endValue;
     };
   }, [value]);
 
-  return <>{displayValue.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
+  return <>{displayValue.toLocaleString(currency === 'PKR' ? 'en-PK' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>;
 };
 
 export default function HomeTab({ 
@@ -221,6 +221,7 @@ export default function HomeTab({
   lastDailyCheckin,
   unreadChatCount = 0
 }: HomeTabProps) {
+  const { currency, toggleCurrency, convertAmount } = useCurrency();
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -390,6 +391,48 @@ export default function HomeTab({
           </div>
       </div>
 
+      {/* Live Support Card */}
+      <motion.div 
+        whileHover={{ y: -5 }}
+        onClick={onSupportAIClick}
+        className="relative z-10 animate-fade-in-up mt-2 mb-4 cursor-pointer group px-1" 
+        style={{ animationDelay: '100ms' }}
+      >
+        <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-[32px] p-6 sm:p-8 overflow-hidden relative border border-white/5 shadow-2xl hover:shadow-indigo-500/20 transition-shadow">
+          <div className="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] group-hover:bg-indigo-500/30 transition-colors duration-500"></div>
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-purple-500/20 rounded-full blur-[60px] group-hover:bg-purple-500/30 transition-colors duration-500"></div>
+
+          <div className="flex flex-col gap-6 relative z-10">
+            <div className="flex items-center gap-3 w-full">
+              <div className="px-3 py-1 bg-indigo-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                LIVE 24/7
+              </div>
+              <div className="h-px flex-1 bg-white/10"></div>
+              {unreadChatCount > 0 && (
+                <div className="w-6 h-6 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg animate-bounce">
+                  {unreadChatCount}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tighter mb-1">
+                    Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Support</span>
+                  </h3>
+                  <p className="text-sm font-bold text-indigo-200/60 w-3/4">Need help? Chat with our team now.</p>
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex flex-shrink-0 items-center justify-center border border-indigo-500/30 group-hover:scale-110 transition-transform shadow-inner">
+                  <Headphones className="w-7 h-7 text-indigo-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
       {/* APK Welcome & High-Priority Alerts */}
       <div className="grid grid-cols-1 gap-4 relative z-10">
         {isApp && !appBonusClaimed && (
@@ -514,9 +557,11 @@ export default function HomeTab({
                 </div>
                 <div className="flex items-baseline gap-3">
                   <span className="text-5xl sm:text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                    <AnimatedCounter value={balance} />
+                    <AnimatedCounter value={convertAmount(balance)} />
                   </span>
-                  <span className="text-xl font-black text-indigo-500 tracking-tighter italic">RS</span>
+                  <button onClick={toggleCurrency} className="text-xl font-black text-indigo-500 tracking-tighter italic hover:text-indigo-400 p-1">
+                    {currency === 'PKR' ? 'RS' : '$'}
+                  </button>
                 </div>
                 <div className="flex items-center gap-4 mt-2">
                     <div className="flex items-center gap-1.5">
@@ -655,8 +700,8 @@ export default function HomeTab({
             labelColor="text-blue-900" delay={1000}
           />
           <QuickActionBtn 
-            icon={<Crown />} label="Partner Tools" 
-            onClick={onPartnerToolsClick} 
+            icon={<Headphones />} label="Live Support" badge="HELP" 
+            onClick={onSupportAIClick} 
             colorClass="bg-gradient-to-br from-[#8e2de2] to-[#4a00e0]" 
             shadowColor="shadow-purple-700/40"
             labelColor="text-[#8e2de2]" delay={1100}
@@ -732,62 +777,6 @@ export default function HomeTab({
                   <ArrowRight className="w-6 h-6 text-amber-500" />
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Live Support Card */}
-      <motion.div 
-        whileHover={{ y: -5 }}
-        onClick={onSupportAIClick}
-        className="relative z-10 animate-fade-in-up mt-4 mb-4 cursor-pointer group" 
-        style={{ animationDelay: '500ms' }}
-      >
-        <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-[32px] p-8 overflow-hidden relative border border-white/5 shadow-2xl">
-          <div className="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] group-hover:bg-indigo-500/30 transition-colors"></div>
-          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-purple-500/20 rounded-full blur-[60px]"></div>
-
-          <div className="flex flex-col gap-6 relative z-10">
-            <div className="flex items-center gap-3 w-full">
-              <div className="px-3 py-1 bg-indigo-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)] flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                LIVE 24/7
-              </div>
-              <div className="h-px flex-1 bg-white/10"></div>
-              {unreadChatCount > 0 && (
-                <div className="w-6 h-6 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg animate-bounce">
-                  {unreadChatCount}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-3xl font-black text-white tracking-tighter mb-1">
-                    Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Support</span>
-                  </h3>
-                  <p className="text-sm font-medium text-slate-400 leading-relaxed max-w-[200px]">
-                    Need help? Chat with our live support agents instantly.
-                  </p>
-                </div>
-                
-                <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300 shrink-0">
-                  <Headphones className="w-8 h-8 text-white" />
-                </div>
-              </div>
-              
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSupportAIClick();
-                }}
-                className="w-full py-4 mt-2 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all border border-white/5 group-hover:border-indigo-500/30"
-              >
-                Talk to Agent
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
             </div>
           </div>
         </div>

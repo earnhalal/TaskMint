@@ -4,6 +4,7 @@ import { ArrowLeft, Wallet, Lock, ShieldCheck, Plus, ChevronRight, Save, Trash2,
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
 interface Account {
   id: string;
@@ -20,6 +21,7 @@ interface ManageWalletViewProps {
 
 export default function ManageWalletView({ balance, accounts, onBack }: ManageWalletViewProps) {
   const { user } = useAuth();
+  const { formatAmount } = useCurrency();
   const [isAddingAccount, setIsAddingAccount] = useState(false);
   const [isChangingPin, setIsChangingPin] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -147,7 +149,7 @@ export default function ManageWalletView({ balance, accounts, onBack }: ManageWa
             <Wallet className="w-4 h-4" />
             <span className="text-[10px] font-bold uppercase tracking-widest">Available Balance</span>
           </div>
-          <h2 className="text-3xl font-black mb-1">Rs {balance.toLocaleString()}</h2>
+          <h2 className="text-3xl font-black mb-1">{formatAmount(balance)}</h2>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Verified Account</p>
         </div>
       </div>

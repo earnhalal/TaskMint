@@ -10,6 +10,7 @@ import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Loader from './components/Loader';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -97,11 +98,13 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <div className="w-full max-w-full overflow-x-hidden relative min-h-screen">
-          <AppContent />
-        </div>
-      </BrowserRouter>
+      <CurrencyProvider>
+        <BrowserRouter>
+          <div className="w-full max-w-full overflow-x-hidden relative min-h-screen">
+            <AppContent />
+          </div>
+        </BrowserRouter>
+      </CurrencyProvider>
     </AuthProvider>
   );
 }
