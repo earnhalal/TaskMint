@@ -42,23 +42,36 @@ const SUPPORT_AGENTS = [
   { name: "Sara", gender: "female", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&h=150&auto=format&fit=crop" },
   { name: "Zainab", gender: "female", image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&h=150&auto=format&fit=crop" },
   { name: "Omar", gender: "male", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&h=150&auto=format&fit=crop" },
-  { name: "Aisha", gender: "female", image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=150&h=150&auto=format&fit=crop" },
+  { name: "Ayesha", gender: "female", image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=150&h=150&auto=format&fit=crop" },
+  { name: "Mariyam", gender: "female", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&h=150&auto=format&fit=crop" },
+  { name: "Fatima", gender: "female", image: "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?q=80&w=150&h=150&auto=format&fit=crop" },
 ];
 
 export default function SupportAIChat({ onBack, userName, accountStatus, balance, persistedMessages, onUpdateMessages, persistedAgent, onAgentAssigned }: SupportAIChatProps) {
   const [agent] = useState(() => {
     if (persistedAgent) return persistedAgent;
-    const selected = SUPPORT_AGENTS[Math.floor(Math.random() * SUPPORT_AGENTS.length)];
-    if (onAgentAssigned) onAgentAssigned(selected);
-    return selected;
+    return SUPPORT_AGENTS[Math.floor(Math.random() * SUPPORT_AGENTS.length)];
   });
+
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+  useEffect(() => {
+    if (!persistedAgent && onAgentAssigned) {
+      onAgentAssigned(agent);
+    }
+  }, [persistedAgent, agent, onAgentAssigned]);
+
   const [isConnecting, setIsConnecting] = useState(!persistedMessages || persistedMessages.length === 0);
   const [connectionStep, setConnectionStep] = useState(0);
   const [messages, setMessages] = useState<Message[]>(persistedMessages || []);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
+  
   // Sound effects
   const sendSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
   const receiveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
@@ -68,10 +81,11 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
     if (!isConnecting) return;
 
     const steps = [
-      "Connecting to TaskMint secure gateway...",
-      "Waiting for an available human agent...",
-      `Agent ${agent.name} is reading your profile...`,
-      `${agent.name} is joining the chat room...`
+      "Securing Chat Tunnel...",
+      "Validating Session...",
+      `Assigning Agent ${agent.name}...`,
+      "Enabling End-to-End Encryption...",
+      "Finalizing Connection..."
     ];
 
     const interval = setInterval(() => {
@@ -82,7 +96,7 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
           setIsConnecting(false);
           const verb = agent.gender === 'female' ? 'rahi hoon' : 'raha hoon';
           const canVerb = agent.gender === 'female' ? 'sakti hoon' : 'sakta hoon';
-          const greeting = `Asalam-o-Alaikum ${userName || 'User'}! Main TaskMint Support se ${agent.name} baat kar ${verb}. Kaise hain aap? Main aap ki kis tarah madad kar ${canVerb}?`;
+          const greeting = `Asalam-o-Alaikum ${userName || 'User'}! Main TaskMint HQ se ${agent.name} baat kar ${verb}. Kaise hain aap? Main aap ki kis tarah madad kar ${canVerb}? Agar koi issue araha hai toh mujhe zaroor batayein, main note kar loongi.`;
           const newMessages: Message[] = [
             { 
               role: 'model', 
@@ -97,7 +111,7 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
         }, 1500);
         return prev;
       });
-    }, 2500); // Slower connection for "Human" feel
+    }, 2000);
 
     return () => clearInterval(interval);
   }, []);
@@ -119,31 +133,18 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
     return `You are "${agent.name}", a standard human support representative working at the TaskMint office in Pakistan.
 ### IDENTITY & TONE:
 1. You are 100% human. Talk like a person using Roman Urdu/Hinglish (e.g., "G", "Bilkul", "Thek hai").
-2. Your gender is ${agent.gender}. Use correct Urdu grammar:
-   - If female: "Main kar rahi hoon", "Main kar sakti hoon".
-   - If male: "Main kar raha hoon", "Main kar sakta hoon".
-3. NO robotic language. NO "As an AI model...". If asked, say "Main office se live chat kar ${verb}."
+2. Your gender is ${agent.gender}. Use correct Urdu grammar (rahi/raha, sakti/sakta).
+3. If a user says there is an ERROR or PROBLEM, listen attentively and say "Main ye note kar ${verb} aur technical team ko reports bhej ${verb}."
+4. Stay helpful and professional. You can see user balance and status.
 
-### COMPLETE TASKMINT ACCESS & KNOWLEDGE:
-- **Membership Plans**: 
-  - Bronze: Basic plan, standard ad earning (Daily limit applies).
-  - Silver: Professional plan, 2x ad earning rewards.
-  - Gold: Premium plan, max earning potential + prioritized withdrawals.
-- **Earning System**:
-  - Watch Ads: Rs. 2 to Rs. 5 per ad.
-  - Referral Bonus: Rs. 100 flat reward for each active referral.
-  - Social Task Plus: Follow/Like official social media for extra rewards.
-  - APK Bonus: Rs. 100 bonus on app install + Rs. 10 daily bonus in app.
-- **Activation**: Send payment proof to WhatsApp Admin (+923338739929). Verified in 1-6 hours.
-- **Withdrawals**: Minimum Rs. 500 via EasyPaisa/JazzCash.
-- **User Detail**: You can see user balance and status.
+### TASKMINT KNOWLEDGE:
+- Bronze (Free), Silver (2x), Gold (Max Earnings).
+- Ad Earnings: Rs. 2-5 per ad.
+- Withdraw: Min Rs. 500 via EasyPaisa/JazzCash.
+- Referral: Rs. 100 flat reward.
+- Activation: Send screenshot to WhatsApp Admin (+923338739929).
 
-User Info:
-Name: ${userName}
-Status: ${accountStatus}
-Balance: Rs. ${balance}
-
-Aap ko app ke har feature (Home, Watch, Surveys, Tasks, Pro) ka pata hai. Stay helpful and professional.`;
+User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
   };
 
   const handleSend = async () => {
@@ -161,20 +162,20 @@ Aap ko app ke har feature (Home, Watch, Surveys, Tasks, Pro) ka pata hai. Stay h
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
       const history = messages.map(msg => ({
         role: msg.role === 'user' ? 'user' as const : 'model' as const,
         parts: [{ text: msg.text }]
       }));
 
+      const modelName = "gemini-3-flash-preview";
       const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: modelName,
         contents: [...history, { role: 'user', parts: [{ text: userMessage }] }],
         config: { systemInstruction: getSystemPrompt(), temperature: 0.8 },
       });
 
-      const aiText = response.text || "Ji? Main samajh nahi sakka.";
-      const typingTime = Math.min(Math.max(2500, aiText.length * 40), 7000); 
+      const aiText = response.text || "Ji? Main samajh nahi sakka. Dobara puchen please.";
+      const typingTime = Math.min(Math.max(1500, aiText.length * 25), 5000); 
 
       setTimeout(() => {
         const receivedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -187,30 +188,112 @@ Aap ko app ke har feature (Home, Watch, Surveys, Tasks, Pro) ka pata hai. Stay h
 
     } catch (error) {
       console.error("Chat Error:", error);
+      const errorMsg = "Maazrat! Server connection slow hai. Please check your internet and try again.";
+      const receivedTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const finalMessages: Message[] = [...updatedMessages, { role: 'model', text: errorMsg, timestamp: receivedTime, status: 'read' }];
+      setMessages(finalMessages);
       setIsLoading(false);
     }
   };
 
+  if (showFeedback) {
+    return (
+      <div className="flex flex-col h-full bg-[#0b141a] items-center justify-center p-8 text-center">
+        <motion.div
+           initial={{ scale: 0.8, opacity: 0 }}
+           animate={{ scale: 1, opacity: 1 }}
+           className="bg-[#202c33] p-10 rounded-3xl border border-white/10 shadow-2xl max-w-sm w-full"
+        >
+          {feedbackSubmitted ? (
+            <div className="space-y-6">
+              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
+                 <CheckCheck className="w-8 h-8 text-emerald-500" />
+              </div>
+              <h2 className="text-xl font-bold text-white tracking-tight">Feedback Received!</h2>
+              <p className="text-slate-400 text-sm italic">"Shukriya! Aap ki feedback hamare liye bohat important hai."</p>
+              <button 
+                onClick={onBack}
+                className="w-full py-4 rounded-2xl bg-[#00a884] text-white font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+              >
+                Go to Home
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="w-16 h-16 rounded-full overflow-hidden mx-auto border-2 border-emerald-500">
+                <img src={agent.image} alt={agent.name} className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white tracking-tight">Session Finished</h2>
+                <p className="text-xs text-slate-400 mt-1">Please rate your chat with {agent.name}</p>
+              </div>
+
+              <div className="flex justify-center gap-2">
+                 {[1, 2, 3, 4, 5].map((star) => (
+                   <button
+                     key={star}
+                     onClick={() => setRating(star)}
+                     className={`text-2xl transition-all ${rating >= star ? 'text-amber-500' : 'text-slate-600'}`}
+                   >
+                     ★
+                   </button>
+                 ))}
+              </div>
+
+              <button 
+                disabled={rating === 0}
+                onClick={() => setFeedbackSubmitted(true)}
+                className="w-full py-4 rounded-2xl bg-[#00a884] text-white font-bold shadow-lg shadow-emerald-500/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95"
+              >
+                SUBMIT FEEDBACK
+              </button>
+
+              <button onClick={onBack} className="text-slate-500 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors">
+                 Skip
+              </button>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    );
+  }
+
   if (isConnecting) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#0b141a]">
-        <div className="relative mb-8">
-           <div className="w-24 h-24 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin"></div>
-           <div className="absolute inset-0 flex items-center justify-center">
-              <Headphones className="w-8 h-8 text-emerald-500 animate-pulse" />
-           </div>
+      <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#0b141a] relative overflow-hidden">
+        {/* Animated Background Pulse */}
+        <div className="absolute inset-0 z-0 opacity-20">
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] animate-pulse"></div>
         </div>
-        <h2 className="text-white font-bold text-lg mb-2 tracking-tight">Connecting to Support</h2>
-        <motion.p 
-          key={connectionStep}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-emerald-500/60 text-[11px] font-black uppercase tracking-widest"
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative z-10 mb-12"
         >
-          {connectionStep === 1 ? "Searching for Agent..." : 
-           connectionStep === 2 ? `Agent ${agent.name} is Assigning...` : 
-           ["Starting Security Encryption...", "Establishing Connection...", `Allocating Agent...`, `Joining Session...`][connectionStep]}
-        </motion.p>
+           <div className="w-28 h-28 rounded-full border-2 border-emerald-500/10 flex items-center justify-center relative">
+              <div className="absolute inset-0 rounded-full border-t-2 border-emerald-500/40 animate-spin"></div>
+              <Headphones className="w-10 h-10 text-emerald-500 animate-pulse" />
+           </div>
+        </motion.div>
+        
+        <div className="relative z-10">
+           <h2 className="text-white font-black text-2xl mb-2 tracking-tighter italic uppercase">Live Support</h2>
+           <motion.p 
+             key={connectionStep}
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="text-emerald-500/60 text-[10px] font-black uppercase tracking-[0.4em]"
+           >
+             {[
+               "Securing Chat Tunnel...",
+               "Validating Session...",
+               `Assigning Agent ${agent.name}...`,
+               "Enabling End-to-End Encryption...",
+               "Finalizing Connection..."
+             ][connectionStep]}
+           </motion.p>
+        </div>
       </div>
     );
   }
@@ -238,15 +321,18 @@ Aap ko app ke har feature (Home, Watch, Surveys, Tasks, Pro) ka pata hai. Stay h
           </div>
         </div>
         <div className="flex items-center gap-2">
-           <div className="px-2.5 py-1 rounded-full bg-[#00a884]/10 border border-[#00a884]/20 shadow-inner">
-              <p className="text-[9px] font-black text-[#00a884] uppercase tracking-widest">Verified</p>
-           </div>
+           <button 
+             onClick={() => setShowFeedback(true)}
+             className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[10px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all shadow-lg active:scale-95"
+           >
+              End Session
+           </button>
         </div>
       </div>
 
       {/* Messages */}
       <div 
-        className="flex-1 overflow-y-auto p-4 space-y-3 relative hide-scrollbar"
+        className="flex-1 overflow-y-auto p-4 space-y-3 relative hide-scrollbar pb-10"
         style={{
           backgroundImage: `url('https://i.pinimg.com/originals/85/70/f6/8570f6339d318933ef0c28307d896135.png')`,
           backgroundSize: '400px',
@@ -264,9 +350,18 @@ Aap ko app ke har feature (Home, Watch, Surveys, Tasks, Pro) ka pata hai. Stay h
                    <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em]">Live Session Active</p>
                 </div>
                 <p className="text-[10px] text-[#8696a0] font-medium leading-relaxed">
-                  Your chat is end-to-end encrypted. For security, entire chat history will be wiped automatically after 30 minutes.
+                  Your chat is end-to-end encrypted. Help {agent.name} understand your issue. Entire chat will be wiped automatically after 30 minutes.
                 </p>
              </div>
+          </div>
+
+          <div className="flex justify-center mb-6">
+            <div className="bg-[#1b2831] px-4 py-2 rounded-lg border border-white/5 text-center max-w-[85%]">
+               <p className="text-[10px] text-[#8696a0] font-medium leading-relaxed">
+                 <ShieldCheck className="w-3 h-3 inline-block mr-1 opacity-50 text-emerald-500" />
+                 Messages are end-to-end encrypted.
+               </p>
+            </div>
           </div>
 
           {messages.map((msg, index) => (
@@ -281,7 +376,7 @@ Aap ko app ke har feature (Home, Watch, Surveys, Tasks, Pro) ka pata hai. Stay h
                 ? 'bg-[#005c4b] text-white rounded-tr-none'
                 : 'bg-[#202c33] text-[#d1d7db] rounded-tl-none border border-white/5'
               }`}>
-                <p className="text-[13.5px] leading-relaxed pr-6 pb-1 font-medium">{msg.text}</p>
+                <p className="text-[13.5px] leading-relaxed pr-6 pb-1 font-medium tracking-tight">{msg.text}</p>
                 <div className="flex items-center justify-end gap-1.5 mt-1 border-t border-white/5 pt-1">
                    <span className="text-[8px] uppercase font-bold text-white/30 tracking-widest">{msg.timestamp}</span>
                    {msg.role === 'user' && (
@@ -303,19 +398,19 @@ Aap ko app ke har feature (Home, Watch, Surveys, Tasks, Pro) ka pata hai. Stay h
                </div>
             </div>
           )}
-          <div ref={messagesEndRef} className="h-8" />
+          <div ref={messagesEndRef} className="h-12" />
         </div>
       </div>
 
       {/* Input */}
       <div className="bg-[#202c33]/95 backdrop-blur-xl p-4 flex items-center gap-3 border-t border-white/5 relative z-20 pb-8">
-         <div className="flex-1 bg-[#2a3942] rounded-2xl flex items-center px-5 py-3.5 shadow-inner border border-white/5 transition-all focus-within:ring-2 ring-emerald-500/20">
+         <div className="flex-1 bg-[#2a3942] rounded-2xl flex items-center px-4 py-3 shadow-inner border border-white/5 transition-all focus-within:ring-2 ring-emerald-500/20">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Start typing..."
+              placeholder="Report your problem..."
               className="w-full bg-transparent outline-none text-[15px] font-medium text-white placeholder:text-white/20"
             />
          </div>
@@ -323,9 +418,13 @@ Aap ko app ke har feature (Home, Watch, Surveys, Tasks, Pro) ka pata hai. Stay h
            whileTap={{ scale: 0.9 }}
            disabled={!input.trim() || isLoading}
            onClick={handleSend}
-           className="w-14 h-14 bg-[#00a884] text-white rounded-2xl flex items-center justify-center flex-shrink-0 shadow-[0_4px_20px_rgba(0,168,132,0.4)] transition-all disabled:opacity-50 disabled:grayscale"
+           className="w-12 h-12 bg-[#00a884] text-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-[0_4px_20px_rgba(0,168,132,0.4)] transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
          >
-           {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6 translate-x-0.5" />}
+           {isLoading ? (
+             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+           ) : (
+             <Send className="w-5 h-5 translate-x-0.5" />
+           )}
          </motion.button>
       </div>
     </div>
