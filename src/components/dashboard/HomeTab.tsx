@@ -11,30 +11,24 @@ import {
     Gift as GiftIcon, 
     PlusCircle as PlusCircleIcon, 
     PlayCircle as PlayCircleIcon, 
-    RefreshCw as ExchangeIcon,
     RefreshCw,
     Ticket as TicketIcon,
     Calendar as CalendarIcon,
     Trophy,
-    AlertTriangle,
-    Clock,
     CheckCircle2,
     MessageCircle,
     Download,
     Lock,
-    Gift,
     Crown,
     Rocket,
-    Layout,
-    Briefcase,
-    Zap,
-    Flame,
     Headphones,
-    ClipboardList as TaskIcon
+    Zap,
+    Gift,
+    Clock,
 } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
 import { db, auth, rtdb } from '../../firebase';
-import { doc, updateDoc, increment, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { ref, update } from 'firebase/database';
 import { useCurrency } from '../../context/CurrencyContext';
 
@@ -70,7 +64,7 @@ interface HomeTabProps {
   onOfferWallClick: () => void;
   onPartnerToolsClick: () => void;
   onProductDrawClick: () => void;
-  onUpdateBalance: (amount: number, source?: string, description?: string) => Promise<boolean>;
+  onUpdateBalance: (amount: number, source?: string, description?: string, transactionId?: string) => Promise<boolean>;
   onReloadData?: () => void;
   appSettings: {
     activationFee: number;
