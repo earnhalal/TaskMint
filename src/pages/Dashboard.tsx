@@ -121,6 +121,38 @@ export default function Dashboard() {
   const [partnerReferrals, setPartnerReferrals] = useState<any[]>([]);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatExpiry, setChatExpiry] = useState<number | null>(null);
+  const [persistedAgent, setPersistedAgent] = useState<any>(null);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+
+  // Check for chat expiry (30 minutes)
+  useEffect(() => {
+    if (chatExpiry && Date.now() > chatExpiry) {
+      setChatMessages([]);
+      setChatExpiry(null);
+      setPersistedAgent(null);
+    }
+  }, [activeTab, chatExpiry]);
+
+  const handleUpdateChatMessages = (messages: any[]) => {
+    setChatMessages(messages);
+    setChatExpiry(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+
+    // If new message from model and we are not in support tab, increment unread count
+    if (messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.role === 'model' && activeTab !== 'support_ai') {
+        setUnreadChatCount(prev => prev + 1);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'support_ai') {
+      setUnreadChatCount(0);
+    }
+  }, [activeTab]);
 
   const names = ['Ahmed', 'Fatima', 'Ali', 'Ayesha', 'Zainab', 'Bilal', 'Hassan', 'Sana', 'Usman', 'Maryam', 'Abdullah', 'Khadija'];
   const amounts = [100, 250, 500, 750, 1000, 1250, 2000];
@@ -1409,6 +1441,10 @@ export default function Dashboard() {
           userName={userName}
           accountStatus={accountStatus}
           balance={balance}
+          persistedMessages={chatMessages}
+          onUpdateMessages={handleUpdateChatMessages}
+          persistedAgent={persistedAgent}
+          onAgentAssigned={(a) => setPersistedAgent(a)}
         />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {
@@ -1486,6 +1522,7 @@ export default function Dashboard() {
           appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}
           lastDailyCheckin={lastDailyCheckin}
+          unreadChatCount={unreadChatCount}
         />;
     }
   };
@@ -1605,101 +1642,105 @@ export default function Dashboard() {
         </AnimatePresence>
 
         {/* Modern Polished Header */}
-        <div className={`px-5 py-5 ${role === 'partner' ? 'bg-gradient-to-r from-[#060D2D] to-[#151E32]' : 'bg-white/80 backdrop-blur-xl'} flex items-center justify-between sticky top-0 z-40 border-b border-gray-100/20 shadow-sm transition-all duration-300`}>
-          <div className="flex items-center gap-3 cursor-pointer group relative" onClick={() => setActiveTab('home')}>
-            <div className={`relative w-11 h-11 rounded-2xl ${role === 'partner' ? 'bg-amber-500 shadow-amber-500/40' : 'bg-[#0A0A0B] shadow-black/20'} flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 overflow-hidden`}>
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <Sparkles className="w-6 h-6 animate-pulse" />
-            </div>
-            <div className="flex flex-col -space-y-1">
-              <h1 className={`font-black text-2xl sm:text-3xl tracking-tighter italic uppercase`}>
-                <span className={role === 'partner' ? 'text-white' : 'text-slate-900'}>Task</span>
-                <span className={role === 'partner' ? 'text-amber-500' : 'text-indigo-600'}>Mint</span>
-              </h1>
-              <div className={`flex items-center gap-1 ${role === 'partner' ? 'text-amber-500/60' : 'text-indigo-600/40'}`}>
-                 <div className="w-1 h-1 rounded-full bg-current"></div>
-                 <span className="text-[8px] font-black uppercase tracking-[0.3em]">Version 2.0</span>
+        {activeTab !== 'support_ai' && (
+          <div className={`px-5 py-5 ${role === 'partner' ? 'bg-gradient-to-r from-[#060D2D] to-[#151E32]' : 'bg-white/80 backdrop-blur-xl'} flex items-center justify-between sticky top-0 z-40 border-b border-gray-100/20 shadow-sm transition-all duration-300`}>
+            <div className="flex items-center gap-3 cursor-pointer group relative" onClick={() => setActiveTab('home')}>
+              <div className={`relative w-11 h-11 rounded-2xl ${role === 'partner' ? 'bg-amber-500 shadow-amber-500/40' : 'bg-[#0A0A0B] shadow-black/20'} flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 overflow-hidden`}>
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <Sparkles className="w-6 h-6 animate-pulse" />
+              </div>
+              <div className="flex flex-col -space-y-1">
+                <h1 className={`font-black text-2xl sm:text-3xl tracking-tighter italic uppercase`}>
+                  <span className={role === 'partner' ? 'text-white' : 'text-slate-900'}>Task</span>
+                  <span className={role === 'partner' ? 'text-amber-500' : 'text-indigo-600'}>Mint</span>
+                </h1>
+                <div className={`flex items-center gap-1 ${role === 'partner' ? 'text-amber-500/60' : 'text-indigo-600/40'}`}>
+                   <div className="w-1 h-1 rounded-full bg-current"></div>
+                   <span className="text-[8px] font-black uppercase tracking-[0.3em]">Version 2.0</span>
+                </div>
               </div>
             </div>
+            <div className="flex items-center gap-3">
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveTab('updates')}
+                className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group`}
+              >
+                <Mail className={`w-5 h-5 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-amber-600`} />
+                {unreadUpdatesCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce">
+                    {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
+                  </span>
+                )}
+              </motion.button>
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveTab('profile')}
+                className={`relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group ${activeTab === 'profile' ? 'ring-2 ring-amber-500 bg-amber-50' : ''}`}
+              >
+                {profileAvatarId ? (
+                   <DynamicAvatar avatarId={profileAvatarId} fallbackText={userName} />
+                ) : (
+                   <UserCircle className={`w-6 h-6 ${role === 'partner' ? 'text-white' : (activeTab === 'profile' ? 'text-amber-600' : 'text-slate-600')} transition-colors group-hover:text-amber-600`} />
+                )}
+              </motion.button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveTab('updates')}
-              className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group`}
-            >
-              <Mail className={`w-5 h-5 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-amber-600`} />
-              {unreadUpdatesCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce">
-                  {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
-                </span>
-              )}
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setActiveTab('profile')}
-              className={`relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group ${activeTab === 'profile' ? 'ring-2 ring-amber-500 bg-amber-50' : ''}`}
-            >
-              {profileAvatarId ? (
-                 <DynamicAvatar avatarId={profileAvatarId} fallbackText={userName} />
-              ) : (
-                 <UserCircle className={`w-6 h-6 ${role === 'partner' ? 'text-white' : (activeTab === 'profile' ? 'text-amber-600' : 'text-slate-600')} transition-colors group-hover:text-amber-600`} />
-              )}
-            </motion.button>
-          </div>
-        </div>
+        )}
 
         {/* Scrollable Content */}
-        <div className={`flex-1 overflow-y-auto ${activeTab === 'watch' ? 'px-0 pt-0' : 'px-5 pt-6'} hide-scrollbar ${role === 'partner' ? 'bg-[#060D2D]' : 'bg-slate-50'}`}>
-          <div className="max-w-2xl mx-auto pb-40">
+        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-5 pt-6'} hide-scrollbar ${role === 'partner' ? 'bg-[#060D2D]' : 'bg-slate-50'}`}>
+          <div className={`${['watch', 'support_ai'].includes(activeTab) ? 'max-w-full h-full' : 'max-w-2xl mx-auto pb-40'}`}>
             {renderTabContent()}
           </div>
         </div>
 
         {/* Fixed Bottom Tab Bar */}
-        <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#0A0A0B]/95 border-t border-white/10' : 'bg-white/95 border-t border-slate-200'} backdrop-blur-2xl px-2 pt-2 pb-6 flex items-center justify-around shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-colors duration-500`}>
-          {/* Decorative shine only for partner */}
-          {role === 'partner' && <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>}
-          
-          {[
-            { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },
-            { id: 'watch', icon: <Tv2 className="w-6 h-6" />, label: 'WATCH' },
-            { id: 'task_wall', icon: <Rocket className="w-6 h-6" />, label: 'SURVEYS' },
-            { id: 'tasks', icon: <Zap className="w-6 h-6" />, label: 'TASKS' },
-            { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PRO' },
-          ].map((tab) => (
-            <button 
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-14 relative transition-all duration-300 ${activeTab === tab.id ? 'text-amber-500' : (role === 'partner' ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600')}`}
-            >
-              {activeTab === tab.id && (
-                <motion.div 
-                  layoutId="activeTab"
-                  className={`absolute inset-0 rounded-2xl border ${role === 'partner' ? 'bg-white/5 border-white/5 shadow-inner' : 'bg-amber-50 border-amber-100'} -mb-4`}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              
-              <div className={`relative z-10 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-1' : ''}`}>
-                {activeTab === tab.id && role === 'partner' && (
-                  <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full"></div>
+        {activeTab !== 'support_ai' && (
+          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#0A0A0B]/95 border-t border-white/10' : 'bg-white/95 border-t border-slate-200'} backdrop-blur-2xl px-2 pt-2 pb-6 flex items-center justify-around shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-colors duration-500`}>
+            {/* Decorative shine only for partner */}
+            {role === 'partner' && <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>}
+            
+            {[
+              { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },
+              { id: 'watch', icon: <Tv2 className="w-6 h-6" />, label: 'WATCH' },
+              { id: 'task_wall', icon: <Rocket className="w-6 h-6" />, label: 'SURVEYS' },
+              { id: 'tasks', icon: <Zap className="w-6 h-6" />, label: 'TASKS' },
+              { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PRO' },
+            ].map((tab) => (
+              <button 
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-14 relative transition-all duration-300 ${activeTab === tab.id ? 'text-amber-500' : (role === 'partner' ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600')}`}
+              >
+                {activeTab === tab.id && (
+                  <motion.div 
+                    layoutId="activeTab"
+                    className={`absolute inset-0 rounded-2xl border ${role === 'partner' ? 'bg-white/5 border-white/5 shadow-inner' : 'bg-amber-50 border-amber-100'} -mb-4`}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
                 )}
-                {tab.icon}
-              </div>
-              
-              <span className={`relative z-10 text-[9px] font-black uppercase tracking-[0.2em] leading-none text-center transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-105' : 'opacity-80'}`}>
-                {tab.label}
-              </span>
+                
+                <div className={`relative z-10 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-1' : ''}`}>
+                  {activeTab === tab.id && role === 'partner' && (
+                    <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full"></div>
+                  )}
+                  {tab.icon}
+                </div>
+                
+                <span className={`relative z-10 text-[9px] font-black uppercase tracking-[0.2em] leading-none text-center transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-105' : 'opacity-80'}`}>
+                  {tab.label}
+                </span>
 
-              {activeTab === tab.id && (
-                <div className={`absolute -bottom-2 w-1.5 h-1.5 rounded-full ${role === 'partner' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,1)]' : 'bg-amber-500'}`}></div>
-              )}
-            </button>
-          ))}
-        </div>
+                {activeTab === tab.id && (
+                  <div className={`absolute -bottom-2 w-1.5 h-1.5 rounded-full ${role === 'partner' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,1)]' : 'bg-amber-500'}`}></div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Global Shimmer Keyframe */}
         <style dangerouslySetInnerHTML={{ __html: `

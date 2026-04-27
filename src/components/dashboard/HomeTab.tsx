@@ -75,6 +75,7 @@ interface HomeTabProps {
   };
   appBonusClaimed: boolean;
   lastDailyCheckin: any;
+  unreadChatCount?: number;
 }
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; bgClass: string; iconColor: string; delay: number }> = ({ icon, label, value, bgClass, iconColor, delay }) => (
@@ -215,7 +216,8 @@ export default function HomeTab({
   onReloadData,
   appSettings,
   appBonusClaimed,
-  lastDailyCheckin
+  lastDailyCheckin,
+  unreadChatCount = 0
 }: HomeTabProps) {
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -564,7 +566,7 @@ export default function HomeTab({
         <div className="grid grid-cols-3 min-[400px]:grid-cols-4 gap-x-2 gap-y-8 sm:gap-6">
           {/* Row 1 */}
           <QuickActionBtn 
-            icon={<Headphones />} label="Live Support" badge="ONLINE" 
+            icon={<Headphones />} label="Live Support" badge={unreadChatCount > 0 ? `${unreadChatCount} NEW` : "24/7"} 
             onClick={onSupportAIClick} 
             colorClass="bg-gradient-to-br from-[#00c6ff] to-[#0072ff]" 
             shadowColor="shadow-blue-500/40"
@@ -718,12 +720,12 @@ export default function HomeTab({
 
             <div>
               <h3 className="text-3xl font-black text-white italic tracking-tighter mb-2">MEGA <span className="text-amber-500">REFERRAL</span></h3>
-              <p className="text-sm font-bold text-slate-400 leading-relaxed mb-6">Mera referral code use karo aur har friend ke account activation par <span className="text-white font-black italic">Rs. 125</span> earn karo.</p>
+              <p className="text-sm font-bold text-slate-400 leading-relaxed mb-6">Mera referral code use karo aur har friend ke account activation par <span className="text-white font-black italic">Rs. 100</span> earn karo.</p>
               
               <div className="flex items-center justify-between bg-white/5 rounded-2xl p-4 border border-white/10 border-dashed">
                 <div>
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Commission Earned</p>
-                  <p className="text-xl font-black text-amber-500 italic">Rs 125.00</p>
+                  <p className="text-xl font-black text-amber-500 italic">Rs 100.00</p>
                 </div>
                 <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
                   <ArrowRight className="w-6 h-6 text-amber-500" />
