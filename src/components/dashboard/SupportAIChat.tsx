@@ -136,7 +136,8 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
           if (messages.length === 0) {
             const verb = agent.gender === 'female' ? 'rahi hoon' : 'raha hoon';
             const canVerb = agent.gender === 'female' ? 'sakti hoon' : 'sakta hoon';
-            const greeting = `Asalam-o-Alaikum ${userName || 'User'}! Main TaskMint HQ se ${agent.name} baat kar ${verb}. Kaise hain aap? Main aap ki kis tarah madad kar ${canVerb}? Agar koi issue araha hai toh mujhe zaroor batayein, main note kar loongi.`;
+            const noteVerb = agent.gender === 'female' ? 'loongi' : 'loonga';
+            const greeting = `Asalam-o-Alaikum ${userName || 'User'}! Main TaskMint HQ se ${agent.name} baat kar ${verb}. Kaise hain aap? Main aap ki kis tarah madad kar ${canVerb}? Agar koi issue araha hai toh mujhe zaroor batayein, main note kar ${noteVerb}.`;
             const newMessages: Message[] = [
               { 
                 role: 'model', 

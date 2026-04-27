@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Wallet, ArrowRight, ArrowDownCircle, Sparkles, CheckCircle2, AlertCircle, Lock, Calendar, TrendingUp, X, CreditCard, Landmark, ArrowUpRight, History, ShieldCheck, Zap } from 'lucide-react';
+import { useCurrency } from '../../context/CurrencyContext';
 
 interface Account {
   id: string;
@@ -32,6 +33,7 @@ const CardChip = () => (
 );
 
 export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts, manualWithdrawUnlock = false, isPartner = false }: WithdrawTabProps) {
+  const { formatAmount } = useCurrency();
   const [amount, setAmount] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
   const [error, setError] = useState('');
@@ -352,14 +354,14 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                    </div>
                 </div>
                 
-                <div className="relative flex items-center mb-6 border-b border-slate-100 pb-2">
-                    <span className="text-slate-900 font-black text-xl italic mr-3">RS</span>
+                <div className="relative flex items-center mb-6 bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                    <span className="text-slate-500 font-black text-sm italic mr-3 uppercase">RS</span>
                     <input
                         type={isAmountVisible ? "number" : "password"}
                         value={amount}
                         onChange={(e) => { setAmount(e.target.value); setError(''); }}
                         placeholder="0.00"
-                        className="w-full bg-transparent rounded-none text-slate-900 font-black text-4xl focus:outline-none placeholder:text-slate-100 tracking-tighter"
+                        className="w-full bg-transparent rounded-none text-slate-900 font-black text-3xl focus:outline-none placeholder:text-slate-300 tracking-tighter"
                     />
                 </div>
 
@@ -512,55 +514,55 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               </div>
               
               {/* Receipt Body - Premium Dark Theme */}
-              <div className="bg-gradient-to-b from-[#111] to-[#050505] p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
+              <div className="bg-gradient-to-b from-[#18181b] to-[#09090b] p-6 rounded-3xl border border-white/10 shadow-inner relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-[60px]"></div>
                 
                 {/* Transaction Data */}
-                <div className="space-y-6 relative z-10">
+                <div className="space-y-4 relative z-10">
                     {/* Header Section */}
-                    <div className="flex justify-between items-center border-b border-white/5 pb-6">
+                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
                         <div>
-                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Transaction ID</p>
-                            <p className="text-sm font-mono font-medium text-white tracking-wider">{selectedWithdrawal.id?.substring(0, 12).toUpperCase() || 'TXN-PENDING'}</p>
+                            <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">TXN ID</p>
+                            <p className="text-[10px] font-mono font-medium text-white tracking-wider">{selectedWithdrawal.id?.substring(0, 12).toUpperCase() || 'TXN-PENDING'}</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Approved Date</p>
-                            <p className="text-xs font-semibold text-white">{selectedWithdrawal.date ? new Date(selectedWithdrawal.date).toLocaleDateString() : 'N/A'}</p>
+                            <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Date</p>
+                            <p className="text-[10px] font-semibold text-white">{selectedWithdrawal.date ? new Date(selectedWithdrawal.date).toLocaleDateString() : 'N/A'}</p>
                         </div>
                     </div>
 
                     {/* Amount Highlight - Center Stage */}
-                    <div className="text-center py-4">
-                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] mb-2">Total Amount Received</p>
-                        <p className="text-4xl font-black text-emerald-400 italic tracking-tighter">Rs {selectedWithdrawal.amount.toLocaleString()}</p>
+                    <div className="text-center py-2">
+                        <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em] mb-1">Total Received</p>
+                        <p className="text-3xl font-black text-emerald-400 italic tracking-tighter">{formatAmount(selectedWithdrawal.amount)}</p>
                     </div>
 
                     {/* Detailed Grid */}
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-5 border-t border-white/5 pt-6">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-white/5 pt-4">
                         <div>
-                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Username</p>
-                            <p className="text-xs font-semibold text-white tracking-wide truncate">{selectedWithdrawal.username || selectedWithdrawal.userName || 'N/A'}</p>
+                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Username</p>
+                            <p className="text-[10px] font-semibold text-white tracking-wide truncate">{selectedWithdrawal.username || 'N/A'}</p>
                         </div>
                         <div>
-                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Referral ID</p>
-                            <p className="text-xs font-semibold text-white tracking-wide">{selectedWithdrawal.referralId || 'N/A'}</p>
+                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Ref ID</p>
+                            <p className="text-[10px] font-semibold text-white tracking-wide">{selectedWithdrawal.referralId || 'N/A'}</p>
                         </div>
                         <div>
-                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Method</p>
-                            <p className="text-xs font-semibold text-white uppercase">{selectedWithdrawal.method}</p>
+                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Method</p>
+                            <p className="text-[10px] font-semibold text-white uppercase">{selectedWithdrawal.method}</p>
                         </div>
                         <div>
-                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-1">Status</p>
-                            <p className={`text-xs font-bold uppercase ${selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'text-emerald-500' : 'text-amber-500'}`}>{selectedWithdrawal.status}</p>
+                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Status</p>
+                            <p className={`text-[10px] font-bold uppercase ${selectedWithdrawal.status === 'Approved' ? 'text-emerald-500' : 'text-amber-500'}`}>{selectedWithdrawal.status}</p>
                         </div>
                     </div>
 
                     {/* Payment Details */}
-                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                        <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest mb-2">Account Information</p>
+                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
+                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Account Info</p>
                         <div className="flex justify-between items-center">
-                            <p className="text-xs font-semibold text-white">{selectedWithdrawal.accountName || 'N/A'}</p>
-                            <p className="text-xs font-mono text-emerald-400">{selectedWithdrawal.accountNumber || 'N/A'}</p>
+                            <p className="text-[10px] font-semibold text-white">{selectedWithdrawal.accountName || selectedWithdrawal.username || 'N/A'}</p>
+                            <p className="text-[10px] font-mono text-emerald-400">{selectedWithdrawal.accountNumber || 'N/A'}</p>
                         </div>
                     </div>
                 </div>
