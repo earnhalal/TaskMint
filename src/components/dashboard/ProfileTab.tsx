@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles } from 'lucide-react';
+import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles, Bot } from 'lucide-react';
 
 import { DynamicAvatar } from '../ui/DynamicAvatar';
 
@@ -29,6 +29,7 @@ export default function ProfileTab({
   onActivateClick,
   onMailboxClick,
   onProductDrawClick,
+  onSupportAIClick,
   appSettings,
   accountNumber,
   accountTitle
@@ -53,6 +54,7 @@ export default function ProfileTab({
   onActivateClick?: () => void,
   onMailboxClick?: () => void,
   onProductDrawClick?: () => void,
+  onSupportAIClick?: () => void,
   appSettings?: any,
   accountNumber?: string,
   accountTitle?: string
@@ -343,6 +345,7 @@ export default function ProfileTab({
       </Section>
 
       <Section title="Support">
+        <Item icon={<Headphones className="w-4 h-4 text-blue-600" />} label="Live Support Chat" onClick={onSupportAIClick} />
         <Item icon={<LogOut className="w-4 h-4" />} label="Log Out" isDestructive onClick={handleLogout} />
         <Item icon={<AlertCircle className="w-4 h-4" />} label="Delete Account" isDestructive onClick={() => setShowDeleteModal(true)} />
       </Section>

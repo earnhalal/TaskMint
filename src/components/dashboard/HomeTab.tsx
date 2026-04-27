@@ -29,6 +29,7 @@ import {
     Briefcase,
     Zap,
     Flame,
+    Headphones,
     ClipboardList as TaskIcon
 } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
@@ -51,6 +52,7 @@ interface HomeTabProps {
   onDepositClick: () => void;
   onWithdrawClick: () => void;
   onWatchAdsClick: () => void;
+  onSupportAIClick: () => void;
   onTasksClick: () => void;
   onProfileClick: () => void;
   onLotteryClick: () => void;
@@ -193,6 +195,7 @@ export default function HomeTab({
   onDepositClick, 
   onWithdrawClick, 
   onWatchAdsClick, 
+  onSupportAIClick,
   onTasksClick, 
   onProfileClick, 
   onLotteryClick, 
@@ -561,11 +564,18 @@ export default function HomeTab({
         <div className="grid grid-cols-3 min-[400px]:grid-cols-4 gap-x-2 gap-y-8 sm:gap-6">
           {/* Row 1 */}
           <QuickActionBtn 
+            icon={<Headphones />} label="Live Support" badge="ONLINE" 
+            onClick={onSupportAIClick} 
+            colorClass="bg-gradient-to-br from-[#00c6ff] to-[#0072ff]" 
+            shadowColor="shadow-blue-500/40"
+            labelColor="text-blue-600" delay={0}
+          />
+          <QuickActionBtn 
             icon={<MessageCircle />} label="WhatsApp" badge="HELP" 
             onClick={() => window.open('https://whatsapp.com/channel/0029VbCpKTp2P59cvqS4CL2L', '_blank')} 
             colorClass="bg-gradient-to-br from-[#25D366] to-[#128C7E]" 
             shadowColor="shadow-emerald-500/40"
-            labelColor="text-emerald-500" delay={0}
+            labelColor="text-emerald-500" delay={100}
           />
           <QuickActionBtn 
             icon={<PlayCircleIcon />} label="Watch Ads" badge="HOT" 

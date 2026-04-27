@@ -73,6 +73,7 @@ import EditProfileView from '../components/dashboard/EditProfileView';
 
 import TaskWall from '../components/dashboard/TaskWall';
 import WatchTab from '../components/dashboard/WatchTab';
+import SupportAIChat from '../components/dashboard/SupportAIChat';
 import TasksTab from '../components/dashboard/TasksTab';
 import ManageWalletView from '../components/dashboard/ManageWalletView';
 import LotteryView from '../components/dashboard/LotteryView';
@@ -1256,6 +1257,7 @@ export default function Dashboard() {
                  onPartnerUpgradeClick={() => setActiveTab('premium')}
                  onEarningHistoryClick={() => setActiveTab('earning_history')}
                  onActivateClick={() => setActiveTab('activation')}
+                 onSupportAIClick={() => setActiveTab('support_ai')}
                  onMailboxClick={() => setActiveTab('updates')}
                  appSettings={activeAppSettings}
                />;
@@ -1401,6 +1403,13 @@ export default function Dashboard() {
           role={role}
           partnerTier={partnerTier}
         />;
+      case 'support_ai':
+        return <SupportAIChat 
+          onBack={() => setActiveTab('home')}
+          userName={userName}
+          accountStatus={accountStatus}
+          balance={balance}
+        />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {
           return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} />;
@@ -1456,6 +1465,7 @@ export default function Dashboard() {
           onDepositClick={() => setActiveTab('deposit')}
           onWithdrawClick={() => setActiveTab('withdraw')}
           onWatchAdsClick={() => setActiveTab('watch')}
+          onSupportAIClick={() => setActiveTab('support_ai')}
           onTasksClick={() => setActiveTab('tasks')}
           onProfileClick={() => setActiveTab('profile')}
           onLotteryClick={() => setActiveTab('lottery')}
