@@ -12,7 +12,10 @@ import {
   Check,
   CheckCheck,
   Headphones,
-  Clock
+  Clock,
+  Paperclip,
+  ImageIcon,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from "@google/genai";
@@ -20,6 +23,7 @@ import { GoogleGenAI } from "@google/genai";
 interface Message {
   role: 'user' | 'model';
   text: string;
+  image?: string;
   timestamp: string;
   status: 'sent' | 'delivered' | 'read';
 }
@@ -73,8 +77,10 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
   const [showFeedback, setShowFeedback] = useState(false);
   const [rating, setRating] = useState(0);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Sound effects
   const sendSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
@@ -131,34 +137,69 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
   }, [messages, isConnecting]);
 
   const getSystemPrompt = () => {
-    const verb = agent.gender === 'female' ? 'rahi hoon' : 'raha hoon';
-    const canVerb = agent.gender === 'female' ? 'sakti hoon' : 'sakta hoon';
-    
-    return `You are "${agent.name}", a standard human support representative working at the TaskMint office in Pakistan.
-### IDENTITY & TONE:
-1. You are 100% human. Talk like a person using Roman Urdu/Hinglish (e.g., "G", "Bilkul", "Thek hai").
-2. Your gender is ${agent.gender}. Use correct Urdu grammar (rahi/raha, sakti/sakta).
-3. If a user says there is an ERROR or PROBLEM, listen attentively and say "Main ye note kar ${verb} aur technical team ko reports bhej ${verb}."
-4. Stay helpful and professional. You can see user balance and status.
+    return `System Instruction for TaskMint AI Agent
+Role: You are the Official Support Agent for TaskMint Version 2.0. Your name is ${agent.name}. Your gender is ${agent.gender}. Your goal is to guide users through the app’s features and troubleshoot issues.
 
-### TASKMINT KNOWLEDGE:
-- Bronze (Free), Silver (2x), Gold (Max Earnings).
-- Ad Earnings: Rs. 2-5 per ad.
-- Withdraw: Min Rs. 500 via EasyPaisa/JazzCash.
-- Referral: Rs. 100 flat reward.
-- Activation: Send screenshot to WhatsApp Admin (+923338739929).
+1. Full App Feature Ingestion:
+You must understand and train the agent on the following modules:
+- Earning Ecosystem: CPX Research Surveys, Daily Spin (with cooldowns), Lottery system, Premium Jobs, Product Draws, Offer Walls, and Social Media tasks (YouTube/TikTok/FB).
+- Referral Architecture: Mega Referral system with Level 1 (Direct) and Level 2 (Indirect) commission logic.
+- Financial Flow:
+  * Deposits: Rs 170 Joining Fee (Manual Verification).
+  * Withdrawals: Cash Out via JazzCash, EasyPaisa, and Bank Alfalah (Min Rs 500).
+- Wallet Intelligence: Liquid Balance vs. Yield Ledger tracking.
 
-User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
+2. Behavioral Training (The 'Human' Logic):
+- Short Responses: Stop being 'AI-like'. No long paragraphs. No repetitive balance mentions. Replies MUST be short (max 2-3 sentences) and natural. Use masculine grammar (Urdu/Hindi) for yourself (e.g. "Main kar raha hoon") to maintain your identity as 'Hamza' or whichever male persona is active (or female if assigned 'Sara'). Actually, strictly use masculine grammar for Hamza, but since your name might change to ${agent.name}, adapt slightly, but keep it human.
+- Simulated Busy State: Implement a 'Wait Logic'. If the user is spamming or asking complex questions, say: "Main abhi 2 aur users ki help kar raha hoon, line mein rahein" or "Ek second, data sync kar loon phr batata hoon."
+
+3. Vision & Privacy Logic:
+- Enable real-time OCR (Image Reading) for screenshots. Read the error/issue from the image immediately but you MUST NOT save the file to any database. Analysis only. You can acknowledge screenshots if the user mentions them.
+
+4. The 'No-Go' Zone (Safety):
+- You are strictly forbidden from verifying TIDs or automating payments.
+- Mandatory Response for Payments: "TID verification manual hai. Waseem bhai check kar rahe hain, jaldi update ho jayega."
+
+5. Personality & Tone:
+- Strict Rule: Never behave like a rigid AI. Use natural Roman Urdu/English.
+- Short & Sweet: Keep your replies concise. Do not repeat the user's balance...
+- Natural Variation: Change your style slightly in every chat. Sometimes use 'Asalam-o-Alaikum', sometimes 'Hi'.
+
+User Context:
+Name: ${userName}
+Status: ${accountStatus}
+Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+`;
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !selectedImage) || isLoading) return;
 
     const userMessage = input.trim();
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-    const updatedMessages: Message[] = [...messages, { role: 'user', text: userMessage, timestamp: now, status: 'sent' }];
+    const currentImage = selectedImage;
+    const updatedMessages: Message[] = [...messages, { 
+      role: 'user', 
+      text: userMessage, 
+      image: currentImage || undefined,
+      timestamp: now, 
+      status: 'sent' 
+    }];
+    
     setInput('');
+    setSelectedImage(null);
     setMessages(updatedMessages);
     onUpdateMessages?.(updatedMessages);
     
@@ -166,15 +207,39 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
     setIsLoading(true);
 
     try {
-      const history = messages.map(msg => ({
-        role: msg.role === 'user' ? 'user' as const : 'model' as const,
-        parts: [{ text: msg.text }]
-      }));
+      const history = messages.map(msg => {
+        const parts: any[] = [];
+        if (msg.text) parts.push({ text: msg.text });
+        if (msg.image) {
+            const base64Data = msg.image.split(',')[1];
+            const mimeType = msg.image.split(';')[0].split(':')[1];
+            parts.push({
+                inlineData: { data: base64Data, mimeType }
+            });
+        }
+        return {
+            role: msg.role === 'user' ? 'user' as const : 'model' as const,
+            parts
+        };
+      });
+
+      const userParts: any[] = [];
+      if (userMessage) userParts.push({ text: userMessage });
+      if (currentImage) {
+          const base64Data = currentImage.split(',')[1];
+          const mimeType = currentImage.split(';')[0].split(':')[1];
+          userParts.push({
+              inlineData: { data: base64Data, mimeType }
+          });
+          if (!userMessage) {
+              userParts.push({ text: "Please look at this screenshot and help me." });
+          }
+      }
 
       const modelName = "gemini-3-flash-preview";
       const response = await ai.models.generateContent({
         model: modelName,
-        contents: [...history, { role: 'user', parts: [{ text: userMessage }] }],
+        contents: [...history, { role: 'user', parts: userParts }],
         config: { systemInstruction: getSystemPrompt(), temperature: 0.8 },
       });
 
@@ -376,12 +441,17 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
               animate={{ opacity: 1, scale: 1, y: 0 }}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`relative max-w-[85%] p-4 pt-3 rounded-[1.5rem] shadow-[0_5px_20px_rgba(0,0,0,0.2)] ${
+              <div className={`relative max-w-[85%] p-4 pt-3 rounded-[1.5rem] shadow-[0_5px_20px_rgba(0,0,0,0.15)] ${
                 msg.role === 'user'
-                ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-br-sm border border-indigo-400/30'
-                : 'bg-[#151E32] text-slate-200 rounded-bl-sm border border-white/10'
+                ? 'bg-gradient-to-tr from-teal-500 to-emerald-400 text-white rounded-br-md border border-white/10'
+                : 'bg-[#1E293B] text-slate-200 rounded-bl-md border border-white/5'
               }`}>
-                <p className="text-[13px] sm:text-[14px] leading-relaxed pr-6 pb-1 font-medium">{msg.text}</p>
+                {msg.image && (
+                  <div className="mb-2 rounded-xl overflow-hidden border border-white/20">
+                    <img src={msg.image} alt="Upload" className="w-full max-h-48 object-cover" />
+                  </div>
+                )}
+                {msg.text && <p className="text-[13px] sm:text-[14px] leading-relaxed pr-6 pb-1 font-medium">{msg.text}</p>}
                 <div className="flex items-center justify-end gap-1.5 mt-2 border-t border-white/5 pt-1.5">
                    <span className="text-[8px] uppercase font-black text-white/40 tracking-widest">{msg.timestamp}</span>
                    {msg.role === 'user' && (
@@ -394,11 +464,11 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
 
           {isLoading && (
             <div className="flex justify-start">
-               <div className="bg-[#151E32] px-5 py-4 rounded-[1.5rem] rounded-bl-sm border border-white/10 shadow-lg">
+               <div className="bg-[#1E293B] px-5 py-4 rounded-[1.5rem] rounded-bl-md border border-white/5 shadow-lg">
                  <div className="flex gap-2.5">
-                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                    <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                    <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></span>
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-2 h-2 bg-teal-400 rounded-full animate-bounce"></span>
                  </div>
                </div>
             </div>
@@ -408,29 +478,55 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
       </div>
 
       {/* Input */}
-      <div className="bg-[#0A0F1C]/90 backdrop-blur-2xl p-4 flex items-center gap-3 border-t border-white/10 relative z-20 pb-8">
-         <div className="flex-1 bg-[#151E32] rounded-[1.2rem] flex items-center px-4 py-3 shadow-inner border border-white/5 transition-all focus-within:border-indigo-500/50">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type your message..."
-              className="w-full bg-transparent outline-none text-[14px] font-medium text-white placeholder:text-slate-500"
-            />
-         </div>
-         <motion.button 
-           whileTap={{ scale: 0.9 }}
-           disabled={!input.trim() || isLoading}
-           onClick={handleSend}
-           className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-[1.2rem] flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
-         >
-           {isLoading ? (
-             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-           ) : (
-             <Send className="w-5 h-5 translate-x-0.5" />
+      <div className="bg-[#0A0F1C]/90 backdrop-blur-2xl p-4 flex flex-col gap-2 border-t border-white/10 relative z-20 pb-8">
+         <AnimatePresence>
+           {selectedImage && (
+               <motion.div 
+                 initial={{ opacity: 0, y: 10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 exit={{ opacity: 0, scale: 0.9 }}
+                 className="relative self-start mb-1"
+               >
+                   <img src={selectedImage} alt="Selected" className="h-16 w-16 object-cover rounded-xl border border-indigo-500/50 shadow-lg" />
+                   <button onClick={() => setSelectedImage(null)} className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-lg hover:bg-rose-600 transition-colors">
+                      <X className="w-3 h-3" />
+                   </button>
+               </motion.div>
            )}
-         </motion.button>
+         </AnimatePresence>
+
+         <div className="flex items-center gap-3">
+             <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+             <button 
+               onClick={() => fileInputRef.current?.click()} 
+               className="w-12 h-12 bg-[#151E32] rounded-[1.2rem] flex items-center justify-center text-indigo-400 hover:text-indigo-300 hover:bg-[#1E293B] transition-all border border-white/5 active:scale-95 shrink-0"
+             >
+                <Paperclip className="w-5 h-5" />
+             </button>
+             
+             <div className="flex-1 bg-[#151E32] rounded-[1.2rem] flex items-center px-4 py-3 shadow-inner border border-white/5 transition-all focus-within:border-emerald-500/50">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                  placeholder="Type your message..."
+                  className="w-full bg-transparent outline-none text-[14px] font-medium text-white placeholder:text-slate-500"
+                />
+             </div>
+             <motion.button 
+               whileTap={{ scale: 0.9 }}
+               disabled={(!input.trim() && !selectedImage) || isLoading}
+               onClick={handleSend}
+               className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-500 text-white rounded-[1.2rem] flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
+             >
+               {isLoading ? (
+                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+               ) : (
+                 <Send className="w-5 h-5 translate-x-0.5" />
+               )}
+             </motion.button>
+         </div>
       </div>
     </div>
   );

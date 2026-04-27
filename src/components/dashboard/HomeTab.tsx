@@ -762,19 +762,32 @@ export default function HomeTab({
               )}
             </div>
 
-            <div className="flex items-end justify-between">
-              <div>
-                <h3 className="text-3xl font-black text-white tracking-tighter mb-1">
-                  Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Support</span>
-                </h3>
-                <p className="text-sm font-medium text-slate-400 leading-relaxed max-w-[200px]">
-                  Need help? Chat with our live support agents instantly.
-                </p>
+            <div className="flex flex-col gap-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-3xl font-black text-white tracking-tighter mb-1">
+                    Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Support</span>
+                  </h3>
+                  <p className="text-sm font-medium text-slate-400 leading-relaxed max-w-[200px]">
+                    Need help? Chat with our live support agents instantly.
+                  </p>
+                </div>
+                
+                <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300 shrink-0">
+                  <Headphones className="w-8 h-8 text-white" />
+                </div>
               </div>
               
-              <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
-                <Headphones className="w-8 h-8 text-white" />
-              </div>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSupportAIClick();
+                }}
+                className="w-full py-4 mt-2 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all border border-white/5 group-hover:border-indigo-500/30"
+              >
+                Talk to Agent
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
           </div>
         </div>

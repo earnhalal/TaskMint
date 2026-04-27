@@ -283,7 +283,7 @@ export default function ProfileTab({
                     <Wallet className="w-3 h-3" /> Liquid Balance
                   </p>
                   <p className="text-4xl font-black text-emerald-600 tracking-tighter flex items-baseline gap-2 italic">
-                    {balance?.toLocaleString() || 0} 
+                    {balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'} 
                     <span className="text-sm font-bold text-slate-400 uppercase tracking-widest not-italic">PKR</span>
                   </p>
                 </div>
@@ -299,7 +299,7 @@ export default function ProfileTab({
                 <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
                     <Clock className="w-3 h-3" /> Locked Distribution
                 </p>
-                <p className="text-2xl font-black text-amber-600 italic tracking-tighter">Rs {lockedBalance?.toLocaleString() || 0}</p>
+                <p className="text-2xl font-black text-amber-600 italic tracking-tighter">Rs {lockedBalance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</p>
                 <div className="flex items-center gap-2 mt-2 bg-amber-500/10 px-3 py-1 rounded-lg w-fit border border-amber-500/10">
                   <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
                   <p className="text-[9px] text-amber-600 font-black uppercase tracking-widest">Protocol Stake Active</p>
