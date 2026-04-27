@@ -175,7 +175,7 @@ export default function SpinWheel({
     }
     
     if (isPaid) {
-      onUpdateBalance(-cost, 'spin', `Paid ${cost} PKR for Helix Spin`);
+      onUpdateBalance(-cost, 'spin', `Paid ${cost} PKR for Helix Spin`, `spin_deduct_${auth.currentUser.uid}_${Date.now()}`);
     } else {
       onUseFreeSpin();
     }
@@ -267,7 +267,7 @@ export default function SpinWheel({
             if (onWinLockedPrize) onWinLockedPrize(won.value, requiredInvites);
           } else {
             // Normal win
-            onUpdateBalance(won.value, 'spin', `Won ${won.label} from ${activeTier} PKR Spin`);
+            onUpdateBalance(won.value, 'spin', `Won ${won.label} from ${activeTier} PKR Spin`, `spin_win_${auth.currentUser.uid}_${Date.now()}`);
           }
         } catch (error) {
           console.error("Error updating spin win:", error);

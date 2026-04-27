@@ -41,6 +41,7 @@ interface HomeTabProps {
   name: string;
   balance: number;
   spinBalance?: number;
+  lastUpdated?: number;
   totalEarnings?: number;
   totalIndirectCommission?: number;
   lockedBalance: number;
@@ -214,6 +215,7 @@ export default function HomeTab({
   onProductDrawClick,
   onUpdateBalance,
   onReloadData,
+  lastUpdated = Date.now(),
   appSettings,
   appBonusClaimed,
   lastDailyCheckin,
@@ -505,26 +507,32 @@ export default function HomeTab({
               </button>
             </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-3">
-                <span className="text-5xl sm:text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                  <AnimatedCounter value={balance} />
-                </span>
-                <span className="text-xl font-black text-indigo-500 tracking-tighter italic">RS</span>
-              </div>
-              <div className="flex items-center gap-3 mt-4">
-                <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></div>
-                  <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Live Syncing</span>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
+                  <span className="text-[10px] font-black text-indigo-300/60 uppercase tracking-[0.2em]">Secured Hub Balance</span>
                 </div>
-                {lockedBalance > 0 && (
-                  <div className="flex items-center gap-2 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
-                    <Lock className="w-2.5 h-2.5 text-amber-500" />
-                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Locked: {lockedBalance}</span>
-                  </div>
-                )}
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl sm:text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                    <AnimatedCounter value={balance} />
+                  </span>
+                  <span className="text-xl font-black text-indigo-500 tracking-tighter italic">RS</span>
+                </div>
+                <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-1.5">
+                        <Clock className="w-3 h-3 text-slate-500" />
+                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+                            Updated: {Math.floor((Date.now() - lastUpdated) / 60000)} mins ago
+                        </span>
+                    </div>
+                  {lockedBalance > 0 && (
+                    <div className="flex items-center gap-2 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+                      <Lock className="w-2.5 h-2.5 text-amber-500" />
+                      <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Locked: {lockedBalance}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <motion.button 
@@ -566,13 +574,6 @@ export default function HomeTab({
         <div className="grid grid-cols-3 min-[400px]:grid-cols-4 gap-x-2 gap-y-8 sm:gap-6">
           {/* Row 1 */}
           <QuickActionBtn 
-            icon={<Headphones />} label="Live Support" badge={unreadChatCount > 0 ? `${unreadChatCount} NEW` : "24/7"} 
-            onClick={onSupportAIClick} 
-            colorClass="bg-gradient-to-br from-[#00c6ff] to-[#0072ff]" 
-            shadowColor="shadow-blue-500/40"
-            labelColor="text-blue-600" delay={0}
-          />
-          <QuickActionBtn 
             icon={<MessageCircle />} label="WhatsApp" badge="HELP" 
             onClick={() => window.open('https://whatsapp.com/channel/0029VbCpKTp2P59cvqS4CL2L', '_blank')} 
             colorClass="bg-gradient-to-br from-[#25D366] to-[#128C7E]" 
@@ -603,11 +604,11 @@ export default function HomeTab({
 
           {/* Row 2 */}
           <QuickActionBtn 
-            icon={<Rocket />} label="CPX Surveys" 
+            icon={<Rocket />} label="CPX Surveys" badge="HIGH REWARD"
             onClick={onTaskWallClick} 
-            colorClass="bg-gradient-to-br from-[#fa709a] to-[#fee140]" 
-            shadowColor="shadow-pink-500/40"
-            labelColor="text-slate-700" delay={400}
+            colorClass="bg-gradient-to-br from-[#FF0080] to-[#7928CA] shadow-[0_0_20px_rgba(255,0,128,0.4)]" 
+            shadowColor="shadow-purple-500/40"
+            labelColor="text-purple-600 font-black" delay={400}
           />
           <QuickActionBtn 
             icon={<CheckSquareIcon />} label="Easy Task" badge="NEW" 
@@ -730,6 +731,49 @@ export default function HomeTab({
                 <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
                   <ArrowRight className="w-6 h-6 text-amber-500" />
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Live Support Card */}
+      <motion.div 
+        whileHover={{ y: -5 }}
+        onClick={onSupportAIClick}
+        className="relative z-10 animate-fade-in-up mt-4 mb-4 cursor-pointer group" 
+        style={{ animationDelay: '500ms' }}
+      >
+        <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-[32px] p-8 overflow-hidden relative border border-white/5 shadow-2xl">
+          <div className="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] group-hover:bg-indigo-500/30 transition-colors"></div>
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-purple-500/20 rounded-full blur-[60px]"></div>
+
+          <div className="flex flex-col gap-6 relative z-10">
+            <div className="flex items-center gap-3 w-full">
+              <div className="px-3 py-1 bg-indigo-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                LIVE 24/7
+              </div>
+              <div className="h-px flex-1 bg-white/10"></div>
+              {unreadChatCount > 0 && (
+                <div className="w-6 h-6 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg animate-bounce">
+                  {unreadChatCount}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-end justify-between">
+              <div>
+                <h3 className="text-3xl font-black text-white tracking-tighter mb-1">
+                  Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Support</span>
+                </h3>
+                <p className="text-sm font-medium text-slate-400 leading-relaxed max-w-[200px]">
+                  Need help? Chat with our live support agents instantly.
+                </p>
+              </div>
+              
+              <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
+                <Headphones className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>

@@ -61,7 +61,11 @@ export default function SupportAIChat({ onBack, userName, accountStatus, balance
     }
   }, [persistedAgent, agent, onAgentAssigned]);
 
-  const [isConnecting, setIsConnecting] = useState(!persistedMessages || persistedMessages.length === 0);
+  const [isConnecting, setIsConnecting] = useState(() => {
+    // If we have messages, we are already connected
+    if (persistedMessages && persistedMessages.length > 0) return false;
+    return true;
+  });
   const [connectionStep, setConnectionStep] = useState(0);
   const [messages, setMessages] = useState<Message[]>(persistedMessages || []);
   const [input, setInput] = useState('');
@@ -198,34 +202,34 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
 
   if (showFeedback) {
     return (
-      <div className="flex flex-col h-full bg-[#0b141a] items-center justify-center p-8 text-center">
+      <div className="flex flex-col h-full bg-[#060B19] items-center justify-center p-8 text-center">
         <motion.div
            initial={{ scale: 0.8, opacity: 0 }}
            animate={{ scale: 1, opacity: 1 }}
-           className="bg-[#202c33] p-10 rounded-3xl border border-white/10 shadow-2xl max-w-sm w-full"
+           className="bg-[#0F172A] p-10 rounded-3xl border border-white/10 shadow-2xl max-w-sm w-full"
         >
           {feedbackSubmitted ? (
             <div className="space-y-6">
-              <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
-                 <CheckCheck className="w-8 h-8 text-emerald-500" />
+              <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto">
+                 <CheckCheck className="w-8 h-8 text-indigo-500" />
               </div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Feedback Received!</h2>
+              <h2 className="text-xl font-black text-white tracking-tight">Feedback Received!</h2>
               <p className="text-slate-400 text-sm italic">"Shukriya! Aap ki feedback hamare liye bohat important hai."</p>
               <button 
                 onClick={onBack}
-                className="w-full py-4 rounded-2xl bg-[#00a884] text-white font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                className="w-full py-4 rounded-2xl bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
               >
                 Go to Home
               </button>
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="w-16 h-16 rounded-full overflow-hidden mx-auto border-2 border-emerald-500">
+              <div className="w-16 h-16 rounded-full overflow-hidden mx-auto border-2 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]">
                 <img src={agent.image} alt={agent.name} className="w-full h-full object-cover" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight">Session Finished</h2>
-                <p className="text-xs text-slate-400 mt-1">Please rate your chat with {agent.name}</p>
+                <h2 className="text-xl font-black text-white tracking-tight">Session Finished</h2>
+                <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Please rate your chat with {agent.name}</p>
               </div>
 
               <div className="flex justify-center gap-2">
@@ -233,7 +237,7 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
                    <button
                      key={star}
                      onClick={() => setRating(star)}
-                     className={`text-2xl transition-all ${rating >= star ? 'text-amber-500' : 'text-slate-600'}`}
+                     className={`text-2xl transition-all ${rating >= star ? 'text-amber-500 scale-110' : 'text-slate-700 hover:text-slate-500'}`}
                    >
                      ★
                    </button>
@@ -243,7 +247,7 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
               <button 
                 disabled={rating === 0}
                 onClick={() => setFeedbackSubmitted(true)}
-                className="w-full py-4 rounded-2xl bg-[#00a884] text-white font-bold shadow-lg shadow-emerald-500/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95"
+                className="w-full py-4 rounded-2xl bg-indigo-600 text-white font-black shadow-lg shadow-indigo-500/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95"
               >
                 SUBMIT FEEDBACK
               </button>
@@ -260,10 +264,10 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
 
   if (isConnecting) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#0b141a] relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#060B19] relative overflow-hidden">
         {/* Animated Background Pulse */}
-        <div className="absolute inset-0 z-0 opacity-20">
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute inset-0 z-0 opacity-30">
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[120px] animate-pulse-slow"></div>
         </div>
 
         <motion.div 
@@ -271,19 +275,19 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
           animate={{ opacity: 1, scale: 1 }}
           className="relative z-10 mb-12"
         >
-           <div className="w-28 h-28 rounded-full border-2 border-emerald-500/10 flex items-center justify-center relative">
-              <div className="absolute inset-0 rounded-full border-t-2 border-emerald-500/40 animate-spin"></div>
-              <Headphones className="w-10 h-10 text-emerald-500 animate-pulse" />
+           <div className="w-32 h-32 rounded-full border border-indigo-500/20 flex items-center justify-center relative bg-[#0F172A] shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+              <div className="absolute inset-0 rounded-full border-t-2 border-indigo-500 animate-spin"></div>
+              <Headphones className="w-12 h-12 text-indigo-400 animate-pulse" />
            </div>
         </motion.div>
         
         <div className="relative z-10">
-           <h2 className="text-white font-black text-2xl mb-2 tracking-tighter italic uppercase">Live Support</h2>
+           <h2 className="text-white font-black text-3xl mb-4 tracking-tighter italic uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">Live Support</h2>
            <motion.p 
              key={connectionStep}
              initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
-             className="text-emerald-500/60 text-[10px] font-black uppercase tracking-[0.4em]"
+             className="text-indigo-400 text-[11px] font-black uppercase tracking-[0.4em]"
            >
              {[
                "Securing Chat Tunnel...",
@@ -299,67 +303,68 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0b141a] text-white overflow-hidden relative">
+    <div className="flex flex-col h-full bg-[#060B19] text-white overflow-hidden relative">
       {/* Chat Header */}
-      <div className="bg-[#202c33] px-4 py-3 flex items-center justify-between border-b border-white/5 h-16 shrink-0 shadow-lg relative z-20">
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
+      <div className="bg-[#0A0F1C]/90 backdrop-blur-xl px-4 py-3 flex items-center justify-between border-b border-indigo-500/20 h-16 shrink-0 shadow-lg relative z-20">
+        <div className="flex items-center gap-3 w-full">
+          <button onClick={onBack} className="p-1.5 hover:bg-white/10 rounded-full transition-colors shrink-0">
             <ArrowLeft className="w-5 h-5 text-white/80" />
           </button>
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-slate-700 overflow-hidden border-2 border-emerald-500/30 shadow-inner">
+          
+          <div className="relative shrink-0">
+            <div className="w-10 h-10 rounded-[12px] bg-slate-800 overflow-hidden border border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]">
                <img src={agent.image} alt={agent.name} className="w-full h-full object-cover" />
             </div>
-            <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 bg-[#00a884] border-2 border-[#202c33] rounded-full"></div>
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#0A0F1C] rounded-full"></div>
           </div>
-          <div>
-             <h3 className="text-sm font-bold text-white tracking-wide">{agent.name}</h3>
+          
+          <div className="flex-1 overflow-hidden">
+             <h3 className="text-xs sm:text-sm font-black text-white tracking-widest uppercase truncate">{agent.name}</h3>
              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                <p className="text-[10px] text-[#00a884] font-bold uppercase tracking-tighter">Support Agent (24/7)</p>
+                <ShieldCheck className="w-3 h-3 text-indigo-400" />
+                <p className="text-[8px] sm:text-[9px] text-indigo-400/80 font-black uppercase tracking-[0.2em] truncate">Encrypted Mode</p>
              </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-           <button 
-             onClick={() => setShowFeedback(true)}
-             className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[10px] font-black text-rose-500 uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all shadow-lg active:scale-95"
-           >
-              End Session
-           </button>
+          
+          <div className="flex items-center gap-2 shrink-0">
+             <button 
+               onClick={() => setShowFeedback(true)}
+               className="px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[9px] font-black text-rose-400 uppercase tracking-[0.2em] hover:bg-rose-500 hover:text-white transition-all shadow-lg active:scale-95"
+             >
+                End
+             </button>
+          </div>
         </div>
       </div>
 
       {/* Messages */}
       <div 
-        className="flex-1 overflow-y-auto p-4 space-y-3 relative hide-scrollbar pb-10"
-        style={{
-          backgroundImage: `url('https://i.pinimg.com/originals/85/70/f6/8570f6339d318933ef0c28307d896135.png')`,
-          backgroundSize: '400px',
-          backgroundRepeat: 'repeat'
-        }}
+        className="flex-1 overflow-y-auto p-4 space-y-4 relative hide-scrollbar pb-10"
       >
-        <div className="absolute inset-0 bg-[#0b141a]/96 z-0"></div>
+        {/* Abstract Background Design */}
+        <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center opacity-[0.03]">
+           <Zap className="w-[120%] h-[120%] text-indigo-100" />
+        </div>
 
-        <div className="relative z-10 flex flex-col gap-3">
+        <div className="relative z-10 flex flex-col gap-4">
           {/* Top Info Notice */}
-          <div className="flex justify-center mb-6">
-             <div className="bg-[#182229]/60 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/5 text-center max-w-[92%] shadow-2xl">
-                <div className="flex items-center justify-center gap-2 mb-1.5">
+          <div className="flex justify-center mb-4">
+             <div className="bg-indigo-900/20 backdrop-blur-md px-5 py-3 rounded-[1.5rem] border border-indigo-500/20 text-center max-w-[90%] shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+                <div className="flex items-center justify-center gap-2 mb-2">
                    <Clock className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                   <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em]">Live Session Active</p>
+                   <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.3em]">Live Session Active</p>
                 </div>
-                <p className="text-[10px] text-[#8696a0] font-medium leading-relaxed">
-                  Your chat is end-to-end encrypted. Help {agent.name} understand your issue. Entire chat will be wiped automatically after 30 minutes.
+                <p className="text-[10px] text-indigo-200/60 font-bold leading-relaxed">
+                  Your chat is end-to-end encrypted. The entire chat history will be automatically wiped after 30 minutes of inactivity.
                 </p>
              </div>
           </div>
 
           <div className="flex justify-center mb-6">
-            <div className="bg-[#1b2831] px-4 py-2 rounded-lg border border-white/5 text-center max-w-[85%]">
-               <p className="text-[10px] text-[#8696a0] font-medium leading-relaxed">
-                 <ShieldCheck className="w-3 h-3 inline-block mr-1 opacity-50 text-emerald-500" />
-                 Messages are end-to-end encrypted.
+            <div className="bg-[#0A0F1C] px-4 py-2 rounded-xl border border-white/5 text-center shadow-lg">
+               <p className="text-[9px] text-indigo-300/80 font-black tracking-widest uppercase">
+                 <ShieldCheck className="w-3 h-3 inline-block mr-1 text-indigo-500" />
+                 Secured Connection
                </p>
             </div>
           </div>
@@ -371,16 +376,16 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
               animate={{ opacity: 1, scale: 1, y: 0 }}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`relative max-w-[85%] p-3.5 pt-2.5 rounded-2xl shadow-xl ${
+              <div className={`relative max-w-[85%] p-4 pt-3 rounded-[1.5rem] shadow-[0_5px_20px_rgba(0,0,0,0.2)] ${
                 msg.role === 'user'
-                ? 'bg-[#005c4b] text-white rounded-tr-none'
-                : 'bg-[#202c33] text-[#d1d7db] rounded-tl-none border border-white/5'
+                ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-br-sm border border-indigo-400/30'
+                : 'bg-[#151E32] text-slate-200 rounded-bl-sm border border-white/10'
               }`}>
-                <p className="text-[13.5px] leading-relaxed pr-6 pb-1 font-medium tracking-tight">{msg.text}</p>
-                <div className="flex items-center justify-end gap-1.5 mt-1 border-t border-white/5 pt-1">
-                   <span className="text-[8px] uppercase font-bold text-white/30 tracking-widest">{msg.timestamp}</span>
+                <p className="text-[13px] sm:text-[14px] leading-relaxed pr-6 pb-1 font-medium">{msg.text}</p>
+                <div className="flex items-center justify-end gap-1.5 mt-2 border-t border-white/5 pt-1.5">
+                   <span className="text-[8px] uppercase font-black text-white/40 tracking-widest">{msg.timestamp}</span>
                    {msg.role === 'user' && (
-                     <CheckCheck className={`w-3.5 h-3.5 ${msg.status === 'read' ? 'text-[#53bdeb]' : 'text-white/20'}`} />
+                     <CheckCheck className={`w-3.5 h-3.5 ${msg.status === 'read' ? 'text-white' : 'text-white/30'}`} />
                    )}
                 </div>
               </div>
@@ -389,11 +394,11 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
 
           {isLoading && (
             <div className="flex justify-start">
-               <div className="bg-[#202c33] px-5 py-3 rounded-2xl rounded-tl-none border border-white/5">
-                 <div className="flex gap-2">
-                    <span className="w-2 h-2 bg-emerald-500/40 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                    <span className="w-2 h-2 bg-emerald-500/40 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                    <span className="w-2 h-2 bg-emerald-500/40 rounded-full animate-bounce"></span>
+               <div className="bg-[#151E32] px-5 py-4 rounded-[1.5rem] rounded-bl-sm border border-white/10 shadow-lg">
+                 <div className="flex gap-2.5">
+                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></span>
                  </div>
                </div>
             </div>
@@ -403,22 +408,22 @@ User Context: ${userName}, Status: ${accountStatus}, Balance: Rs. ${balance}.`;
       </div>
 
       {/* Input */}
-      <div className="bg-[#202c33]/95 backdrop-blur-xl p-4 flex items-center gap-3 border-t border-white/5 relative z-20 pb-8">
-         <div className="flex-1 bg-[#2a3942] rounded-2xl flex items-center px-4 py-3 shadow-inner border border-white/5 transition-all focus-within:ring-2 ring-emerald-500/20">
+      <div className="bg-[#0A0F1C]/90 backdrop-blur-2xl p-4 flex items-center gap-3 border-t border-white/10 relative z-20 pb-8">
+         <div className="flex-1 bg-[#151E32] rounded-[1.2rem] flex items-center px-4 py-3 shadow-inner border border-white/5 transition-all focus-within:border-indigo-500/50">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Report your problem..."
-              className="w-full bg-transparent outline-none text-[15px] font-medium text-white placeholder:text-white/20"
+              placeholder="Type your message..."
+              className="w-full bg-transparent outline-none text-[14px] font-medium text-white placeholder:text-slate-500"
             />
          </div>
          <motion.button 
            whileTap={{ scale: 0.9 }}
            disabled={!input.trim() || isLoading}
            onClick={handleSend}
-           className="w-12 h-12 bg-[#00a884] text-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-[0_4px_20px_rgba(0,168,132,0.4)] transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
+           className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-[1.2rem] flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all disabled:opacity-50 disabled:grayscale active:scale-95"
          >
            {isLoading ? (
              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

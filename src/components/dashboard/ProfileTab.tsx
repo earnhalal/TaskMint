@@ -176,8 +176,8 @@ export default function ProfileTab({
       )}
 
       {/* Profile Header: Digital Identity Card */}
-      <div className="px-6 mb-8 mt-4">
-        <div className={`relative rounded-[3rem] p-8 overflow-hidden shadow-2xl transition-all duration-700 group hover:scale-[1.02] ${
+      <div className="px-5 mb-6 mt-2">
+        <div className={`relative rounded-[2rem] p-5 overflow-hidden shadow-2xl transition-all duration-700 group hover:scale-[1.02] ${
             role === 'partner' 
             ? partnerTier === 'gold'
                 ? 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-amber-500/20 shadow-amber-500/5'
@@ -185,25 +185,25 @@ export default function ProfileTab({
             : 'bg-gradient-to-br from-[#1E3A8A] via-[#312E81] to-[#1E1B4B] border border-white/5 shadow-indigo-500/10'
         }`}>
             {/* Holographic Overlays */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 animate-pulse" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -ml-32 -mb-32 animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl -mr-24 -mt-24 animate-pulse" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl -ml-24 -mb-24 animate-pulse" style={{ animationDelay: '1s' }} />
             
             {/* Card Content */}
             <div className="relative z-10 flex flex-col items-center">
-                <div className="w-full flex justify-between items-start mb-8">
+                <div className="w-full flex justify-between items-start mb-4">
                     <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">USER ID</span>
-                        <div className="bg-white/5 backdrop-blur-md rounded-lg px-3 py-1 border border-white/10 flex items-center gap-2">
+                        <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] mb-1">USER ID</span>
+                        <div className="bg-white/5 backdrop-blur-sm rounded-lg px-2.5 py-1 border border-white/10 flex items-center gap-1.5">
                             <Fingerprint className="w-3 h-3 text-amber-500" />
-                            <span className="text-xs font-black text-white tracking-widest">{referralCode}</span>
+                            <span className="text-[10px] font-black text-white tracking-widest">{referralCode}</span>
                         </div>
                     </div>
                     <div className="flex flex-col items-end">
-                         <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] mb-1">ACCOUNT STATUS</span>
-                         <div className={`flex items-center gap-2 bg-black/20 px-3 py-1 rounded-lg border ${
+                         <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] mb-1">STATUS</span>
+                         <div className={`flex items-center gap-1.5 bg-black/20 px-2.5 py-1 rounded-lg border ${
                              status.toLowerCase() === 'active' ? 'border-emerald-500/30 text-emerald-400' : 'border-red-500/30 text-red-400'
                          }`}>
-                             <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                             <div className={`w-1 h-1 rounded-full animate-pulse ${
                                  status.toLowerCase() === 'active' ? 'bg-emerald-500' : 'bg-red-500'
                              }`} />
                              <span className="text-[9px] font-black uppercase tracking-widest">{status}</span>
@@ -211,62 +211,61 @@ export default function ProfileTab({
                     </div>
                 </div>
 
-                <div className="relative mb-6 group-hover:rotate-6 transition-transform duration-500">
-                    <div className={`w-28 h-28 rounded-[2.5rem] p-1 shadow-2xl transition-all duration-500 ${
+                <div className="relative mb-3 group-hover:rotate-6 transition-transform duration-500">
+                    <div className={`w-20 h-20 rounded-[1.5rem] p-1 shadow-xl transition-all duration-500 ${
                         role === 'partner'
                             ? partnerTier === 'gold'
                                 ? 'bg-gradient-to-tr from-amber-400 via-yellow-500 to-amber-600'
                                 : 'bg-gradient-to-tr from-blue-500 via-indigo-600 to-blue-700'
                             : 'bg-gradient-to-tr from-indigo-500 via-purple-600 to-indigo-700'
                     }`}>
-                        <div className="w-full h-full rounded-[2.3rem] overflow-hidden bg-[#0F172A] flex items-center justify-center border-4 border-black/20">
+                        <div className="w-full h-full rounded-[1.3rem] overflow-hidden bg-[#0F172A] flex items-center justify-center border-2 border-black/20">
                             <DynamicAvatar avatarId={profileAvatarId} fallbackText={name} className="w-full h-full" />
                         </div>
                     </div>
                     <button 
                         onClick={onEditProfile}
-                        className="absolute -bottom-1 -right-1 w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-2xl text-slate-900 border-2 border-black/5 active:scale-90 transition-all hover:bg-amber-100 hover:text-amber-600"
+                        className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-lg text-slate-900 border-2 border-black/5 active:scale-90 transition-all hover:bg-amber-100 hover:text-amber-600"
                     >
-                        <PenTool className="w-5 h-5" />
+                        <PenTool className="w-4 h-4" />
                     </button>
                 </div>
 
                 <div className="text-center w-full">
-                    <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase mb-1 drop-shadow-2xl">
+                    <h2 className="text-2xl sm:text-3xl font-black text-white italic tracking-tighter uppercase mb-0.5 drop-shadow-lg">
                         {name.toLowerCase()}
                     </h2>
-                    <p className="text-xs font-bold text-white/40 mb-6 flex items-center justify-center gap-2">
+                    <p className="text-[10px] sm:text-xs font-bold text-white/40 mb-4 flex items-center justify-center gap-1.5">
                         <Mail className="w-3 h-3" />
                         {email}
                     </p>
 
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/5 text-left group/stat hover:bg-white/10 transition-all">
-                             <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">MEMBER SINCE</p>
-                             <p className="text-sm font-black text-white flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-amber-500" />
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/5 text-left group/stat hover:bg-white/10 transition-all">
+                             <p className="text-[8px] sm:text-[9px] font-black text-white/30 uppercase tracking-widest mb-0.5">MEMBER SINCE</p>
+                             <p className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5 text-amber-500" />
                                 {joiningDate ? (joiningDate.includes('T') ? new Date(joiningDate).toLocaleDateString() : joiningDate) : 'Jan 2024'}
                              </p>
                         </div>
-                        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/5 text-left group/stat hover:bg-white/10 transition-all">
-                             <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">ALPHA RANK</p>
-                             <div className="flex items-center gap-2">
+                        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-2.5 border border-white/5 text-left group/stat hover:bg-white/10 transition-all">
+                             <p className="text-[8px] sm:text-[9px] font-black text-white/30 uppercase tracking-widest mb-0.5">ALPHA RANK</p>
+                             <div className="flex items-center gap-1.5">
                                 {role === 'partner' ? (
-                                    <Crown className="w-4 h-4 text-amber-500" />
+                                    <Crown className="w-3.5 h-3.5 text-amber-500" />
                                 ) : (
-                                    <Users className="w-4 h-4 text-indigo-400" />
+                                    <Users className="w-3.5 h-3.5 text-indigo-400" />
                                 )}
-                                <p className="text-sm font-black text-white uppercase italic">{role}</p>
+                                <p className="text-xs sm:text-sm font-black text-white uppercase italic">{role}</p>
                              </div>
                         </div>
                     </div>
 
-
                 </div>
 
                 {/* Card NFC-style decoration */}
-                <div className="w-full flex justify-center mt-2 opacity-10">
-                    <div className="h-6 w-10 bg-white rounded-sm border-2 border-white/50 relative overflow-hidden">
+                <div className="w-full flex justify-center mt-1 opacity-10 hidden sm:flex">
+                    <div className="h-4 w-8 bg-white rounded-sm border-2 border-white/50 relative overflow-hidden">
                         <div className="absolute inset-x-0 top-1/2 h-px bg-white" />
                         <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white" />
                     </div>

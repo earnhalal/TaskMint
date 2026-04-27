@@ -16,6 +16,7 @@ interface Transaction {
 interface DepositTabProps {
   onDeposit: (amount: number, method: DepositMethod, transactionId: string, type?: 'activation' | 'regular') => Promise<void>;
   transactions: Transaction[];
+  userCountry?: string;
   initialType?: 'activation' | 'regular';
   appSettings: {
     activationFee: number;
@@ -57,7 +58,7 @@ const EasyPaisaIcon = ({ className }: { className?: string }) => (
   </div>
 );
 
-export default function DepositTab({ onDeposit, transactions, initialType = 'regular', appSettings }: DepositTabProps) {
+export default function DepositTab({ onDeposit, transactions, userCountry = 'Pakistan', initialType = 'regular', appSettings }: DepositTabProps) {
   const [type, setType] = useState<'activation' | 'regular'>(initialType);
   const [amount, setAmount] = useState(initialType === 'activation' ? appSettings.activationFee.toString() : '');
   const [transactionId, setTransactionId] = useState('');
@@ -179,6 +180,21 @@ export default function DepositTab({ onDeposit, transactions, initialType = 'reg
                              </div>
                          </button>
                     ))}
+
+                    {userCountry !== 'Pakistan' && (
+                        <div className="relative flex items-center gap-4 p-6 rounded-[2rem] border-2 border-dashed border-indigo-200 bg-indigo-50/50 opacity-80 cursor-not-allowed group/usdt">
+                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden border border-indigo-100 shrink-0">
+                                <div className="bg-indigo-600 text-white text-[8px] font-black p-1 rounded">USDT</div>
+                             </div>
+                             <div className="text-left flex-1">
+                                <span className="font-black text-xs text-indigo-900 uppercase tracking-widest block">USDT (Binance)</span>
+                                <span className="text-[8px] font-bold text-indigo-600/40 uppercase">International Transfer</span>
+                             </div>
+                             <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-[8px] font-black px-2 py-1 rounded shadow-lg">
+                                COMING SOON
+                             </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="mt-8 bg-[#0A0B0F] rounded-[2.5rem] p-8 text-white relative overflow-hidden group/acc shadow-2xl">

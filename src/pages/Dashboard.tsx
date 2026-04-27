@@ -39,10 +39,11 @@ import {
   where, 
   writeBatch,
   addDoc,
+  runTransaction,
   serverTimestamp as firestoreServerTimestamp 
 } from 'firebase/firestore';
 import { db, auth, rtdb } from '../firebase';
-import { ref, onValue, update, set, increment as rtdbIncrement, push, serverTimestamp, runTransaction, get } from 'firebase/database';
+import { ref, onValue, update, set, increment as rtdbIncrement, push, serverTimestamp, get } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { 
   sendDepositRequestMail, 
@@ -54,6 +55,7 @@ import {
   sendSystemUpdateMail
 } from '../services/notificationService';
 import HomeTab from '../components/dashboard/HomeTab';
+import AnnouncementBar from '../components/dashboard/AnnouncementBar';
 import ProfileTab from '../components/dashboard/ProfileTab';
 import InviteTab from '../components/dashboard/InviteTab';
 import WithdrawTab from '../components/dashboard/WithdrawTab';
@@ -96,6 +98,7 @@ export default function Dashboard() {
   const [userEmail, setUserEmail] = useState('');
   const [userPhone, setUserPhone] = useState('');
   const [userGender, setUserGender] = useState('');
+  const [userCountry, setUserCountry] = useState('Pakistan');
   const [profileAvatarId, setProfileAvatarId] = useState('');
   const [withdrawalAccounts, setWithdrawalAccounts] = useState<any[]>([]);
   const [twoFactorAuth, setTwoFactorAuth] = useState(false);
@@ -242,6 +245,7 @@ export default function Dashboard() {
         setUserEmail(data.email || '');
         setUserPhone(data.phone || '');
         setUserGender(data.gender || '');
+        setUserCountry(data.country || 'Pakistan');
         setProfileAvatarId(data.profile_avatar_id || '');
         setWithdrawalAccounts(data.withdrawalAccounts || []);
         setTwoFactorAuth(data.twoFactorAuth || false);
@@ -651,10 +655,12 @@ export default function Dashboard() {
 
   const [isBalanceUpdating, setIsBalanceUpdating] = useState(false);
 
-  const handleUpdateBalance = async (amount: number, source: string = 'system', description: string = '') => {
+  const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
+
+  const handleUpdateBalance = async (amount: number, source: string = 'system', description: string = '', transactionId?: string) => {
     if (!user || isBalanceUpdating) return false;
     
-    // If it's a deduction, check balance strictly
+    // If it's a deduction, check balance strictly (Quick check before transaction)
     if (amount < 0 && balance < Math.abs(amount)) {
       console.error("[BALANCE_SHIELD] Prevented negative balance update:", { balance, amount, source });
       return false;
@@ -662,130 +668,186 @@ export default function Dashboard() {
 
     setIsBalanceUpdating(true);
     try {
-      let spinAmt = 0;
-      let balAmt = 0;
+      const userDocRef = doc(db, 'users', user.uid);
+      const userRtdbRef = ref(rtdb, `users/${user.uid}`);
       
-      if (source === 'app_bonus') {
-        spinAmt = amount;
-      } else if (source === 'spin' && amount < 0) {
-        if (spinBalance >= Math.abs(amount)) {
-            spinAmt = amount;
-        } else {
-            spinAmt = -spinBalance;
-            balAmt = amount - spinAmt;
+      const success = await runTransaction(db, async (transaction) => {
+        const userDoc = await transaction.get(userDocRef);
+        if (!userDoc.exists()) throw new Error("User does not exist!");
+
+        const userData = userDoc.data();
+        const currentBalance = userData.balance || 0;
+        const currentSpinBalance = userData.spinBalance || 0;
+
+        // Check for duplicate transactionId
+        if (transactionId) {
+          const tidRef = doc(db, 'users', user.uid, 'processed_ids', transactionId);
+          const tidDoc = await transaction.get(tidRef);
+          if (tidDoc.exists()) {
+            console.warn(`[TRANSACTION_SHIELD] Duplicate transaction detected: ${transactionId}`);
+            return false; // Already processed
+          }
         }
-      } else {
-        balAmt = amount;
-      }
 
-      // Re-verify after logic
-      if (balAmt < 0 && balance < Math.abs(balAmt)) {
-        setIsBalanceUpdating(false);
-        return false;
-      }
-
-      const updates: any = {};
-      const rtdbUpdates: any = {};
-      
-      if (balAmt !== 0) {
-        updates.balance = increment(balAmt);
-        rtdbUpdates.balance = rtdbIncrement(balAmt);
-        if (balAmt > 0 && source !== 'spin') {
-            updates.totalEarnings = increment(balAmt);
-            rtdbUpdates.totalEarnings = rtdbIncrement(balAmt);
-        }
-      }
-      
-      if (spinAmt !== 0) {
-        updates.spinBalance = increment(spinAmt);
-        rtdbUpdates.spinBalance = rtdbIncrement(spinAmt);
-      }
-
-      if (Object.keys(updates).length > 0) {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userRtdbRef = ref(rtdb, `users/${user.uid}`);
-          
-          await setDoc(userDocRef, updates, { merge: true });
-          await update(userRtdbRef, rtdbUpdates);
-      }
-
-      // 3. Record Earning History if amount !== 0
-      if (balAmt !== 0 || spinAmt !== 0) {
-        await addDoc(collection(db, 'earning_history'), {
-          userId: user.uid,
-          amount: amount,
-          type: amount < 0 ? 'expense' : 'earning',
-          source: source,
-          description: description || (amount < 0 ? `Spent on ${source.replace('_', ' ')}` : `Earned from ${source.replace('_', ' ')}`),
-          timestamp: firestoreServerTimestamp()
-        });
-      }
-      
-      console.log(`[BALANCE_SYNC] Updated balances from ${source} in Firestore and RTDB`);
-
-      // Team Commission Logic: If user has a referrer who is a Partner, give them 10%
-      if (amount > 0 && referredBy) {
-        let referrerUid = null;
-        const sanitizedRef = referredBy.trim().toLowerCase();
-
-        // 1. Try to find by referralCode
-        const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
-        const querySnapshot = await getDocs(q);
+        let spinAmt = 0;
+        let balAmt = 0;
         
-        if (!querySnapshot.empty) {
-          referrerUid = querySnapshot.docs[0].id;
-        } else {
-          // 2. Try to find by username
-          const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
-          if (parentUsernameDoc.exists()) {
-            referrerUid = parentUsernameDoc.data().uid;
+        if (source === 'app_bonus') {
+          spinAmt = amount;
+        } else if (source === 'spin' && amount < 0) {
+          if (currentSpinBalance >= Math.abs(amount)) {
+              spinAmt = amount;
           } else {
-            // 3. Maybe it's already a UID
-            referrerUid = referredBy;
+              spinAmt = -currentSpinBalance;
+              balAmt = amount - spinAmt;
           }
+        } else {
+          balAmt = amount;
         }
 
-        if (referrerUid) {
-          const referrerRef = doc(db, 'users', referrerUid);
-          const referrerDoc = await getDoc(referrerRef);
-          if (referrerDoc.exists()) {
-            const referrerData = referrerDoc.data();
-            if (referrerData.role === 'partner') {
-              const commission = amount * 0.1;
-              // Update Referrer Firestore
-              await updateDoc(referrerRef, {
-                balance: increment(commission),
-                totalTeamEarnings: increment(commission)
-              });
-              // Update Referrer RTDB
-              const referrerRtdbRef = ref(rtdb, `users/${referrerUid}`);
-              await update(referrerRtdbRef, {
-                balance: rtdbIncrement(commission),
-                totalTeamEarnings: rtdbIncrement(commission)
-              });
+        // Final safety check inside transaction
+        if (balAmt < 0 && currentBalance < Math.abs(balAmt)) {
+          return false;
+        }
 
-              // Record Commission in Referrer's History
-              await addDoc(collection(db, 'earning_history'), {
-                userId: referrerUid,
-                amount: commission,
-                source: 'commission',
-                description: `Team commission from ${userName || 'Downline Member'}`,
-                timestamp: firestoreServerTimestamp()
-              });
+        const newUpdates: any = {
+          lastUpdatedAt: firestoreServerTimestamp()
+        };
 
-              console.log(`[COMMISSION_SYNC] Paid ${commission} commission to partner ${referrerUid}`);
-            }
+        if (balAmt !== 0) {
+          newUpdates.balance = (currentBalance || 0) + balAmt;
+          if (balAmt > 0 && source !== 'spin') {
+            newUpdates.totalEarnings = (userData.totalEarnings || 0) + balAmt;
           }
+        }
+        
+        if (spinAmt !== 0) {
+          newUpdates.spinBalance = (currentSpinBalance || 0) + spinAmt;
+        }
+
+        // Apply updates to Firestore
+        transaction.set(userDocRef, newUpdates, { merge: true });
+
+        // Mark transaction internal ID as processed
+        if (transactionId) {
+          const tidRef = doc(db, 'users', user.uid, 'processed_ids', transactionId);
+          transaction.set(tidRef, { 
+            processedAt: firestoreServerTimestamp(),
+            source,
+            amount 
+          });
+        }
+
+        // Also record history inside transaction for consistency
+        if (balAmt !== 0 || spinAmt !== 0) {
+          const historyRef = doc(collection(db, 'earning_history'));
+          transaction.set(historyRef, {
+            userId: user.uid,
+            amount: amount,
+            type: amount < 0 ? 'expense' : 'earning',
+            source: source,
+            description: description || (amount < 0 ? `Spent on ${source.replace('_', ' ')}` : `Earned from ${source.replace('_', ' ')}`),
+            timestamp: firestoreServerTimestamp(),
+            transactionId: transactionId || null
+          });
+        }
+
+        // RTDB update (not atomic with Firestore, but done immediately after successful transaction)
+        const rtdbUpdates: any = {
+          lastUpdatedAt: Date.now()
+        };
+        if (balAmt !== 0) {
+          rtdbUpdates.balance = rtdbIncrement(balAmt);
+          if (balAmt > 0 && source !== 'spin') {
+            rtdbUpdates.totalEarnings = rtdbIncrement(balAmt);
+          }
+        }
+        if (spinAmt !== 0) {
+          rtdbUpdates.spinBalance = rtdbIncrement(spinAmt);
+        }
+        await update(userRtdbRef, rtdbUpdates);
+
+        // Team Commission Logic: If user has a referrer who is a Partner, give them 10%
+        // Note: For simplicity and to avoid complex locks on multiple roots, we keep commission outside the main user transaction 
+        // OR move it into a separate transaction if needed. Given user requirements for atomic balance updates, 
+        // the main user's balance is now secured via transaction.
+        
+        return true;
+      });
+
+      if (success) {
+        setLastUpdated(Date.now());
+        
+        // Handle commissions separately as they involve other users
+        if (amount > 0 && referredBy) {
+          handleCommissionUpdate(amount, source);
         }
       }
-      return true;
+
+      return success;
     } catch (error) {
       console.error("Error updating balance:", error);
-      // Fallback to local state if Firestore fails
-      setBalance(prev => prev + amount);
       return false;
     } finally {
       setIsBalanceUpdating(false);
+    }
+  };
+
+  const handleCommissionUpdate = async (amount: number, source: string) => {
+    try {
+      const sanitizedRef = referredBy.trim().toLowerCase();
+      let referrerUid = null;
+
+      // 1. Try to find by referralCode
+      const q = query(collection(db, 'users'), where('referralCode', '==', sanitizedRef));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        referrerUid = querySnapshot.docs[0].id;
+      } else {
+        // 2. Try to find by username
+        const parentUsernameDoc = await getDoc(doc(db, 'usernames', sanitizedRef));
+        if (parentUsernameDoc.exists()) {
+          referrerUid = parentUsernameDoc.data().uid;
+        } else {
+          // 3. Maybe it's already a UID
+          referrerUid = referredBy;
+        }
+      }
+
+      if (referrerUid) {
+        const referrerRef = doc(db, 'users', referrerUid);
+        const commission = amount * 0.1;
+        
+        await runTransaction(db, async (transaction) => {
+          const refDoc = await transaction.get(referrerRef);
+          if (refDoc.exists() && refDoc.data().role === 'partner') {
+            transaction.update(referrerRef, {
+              balance: increment(commission),
+              totalTeamEarnings: increment(commission)
+            });
+
+            // Record Commission in Referrer's History
+            const historyRef = doc(collection(db, 'earning_history'));
+            transaction.set(historyRef, {
+              userId: referrerUid,
+              amount: commission,
+              source: 'commission',
+              description: `Team commission from ${userName || 'Downline Member'}`,
+              timestamp: firestoreServerTimestamp()
+            });
+
+            // Update Referrer RTDB
+            const referrerRtdbRef = ref(rtdb, `users/${referrerUid}`);
+            await update(referrerRtdbRef, {
+              balance: rtdbIncrement(commission),
+              totalTeamEarnings: rtdbIncrement(commission)
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.error("Commission Update Error:", e);
     }
   };
 
@@ -992,192 +1054,168 @@ export default function Dashboard() {
     try {
       console.log(`[ADMIN_ACTION] Activating user: ${targetUserId}`);
       const userRef = doc(db, 'users', targetUserId);
-      const userDoc = await getDoc(userRef);
-      if (!userDoc.exists()) {
-        console.error(`[ADMIN_ACTION_FAILURE] User ${targetUserId} not found.`);
-        alert("User document not found.");
-        return;
-      }
+      const userRtdbRef = ref(rtdb, `users/${targetUserId}`);
       
-      const userData = userDoc.data();
-      if (userData.status === 'Active') {
-        console.log(`[ADMIN_ACTION] User ${targetUserId} is already active.`);
-        alert("User is already active.");
-        return;
-      }
-
-      // 1. Activate the user
-      await updateDoc(userRef, { 
-        status: 'Active',
-        accountStatus: 'active',
-        feeStatus: 'paid'
-      });
-      
-      // Update RTDB status and feeStatus
-      const userStatusRef = ref(rtdb, `users/${targetUserId}`);
-      await update(userStatusRef, { status: 'Active', accountStatus: 'active', feeStatus: 'paid' });
-      console.log(`[ADMIN_ACTION_SUCCESS] User ${targetUserId} status updated to Active in Firestore and RTDB.`);
-      
-      // Update deposit status if provided
-      if (depositId) {
-        await updateDoc(doc(db, 'deposits', depositId), { status: 'Approved' });
-        console.log(`[ADMIN_ACTION_SUCCESS] Deposit ${depositId} status updated to Approved.`);
-      }
-      
-      // Send internal notification
-      await sendActivationMail(targetUserId);
-
-      // 2. Handle Multi-Level Referrals (Level 1, Level 2, Level 3)
-      if (userData.referredBy) {
-        console.log(`[REFERRAL_LOG] User ${targetUserId} was referred by: ${userData.referredBy}`);
+      const success = await runTransaction(db, async (transaction) => {
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists()) throw new Error("User document not found.");
         
-        // Helper to parse referral code
-        const getCleanCode = (raw: string) => {
-          let code = raw;
-          if (code.toLowerCase().includes('ref/')) code = code.split(/ref\//i)[1];
-          else if (code.includes('=')) code = code.split('=')[1];
-          return (code || '').trim().toLowerCase();
-        };
+        const userData = userDoc.data();
+        if (userData.status === 'Active') throw new Error("User is already active.");
 
-        const resolveRef = async (refCode: string) => {
-          if (!refCode) return null;
-          const sanitized = getCleanCode(refCode);
-          if (!sanitized) return null;
+        // 1. Activate the user
+        transaction.update(userRef, { 
+          status: 'Active',
+          accountStatus: 'active',
+          feeStatus: 'paid'
+        });
+        
+        // Update RTDB status
+        await update(userRtdbRef, { status: 'Active', accountStatus: 'active', feeStatus: 'paid' });
+
+        // Update deposit if exists
+        if (depositId) {
+          transaction.update(doc(db, 'deposits', depositId), { status: 'Approved' });
+        }
+
+        // 2. Handle Commissions
+        if (userData.referredBy) {
+          const l1 = await resolveRefInternal(userData.referredBy);
           
-          let uid = null;
-          let docData = null;
-          
-          const q = query(collection(db, 'users'), where('referralCode', '==', sanitized));
-          const snap = await getDocs(q);
-          if (!snap.empty) {
-            uid = snap.docs[0].id;
-            docData = snap.docs[0].data();
-          } else {
-            const uDoc = await getDoc(doc(db, 'usernames', sanitized));
-            if (uDoc.exists()) {
-              uid = uDoc.data().uid;
-              const rDoc = await getDoc(doc(db, 'users', uid));
-              if (rDoc.exists()) {
-                docData = rDoc.data();
-              }
+          if (l1) {
+            let l1BonusAmount = activeAppSettings.referralBonusBasic || 100;
+            if (l1.data.role === 'partner') {
+               if (l1.data.partnerTier === 'gold') l1BonusAmount = 200;
+               else if (l1.data.partnerTier === 'silver') l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
+               else if (l1.data.partnerTier === 'bronze') l1BonusAmount = 130;
+               else l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
             }
-          }
-          return uid && docData ? { uid, data: docData, code: sanitized } : null;
-        };
 
-        const currentUserName = userData.username || userData.name || 'New Member';
-        const l1 = await resolveRef(userData.referredBy);
-        
-        if (l1) {
-          console.log(`[REFERRAL_LOG] L1 Parent found: ${l1.uid}`);
-          
-          let l1BonusAmount = activeAppSettings.referralBonusBasic || 100;
-          if (l1.data.role === 'partner') {
-             if (l1.data.partnerTier === 'gold') l1BonusAmount = 200;
-             else if (l1.data.partnerTier === 'silver') l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
-             else if (l1.data.partnerTier === 'bronze') l1BonusAmount = 130;
-             else l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
-          }
+            // L1 Updates
+            const l1Ref = doc(db, 'users', l1.uid);
+            transaction.update(l1Ref, {
+              activeMembers: increment(1),
+              totalCommission: increment(l1BonusAmount),
+              balance: increment(l1BonusAmount),
+              totalEarnings: increment(l1BonusAmount)
+            });
 
-          const safeParentRef = l1.code.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
-          await update(ref(rtdb, `invites/${safeParentRef}/history/${targetUserId}`), { 
-            status: 'paid', 
-            commission: l1BonusAmount 
-          });
+            // Record L1 History
+            const l1HistoryRef = doc(collection(db, 'earning_history'));
+            transaction.set(l1HistoryRef, {
+              userId: l1.uid,
+              amount: l1BonusAmount,
+              source: 'invite_commission',
+              description: `Rs. ${l1BonusAmount} Direct Income from ${userData.username || 'Member'}`,
+              timestamp: firestoreServerTimestamp()
+            });
 
-          await updateDoc(doc(db, 'users', l1.uid), {
-            activeMembers: increment(1),
-            totalCommission: increment(l1BonusAmount),
-            balance: increment(l1BonusAmount),
-            totalEarnings: increment(l1BonusAmount)
-          });
-          
-          await update(ref(rtdb, `users/${l1.uid}`), {
-            balance: rtdbIncrement(l1BonusAmount),
-            totalEarnings: rtdbIncrement(l1BonusAmount),
-            activeMembers: rtdbIncrement(1),
-            totalCommission: rtdbIncrement(l1BonusAmount)
-          });
-          
-          await addDoc(collection(db, 'earning_history'), {
-            userId: l1.uid,
-            amount: l1BonusAmount,
-            source: 'invite_commission',
-            description: `Rs. ${l1BonusAmount} Direct Income from ${currentUserName}`,
-            timestamp: serverTimestamp()
-          });
+            // L1 RTDB
+            await update(ref(rtdb, `users/${l1.uid}`), {
+              balance: rtdbIncrement(l1BonusAmount),
+              totalEarnings: rtdbIncrement(l1BonusAmount),
+              activeMembers: rtdbIncrement(1),
+              totalCommission: rtdbIncrement(l1BonusAmount)
+            });
 
-          // Level 2 Logic
-          if (l1.data.referredBy) {
-            const l2 = await resolveRef(l1.data.referredBy);
-            if (l2) {
-              console.log(`[REFERRAL_LOG] L2 Parent found: ${l2.uid}`);
-              const l2Bonus = 15;
-              
-              await updateDoc(doc(db, 'users', l2.uid), {
-                balance: increment(l2Bonus),
-                totalEarnings: increment(l2Bonus),
-                totalIndirectCommission: increment(l2Bonus)
-              });
-              
-              await update(ref(rtdb, `users/${l2.uid}`), {
-                balance: rtdbIncrement(l2Bonus),
-                totalEarnings: rtdbIncrement(l2Bonus),
-                totalIndirectCommission: rtdbIncrement(l2Bonus)
-              });
-              
-              await addDoc(collection(db, 'earning_history'), {
-                userId: l2.uid,
-                amount: l2Bonus,
-                source: 'indirect_commission',
-                description: `Indirect Bonus (L2) from ${currentUserName}`,
-                timestamp: serverTimestamp()
-              });
+            // Level 2
+            if (l1.data.referredBy) {
+              const l2 = await resolveRefInternal(l1.data.referredBy);
+              if (l2) {
+                const l2Bonus = 15;
+                const l2Ref = doc(db, 'users', l2.uid);
+                transaction.update(l2Ref, {
+                  balance: increment(l2Bonus),
+                  totalEarnings: increment(l2Bonus),
+                  totalIndirectCommission: increment(l2Bonus)
+                });
 
-              // Level 3 Logic
-              if (l2.data.referredBy) {
-                const l3 = await resolveRef(l2.data.referredBy);
-                if (l3) {
-                  console.log(`[REFERRAL_LOG] L3 Parent found: ${l3.uid}`);
-                  const l3Bonus = 10;
-                  
-                  await updateDoc(doc(db, 'users', l3.uid), {
-                    balance: increment(l3Bonus),
-                    totalEarnings: increment(l3Bonus),
-                    totalIndirectCommission: increment(l3Bonus)
-                  });
-                  
-                  await update(ref(rtdb, `users/${l3.uid}`), {
-                    balance: rtdbIncrement(l3Bonus),
-                    totalEarnings: rtdbIncrement(l3Bonus),
-                    totalIndirectCommission: rtdbIncrement(l3Bonus)
-                  });
-                  
-                  await addDoc(collection(db, 'earning_history'), {
-                    userId: l3.uid,
-                    amount: l3Bonus,
-                    source: 'indirect_commission',
-                    description: `Indirect Bonus (L3) from ${currentUserName}`,
-                    timestamp: serverTimestamp()
-                  });
+                transaction.set(doc(collection(db, 'earning_history')), {
+                  userId: l2.uid,
+                  amount: l2Bonus,
+                  source: 'indirect_commission',
+                  description: `Indirect Bonus (L2) from ${userData.username || 'Member'}`,
+                  timestamp: firestoreServerTimestamp()
+                });
+
+                await update(ref(rtdb, `users/${l2.uid}`), {
+                  balance: rtdbIncrement(l2Bonus),
+                  totalEarnings: rtdbIncrement(l2Bonus),
+                  totalIndirectCommission: rtdbIncrement(l2Bonus)
+                });
+
+                // Level 3
+                if (l2.data.referredBy) {
+                  const l3 = await resolveRefInternal(l2.data.referredBy);
+                  if (l3) {
+                    const l3Bonus = 10;
+                    const l3Ref = doc(db, 'users', l3.uid);
+                    transaction.update(l3Ref, {
+                      balance: increment(l3Bonus),
+                      totalEarnings: increment(l3Bonus),
+                      totalIndirectCommission: increment(l3Bonus)
+                    });
+
+                    transaction.set(doc(collection(db, 'earning_history')), {
+                      userId: l3.uid,
+                      amount: l3Bonus,
+                      source: 'indirect_commission',
+                      description: `Indirect Bonus (L3) from ${userData.username || 'Member'}`,
+                      timestamp: firestoreServerTimestamp()
+                    });
+
+                    await update(ref(rtdb, `users/${l3.uid}`), {
+                      balance: rtdbIncrement(l3Bonus),
+                      totalEarnings: rtdbIncrement(l3Bonus),
+                      totalIndirectCommission: rtdbIncrement(l3Bonus)
+                    });
+                  }
                 }
               }
             }
           }
-        } else {
-          console.warn(`[REFERRAL_LOG] L1 Parent Not Found for code: ${userData.referredBy}`);
         }
+        return true;
+      });
+
+      if (success) {
+        if (targetUserId === user?.uid) setStatus('Active');
+        await sendActivationMail(targetUserId);
+        alert("Member activated and commissions distributed successfully!");
       }
-      
-      if (targetUserId === user?.uid) {
-        setStatus('Active');
-      }
-      
-      alert("Member activated and commissions distributed successfully!");
     } catch (error) {
       console.error("Error activating member:", error);
-      alert("Error during activation. Check console for details.");
+      alert(error instanceof Error ? error.message : "Error during activation.");
     }
+  };
+
+  // Helper for resolveRef inside handleActivateUser
+  const resolveRefInternal = async (refCode: string) => {
+    if (!refCode) return null;
+    const getCleanCode = (raw: string) => {
+      let code = raw;
+      if (code.toLowerCase().includes('ref/')) code = code.split(/ref\//i)[1];
+      else if (code.includes('=')) code = code.split('=')[1];
+      return (code || '').trim().toLowerCase();
+    };
+    const sanitized = getCleanCode(refCode);
+    if (!sanitized) return null;
+    let uid = null;
+    let docData = null;
+    const q = query(collection(db, 'users'), where('referralCode', '==', sanitized));
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      uid = snap.docs[0].id;
+      docData = snap.docs[0].data();
+    } else {
+      const uDoc = await getDoc(doc(db, 'usernames', sanitized));
+      if (uDoc.exists()) {
+        uid = uDoc.data().uid;
+        const rDoc = await getDoc(doc(db, 'users', uid));
+        if (rDoc.exists()) docData = rDoc.data();
+      }
+    }
+    return uid && docData ? { uid, data: docData, code: sanitized } : null;
   };
 
   const claimPendingIndirect = async () => {
@@ -1385,6 +1423,7 @@ export default function Dashboard() {
           transactions={depositHistory}
           initialType={status === 'Inactive' ? 'activation' : 'regular'}
           appSettings={activeAppSettings}
+          userCountry={userCountry}
         />;
       case 'updates':
         return <UpdatesView 
@@ -1617,27 +1656,13 @@ export default function Dashboard() {
         {/* Notch simulation (Desktop only) */}
         <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-3xl z-50"></div>
 
-        {/* Top Notification Bar */}
+        {/* Top Notification Bar & Announcements */}
         <AnimatePresence>
-          {showNotification && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="bg-[#151E32] text-white text-xs py-2 px-4 flex items-center justify-between z-20 relative overflow-hidden"
-            >
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-              <div className="flex items-center gap-2 relative z-10 w-full">
-                <Bell className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 shrink-0" />
-                <span 
-                  className={`transition-opacity duration-500 truncate ${isNotificationAnimating ? 'opacity-100' : 'opacity-0'}`}
-                  dangerouslySetInnerHTML={{ __html: notificationMessage }}
-                />
-              </div>
-              <button onClick={() => setShowNotification(false)} className="text-slate-400 hover:text-white relative z-10 shrink-0 ml-2">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </motion.div>
+          {showNotification && activeTab !== 'support_ai' && (
+            <AnnouncementBar 
+              dynamicMessage={notificationMessage} 
+              onClose={() => setShowNotification(false)} 
+            />
           )}
         </AnimatePresence>
 
@@ -1697,9 +1722,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Fixed Bottom Tab Bar */}
+        {/* Fixed Bottom Tab Bar - Glassmorphism UI */}
         {activeTab !== 'support_ai' && (
-          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#0A0A0B]/95 border-t border-white/10' : 'bg-white/95 border-t border-slate-200'} backdrop-blur-2xl px-2 pt-2 pb-6 flex items-center justify-around shadow-[0_-10px_40px_rgba(0,0,0,0.05)] transition-colors duration-500`}>
+          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#0A0A0B]/90' : 'bg-white/80'} backdrop-blur-3xl px-2 pt-2 pb-6 flex items-center justify-around shadow-[0_-15px_45px_rgba(0,0,0,0.1)] border-t border-white/5 transition-colors duration-500 rounded-t-[2.5rem]`}>
             {/* Decorative shine only for partner */}
             {role === 'partner' && <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>}
             
