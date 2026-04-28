@@ -356,14 +356,15 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                     />
                 </div>
 
+                {/* Fee Calculation Section */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
                    <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">Net Fee</p>
-                      <p className="text-xs font-black text-slate-900 italic">Rs 0</p>
+                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">5% Fee</p>
+                      <p className="text-xs font-black text-red-600 italic">Rs {(parseFloat(amount) * 0.05 || 0).toFixed(0)}</p>
                    </div>
                    <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">Method</p>
-                      <p className="text-xs font-black text-emerald-600 italic">Instant</p>
+                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">You'll Get</p>
+                      <p className="text-xs font-black text-emerald-600 italic">Rs {(parseFloat(amount) * 0.95 || 0).toFixed(0)}</p>
                    </div>
                 </div>
 
