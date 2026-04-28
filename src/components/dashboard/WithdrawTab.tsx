@@ -38,8 +38,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
   const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
   const [error, setError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
-  const [isAmountVisible, setIsAmountVisible] = useState(false);
-  const [isCardExpanded, setIsCardExpanded] = useState(false);
+  const [isCardExpanded, setIsCardExpanded] = useState(true); // Default to open for mobile app feel
 
   const minWithdrawal = 500;
 
@@ -341,23 +340,15 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                 
                 <div className="flex items-center justify-between mb-4">
                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Order Amount</label>
-                   <div className="flex items-center gap-2">
-                     <button 
-                      onClick={() => setIsAmountVisible(!isAmountVisible)}
-                      className="p-1 hover:bg-slate-100 rounded-md transition-colors"
-                     >
-                       {isAmountVisible ? <Lock className="w-3 h-3 text-slate-300" /> : <ShieldCheck className="w-3 h-3 text-emerald-500" />}
-                     </button>
-                     {parseFloat(amount) > 0 && (
-                       <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md tracking-tighter">Verified</span>
-                     )}
-                   </div>
+                   {parseFloat(amount) > 0 && (
+                     <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md tracking-tighter">Verified</span>
+                   )}
                 </div>
                 
                 <div className="relative flex items-center mb-6 bg-slate-50 p-6 rounded-3xl border border-slate-100">
                     <span className="text-slate-500 font-black text-sm italic mr-3 uppercase">RS</span>
                     <input
-                        type={isAmountVisible ? "number" : "password"}
+                        type="number"
                         value={amount}
                         onChange={(e) => { setAmount(e.target.value); setError(''); }}
                         placeholder="0.00"

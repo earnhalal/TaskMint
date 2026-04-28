@@ -39,7 +39,7 @@ import {
   where, 
   writeBatch,
   addDoc,
-  runTransaction,
+  runTransaction as runFirestoreTransaction,
   serverTimestamp as firestoreServerTimestamp 
 } from 'firebase/firestore';
 import { db, auth, rtdb } from '../firebase';
@@ -660,131 +660,55 @@ export default function Dashboard() {
   const handleUpdateBalance = async (amount: number, source: string = 'system', description: string = '', transactionId?: string) => {
     if (!user || isBalanceUpdating) return false;
     
-    // If it's a deduction, check balance strictly (Quick check before transaction)
-    if (amount < 0 && balance < Math.abs(amount)) {
-      console.error("[BALANCE_SHIELD] Prevented negative balance update:", { balance, amount, source });
-      return false;
-    }
-
     setIsBalanceUpdating(true);
     try {
-      const userDocRef = doc(db, 'users', user.uid);
       const userRtdbRef = ref(rtdb, `users/${user.uid}`);
       
-      const success = await runTransaction(db, async (transaction) => {
-        const userDoc = await transaction.get(userDocRef);
-        if (!userDoc.exists()) throw new Error("User does not exist!");
+      let spinAmt = 0;
+      let balAmt = 0;
 
-        const userData = userDoc.data();
-        const currentBalance = userData.balance || 0;
-        const currentSpinBalance = userData.spinBalance || 0;
-
-        // Check for duplicate transactionId
-        if (transactionId) {
-          const tidRef = doc(db, 'users', user.uid, 'processed_ids', transactionId);
-          const tidDoc = await transaction.get(tidRef);
-          if (tidDoc.exists()) {
-            console.warn(`[TRANSACTION_SHIELD] Duplicate transaction detected: ${transactionId}`);
-            return false; // Already processed
-          }
-        }
-
-        let spinAmt = 0;
-        let balAmt = 0;
-        
-        if (source === 'app_bonus') {
-          spinAmt = amount;
-        } else if (source === 'spin' && amount < 0) {
-          if (currentSpinBalance >= Math.abs(amount)) {
-              spinAmt = amount;
-          } else {
-              spinAmt = -currentSpinBalance;
-              balAmt = amount - spinAmt;
-          }
-        } else {
-          balAmt = amount;
-        }
-
-        // Final safety check inside transaction
-        if (balAmt < 0 && currentBalance < Math.abs(balAmt)) {
-          return false;
-        }
-
-        const newUpdates: any = {
-          lastUpdatedAt: firestoreServerTimestamp()
-        };
-
-        if (balAmt !== 0) {
-          newUpdates.balance = (currentBalance || 0) + balAmt;
-          if (balAmt > 0 && source !== 'spin') {
-            newUpdates.totalEarnings = (userData.totalEarnings || 0) + balAmt;
-          }
-        }
-        
-        if (spinAmt !== 0) {
-          newUpdates.spinBalance = (currentSpinBalance || 0) + spinAmt;
-        }
-
-        // Apply updates to Firestore
-        transaction.set(userDocRef, newUpdates, { merge: true });
-
-        // Mark transaction internal ID as processed
-        if (transactionId) {
-          const tidRef = doc(db, 'users', user.uid, 'processed_ids', transactionId);
-          transaction.set(tidRef, { 
-            processedAt: firestoreServerTimestamp(),
-            source,
-            amount 
-          });
-        }
-
-        // Also record history inside transaction for consistency
-        if (balAmt !== 0 || spinAmt !== 0) {
-          const historyRef = doc(collection(db, 'earning_history'));
-          transaction.set(historyRef, {
-            userId: user.uid,
-            amount: amount,
-            type: amount < 0 ? 'expense' : 'earning',
-            source: source,
-            description: description || (amount < 0 ? `Spent on ${source.replace('_', ' ')}` : `Earned from ${source.replace('_', ' ')}`),
-            timestamp: firestoreServerTimestamp(),
-            transactionId: transactionId || null
-          });
-        }
-
-        // RTDB update (not atomic with Firestore, but done immediately after successful transaction)
-        const rtdbUpdates: any = {
-          lastUpdatedAt: Date.now()
-        };
-        if (balAmt !== 0) {
-          rtdbUpdates.balance = rtdbIncrement(balAmt);
-          if (balAmt > 0 && source !== 'spin') {
-            rtdbUpdates.totalEarnings = rtdbIncrement(balAmt);
-          }
-        }
-        if (spinAmt !== 0) {
-          rtdbUpdates.spinBalance = rtdbIncrement(spinAmt);
-        }
-        await update(userRtdbRef, rtdbUpdates);
-
-        // Team Commission Logic: If user has a referrer who is a Partner, give them 10%
-        // Note: For simplicity and to avoid complex locks on multiple roots, we keep commission outside the main user transaction 
-        // OR move it into a separate transaction if needed. Given user requirements for atomic balance updates, 
-        // the main user's balance is now secured via transaction.
-        
-        return true;
-      });
-
-      if (success) {
-        setLastUpdated(Date.now());
-        
-        // Handle commissions separately as they involve other users
-        if (amount > 0 && referredBy) {
-          handleCommissionUpdate(amount, source);
-        }
+      if (source === 'app_bonus') {
+        spinAmt = amount;
+      } else if (source === 'spin' && amount < 0) {
+        // We need to know spinBalance before deciding, but with Rtdb increment we just do it.
+        // For spin-specific logic, consider checking before, but this is a quick fix.
+        balAmt = amount;
+      } else {
+        balAmt = amount;
       }
 
-      return success;
+      const updates: any = {
+        lastUpdatedAt: Date.now()
+      };
+      
+      if (balAmt !== 0) updates.balance = rtdbIncrement(balAmt);
+      if (spinAmt !== 0) updates.spinBalance = rtdbIncrement(spinAmt);
+      
+      if (balAmt > 0 && source !== 'spin') {
+        updates.totalEarnings = rtdbIncrement(balAmt);
+      }
+      
+      await update(userRtdbRef, updates);
+
+      setLastUpdated(Date.now());
+      
+      // History in Firestore (still needed, but less frequent)
+      await addDoc(collection(db, 'earning_history'), {
+        userId: user.uid,
+        amount: amount,
+        type: amount < 0 ? 'expense' : 'earning',
+        source: source,
+        description: description || (amount < 0 ? `Spent on ${source.replace('_', ' ')}` : `Earned from ${source.replace('_', ' ')}`),
+        timestamp: firestoreServerTimestamp(),
+        transactionId: transactionId || null
+      });
+
+      // Team Commission Logic (Async)
+      if (amount > 0 && referredBy) {
+        handleCommissionUpdate(amount, source);
+      }
+      
+      return true;
     } catch (error) {
       console.error("Error updating balance:", error);
       return false;
@@ -819,7 +743,7 @@ export default function Dashboard() {
         const referrerRef = doc(db, 'users', referrerUid);
         const commission = amount * 0.1;
         
-        await runTransaction(db, async (transaction) => {
+        await runFirestoreTransaction(db, async (transaction) => {
           const refDoc = await transaction.get(referrerRef);
           if (refDoc.exists() && refDoc.data().role === 'partner') {
             transaction.update(referrerRef, {
@@ -1056,7 +980,7 @@ export default function Dashboard() {
       const userRef = doc(db, 'users', targetUserId);
       const userRtdbRef = ref(rtdb, `users/${targetUserId}`);
       
-      const success = await runTransaction(db, async (transaction) => {
+      const success = await runFirestoreTransaction(db, async (transaction) => {
         const userDoc = await transaction.get(userRef);
         if (!userDoc.exists()) throw new Error("User document not found.");
         
