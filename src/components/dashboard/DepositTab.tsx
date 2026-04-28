@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { ClipboardList, CheckCircle2, PlusCircle, Wallet, ArrowRight } from 'lucide-react';
+import { ClipboardList, CheckCircle2, PlusCircle, Wallet, ArrowRight, ExternalLink } from 'lucide-react';
 
 type DepositMethod = 'EasyPaisa';
 
@@ -24,6 +24,7 @@ interface DepositTabProps {
     paymentName: string;
     referralBonusBasic?: number;
   };
+  userName: string;
 }
 
 const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
@@ -61,7 +62,6 @@ const EasyPaisaIcon = ({ className }: { className?: string }) => (
 export default function DepositTab({ onDeposit, transactions, userCountry = 'Pakistan', initialType = 'regular', appSettings }: DepositTabProps) {
   const [type, setType] = useState<'activation' | 'regular'>(initialType);
   const [amount, setAmount] = useState(initialType === 'activation' ? appSettings.activationFee.toString() : '');
-  const [transactionId, setTransactionId] = useState('');
   const [method, setMethod] = useState<DepositMethod>('EasyPaisa');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,9 +76,8 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
         });
   }, [transactions]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleWhatsAppClick = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage('');
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
         setMessage('Please enter a valid amount.');
@@ -88,24 +87,22 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
         setMessage(`Activation fee must be exactly Rs ${appSettings.activationFee}.`);
         return;
     }
-    if (!transactionId.trim()) {
-        setMessage('Please enter the transaction ID.');
-        return;
-    }
-
     setIsSubmitting(true);
     try {
-        await onDeposit(numAmount, method, transactionId, type);
-        setMessage(type === 'activation' 
-          ? 'Activation request submitted! Verification takes 1-6 hours.' 
-          : `Deposit request for ${numAmount.toFixed(2)} Rs has been submitted successfully.`);
-        if (type !== 'activation') setAmount('');
-        setTransactionId('');
-        setTimeout(() => setMessage(''), 5000);
+      // Construct WhatsApp message
+      const whatsappNumber = "923338739929";
+      const message = `🌟 *TASKMINT OFFICIAL* 🌟\n\n*Hi Admin!* 👋\nMera naam *${userName || 'User'}* hai. ✨\n\nMaine *Rs. ${numAmount}* Deposit karna hai via *${method}*. ✅\nYe raha mera *Payment Screenshot* as a proof. 📸\n\n*Please meri deposit request check kar dein!* 🙏🔥\n\n_Sent via TaskMint App_`;
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+      
+      await onDeposit(numAmount, method, 'Sent via WhatsApp', type);
+      
+      window.open(whatsappUrl, '_blank');
+      setAmount(type === 'activation' ? appSettings.activationFee.toString() : '');
+      setMessage('Redirecting to WhatsApp...');
+      setTimeout(() => setMessage(''), 5000);
     } catch (error: any) {
         console.error("[DEPOSIT_VIEW_FAILURE] The deposit operation failed:", error);
-        const userMessage = error.message || "An unexpected error occurred.";
-        setMessage(userMessage);
+        setMessage(error.message || "An unexpected error occurred.");
     } finally {
         setIsSubmitting(false);
     }
@@ -231,8 +228,8 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                 <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
                 <h3 className="font-black text-slate-900 text-xl tracking-tight italic mb-8">02. Transfer Details</h3>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <form onSubmit={handleWhatsAppClick} className="space-y-8">
+                    <div className="grid grid-cols-1 gap-6">
                         <div className="space-y-3">
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Volume (PKR)</label>
                             <input 
@@ -241,17 +238,6 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                               onChange={e => setAmount(e.target.value)} 
                               className="w-full bg-slate-50 border-2 border-slate-50 rounded-[1.5rem] px-6 py-4 font-black text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all text-xl italic tracking-tight" 
                               placeholder="0.00" 
-                              required 
-                            />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Transaction Identity</label>
-                            <input 
-                              type="text" 
-                              value={transactionId} 
-                              onChange={e => setTransactionId(e.target.value)} 
-                              className="w-full bg-slate-50 border-2 border-slate-50 rounded-[1.5rem] px-6 py-4 font-black text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all text-xl italic tracking-tight uppercase placeholder:text-slate-200" 
-                              placeholder="TID 123..." 
                               required 
                             />
                         </div>

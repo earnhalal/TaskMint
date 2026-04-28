@@ -13,7 +13,7 @@ interface Account {
 interface WithdrawTabProps {
   balance: number;
   history: any[];
-  onWithdraw: (amount: number, method: string) => void;
+  onWithdraw: (amount: number, method: string, accountName: string, accountNumber: string) => void;
   hasPin: boolean;
   onSetupPin: () => void;
   onEditAccount: () => void;
@@ -89,7 +89,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
       setError('Insufficient Reserve Balance');
       return;
     }
-    onWithdraw(val, selectedAccount.method);
+    onWithdraw(val, selectedAccount.method, selectedAccount.title, selectedAccount.number);
     setAmount('');
     setError('');
     setShowSuccess(true);

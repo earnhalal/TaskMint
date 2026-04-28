@@ -43,7 +43,7 @@ import {
   serverTimestamp as firestoreServerTimestamp 
 } from 'firebase/firestore';
 import { db, auth, rtdb } from '../firebase';
-import { ref, onValue, update, set, increment as rtdbIncrement, push, serverTimestamp, get } from 'firebase/database';
+import { ref, onValue, update, set, increment as rtdbIncrement, push, serverTimestamp, get, runTransaction as runRtdbTransaction } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { 
   sendDepositRequestMail, 
@@ -91,7 +91,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('home');
   const [showNotification, setShowNotification] = useState(true);
   const [pinMode, setPinMode] = useState<'enter' | 'set'>('set');
-  const [pendingWithdrawal, setPendingWithdrawal] = useState<{amount: number, method: string} | null>(null);
+  const [pendingWithdrawal, setPendingWithdrawal] = useState<{amount: number, method: string, accountName: string, accountNumber: string} | null>(null);
   const [userPin, setUserPin] = useState('');
   const [seenUpdates, setSeenUpdates] = useState<string[]>([]);
   const [userName, setUserName] = useState('');
@@ -669,30 +669,41 @@ export default function Dashboard() {
 
       if (source === 'app_bonus') {
         spinAmt = amount;
-      } else if (source === 'spin' && amount < 0) {
-        // We need to know spinBalance before deciding, but with Rtdb increment we just do it.
-        // For spin-specific logic, consider checking before, but this is a quick fix.
-        balAmt = amount;
       } else {
         balAmt = amount;
       }
 
-      const updates: any = {
-        lastUpdatedAt: Date.now()
-      };
-      
-      if (balAmt !== 0) updates.balance = rtdbIncrement(balAmt);
-      if (spinAmt !== 0) updates.spinBalance = rtdbIncrement(spinAmt);
-      
-      if (balAmt > 0 && source !== 'spin') {
-        updates.totalEarnings = rtdbIncrement(balAmt);
+      let success = false;
+      await runRtdbTransaction(userRtdbRef, (data) => {
+        if (data === null) return;
+        
+        let newBalance = (data.balance || 0) + balAmt;
+        if (newBalance < 0) return; // Abort transaction if insufficient funds
+        
+        let newSpinBalance = (data.spinBalance || 0) + spinAmt;
+        let newTotalEarnings = (data.totalEarnings || 0);
+
+        if (balAmt > 0 && source !== 'spin') {
+            newTotalEarnings += balAmt;
+        }
+
+        success = true;
+        return {
+            ...data,
+            balance: newBalance,
+            spinBalance: newSpinBalance,
+            totalEarnings: newTotalEarnings,
+            lastUpdatedAt: Date.now()
+        };
+      });
+
+      if (!success) {
+        throw new Error("Insufficient balance or transaction failed.");
       }
-      
-      await update(userRtdbRef, updates);
 
       setLastUpdated(Date.now());
       
-      // History in Firestore (still needed, but less frequent)
+      // History in Firestore
       await addDoc(collection(db, 'earning_history'), {
         userId: user.uid,
         amount: amount,
@@ -817,7 +828,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleWithdraw = async (amount: number, method: string) => {
+  const handleWithdraw = async (amount: number, method: string, accountName: string, accountNumber: string) => {
     if (!user) return;
 
     // Withdrawal Window Logic
@@ -856,7 +867,8 @@ export default function Dashboard() {
         balanceBefore: balance,
         balanceAfter: balanceAfter,
         method,
-        accountNumber: withdrawalAccounts[0]?.number || 'N/A',
+        accountName,
+        accountNumber,
         status: 'Pending',
         date: new Date().toISOString(),
         timestamp: firestoreServerTimestamp()
@@ -948,13 +960,13 @@ export default function Dashboard() {
     setActiveTab('deposit');
   };
 
-  const handleWithdrawRequest = (amount: number, method: string) => {
+  const handleWithdrawRequest = (amount: number, method: string, accountName: string, accountNumber: string) => {
     if (userPin) {
-      setPendingWithdrawal({ amount, method });
+      setPendingWithdrawal({ amount, method, accountName, accountNumber });
       setPinMode('enter');
       setActiveTab('pin');
     } else {
-      handleWithdraw(amount, method);
+      handleWithdraw(amount, method, accountName, accountNumber);
     }
   };
 
@@ -967,7 +979,7 @@ export default function Dashboard() {
   const handlePinCorrect = () => {
     setActiveTab('withdraw');
     if (pendingWithdrawal) {
-      handleWithdraw(pendingWithdrawal.amount, pendingWithdrawal.method);
+      handleWithdraw(pendingWithdrawal.amount, pendingWithdrawal.method, pendingWithdrawal.accountName, pendingWithdrawal.accountNumber);
       setPendingWithdrawal(null);
     }
   };
@@ -1342,12 +1354,16 @@ export default function Dashboard() {
           isPartner={role === 'partner'}
         />;
       case 'deposit':
+        if (accountStatus.toLowerCase() !== 'active') {
+          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} />;
+        }
         return <DepositTab
           onDeposit={handleDeposit}
           transactions={depositHistory}
           initialType={status === 'Inactive' ? 'activation' : 'regular'}
           appSettings={activeAppSettings}
           userCountry={userCountry}
+          userName={userName}
         />;
       case 'updates':
         return <UpdatesView 

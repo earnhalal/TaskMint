@@ -225,15 +225,7 @@ export default function HomeTab({
 
   const [avatar, setAvatar] = React.useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
-  const [reloadTrigger, setReloadTrigger] = useState(0);
-  const [isReloading, setIsReloading] = useState(false);
   const navigate = useNavigate();
-
-  const handleReloadBalance = () => {
-    setIsReloading(true);
-    if (onReloadData) onReloadData();
-    setTimeout(() => setIsReloading(false), 1500);
-  };
 
   const isApp = useMemo(() => {
     if (typeof window === 'undefined') return false;
@@ -537,25 +529,25 @@ export default function HomeTab({
                 </div>
               </div>
               <button 
-                onClick={handleReloadBalance}
-                className={`w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-all hover:bg-white/10 ${isReloading ? 'animate-spin' : ''}`}
+                onClick={toggleCurrency}
+                className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center transition-all hover:bg-white/20 text-white font-black text-xs"
               >
-                <RefreshCw className="w-4 h-4 text-white/40" />
+                {currency}
               </button>
             </div>
 
-              <div className="flex flex-col">
+              <div className={`flex flex-col p-6 rounded-2xl border transition-all ${currency === 'USD' ? 'bg-gradient-to-tr from-blue-900/40 to-indigo-900/40 border-blue-500/30' : 'bg-white/5 border-white/10'}`}>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
                   <span className="text-[10px] font-black text-indigo-300/60 uppercase tracking-[0.2em]">Secured Hub Balance</span>
                 </div>
                 <div className="flex items-baseline gap-3">
                   <span className="text-5xl sm:text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                    <AnimatedCounter value={convertAmount(balance)} />
+                    <AnimatedCounter value={Math.max(0, convertAmount(balance))} />
                   </span>
-                  <button onClick={toggleCurrency} className="text-xl font-black text-indigo-500 tracking-tighter italic hover:text-indigo-400 p-1">
+                  <span className="text-xl font-black text-indigo-500 tracking-tighter italic">
                     {currency === 'PKR' ? 'RS' : '$'}
-                  </button>
+                  </span>
                 </div>
                 <div className="flex items-center gap-4 mt-2">
                     <div className="flex items-center gap-1.5">
@@ -567,7 +559,7 @@ export default function HomeTab({
                   {lockedBalance > 0 && (
                     <div className="flex items-center gap-2 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
                       <Lock className="w-2.5 h-2.5 text-amber-500" />
-                      <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Locked: {lockedBalance}</span>
+                      <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">Locked: {convertAmount(lockedBalance).toFixed(2)}</span>
                     </div>
                   )}
                 </div>
