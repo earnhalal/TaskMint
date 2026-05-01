@@ -377,48 +377,6 @@ export default function HomeTab({
           </div>
       </div>
 
-      {/* Live Support Card */}
-      <motion.div 
-        whileHover={{ y: -5 }}
-        onClick={onSupportAIClick}
-        className="relative z-10 animate-fade-in-up mt-2 mb-4 cursor-pointer group px-1" 
-        style={{ animationDelay: '100ms' }}
-      >
-        <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-[32px] p-6 sm:p-8 overflow-hidden relative border border-white/5 shadow-2xl hover:shadow-indigo-500/20 transition-shadow">
-          <div className="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] group-hover:bg-indigo-500/30 transition-colors duration-500"></div>
-          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-purple-500/20 rounded-full blur-[60px] group-hover:bg-purple-500/30 transition-colors duration-500"></div>
-
-          <div className="flex flex-col gap-6 relative z-10">
-            <div className="flex items-center gap-3 w-full">
-              <div className="px-3 py-1 bg-indigo-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)] flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                LIVE 24/7
-              </div>
-              <div className="h-px flex-1 bg-white/10"></div>
-              {unreadChatCount > 0 && (
-                <div className="w-6 h-6 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg animate-bounce">
-                  {unreadChatCount}
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tighter mb-1">
-                    Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Support</span>
-                  </h3>
-                  <p className="text-sm font-bold text-indigo-200/60 w-3/4">Need help? Chat with our team now.</p>
-                </div>
-                <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex flex-shrink-0 items-center justify-center border border-indigo-500/30 group-hover:scale-110 transition-transform shadow-inner">
-                  <Headphones className="w-7 h-7 text-indigo-400" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
       {/* APK Welcome & High-Priority Alerts */}
       <div className="grid grid-cols-1 gap-4 relative z-10">
         {isApp && !appBonusClaimed && (
@@ -761,6 +719,48 @@ export default function HomeTab({
                 </div>
                 <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
                   <ArrowRight className="w-6 h-6 text-amber-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Live Support Card */}
+      <motion.div 
+        whileHover={{ y: -5 }}
+        onClick={onSupportAIClick}
+        className="relative z-10 animate-fade-in-up mt-2 mb-4 cursor-pointer group px-1" 
+        style={{ animationDelay: '500ms' }}
+      >
+        <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-[32px] p-6 sm:p-8 overflow-hidden relative border border-white/5 shadow-2xl hover:shadow-indigo-500/20 transition-shadow">
+          <div className="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] group-hover:bg-indigo-500/30 transition-colors duration-500"></div>
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-purple-500/20 rounded-full blur-[60px] group-hover:bg-purple-500/30 transition-colors duration-500"></div>
+
+          <div className="flex flex-col gap-6 relative z-10">
+            <div className="flex items-center gap-3 w-full">
+              <div className="px-3 py-1 bg-indigo-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                LIVE 24/7
+              </div>
+              <div className="h-px flex-1 bg-white/10"></div>
+              {unreadChatCount > 0 && (
+                <div className="w-6 h-6 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg animate-bounce">
+                  {unreadChatCount}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tighter mb-1">
+                    Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Support</span>
+                  </h3>
+                  <p className="text-sm font-bold text-indigo-200/60 w-3/4">Need help? Chat with our team now.</p>
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex flex-shrink-0 items-center justify-center border border-indigo-500/30 group-hover:scale-110 transition-transform shadow-inner">
+                  <Headphones className="w-7 h-7 text-indigo-400" />
                 </div>
               </div>
             </div>
