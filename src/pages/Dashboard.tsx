@@ -183,7 +183,7 @@ export default function Dashboard() {
   const [topEarners, setTopEarners] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [appSettings, setAppSettings] = useState({
-    activationFee: 170,
+    activationFee: 150,
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
@@ -460,15 +460,15 @@ export default function Dashboard() {
         const data = snapshot.data();
         setAppSettings(data as any);
         
-        // Ensure activationFee is 170 and remove offerExpiryTime
-        if (data.activationFee !== 170 || data.offerExpiryTime) {
+        // Ensure activationFee is 150 and remove offerExpiryTime
+        if (data.activationFee !== 150 || data.offerExpiryTime) {
           await setDoc(doc(db, 'app_settings', 'global'), {
-            activationFee: 170,
+            activationFee: 150,
             offerExpiryTime: null
           }, { merge: true });
 
           // Notify all users about the fee update (one-time logic)
-          const notifyKey = 'fee_update_notified_170';
+          const notifyKey = 'fee_update_notified_150';
           const alreadyNotified = localStorage.getItem(notifyKey);
           
           if (!alreadyNotified) {
@@ -481,7 +481,7 @@ export default function Dashboard() {
               batch.set(notificationRef, {
                 userId,
                 title: 'New Update: Permanent Fee Reduction 📢',
-                message: 'Good news! Joining fee permanent taur par Rs. 100 kar di gayi hai. Kaam jari rakhein aur earn karein!',
+                message: 'Good news! Joining fee ab sirf Rs. 150 kar di gayi hai. Kaam jari rakhein aur earn karein!',
                 type: 'system',
                 status: 'unread',
                 timestamp: new Date().toISOString()

@@ -1,151 +1,110 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles } from 'lucide-react';
+import { Coins } from 'lucide-react';
+
+const dots = [0, 1, 2];
 
 export default function Loader() {
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.8, ease: "easeInOut" }}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0A0B0F] overflow-hidden"
+      exit={{ opacity: 0, scale: 1.04 }}
+      transition={{ duration: 0.45, ease: 'easeInOut' }}
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white overflow-hidden"
+      role="status"
+      aria-label="Loading TaskMint"
     >
-      {/* Dynamic Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-amber-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-        
-        {/* Animated Grid lines */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      {/* Soft animated background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          aria-hidden
+          animate={{ y: [0, -20, 0], x: [0, 14, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -top-28 -left-28 w-96 h-96 bg-emerald-100/80 rounded-full blur-3xl"
+        />
+        <motion.div
+          aria-hidden
+          animate={{ y: [0, 18, 0], x: [0, -12, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -bottom-32 -right-24 w-[26rem] h-[26rem] bg-teal-100/80 rounded-full blur-3xl"
+        />
+        <div
+          className="absolute inset-0 opacity-[0.35]"
+          style={{ backgroundImage: 'radial-gradient(circle, #a7f3d0 1px, transparent 1px)', backgroundSize: '34px 34px' }}
+        />
       </div>
 
-      <div className="relative flex flex-col items-center">
-        {/* Floating Particles */}
-        <AnimatePresence>
-            {[...Array(8)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
-                    animate={{ 
-                        opacity: [0, 1, 0], 
-                        scale: [0, 1, 0],
-                        x: (Math.random() - 0.5) * 200,
-                        y: (Math.random() - 0.5) * 200
-                    }}
-                    transition={{ 
-                        duration: 3 + Math.random() * 2,
-                        repeat: Infinity,
-                        delay: i * 0.4
-                    }}
-                    className="absolute w-1 h-1 bg-amber-400 rounded-full blur-[1px]"
-                />
-            ))}
-        </AnimatePresence>
-
-        {/* 3D Spinning Core System */}
-        <div className="perspective-[1200px] mb-12">
+      <div className="relative flex flex-col items-center px-6">
+        {/* Bouncing coin with ripple rings */}
+        <div className="relative w-28 h-28 flex items-center justify-center">
+          {[0, 1].map((ring) => (
+            <motion.span
+              key={ring}
+              aria-hidden
+              initial={{ scale: 0.55, opacity: 0.5 }}
+              animate={{ scale: 1.45, opacity: 0 }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut', delay: ring * 0.9 }}
+              className="absolute inset-0 rounded-full border-2 border-emerald-300"
+            />
+          ))}
           <motion.div
-            animate={{ 
-                rotateY: [0, 360],
-                rotateX: [0, 15, 0, -15, 0],
-                y: [0, -10, 0]
-            }}
-            transition={{
-              rotateY: { duration: 3, repeat: Infinity, ease: "linear" },
-              rotateX: { duration: 6, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
-            }}
-            className="relative w-32 h-32"
-            style={{ transformStyle: "preserve-3d" }}
+            animate={{ y: [0, -12, 0], rotate: [0, -4, 4, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+            className="relative w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/40 flex items-center justify-center"
           >
-            {/* Main Coin Face */}
-            <div 
-              className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-600 border-4 border-amber-200/40 flex items-center justify-center overflow-hidden"
-              style={{ 
-                transform: "translateZ(8px)",
-                boxShadow: "0 0 50px rgba(245, 158, 11, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.4)"
-              }}
-            >
-                <div className="w-20 h-20 rounded-full border-2 border-amber-200/20 flex items-center justify-center">
-                    <span className="text-4xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] italic">M</span>
-                </div>
-            </div>
-
-            {/* Back Face */}
-            <div 
-              className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-700 to-amber-900 border-4 border-amber-800/40 flex items-center justify-center"
-              style={{ transform: "translateZ(-8px) rotateY(180deg)" }}
-            >
-                 <Sparkles className="w-12 h-12 text-amber-200 opacity-40" />
-            </div>
-
-            {/* Edge Layers for 3D thickness */}
-            {[...Array(8)].map((_, i) => (
-                <div 
-                    key={i}
-                    className="absolute inset-0 rounded-full bg-amber-700/80"
-                    style={{ transform: `translateZ(${i - 4}px)` }}
-                />
-            ))}
+            <span className="absolute inset-[5px] rounded-full border-2 border-white/30" />
+            <Coins className="w-9 h-9 text-white drop-shadow" />
           </motion.div>
+          {/* Coin shadow */}
+          <motion.span
+            aria-hidden
+            animate={{ scaleX: [1, 0.72, 1], opacity: [0.22, 0.12, 0.22] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute -bottom-1 w-14 h-2.5 bg-slate-900 rounded-full blur-[3px]"
+          />
         </div>
 
-        {/* 3D Branding Text */}
-        <div className="text-center">
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-                className="relative"
-            >
-                <h1 
-                    className="text-6xl font-black tracking-tighter text-white drop-shadow-2xl italic"
-                    style={{
-                        textShadow: '0 4px 10px rgba(0,0,0,0.5)'
-                    }}
-                >
-                    Task<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600">MINT</span>
-                </h1>
-                <div className="h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent w-full mt-2" />
-            </motion.div>
+        {/* Brand name — letters rise in one by one */}
+        <h1 className="mt-9 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 flex" aria-label="TaskMint">
+          {'Task'.split('').map((ch, i) => (
+            <motion.span key={`t-${i}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 * i, duration: 0.35 }} aria-hidden>{ch}</motion.span>
+          ))}
+          {'Mint'.split('').map((ch, i) => (
+            <motion.span key={`m-${i}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 * (i + 4), duration: 0.35 }} className="text-emerald-600" aria-hidden>{ch}</motion.span>
+          ))}
+        </h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.45, duration: 0.4 }}
+          className="mt-2.5 text-sm font-semibold text-slate-500"
+        >
+          Earn money online in Pakistan
+        </motion.p>
 
-            {/* Progress Interface */}
-            <div className="mt-12 space-y-4">
-                <div className="w-56 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5 relative">
-                    <motion.div
-                        initial={{ x: "-100%" }}
-                        animate={{ x: "0%" }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400 to-transparent w-1/2"
-                    />
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: "100%" }}
-                        transition={{ duration: 3, ease: "easeOut" }}
-                        className="h-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
-                    />
-                </div>
-                
-                <div className="flex flex-col items-center gap-1">
-                    <motion.p 
-                        animate={{ opacity: [0.4, 1, 0.4] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="text-[9px] font-black text-amber-500 uppercase tracking-[0.4em]"
-                    >
-                        Synchronizing Protocol
-                    </motion.p>
-                    <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest">
-                        Handshaking with Secure Nodes...
-                    </p>
-                </div>
-            </div>
+        {/* Progress bar */}
+        <div className="mt-9 w-52 h-2 rounded-full bg-emerald-100 overflow-hidden">
+          <motion.div
+            initial={{ x: '-110%' }}
+            animate={{ x: '320%' }}
+            transition={{ duration: 1.15, repeat: Infinity, ease: 'easeInOut' }}
+            className="h-full w-1/3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"
+          />
+        </div>
+
+        {/* Loading dots */}
+        <div className="mt-5 flex items-center gap-2" aria-hidden>
+          <span className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400 mr-1">Loading</span>
+          {dots.map((d) => (
+            <motion.span
+              key={d}
+              animate={{ y: [0, -5, 0], opacity: [0.35, 1, 0.35] }}
+              transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut', delay: d * 0.15 }}
+              className="w-2 h-2 rounded-full bg-emerald-500"
+            />
+          ))}
         </div>
       </div>
     </motion.div>
   );
-}
-
-// Helper component for particles since we need AnimatePresence
-function AnimatePresence({ children }: { children: React.ReactNode }) {
-    return <motion.div className="absolute inset-0">{children}</motion.div>;
 }

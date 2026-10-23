@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye as EyeIcon, EyeOff as EyeSlashIcon, CheckCircle2 as CheckCircleIcon, ArrowRight, Sparkles as SparklesIcon, ShieldCheck } from 'lucide-react';
+import { Eye as EyeIcon, EyeOff as EyeSlashIcon, CheckCircle2 as CheckCircleIcon, ArrowRight, Sparkles as SparklesIcon, ShieldCheck, Coins, PlayCircle, ClipboardList, CalendarCheck, Wallet } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface AuthViewProps {
     onSignup: (data: {username: string, email: string, phone: string, password: string, referralCode?: string}) => void;
     onLogin: (email: string, password: string) => void;
-    onForgotPassword: (email: string) => void; // Added prop
+    onForgotPassword: (email: string) => void;
     initialView: 'login' | 'signup';
     initialReferralCode?: string;
 }
@@ -20,12 +21,21 @@ const GoogleIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+const slideVariants = {
+    enter: (dir: number) => ({ x: dir >= 0 ? 80 : -80, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir >= 0 ? -80 : 80, opacity: 0 }),
+};
+
+const inputClass = "w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/15 focus:border-emerald-500 transition-all font-medium";
+
 const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword, initialView, initialReferralCode = '' }) => {
     const navigate = useNavigate();
     const [isSignup, setIsSignup] = useState(initialView === 'signup');
     const [isResetMode, setIsResetMode] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    
+    const [direction, setDirection] = useState(0);
+
     // Form State
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -48,7 +58,6 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
             updateMetaDescription("Join TaskMint Pakistan. Watch ads, complete surveys, and earn daily rewards with fast JazzCash and Easypaisa withdrawals.");
         }
 
-        // Ensure robots tag is index, follow
         let robots = document.querySelector('meta[name="robots"]');
         if (robots) {
             robots.setAttribute('content', 'index, follow');
@@ -75,19 +84,28 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const ref = params.get('ref');
-        
+
         if (ref) {
             setReferralCode(ref);
-            setIsSignup(true); // Force signup view if referred
+            setIsSignup(true);
         } else {
             setIsSignup(initialView === 'signup');
         }
     }, [initialView]);
 
+    const switchView = (view: 'login' | 'signup') => {
+        if ((view === 'signup') === isSignup && !isResetMode) return;
+        setDirection(view === 'signup' ? 1 : -1);
+        setError('');
+        setIsResetMode(false);
+        setIsSignup(view === 'signup');
+        navigate(`/${view}`);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        
+
         setIsLoading(true);
         await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -98,7 +116,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
                  return;
              }
              onForgotPassword(email);
-             setIsResetMode(false); // Go back to login after sending
+             setIsResetMode(false);
         } else if (isSignup) {
             if (!agree) {
                 setError('You must agree to the Terms & Privacy Policy.');
@@ -109,221 +127,191 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
         } else {
             onLogin(email, password);
         }
-        setTimeout(() => setIsLoading(false), 3000); 
+        setTimeout(() => setIsLoading(false), 3000);
     };
 
+    const formKey = isResetMode ? 'reset' : isSignup ? 'signup' : 'login';
+
     return (
-        <div className="min-h-screen bg-[#F9FAFB] flex items-center justify-center p-4 font-sans selection:bg-amber-100 selection:text-amber-900">
-            <div className="w-full max-w-md relative z-10">
-                <div className="text-center mb-8 animate-fade-in-up">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-600 text-white shadow-lg shadow-amber-500/30 mb-4">
-                        <SparklesIcon className="w-8 h-8" />
+        <div className="min-h-screen bg-white font-sans grid lg:grid-cols-[1.05fr_1fr] selection:bg-emerald-100 selection:text-emerald-900">
+            {/* --- Brand panel (desktop) --- */}
+            <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-700 text-white p-12 xl:p-16">
+                <motion.div aria-hidden animate={{ y: [0, -18, 0], x: [0, 10, 0] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
+                <motion.div aria-hidden animate={{ y: [0, 16, 0] }} transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }} className="absolute -bottom-32 -right-16 w-[28rem] h-[28rem] rounded-full bg-teal-300/20 blur-3xl" />
+
+                <button onClick={() => navigate('/')} className="relative flex items-center gap-2.5 w-fit" aria-label="Back to TaskMint home">
+                    <span className="w-10 h-10 rounded-xl bg-white text-emerald-700 flex items-center justify-center shadow-lg"><Coins className="w-5.5 h-5.5" /></span>
+                    <span className="text-[22px] font-extrabold tracking-tight">TaskMint</span>
+                </button>
+
+                <div className="relative max-w-md">
+                    <motion.h2 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="text-4xl xl:text-5xl font-extrabold leading-[1.1] tracking-tight">
+                        Earn money in your free time
+                    </motion.h2>
+                    <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.1 }} className="mt-4 text-emerald-50/85 text-lg leading-relaxed">
+                        Watch ads, answer surveys and complete simple tasks — then withdraw from Rs. 100 to JazzCash or EasyPaisa.
+                    </motion.p>
+
+                    <div className="mt-10 space-y-3.5 max-w-sm">
+                        {[
+                            { icon: PlayCircle, label: 'Watched a video ad', amount: '+ Rs. 15', delay: 0 },
+                            { icon: ClipboardList, label: 'CPX survey completed', amount: '+ Rs. 180', delay: 0.8 },
+                            { icon: CalendarCheck, label: 'Daily check-in bonus', amount: '+ Rs. 10', delay: 1.6 },
+                        ].map((row) => (
+                            <motion.div key={row.label} animate={{ y: [0, -6, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: row.delay }} className="flex items-center justify-between rounded-2xl bg-white/10 backdrop-blur border border-white/15 px-4.5 py-3.5">
+                                <span className="flex items-center gap-3 font-medium text-[15px]"><row.icon className="w-5 h-5 text-emerald-200" />{row.label}</span>
+                                <span className="font-bold text-emerald-200">{row.amount}</span>
+                            </motion.div>
+                        ))}
                     </div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight font-heading">TaskMint</h1>
-                    <p className="text-sm text-gray-500 font-medium mt-1">Earn Smart. TaskMint.</p>
                 </div>
 
-                <div className="bg-white rounded-[32px] shadow-2xl overflow-hidden border border-white/50 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-                    <div className="p-2">
-                        {!isResetMode && (
-                            <div className="flex bg-gray-100 rounded-2xl p-1 relative">
-                                <div 
-                                    className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm transition-all duration-300 ease-out ${isSignup ? 'translate-x-[100%] left-1' : 'translate-x-0 left-1'}`}
-                                ></div>
-                                
-                                <button 
-                                    onClick={() => { navigate('/login'); setError(''); }}
-                                    className={`flex-1 py-3 text-sm font-bold rounded-xl transition-colors relative z-10 ${!isSignup ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    Log In
-                                </button>
-                                <button 
-                                    onClick={() => { navigate('/signup'); setError(''); }}
-                                    className={`flex-1 py-3 text-sm font-bold rounded-xl transition-colors relative z-10 ${isSignup ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                                >
-                                    Create Account
-                                </button>
-                            </div>
-                        )}
+                <div className="relative flex items-center gap-8 text-sm font-semibold text-emerald-50/80">
+                    <span>50K+ users</span>
+                    <span>Rs. 100 min. payout</span>
+                    <span className="flex items-center gap-1.5"><ShieldCheck className="w-4.5 h-4.5" /> Secure platform</span>
+                </div>
+            </aside>
+
+            {/* --- Form side --- */}
+            <div className="relative flex items-center justify-center p-4 sm:p-8 py-10 overflow-hidden bg-gradient-to-b from-emerald-50/70 via-white to-white">
+                <motion.div aria-hidden animate={{ y: [0, -14, 0] }} transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }} className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-emerald-100/70 blur-3xl pointer-events-none" />
+
+                <div className="relative w-full max-w-md">
+                    <div className="text-center mb-7 lg:hidden">
+                        <button onClick={() => navigate('/')} className="inline-flex items-center gap-2.5" aria-label="Back to TaskMint home">
+                            <span className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/25"><Coins className="w-6 h-6" /></span>
+                            <span className="text-2xl font-extrabold tracking-tight text-slate-900">Task<span className="text-emerald-600">Mint</span></span>
+                        </button>
                     </div>
 
-                    <div className="px-8 pb-8 pt-6">
-                        <div className="mb-8 text-center">
-                            {isSignup && referralCode && (
-                                <div className="mb-4 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2 rounded-full text-xs font-bold animate-fade-in">
-                                    <SparklesIcon className="w-4 h-4 text-amber-500" />
-                                    You are invited by <span className="text-amber-900 font-black">{referralCode}</span>
+                    <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-white rounded-[28px] shadow-[0_24px_60px_-20px_rgba(15,23,42,0.18)] border border-slate-100 overflow-hidden">
+                        {/* Slide / swipe toggle */}
+                        {!isResetMode && (
+                            <div className="p-2.5 pb-0">
+                                <div className="relative grid grid-cols-2 bg-slate-100 rounded-2xl p-1.5">
+                                    <motion.span layout layoutId="auth-toggle-pill" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-emerald-600 shadow-lg shadow-emerald-600/25 ${isSignup ? 'right-1.5' : 'left-1.5'}`} />
+                                    <button onClick={() => switchView('login')} className={`relative z-10 py-3 text-sm font-bold rounded-xl transition-colors ${!isSignup ? 'text-white' : 'text-slate-500 hover:text-slate-800'}`}>Log In</button>
+                                    <button onClick={() => switchView('signup')} className={`relative z-10 py-3 text-sm font-bold rounded-xl transition-colors ${isSignup ? 'text-white' : 'text-slate-500 hover:text-slate-800'}`}>Create Account</button>
                                 </div>
-                            )}
-                            <h2 className="text-2xl font-bold text-gray-900">
-                                {isResetMode ? 'Reset Password' : isSignup ? 'Start your earning journey' : 'Welcome back, Hustler!'}
-                            </h2>
-                            <p className="text-sm text-gray-500 mt-2">
-                                {isResetMode ? 'Enter your email to receive a reset link.' : isSignup ? 'Create an account to unlock tasks & rewards.' : 'Enter your details to access your dashboard.'}
-                            </p>
+                            </div>
+                        )}
+
+                        <div className="px-6 sm:px-8 pb-8 pt-6 overflow-hidden">
+                            <AnimatePresence mode="wait" custom={direction} initial={false}>
+                                <motion.div key={formKey} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.32, ease: [0.32, 0.72, 0, 1] }}>
+                                    <div className="mb-7 text-center">
+                                        {isSignup && referralCode && (
+                                            <div className="mb-4 inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-xs font-bold">
+                                                <SparklesIcon className="w-4 h-4 text-emerald-500" />
+                                                You are invited by <span className="font-black">{referralCode}</span>
+                                            </div>
+                                        )}
+                                        <h1 className="text-[26px] font-extrabold text-slate-900 tracking-tight">
+                                            {isResetMode ? 'Reset Password' : isSignup ? 'Start your earning journey' : 'Welcome back!'}
+                                        </h1>
+                                        <p className="text-sm text-slate-500 mt-2">
+                                            {isResetMode ? 'Enter your email to receive a reset link.' : isSignup ? 'Create an account to unlock tasks & rewards.' : 'Enter your details to access your dashboard.'}
+                                        </p>
+                                        {isSignup && !isResetMode && (
+                                            <p className="mt-4 text-[13px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2.5">
+                                                One-time joining fee of Rs. 150 activates your earning account after sign-up.
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                        {isSignup && !isResetMode && (
+                                            <>
+                                                <input type="text" placeholder="Username (Unique)" value={name} onChange={e => setName(e.target.value.replace(/\s+/g, '').toLowerCase())} required className={inputClass} />
+                                                <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} required className={inputClass} />
+                                            </>
+                                        )}
+
+                                        <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} required className={inputClass} />
+
+                                        {!isResetMode && (
+                                            <div className="relative">
+                                                <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} className={`${inputClass} pr-12`} />
+                                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Show or hide password">
+                                                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {isSignup && !isResetMode ? (
+                                            <>
+                                                <input type="text" placeholder="Referral Code (Optional)" value={referralCode} onChange={e => setReferralCode(e.target.value.replace(/\s+/g, '').toLowerCase())} className={inputClass} />
+                                                <label className="flex items-center gap-3 cursor-pointer group">
+                                                    <span className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${agree ? 'bg-emerald-600 border-emerald-600' : 'bg-white border-slate-300 group-hover:border-emerald-400'}`}>
+                                                        {agree && <CheckCircleIcon className="w-3.5 h-3.5 text-white" />}
+                                                    </span>
+                                                    <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} className="hidden" />
+                                                    <span className="text-xs text-slate-500 font-medium">I agree to the <span className="text-slate-900 hover:underline">Terms</span> & <span className="text-slate-900 hover:underline">Privacy Policy</span></span>
+                                                </label>
+                                            </>
+                                        ) : !isResetMode ? (
+                                            <div className="flex justify-end">
+                                                <button type="button" onClick={() => { setDirection(1); setIsResetMode(true); setError(''); }} className="text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors">Forgot Password?</button>
+                                            </div>
+                                        ) : null}
+
+                                        {error && (
+                                            <div className="bg-red-50 text-red-600 text-xs font-semibold px-4 py-3 rounded-xl text-center animate-pulse">{error}</div>
+                                        )}
+
+                                        <motion.button whileTap={{ scale: 0.98 }} type="submit" disabled={isLoading} className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-[17px] shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/40 hover:-translate-y-0.5 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none">
+                                            {isLoading ? (
+                                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            ) : (
+                                                <>
+                                                    {isResetMode ? 'Send Reset Link' : isSignup ? 'Create Account' : 'Login'}
+                                                    <ArrowRight className="w-5 h-5" />
+                                                </>
+                                            )}
+                                        </motion.button>
+
+                                        {isResetMode && (
+                                            <button type="button" onClick={() => { setDirection(-1); setIsResetMode(false); setError(''); }} className="w-full py-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">Back to Login</button>
+                                        )}
+                                    </form>
+
+                                    {!isResetMode && (
+                                        <>
+                                            <div className="relative my-7">
+                                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                                                <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-slate-400 font-bold tracking-wider">Or continue with</span></div>
+                                            </div>
+
+                                            <button className="w-full py-3.5 rounded-2xl border-2 border-slate-100 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 hover:border-slate-200 transition-all flex items-center justify-center gap-3 shadow-sm active:scale-[0.99]">
+                                                <GoogleIcon className="w-5 h-5" />
+                                                Continue with Google
+                                            </button>
+
+                                            <div className="mt-9 pt-7 border-t border-slate-100 text-center">
+                                                <div className="flex items-center justify-center gap-2 text-emerald-600 mb-3">
+                                                    <ShieldCheck className="w-4 h-4" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest">Secure Platform</span>
+                                                </div>
+                                                <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                                                    TaskMint is a secure platform for Pakistani users to earn real money online.
+                                                    Register today to claim your <span className="text-emerald-700 font-bold">Rs. 100 APK install bonus</span> and start earning.
+                                                </p>
+                                                <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-400"><Wallet className="w-3.5 h-3.5" /> Withdraw via JazzCash &amp; EasyPaisa</p>
+                                            </div>
+                                        </>
+                                    )}
+                                </motion.div>
+                            </AnimatePresence>
                         </div>
+                    </motion.div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            {isSignup && !isResetMode && (
-                                <div className="space-y-4 animate-fade-in">
-                                    <div>
-                                        <input 
-                                            type="text" 
-                                            placeholder="Username (Unique)"
-                                            value={name}
-                                            onChange={e => setName(e.target.value.replace(/\s+/g, '').toLowerCase())}
-                                            required
-                                            className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
-                                        />
-                                    </div>
-                                    <div>
-                                        <input 
-                                            type="tel" 
-                                            placeholder="Phone Number"
-                                            value={phone}
-                                            onChange={e => setPhone(e.target.value)}
-                                            required
-                                            className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            <div>
-                                <input 
-                                    type="email" 
-                                    placeholder="Email Address"
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    required
-                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
-                                />
-                            </div>
-                            
-                            {!isResetMode && (
-                                <div className="relative">
-                                    <input 
-                                        type={showPassword ? "text" : "password"} 
-                                        placeholder="Password"
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}
-                                        required
-                                        minLength={6}
-                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
-                                    />
-                                    <button 
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                    >
-                                        {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
-                                    </button>
-                                </div>
-                            )}
-
-                            {isSignup && !isResetMode ? (
-                                <div className="animate-fade-in space-y-4">
-                                    <input 
-                                        type="text" 
-                                        placeholder="Referral Code (Optional)"
-                                        value={referralCode}
-                                        onChange={e => setReferralCode(e.target.value.replace(/\s+/g, '').toLowerCase())}
-                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium"
-                                    />
-                                    <label className="flex items-center gap-3 cursor-pointer group">
-                                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${agree ? 'bg-amber-500 border-amber-500' : 'bg-white border-gray-300 group-hover:border-amber-400'}`}>
-                                            {agree && <CheckCircleIcon className="w-3.5 h-3.5 text-white" />}
-                                        </div>
-                                        <input type="checkbox" checked={agree} onChange={e => setAgree(e.target.checked)} className="hidden" />
-                                        <span className="text-xs text-gray-500 font-medium">I agree to the <span className="text-gray-900 hover:underline">Terms</span> & <span className="text-gray-900 hover:underline">Privacy Policy</span></span>
-                                    </label>
-                                </div>
-                            ) : !isResetMode ? (
-                                <div className="flex justify-end animate-fade-in">
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setIsResetMode(true)}
-                                        className="text-xs font-bold text-amber-600 hover:text-amber-700 transition-colors"
-                                    >
-                                        Forgot Password?
-                                    </button>
-                                </div>
-                            ) : null}
-
-                            {error && (
-                                <div className="bg-red-50 text-red-600 text-xs font-semibold px-4 py-3 rounded-xl text-center animate-pulse">
-                                    {error}
-                                </div>
-                            )}
-
-                            <button 
-                                type="submit" 
-                                disabled={isLoading}
-                                className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-bold text-lg shadow-lg shadow-amber-500/30 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-4"
-                            >
-                                {isLoading ? (
-                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                ) : (
-                                    <>
-                                        {isResetMode ? 'Send Reset Link' : isSignup ? 'Create Account' : 'Login'}
-                                        <ArrowRight className="w-5 h-5" />
-                                    </>
-                                )}
-                            </button>
-                            
-                            {isResetMode && (
-                                <button 
-                                    type="button"
-                                    onClick={() => { setIsResetMode(false); setError(''); }}
-                                    className="w-full py-2 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors"
-                                >
-                                    Back to Login
-                                </button>
-                            )}
-                        </form>
-
-                        {!isResetMode && (
-                            <>
-                                <div className="relative my-8">
-                                    <div className="absolute inset-0 flex items-center">
-                                        <div className="w-full border-t border-gray-200"></div>
-                                    </div>
-                                    <div className="relative flex justify-center text-xs uppercase">
-                                        <span className="bg-white px-4 text-gray-400 font-bold tracking-wider">Or continue with</span>
-                                    </div>
-                                </div>
-
-                                <button className="w-full py-3.5 rounded-2xl border-2 border-gray-100 bg-white text-gray-700 font-bold text-sm hover:bg-gray-50 hover:border-gray-200 transition-all flex items-center justify-center gap-3 shadow-sm active:scale-[0.99]">
-                                    <GoogleIcon className="w-5 h-5" />
-                                    Continue with Google
-                                </button>
-
-                                {/* About Section for SEO */}
-                                <div className="mt-10 pt-8 border-t border-gray-100 text-center animate-fade-in" style={{animationDelay: '0.4s'}}>
-                                    <div className="flex items-center justify-center gap-2 text-amber-600 mb-3">
-                                        <ShieldCheck className="w-4 h-4" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Secure Platform</span>
-                                    </div>
-                                    <p className="text-xs text-gray-500 leading-relaxed font-medium">
-                                        TaskMint is a secure platform for Pakistani users to earn real money online. 
-                                        Register today to claim your <span className="text-amber-600 font-bold">Rs. 100 APK install bonus</span> and start earning.
-                                    </p>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                    <p className="mt-5 text-center text-xs font-medium text-slate-400 lg:hidden">50K+ users · Rs. 100 min. payout · JazzCash &amp; EasyPaisa</p>
                 </div>
             </div>
-            <style>{`
-                @keyframes fade-in-up {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
-            `}</style>
         </div>
     );
 };

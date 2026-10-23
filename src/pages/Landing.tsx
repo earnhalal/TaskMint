@@ -31,8 +31,8 @@ import { blogPosts } from '../data/blogPosts';
 
 const faqs = [
   {
-    q: 'Is TaskMint free to join?',
-    a: 'Yes. Creating a TaskMint account is free. You earn by completing tasks such as watching video ads, answering surveys, trying offers, daily check-ins and the spin wheel — no investment is needed to start earning.',
+    q: 'Is there a joining fee on TaskMint?',
+    a: 'Creating an account is free, and to activate the earning features you pay a one-time joining fee of Rs. 150. After activation you earn by completing tasks such as watching video ads, answering surveys, trying offers, daily check-ins and the spin wheel.',
   },
   {
     q: 'How do I withdraw my earnings?',
@@ -106,7 +106,7 @@ export default function Landing() {
     document.title = 'TaskMint - Earn Money Online in Pakistan | Online Earning Platform';
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
-      meta.setAttribute('content', 'TaskMint is a free online earning platform in Pakistan. Earn money by watching ads, taking surveys and completing simple tasks. Withdraw from Rs. 100 via JazzCash, EasyPaisa or bank transfer.');
+      meta.setAttribute('content', 'TaskMint is an online earning platform in Pakistan. Earn money by watching ads, taking surveys and completing simple tasks. Withdraw from Rs. 100 via JazzCash, EasyPaisa or bank transfer.');
     }
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
@@ -160,7 +160,7 @@ export default function Landing() {
 
           <div className="hidden md:flex items-center gap-3">
             <button onClick={() => onGetStarted('login')} className="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-emerald-700 transition-colors">Log In</button>
-            <button onClick={() => onGetStarted('signup')} className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-colors">Create Free Account</button>
+            <button onClick={() => onGetStarted('signup')} className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-colors">Create Account</button>
           </div>
 
           <button onClick={() => setMobileMenu(!mobileMenu)} className="md:hidden p-2 text-slate-800" aria-label="Menu">
@@ -177,7 +177,7 @@ export default function Landing() {
             <button onClick={() => scrollTo('faq')} className="text-left py-2.5">FAQ</button>
             <div className="grid grid-cols-2 gap-3 pt-3 pb-2">
               <button onClick={() => onGetStarted('login')} className="py-3 rounded-xl border border-slate-200 font-bold">Log In</button>
-              <button onClick={() => onGetStarted('signup')} className="py-3 rounded-xl bg-emerald-600 text-white font-bold">Sign Up Free</button>
+              <button onClick={() => onGetStarted('signup')} className="py-3 rounded-xl bg-emerald-600 text-white font-bold">Sign Up</button>
             </div>
           </div>
         )}
@@ -190,7 +190,7 @@ export default function Landing() {
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/70 text-emerald-800 text-xs font-bold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                Free online earning platform — Pakistan
+                Online earning platform — Pakistan
               </span>
               <h1 className="mt-6 text-4xl sm:text-5xl xl:text-[56px] font-extrabold leading-[1.08] tracking-tight">
                 Earn money online in your <span className="text-emerald-600">free time</span>
@@ -200,14 +200,14 @@ export default function Landing() {
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <button onClick={() => onGetStarted('signup')} className="inline-flex justify-center items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">
-                  Start Earning Free <ArrowRight className="w-4.5 h-4.5" />
+                  Start Earning <ArrowRight className="w-4.5 h-4.5" />
                 </button>
                 <button onClick={() => scrollTo('how-it-works')} className="inline-flex justify-center items-center gap-2 px-7 py-3.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:border-emerald-200 hover:text-emerald-700 transition-colors">
                   See How It Works
                 </button>
               </div>
               <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-slate-600">
-                <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> No investment needed</li>
+                <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> One-time joining fee Rs. 150</li>
                 <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> Minimum payout Rs. 100</li>
                 <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> JazzCash &amp; EasyPaisa</li>
               </ul>
@@ -219,7 +219,7 @@ export default function Landing() {
             </motion.div>
 
             {/* Wallet preview card */}
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 }} className="relative max-w-md w-full mx-auto lg:ml-auto">
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: [0, -10, 0] }} transition={{ duration: 0.5, delay: 0.12, y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.7 } }} className="relative max-w-md w-full mx-auto lg:ml-auto">
               <div className="rounded-3xl bg-slate-900 text-white p-7 shadow-2xl shadow-slate-900/20">
                 <div className="flex items-center justify-between">
                   <span className="flex items-center gap-2 text-sm font-semibold text-white/70"><WalletIcon className="w-4.5 h-4.5" /> My Wallet</span>
@@ -277,15 +277,15 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto px-5 lg:px-8">
             <div className="max-w-2xl">
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Six simple ways to earn</h2>
-              <p className="mt-4 text-lg text-slate-600 leading-relaxed">No skills or investment required. Pick any task, finish it, and the reward lands in your TaskMint wallet.</p>
+              <p className="mt-4 text-lg text-slate-600 leading-relaxed">No skills required — a one-time joining fee of Rs. 150 activates your account. Pick any task, finish it, and the reward lands in your TaskMint wallet.</p>
             </div>
             <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {earnWays.map((way) => (
-                <article key={way.title} className="rounded-3xl border border-slate-100 bg-white p-7 shadow-[0_4px_20px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all">
+              {earnWays.map((way, i) => (
+                <motion.article key={way.title} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.45, delay: (i % 3) * 0.1 }} className="rounded-3xl border border-slate-100 bg-white p-7 shadow-[0_4px_20px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.07)] hover:-translate-y-0.5 transition-all">
                   <span className={`w-12 h-12 rounded-2xl flex items-center justify-center ${way.color}`}><way.icon className="w-6 h-6" /></span>
                   <h3 className="mt-5 text-lg font-bold">{way.title}</h3>
                   <p className="mt-2 text-[15px] leading-relaxed text-slate-600">{way.text}</p>
-                </article>
+                </motion.article>
               ))}
             </div>
           </div>
@@ -300,16 +300,16 @@ export default function Landing() {
             </div>
             <ol className="mt-14 grid md:grid-cols-3 gap-5">
               {[
-                { icon: Smartphone, step: 'Step 1', title: 'Create your free account', text: 'Sign up with your details in under a minute. Your personal wallet and referral link are created automatically.' },
+                { icon: Smartphone, step: 'Step 1', title: 'Create your account', text: 'Sign up with your details in under a minute, then activate your account with the one-time Rs. 150 joining fee. Your wallet and referral link are created automatically.' },
                 { icon: ClipboardList, step: 'Step 2', title: 'Complete simple tasks', text: 'Watch ads, take surveys, try offers, check in daily and spin the wheel. Every completed task adds money to your wallet.' },
                 { icon: CircleDollarSign, step: 'Step 3', title: 'Withdraw from Rs. 100', text: 'Reach Rs. 100 and cash out to JazzCash, EasyPaisa or your bank account directly from the dashboard.' },
-              ].map((item) => (
-                <li key={item.title} className="rounded-3xl bg-white border border-slate-100 p-8 text-center shadow-[0_4px_20px_rgba(15,23,42,0.03)]">
+              ].map((item, i) => (
+                <motion.li key={item.title} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.45, delay: i * 0.12 }} className="rounded-3xl bg-white border border-slate-100 p-8 text-center shadow-[0_4px_20px_rgba(15,23,42,0.03)]">
                   <span className="mx-auto w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/20"><item.icon className="w-7 h-7" /></span>
                   <p className="mt-6 text-xs font-bold uppercase tracking-[0.16em] text-emerald-600">{item.step}</p>
                   <h3 className="mt-2 text-xl font-bold">{item.title}</h3>
                   <p className="mt-3 text-[15px] leading-relaxed text-slate-600">{item.text}</p>
-                </li>
+                </motion.li>
               ))}
             </ol>
           </div>
@@ -328,22 +328,22 @@ export default function Landing() {
                 <li className="flex gap-2.5"><CheckCircleIcon className="w-5 h-5 text-emerald-600 shrink-0" /> Full transaction history inside your wallet</li>
                 <li className="flex gap-2.5"><Clock3 className="w-5 h-5 text-emerald-600 shrink-0" /> Requests are processed in order, every day</li>
               </ul>
-              <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">Create Free Account <ArrowRight className="w-4.5 h-4.5" /></button>
+              <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">Create Account <ArrowRight className="w-4.5 h-4.5" /></button>
             </div>
             <div className="grid gap-4">
               {[
                 { icon: Smartphone, name: 'JazzCash', note: 'Withdraw to your JazzCash mobile account.' },
                 { icon: WalletIcon, name: 'EasyPaisa', note: 'Withdraw to your EasyPaisa mobile account.' },
                 { icon: BankIcon, name: 'Bank Transfer', note: 'Withdraw directly to your local bank account.' },
-              ].map((m) => (
-                <div key={m.name} className="flex items-center gap-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_4px_20px_rgba(15,23,42,0.03)]">
+              ].map((m, i) => (
+                <motion.div key={m.name} initial={{ opacity: 0, x: 32 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.45, delay: i * 0.1 }} className="flex items-center gap-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_4px_20px_rgba(15,23,42,0.03)]">
                   <span className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><m.icon className="w-6 h-6" /></span>
                   <div>
                     <h3 className="font-bold text-lg">{m.name}</h3>
                     <p className="text-sm text-slate-600">{m.note}</p>
                   </div>
                   <span className="ml-auto text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full whitespace-nowrap">Min Rs. 100</span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -400,8 +400,8 @@ export default function Landing() {
               <button onClick={() => navigate('/blog')} className="inline-flex items-center gap-1.5 font-bold text-emerald-700 hover:gap-2.5 transition-all">View all articles <ArrowRight className="w-4.5 h-4.5" /></button>
             </div>
             <div className="mt-10 grid md:grid-cols-3 gap-5">
-              {latestPosts.map((post) => (
-                <article key={post.id} className="rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-[0_4px_20px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-shadow cursor-pointer" onClick={() => navigate(`/blog/${post.slug}`)}>
+              {latestPosts.map((post, i) => (
+                <motion.article key={post.id} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.45, delay: i * 0.1 }} className="rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-[0_4px_20px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-shadow cursor-pointer" onClick={() => navigate(`/blog/${post.slug}`)}>
                   <img src={post.image} alt={post.title} className="w-full h-44 object-cover" loading="lazy" />
                   <div className="p-6">
                     <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">{post.category}</span>
@@ -409,7 +409,7 @@ export default function Landing() {
                     <p className="mt-2 text-sm leading-relaxed text-slate-600 line-clamp-2">{post.excerpt}</p>
                     <p className="mt-4 text-xs font-semibold text-slate-400">{post.date} · {post.author}</p>
                   </div>
-                </article>
+                </motion.article>
               ))}
             </div>
           </div>
@@ -438,8 +438,8 @@ export default function Landing() {
         <section className="py-20 md:py-24">
           <div className="max-w-4xl mx-auto px-5 lg:px-8 text-center">
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">Your free time is worth money</h2>
-            <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">Join TaskMint free today, complete your first task in minutes, and cash out from just Rs. 100.</p>
-            <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">Create Free Account <ArrowRight className="w-4.5 h-4.5" /></button>
+            <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">Join TaskMint today, activate your account with the one-time Rs. 150 joining fee, complete your first task in minutes, and cash out from just Rs. 100.</p>
+            <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">Create Account <ArrowRight className="w-4.5 h-4.5" /></button>
           </div>
         </section>
       </main>
@@ -452,7 +452,7 @@ export default function Landing() {
               <span className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center"><Coins className="w-5 h-5" /></span>
               <span className="text-xl font-extrabold">Task<span className="text-emerald-400">Mint</span></span>
             </p>
-            <p className="mt-5 text-sm leading-relaxed max-w-sm">TaskMint is a free online earning platform for Pakistan. Earn by watching ads, taking surveys and completing simple tasks, and withdraw via JazzCash, EasyPaisa or bank transfer.</p>
+            <p className="mt-5 text-sm leading-relaxed max-w-sm">TaskMint is an online earning platform for Pakistan. Earn by watching ads, taking surveys and completing simple tasks, and withdraw via JazzCash, EasyPaisa or bank transfer.</p>
             <p className="mt-5 text-sm">Support: <a href="mailto:support@taskmint.click" className="text-emerald-400 font-semibold">support@taskmint.click</a></p>
           </div>
           <nav>

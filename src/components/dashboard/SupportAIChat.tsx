@@ -177,7 +177,7 @@ You must understand and train the agent on the following modules:
 - Earning Ecosystem: CPX Research Surveys, Daily Spin (with cooldowns), Lottery system, Premium Jobs, Product Draws, Offer Walls, and Social Media tasks (YouTube/TikTok/FB).
 - Referral Architecture: Mega Referral system with Level 1 (Direct) and Level 2 (Indirect) commission logic.
 - Financial Flow:
-  * Deposits: Rs 170 Joining Fee (Manual Verification).
+  * Deposits: Rs 150 Joining Fee (Manual Verification).
   * Withdrawals: Cash Out via JazzCash, EasyPaisa, and Bank Alfalah (Min Rs 500).
 - Wallet Intelligence: Liquid Balance vs. Yield Ledger tracking.
 

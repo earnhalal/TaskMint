@@ -41,8 +41,8 @@ function AppContent() {
 
   useEffect(() => {
     if (!loading) {
-      // Small delay to ensure smooth transition
-      const timer = setTimeout(() => setShowSplash(false), 1000);
+      // Short brand moment, then a smooth fade into the app
+      const timer = setTimeout(() => setShowSplash(false), 450);
       return () => clearTimeout(timer);
     }
   }, [loading]);

@@ -169,7 +169,7 @@ export default function ProfileTab({
               onClick={onActivateClick}
               className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-red-600/20 active:scale-95 transition-all"
             >
-              Pay Rs {appSettings?.activationFee || 100} to Start
+              Pay Rs {appSettings?.activationFee || 150} to Start
             </button>
           </div>
         </div>
