@@ -15,6 +15,7 @@ import {
   Briefcase,
   X,
   Sparkles,
+  Coins,
   Mail,
   AlertTriangle,
   Crown,
@@ -22,7 +23,8 @@ import {
   Layout,
   Clock,
   ArrowRight,
-  Users
+  Users,
+  Wallet
 } from 'lucide-react';
 import { 
   doc, 
@@ -80,9 +82,7 @@ import TasksTab from '../components/dashboard/TasksTab';
 import ManageWalletView from '../components/dashboard/ManageWalletView';
 import LotteryView from '../components/dashboard/LotteryView';
 import StreakRewardView from '../components/dashboard/StreakRewardView';
-import SpinWheel from '../components/dashboard/SpinWheel';
 import PartnerToolsView from '../components/dashboard/PartnerToolsView';
-import ProductDrawView from '../components/dashboard/ProductDrawView';
 import { DynamicAvatar } from '../components/ui/DynamicAvatar';
 
 export default function Dashboard() {
@@ -157,22 +157,12 @@ export default function Dashboard() {
     }
   }, [activeTab]);
 
-  const names = ['Ahmed', 'Fatima', 'Ali', 'Ayesha', 'Zainab', 'Bilal', 'Hassan', 'Sana', 'Usman', 'Maryam', 'Abdullah', 'Khadija'];
-  const amounts = [100, 250, 500, 750, 1000, 1250, 2000];
-  const eventTemplates = [
-    { action: 'earned', source: 'from Spin & Win!' },
-    { action: 'earned', source: 'by completing a Task!' },
-    { action: 'earned', source: 'from a Referral Bonus!' }
-  ];
-
   const [balance, setBalance] = useState(0);
-  const [spinBalance, setSpinBalance] = useState(0);
   const [pendingIndirect, setPendingIndirect] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
   const [appBonusClaimed, setAppBonusClaimed] = useState(false);
   const [lastDailyCheckin, setLastDailyCheckin] = useState<any>(null);
-  const [freeSpins, setFreeSpins] = useState(0);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
 
   const withdrawalHistory = useMemo(() => {
@@ -236,7 +226,6 @@ export default function Dashboard() {
       if (snapshot.exists()) {
         const data = snapshot.data();
         if (data.balance !== undefined) setBalance(data.balance);
-        if (data.spinBalance !== undefined) setSpinBalance(data.spinBalance);
         if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
         setUserPin(data.pin || '');
@@ -430,7 +419,6 @@ export default function Dashboard() {
         
         // Priority Sync for Real-time Balance & Commission
         if (data.balance !== undefined) setBalance(data.balance);
-        if (data.spinBalance !== undefined) setSpinBalance(data.spinBalance);
         if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
@@ -592,66 +580,8 @@ export default function Dashboard() {
     // localStorage.setItem('taskmint_seen_updates', JSON.stringify(seenUpdates));
   }, [seenUpdates]);
 
-  useEffect(() => {
-    // Real-time winners listener
-    const winnersRef = ref(rtdb, 'spin_winners');
-    let realWinnerFound = false;
 
-    const unsubscribe = onValue(winnersRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const list = Object.values(data) as any[];
-        const sorted = list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        if (sorted.length > 0) {
-          realWinnerFound = true;
-          const latest = sorted[0];
-          setIsNotificationAnimating(false);
-          setTimeout(() => {
-            setNotificationMessage(`${latest.userName} just won <span class="font-bold">${latest.prize}</span> from Spin & Win!`);
-            setIsNotificationAnimating(true);
-          }, 500);
-        }
-      }
-    });
 
-    // Fallback interval if no real winners exist yet or to keep it dynamic
-    const fallbackInterval = setInterval(() => {
-      if (!realWinnerFound || Math.random() > 0.7) { // 30% chance to show a fake one even if real ones exist, to keep it busy
-        setIsNotificationAnimating(false);
-        setTimeout(() => {
-          const randomName = names[Math.floor(Math.random() * names.length)];
-          const randomAmount = amounts[Math.floor(Math.random() * amounts.length)];
-          const randomEvent = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
-          setNotificationMessage(`${randomName} just ${randomEvent.action} <span class="font-bold">Rs ${randomAmount}</span> ${randomEvent.source}`);
-          setIsNotificationAnimating(true);
-        }, 500);
-      }
-    }, 10000);
-
-    return () => {
-      unsubscribe();
-      clearInterval(fallbackInterval);
-    };
-  }, []);
-
-  useEffect(() => {
-    const lastSpin = localStorage.getItem('taskmint_last_spin');
-    if (lastSpin) {
-      const lastSpinDate = new Date(parseInt(lastSpin));
-      const now = new Date();
-      const diffHours = Math.abs(now.getTime() - lastSpinDate.getTime()) / 36e5;
-      if (diffHours >= 24) {
-        setFreeSpins(1);
-      }
-    } else {
-      setFreeSpins(1);
-    }
-  }, []);
-
-  const handleUseFreeSpin = () => {
-    setFreeSpins(0);
-    localStorage.setItem('taskmint_last_spin', Date.now().toString());
-  };
 
   const [isBalanceUpdating, setIsBalanceUpdating] = useState(false);
 
@@ -664,14 +594,7 @@ export default function Dashboard() {
     try {
       const userRtdbRef = ref(rtdb, `users/${user.uid}`);
       
-      let spinAmt = 0;
-      let balAmt = 0;
-
-      if (source === 'app_bonus') {
-        spinAmt = amount;
-      } else {
-        balAmt = amount;
-      }
+      const balAmt = amount;
 
       let success = false;
       await runRtdbTransaction(userRtdbRef, (data) => {
@@ -680,10 +603,9 @@ export default function Dashboard() {
         let newBalance = (data.balance || 0) + balAmt;
         if (newBalance < 0) return; // Abort transaction if insufficient funds
         
-        let newSpinBalance = (data.spinBalance || 0) + spinAmt;
         let newTotalEarnings = (data.totalEarnings || 0);
 
-        if (balAmt > 0 && source !== 'spin') {
+        if (balAmt > 0) {
             newTotalEarnings += balAmt;
         }
 
@@ -691,7 +613,6 @@ export default function Dashboard() {
         return {
             ...data,
             balance: newBalance,
-            spinBalance: newSpinBalance,
             totalEarnings: newTotalEarnings,
             lastUpdatedAt: Date.now()
         };
@@ -1214,7 +1135,7 @@ export default function Dashboard() {
     // Restriction logic
     const currentAccountStatus = accountStatus.toLowerCase();
     const isInactive = currentAccountStatus !== 'active';
-    const earningTabs = ['spin', 'tasks', 'watch', 'lottery', 'streak'];
+    const earningTabs = ['tasks', 'watch', 'lottery', 'streak'];
     
     if (isInactive && earningTabs.includes(activeTab)) {
       return (
@@ -1222,17 +1143,17 @@ export default function Dashboard() {
           <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6">
             <AlertTriangle className="w-10 h-10" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+          <h2 className="text-2xl font-bold text-white mb-2">
             {currentAccountStatus === 'pending' ? 'Activation Pending' : 'Account Inactive'}
           </h2>
-          <p className="text-slate-500 mb-8 max-w-xs">
+          <p className="text-zinc-400 mb-8 max-w-xs">
             {currentAccountStatus === 'pending' 
               ? 'Your activation request is being verified by the admin. Please wait 1-6 hours.' 
               : `You need to activate your account by paying the Rs ${appSettings.activationFee} joining fee to access earning features.`}
           </p>
           <button 
             onClick={() => setActiveTab('invite')}
-            className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold shadow-xl active:scale-95 transition-all"
+            className="bg-emerald-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl active:scale-95 transition-all"
           >
             Go to Activation Page
           </button>
@@ -1329,17 +1250,6 @@ export default function Dashboard() {
         return <StreakRewardView 
           onBack={() => setActiveTab('home')} 
           onUpdateBalance={handleUpdateBalance} 
-        />;
-      case 'spin':
-        return <SpinWheel 
-          onClose={() => setActiveTab('home')}
-          balance={balance}
-          spinBalance={spinBalance}
-          onUpdateBalance={handleUpdateBalance}
-          freeSpins={freeSpins}
-          onUseFreeSpin={handleUseFreeSpin}
-          onGoToDeposit={() => setActiveTab('deposit')}
-          activeInvites={referralStats.activeMembers}
         />;
       case 'withdraw':
         return <WithdrawTab 
@@ -1456,26 +1366,17 @@ export default function Dashboard() {
                  referralStats={referralStats}
                  onApproveMember={handleActivateUser}
                />;
-      case 'product-draw':
-        return <ProductDrawView 
-            onBack={() => setActiveTab('home')} 
-            balance={balance} 
-            userName={userName}
-            onUpdateBalance={handleUpdateBalance} 
-        />;
       // Add other tabs as needed
       default:
         return <HomeTab 
           name={userName}
           balance={balance}
-          spinBalance={spinBalance}
           totalEarnings={totalEarnings}
           totalIndirectCommission={totalIndirectCommission}
           lockedBalance={lockedBalance}
           accountStatus={accountStatus}
           role={role}
           topEarners={topEarners}
-          onSpinClick={() => setActiveTab('spin')} 
           onInviteClick={() => setActiveTab('invite')}
           onDepositClick={() => setActiveTab('deposit')}
           onWithdrawClick={() => setActiveTab('withdraw')}
@@ -1495,7 +1396,6 @@ export default function Dashboard() {
           onEasyTaskClick={() => setActiveTab('wannads')}
           onOfferWallClick={() => setActiveTab('cpalead')}
           onPartnerToolsClick={() => setActiveTab('partner_tools')}
-          onProductDrawClick={() => setActiveTab('product-draw')}
           onUpdateBalance={handleUpdateBalance}
           onReloadData={reloadData}
           appSettings={activeAppSettings}
@@ -1507,11 +1407,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-[#050607] flex justify-center items-center p-0 sm:p-6 font-sans overflow-x-hidden w-full max-w-full">
       {!isProfileLoaded && (
-        <div className="absolute inset-0 z-[200] bg-white flex flex-col items-center justify-center">
-          <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin mb-4"></div>
-          <p className="text-xs font-black text-slate-900 uppercase tracking-widest animate-pulse">Loading Member Profile...</p>
+        <div className="absolute inset-0 z-[200] bg-[#15181D] flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-white/10 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-xs font-extrabold text-white uppercase tracking-widest animate-pulse">Loading Member Profile...</p>
         </div>
       )}
       {/* Referral Update Notification */}
@@ -1522,27 +1422,27 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden"
+              className="bg-[#15181D] rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 to-yellow-600"></div>
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-amber-600"></div>
               
-              <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="w-10 h-10 text-amber-500" />
+              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="w-10 h-10 text-emerald-500" />
               </div>
 
-              <h3 className="text-2xl font-black text-slate-900 mb-4 leading-tight">Link Update!</h3>
-              <p className="text-sm text-slate-500 font-medium mb-8 leading-relaxed">
+              <h3 className="text-2xl font-black text-white mb-4 leading-tight">Link Update!</h3>
+              <p className="text-sm text-zinc-400 font-medium mb-8 leading-relaxed">
                 Aapka naya referral link update ho gaya hai, mazeed security ke liye ab isay istemal karein.
               </p>
 
-              <div className="bg-slate-50 rounded-2xl p-4 mb-8 border border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">New Referral Code</p>
-                <p className="text-lg font-black text-slate-900 font-mono tracking-wider">{referralCode}</p>
+              <div className="bg-white/5 rounded-2xl p-4 mb-8 border border-white/5">
+                <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1">New Referral Code</p>
+                <p className="text-lg font-black text-white font-mono tracking-wider">{referralCode}</p>
               </div>
 
               <button 
                 onClick={() => setShowReferralUpdateNotify(false)}
-                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all"
+                className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all"
               >
                 Samajh Gaya!
               </button>
@@ -1559,19 +1459,19 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100"
+              className="bg-[#15181D] rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-white/5"
             >
-              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 mx-auto">
                 <AlertTriangle className="w-8 h-8 text-red-500" />
               </div>
-              <h3 className="text-2xl font-bold text-center text-slate-900 mb-3 font-urdu">خوش آمدید! آپ کا اکاؤنٹ ابھی فعال (Active) نہیں ہے۔</h3>
-              <p className="text-base text-center text-slate-600 mb-6 font-urdu leading-relaxed">
+              <h3 className="text-2xl font-bold text-center text-white mb-3 font-urdu">خوش آمدید! آپ کا اکاؤنٹ ابھی فعال (Active) نہیں ہے۔</h3>
+              <p className="text-base text-center text-zinc-300 mb-6 font-urdu leading-relaxed">
                 ارننگ شروع کرنے کے لیے آپ کو ایک بار جوائننگ فیس جمع کروانی ہوگی۔ نیچے دیے گئے بٹن پر کلک کریں اور فیس جمع کروا کر واٹس ایپ پر اسکرین شاٹ بھیجیں۔ اکاؤنٹ جلد ہی ایکٹیو کر دیا جائے گا۔
               </p>
               <div className="flex gap-3">
                 <button 
                   onClick={() => setShowInactiveModal(false)}
-                  className="flex-1 bg-slate-100 text-slate-700 font-bold py-3.5 rounded-xl hover:bg-slate-200 transition-colors font-urdu"
+                  className="flex-1 bg-white/10 text-zinc-200 font-bold py-3.5 rounded-xl hover:bg-white/15 transition-colors font-urdu"
                 >
                   بند کریں
                 </button>
@@ -1591,11 +1491,8 @@ export default function Dashboard() {
       </AnimatePresence>
 
       {/* Mobile App Container */}
-      <div className={`w-full ${activeTab === 'watch' ? 'max-w-full' : 'sm:max-w-[440px]'} ${role === 'partner' ? 'bg-amber-50' : 'bg-slate-50'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-slate-900`}>
+      <div className={`w-full ${activeTab === 'watch' ? 'max-w-full' : 'sm:max-w-[440px]'} ${role === 'partner' ? 'bg-[#0A0C0A]' : 'bg-[#0B0D10]'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-zinc-800`}>
         
-        {/* Notch simulation (Desktop only) */}
-        <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-3xl z-50"></div>
-
         {/* Top Notification Bar & Announcements */}
         <AnimatePresence>
           {showNotification && activeTab !== 'support_ai' && (
@@ -1606,104 +1503,83 @@ export default function Dashboard() {
           )}
         </AnimatePresence>
 
-        {/* Modern Polished Header */}
+        {/* App bar — logo, live balance pill, notifications, profile */}
         {activeTab !== 'support_ai' && (
-          <div className={`px-5 py-5 ${role === 'partner' ? 'bg-gradient-to-r from-[#060D2D] to-[#151E32]' : 'bg-white/80 backdrop-blur-xl'} flex items-center justify-between sticky top-0 z-40 border-b border-gray-100/20 shadow-sm transition-all duration-300`}>
-            <div className="flex items-center gap-3 cursor-pointer group relative" onClick={() => setActiveTab('home')}>
-              <div className={`relative w-11 h-11 rounded-2xl ${role === 'partner' ? 'bg-amber-500 shadow-amber-500/40' : 'bg-[#0A0A0B] shadow-black/20'} flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 overflow-hidden`}>
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                <Sparkles className="w-6 h-6 animate-pulse" />
+          <div className={`px-4 py-3 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-[#15181D] border-white/5'} flex items-center justify-between sticky top-0 z-40 border-b transition-all duration-300`}>
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('home')}>
+              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/25">
+                <Coins className="w-5 h-5" />
               </div>
-              <div className="flex flex-col -space-y-1">
-                <h1 className={`font-black text-2xl sm:text-3xl tracking-tighter italic uppercase`}>
-                  <span className={role === 'partner' ? 'text-white' : 'text-slate-900'}>Task</span>
-                  <span className={role === 'partner' ? 'text-amber-500' : 'text-indigo-600'}>Mint</span>
-                </h1>
-                <div className={`flex items-center gap-1 ${role === 'partner' ? 'text-amber-500/60' : 'text-indigo-600/40'}`}>
-                   <div className="w-1 h-1 rounded-full bg-current"></div>
-                   <span className="text-[8px] font-black uppercase tracking-[0.3em]">Version 2.0</span>
-                </div>
-              </div>
+              <span className={`font-extrabold text-lg tracking-tight ${role === 'partner' ? 'text-white' : 'text-white'}`}>
+                Task<span className="text-emerald-400">Mint</span>
+              </span>
             </div>
-            <div className="flex items-center gap-3">
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setActiveTab('updates')}
-                className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group`}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab('withdraw')}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full border active:scale-95 transition ${role === 'partner' ? 'bg-white/5 border-white/10 text-white' : 'bg-emerald-500/10 border-emerald-500/20 text-white'}`}
               >
-                <Mail className={`w-5 h-5 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-amber-600`} />
+                <Wallet className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-black">Rs {balance.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('updates')}
+                className={`relative w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition ${role === 'partner' ? 'bg-white/5 text-white' : 'bg-white/5 text-zinc-300'}`}
+              >
+                <Bell className="w-5 h-5" />
                 {unreadUpdatesCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] px-1 bg-rose-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white">
                     {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
                   </span>
                 )}
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              </button>
+              <button
                 onClick={() => setActiveTab('profile')}
-                className={`relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group ${activeTab === 'profile' ? 'ring-2 ring-amber-500 bg-amber-50' : ''}`}
+                className="relative w-9 h-9 rounded-full flex items-center justify-center overflow-hidden bg-white/5 active:scale-95 transition"
               >
                 {profileAvatarId ? (
                    <DynamicAvatar avatarId={profileAvatarId} fallbackText={userName} />
                 ) : (
-                   <UserCircle className={`w-6 h-6 ${role === 'partner' ? 'text-white' : (activeTab === 'profile' ? 'text-amber-600' : 'text-slate-600')} transition-colors group-hover:text-amber-600`} />
+                   <UserCircle className="w-6 h-6 text-zinc-300" />
                 )}
-              </motion.button>
+              </button>
             </div>
           </div>
         )}
 
         {/* Scrollable Content */}
-        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-5 pt-6'} hide-scrollbar ${role === 'partner' ? 'bg-[#060D2D]' : 'bg-slate-50'}`}>
-          <div className={`${['watch', 'support_ai'].includes(activeTab) ? 'max-w-full h-full' : 'max-w-2xl mx-auto pb-40'}`}>
+        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-4 pt-4'} hide-scrollbar ${role === 'partner' ? 'bg-[#0A0C0A]' : 'bg-[#0B0D10]'}`}>
+          <div className={`${['watch', 'support_ai'].includes(activeTab) ? 'max-w-full h-full' : 'max-w-2xl mx-auto pb-28'}`}>
             {renderTabContent()}
           </div>
         </div>
 
-        {/* Fixed Bottom Tab Bar - Glassmorphism UI */}
+        {/* Bottom tab bar */}
         {activeTab !== 'support_ai' && (
-          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#0A0A0B]/90' : 'bg-white/80'} backdrop-blur-3xl px-2 pt-2 pb-6 flex items-center justify-around shadow-[0_-15px_45px_rgba(0,0,0,0.1)] border-t border-white/5 transition-colors duration-500 rounded-t-[2.5rem]`}>
-            {/* Decorative shine only for partner */}
-            {role === 'partner' && <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>}
-            
+          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-[#15181D] border-white/5'} border-t px-2 pt-2 pb-4 flex items-start justify-around`}>
             {[
-              { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },
-              { id: 'watch', icon: <Tv2 className="w-6 h-6" />, label: 'WATCH' },
-              { id: 'task_wall', icon: <Rocket className="w-6 h-6" />, label: 'SURVEYS' },
-              { id: 'tasks', icon: <Zap className="w-6 h-6" />, label: 'TASKS' },
-              { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PRO' },
-            ].map((tab) => (
-              <button 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-14 relative transition-all duration-300 ${activeTab === tab.id ? 'text-amber-500' : (role === 'partner' ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600')}`}
-              >
-                {activeTab === tab.id && (
-                  <motion.div 
-                    layoutId="activeTab"
-                    className={`absolute inset-0 rounded-2xl border ${role === 'partner' ? 'bg-white/5 border-white/5 shadow-inner' : 'bg-amber-50 border-amber-100'} -mb-4`}
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                
-                <div className={`relative z-10 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-1' : ''}`}>
-                  {activeTab === tab.id && role === 'partner' && (
-                    <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full"></div>
-                  )}
-                  {tab.icon}
-                </div>
-                
-                <span className={`relative z-10 text-[9px] font-black uppercase tracking-[0.2em] leading-none text-center transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-105' : 'opacity-80'}`}>
-                  {tab.label}
-                </span>
-
-                {activeTab === tab.id && (
-                  <div className={`absolute -bottom-2 w-1.5 h-1.5 rounded-full ${role === 'partner' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,1)]' : 'bg-amber-500'}`}></div>
-                )}
-              </button>
-            ))}
+              { id: 'home', icon: <LayoutGrid className="w-5 h-5" />, label: 'Home' },
+              { id: 'watch', icon: <Tv2 className="w-5 h-5" />, label: 'Watch' },
+              { id: 'task_wall', icon: <Rocket className="w-5 h-5" />, label: 'Surveys' },
+              { id: 'tasks', icon: <Zap className="w-5 h-5" />, label: 'Tasks' },
+              { id: 'premium', icon: <ShieldCheck className="w-5 h-5" />, label: 'PRO' },
+            ].map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="flex-1 flex flex-col items-center gap-1 active:scale-95 transition"
+                >
+                  <span className={`px-4 py-1.5 rounded-full transition ${active ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : (role === 'partner' ? 'text-zinc-500' : 'text-zinc-500')}`}>
+                    {tab.icon}
+                  </span>
+                  <span className={`text-[10px] font-bold leading-none ${active ? 'text-emerald-400' : (role === 'partner' ? 'text-zinc-400' : 'text-zinc-500')}`}>
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
 

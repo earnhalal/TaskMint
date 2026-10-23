@@ -73,27 +73,27 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
       className="pb-24 px-4 pt-4"
     >
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm border border-slate-100 hover:bg-slate-50">
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
+        <button onClick={onBack} className="p-2 bg-[#15181D] rounded-full shadow-sm border border-white/5 hover:bg-white/5">
+          <ArrowLeft className="w-5 h-5 text-zinc-300" />
         </button>
-        <h2 className="text-xl font-bold text-slate-900">Edit Profile</h2>
+        <h2 className="text-xl font-bold text-white">Edit Profile</h2>
       </div>
 
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-6">
+      <div className="bg-[#15181D] rounded-3xl p-6 shadow-sm border border-white/5 mb-6">
         <div className="flex flex-col items-center mb-8 relative">
-          <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-white text-3xl font-black shadow-xl relative overflow-hidden group mb-6">
+          <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-white text-3xl font-black shadow-xl relative overflow-hidden group mb-6">
             <DynamicAvatar avatarId={avatarId} fallbackText={name} className="w-full h-full" />
           </div>
           
           <div className="w-full mb-6">
-             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">Select Identity</label>
-             <div className="flex bg-slate-100 rounded-xl p-1 w-full max-w-[200px] mx-auto mb-6">
+             <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2 text-center">Select Identity</label>
+             <div className="flex bg-white/10 rounded-xl p-1 w-full max-w-[200px] mx-auto mb-6">
                <button 
                  onClick={() => {
                    setGender('male');
                    if (!maleAvatarIds.includes(avatarId)) setAvatarId(maleAvatarIds[0]);
                  }}
-                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${gender === 'male' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${gender === 'male' ? 'bg-[#15181D] shadow text-teal-400' : 'text-zinc-400'}`}
                >
                  Male
                </button>
@@ -102,7 +102,7 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
                    setGender('female');
                    if (!femaleAvatarIds.includes(avatarId)) setAvatarId(femaleAvatarIds[0]);
                  }}
-                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${gender === 'female' ? 'bg-white shadow text-pink-600' : 'text-slate-500'}`}
+                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${gender === 'female' ? 'bg-[#15181D] shadow text-pink-600' : 'text-zinc-400'}`}
                >
                  Female
                </button>
@@ -113,7 +113,7 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
                  <button
                    key={avId}
                    onClick={() => setAvatarId(avId)}
-                   className={`aspect-square w-full rounded-full overflow-hidden border-[3px] transition-all p-0 ${avatarId === avId ? 'border-amber-400 scale-110 shadow-xl' : 'border-transparent hover:scale-105 opacity-70 hover:opacity-100 shadow-sm'}`}
+                   className={`aspect-square w-full rounded-full overflow-hidden border-[3px] transition-all p-0 ${avatarId === avId ? 'border-emerald-400 scale-110 shadow-xl' : 'border-transparent hover:scale-105 opacity-70 hover:opacity-100 shadow-sm'}`}
                  >
                    <DynamicAvatar avatarId={avId} fallbackText={name} className="w-full h-full" />
                  </button>
@@ -124,41 +124,41 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Full Name</label>
+            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Full Name</label>
             <input 
               type="text" 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email Address</label>
+            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Email Address</label>
             <input 
               type="email" 
               value={email}
               readOnly
-              className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-500 cursor-not-allowed"
+              className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-zinc-400 cursor-not-allowed"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Phone Number</label>
+            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Phone Number</label>
             <input 
               type="tel" 
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Country</label>
+            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">Country</label>
             <input 
               list="countries"
               type="text" 
               placeholder="Search or enter country"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
             <datalist id="countries">
               <option value="Pakistan" />
@@ -172,13 +172,13 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
             </datalist>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">City</label>
+            <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">City</label>
             <input 
               type="text" 
               placeholder="Enter your city"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
           </div>
         </div>

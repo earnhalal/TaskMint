@@ -304,21 +304,21 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
         <div className="flex items-center gap-4">
           <button 
             onClick={onBack}
-            className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 hover:bg-slate-50 shadow-sm transition-all active:scale-90"
+            className="w-12 h-12 rounded-2xl bg-[#15181D] border border-white/10 flex items-center justify-center text-white hover:bg-white/5 shadow-sm transition-all active:scale-90"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="min-w-0">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2 truncate">
-              Mega <span className="text-indigo-600">Lottery</span> <Sparkles className="w-6 h-6 text-amber-500 animate-pulse flex-shrink-0" />
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tighter italic flex items-center gap-2 truncate">
+              Mega <span className="text-teal-400">Lottery</span> <Sparkles className="w-6 h-6 text-emerald-500 animate-pulse flex-shrink-0" />
             </h2>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Prize Network</p>
+            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Global Prize Network</p>
           </div>
         </div>
         
-        <div className="hidden sm:flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-2xl">
-           <Users className="w-4 h-4 text-indigo-600" />
-           <span className="text-xs font-black text-indigo-900 uppercase">Live Network</span>
+        <div className="hidden sm:flex items-center gap-2 bg-teal-500/10 border border-teal-100 px-4 py-2 rounded-2xl">
+           <Users className="w-4 h-4 text-teal-400" />
+           <span className="text-xs font-black text-teal-900 uppercase">Live Network</span>
         </div>
       </div>
 
@@ -326,48 +326,48 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="mb-10 relative overflow-hidden rounded-[2.5rem] bg-[#0A0B0F] p-6 sm:p-8 shadow-2xl border border-white/5"
+        className="mb-10 relative overflow-hidden rounded-[2.5rem] bg-[#022c22] p-6 sm:p-8 shadow-2xl border border-white/5"
       >
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl -mr-40 -mt-40 animate-pulse"></div>
+        <div className="absolute top-0 right-0 w-80 h-80 bg-teal-600/10 rounded-full blur-3xl -mr-40 -mt-40 animate-pulse"></div>
         
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
             <div className="flex-1 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full mb-4 text-amber-500 text-[9px] font-black uppercase tracking-widest">
+                <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full mb-4 text-emerald-500 text-[9px] font-black uppercase tracking-widest">
                    <Flame className="w-3 h-3 fill-current" /> High Stakes Active
                 </div>
-                <h3 className="text-3xl font-black text-white mb-3 tracking-tight italic">Fortune <span className="text-indigo-400">Accelerator</span></h3>
-                <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-sm mb-6">
+                <h3 className="text-3xl font-black text-white mb-3 tracking-tight italic">Fortune <span className="text-teal-400">Accelerator</span></h3>
+                <p className="text-zinc-500 text-sm font-medium leading-relaxed max-w-sm mb-6">
                     Join our decentralized prize pool. Every ticket entry increases your probability of payout.
                 </p>
                 <div className="flex items-center justify-center md:justify-start gap-6">
                     <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Payouts</p>
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Total Payouts</p>
                         <p className="text-xl font-black text-white italic tracking-tighter">Rs 5M+</p>
                     </div>
                     <div className="w-px h-10 bg-white/10"></div>
                     <div>
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Status</p>
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Status</p>
                         <p className="text-xl font-black text-white italic tracking-tighter">Instant Draw</p>
                     </div>
                 </div>
             </div>
             
             <div className="bg-white/5 backdrop-blur-xl p-6 sm:p-8 rounded-[3rem] border border-white/10 shadow-inner shrink-0 text-center w-full md:w-auto">
-               <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-2">Available Balance</p>
+               <p className="text-[9px] font-black text-teal-400 uppercase tracking-widest mb-2">Available Balance</p>
                <p className="text-3xl sm:text-4xl font-black text-white italic tracking-tighter mb-4">Rs {balance.toLocaleString()}</p>
                
                {freeTickets > 0 && (
                  <motion.div 
                    initial={{ opacity: 0, y: 10 }}
                    animate={{ opacity: 1, y: 0 }}
-                   className="mb-4 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-2xl flex items-center justify-center gap-2"
+                   className="mb-4 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-2xl flex items-center justify-center gap-2"
                  >
-                   <Crown className="w-3 h-3 text-amber-500" />
-                   <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Free Tickets Available: {freeTickets}</span>
+                   <Crown className="w-3 h-3 text-emerald-500" />
+                   <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Free Tickets Available: {freeTickets}</span>
                  </motion.div>
                )}
 
-               <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center mx-auto border border-indigo-500/30 text-indigo-400">
+               <div className="w-12 h-12 bg-teal-500/20 rounded-2xl flex items-center justify-center mx-auto border border-teal-500/30 text-teal-400">
                   <Ticket className="w-7 h-7" />
                </div>
             </div>
@@ -377,13 +377,13 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
       {/* Notifications */}
       <AnimatePresence>
           {errorMsg && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-red-50 text-red-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-red-100 shadow-lg shadow-red-500/5">
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-red-500/10 text-red-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-red-100 shadow-lg shadow-red-500/5">
               <AlertCircle className="w-5 h-5 shrink-0" /> {errorMsg}
             </motion.div>
           )}
 
           {showSuccess && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-emerald-50 text-emerald-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-emerald-100 shadow-lg shadow-emerald-500/5">
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-emerald-500/10 text-emerald-400 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
               <CheckCircle2 className="w-5 h-5 shrink-0" /> Entry Encrypted & Secured
             </motion.div>
           )}
@@ -392,23 +392,23 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
       {/* Grid */}
       <div className="mb-16">
         <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
-                <Crown className="w-4 h-4 text-amber-500" /> Active Operations
+            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-2">
+                <Crown className="w-4 h-4 text-emerald-500" /> Active Operations
             </h3>
         </div>
         
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-12 h-12 border-4 border-slate-100 border-t-indigo-600 rounded-full animate-spin mb-6 shadow-xl"></div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scanning Network...</p>
+            <div className="w-12 h-12 border-4 border-white/5 border-t-teal-600 rounded-full animate-spin mb-6 shadow-xl"></div>
+            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Scanning Network...</p>
           </div>
         ) : lotteries.length === 0 ? (
-          <div className="bg-[#111218] rounded-[3rem] border border-white/5 p-16 text-center shadow-inner">
-            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-500">
+          <div className="bg-[#022c22] rounded-[3rem] border border-white/5 p-16 text-center shadow-inner">
+            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 text-zinc-400">
               <Ticket className="w-10 h-10" />
             </div>
             <p className="text-xl font-black text-white mb-2 italic uppercase">Zero Active Nodes</p>
-            <p className="text-xs text-slate-500 font-medium">Internal systems are recalibrating. Standby for next cycle.</p>
+            <p className="text-xs text-zinc-400 font-medium">Internal systems are recalibrating. Standby for next cycle.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -424,24 +424,24 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                     key={lottery.id} 
                     className="relative group block h-full"
                   >
-                    <div className="absolute inset-0 bg-indigo-500/10 blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-teal-500/10 blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     
-                    <div className="relative bg-[#111218] rounded-[2.5rem] overflow-hidden border border-white/5 transition-all duration-500 hover:translate-y-[-8px] hover:border-indigo-500/30 flex flex-col h-full">
+                    <div className="relative bg-[#022c22] rounded-[2.5rem] overflow-hidden border border-white/5 transition-all duration-500 hover:translate-y-[-8px] hover:border-teal-500/30 flex flex-col h-full">
                         <div className="absolute top-0 inset-x-0 h-1 flex">
-                            <div className="flex-1 bg-amber-500/30" />
-                            <div className="flex-1 bg-indigo-500/30" />
-                            <div className="flex-1 bg-purple-500/30" />
+                            <div className="flex-1 bg-emerald-500/30" />
+                            <div className="flex-1 bg-teal-500/30" />
+                            <div className="flex-1 bg-emerald-500/30" />
                         </div>
 
                         <div className="p-6 pb-0 flex justify-between items-start">
                             <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-                                   <Crown className="w-4 h-4 text-amber-500" />
+                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                                   <Crown className="w-4 h-4 text-emerald-500" />
                                 </div>
-                                <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic">Mega Pool</span>
+                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest italic">Mega Pool</span>
                             </div>
                             <div className="text-right">
-                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Ticket Fee</p>
+                                <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Ticket Fee</p>
                                 <div className="flex items-center justify-end gap-1">
                                     <span className="text-sm font-black text-white italic">Rs {lottery.fee}</span>
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -450,20 +450,20 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                         </div>
 
                         <div className="px-6 py-8 text-center flex-1 flex flex-col justify-center">
-                            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2 leading-none">Global Prize Fund</p>
+                            <p className="text-[10px] font-black text-teal-400 uppercase tracking-[0.4em] mb-2 leading-none">Global Prize Fund</p>
                             <h4 className="text-5xl font-black text-white tracking-tighter italic drop-shadow-2xl flex items-center justify-center gap-1">
-                                <span className="text-xl text-slate-500 not-italic mr-1">Rs</span>
+                                <span className="text-xl text-zinc-400 not-italic mr-1">Rs</span>
                                 {lottery.prizePool.toLocaleString()}
                             </h4>
                         </div>
 
                         <div className="px-6 grid grid-cols-2 gap-3 mb-6">
                             <div className="bg-white/5 p-3 rounded-2xl border border-white/10 flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0">
+                                <div className="w-8 h-8 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 shrink-0">
                                     <Users className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Network</p>
+                                    <p className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">Network</p>
                                     <p className="text-[10px] font-black text-white italic">{lottery.maxMembers} Spots</p>
                                 </div>
                             </div>
@@ -472,7 +472,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                     <Shield className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <p className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Legal</p>
+                                    <p className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">Legal</p>
                                     <p className="text-[10px] font-black text-emerald-400 uppercase italic">Secure</p>
                                 </div>
                             </div>
@@ -480,20 +480,20 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
 
                         <div className="px-6 space-y-2 mb-8">
                             <div className="flex justify-between items-end">
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Initialization</p>
-                                <span className="text-[9px] font-black text-indigo-400 italic font-mono">{Math.round(fillPercentage)}%</span>
+                                <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Initialization</p>
+                                <span className="text-[9px] font-black text-teal-400 italic font-mono">{Math.round(fillPercentage)}%</span>
                             </div>
                             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden relative border border-white/5">
                                 <motion.div 
                                     initial={{ width: 0 }}
                                     animate={{ width: `${fillPercentage}%` }}
                                     transition={{ duration: 1.5, ease: "easeOut" }}
-                                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-600 via-purple-500 to-indigo-600"
+                                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-teal-600 via-emerald-500 to-teal-600"
                                 />
                             </div>
                             <div className="flex justify-between">
-                                <p className="text-[7px] font-black text-slate-600 uppercase tracking-widest">{lottery.currentMembers} Joined</p>
-                                <p className="text-[7px] font-black text-slate-600 uppercase tracking-widest">{lottery.maxMembers - lottery.currentMembers} Remaining</p>
+                                <p className="text-[7px] font-black text-zinc-300 uppercase tracking-widest">{lottery.currentMembers} Joined</p>
+                                <p className="text-[7px] font-black text-zinc-300 uppercase tracking-widest">{lottery.maxMembers - lottery.currentMembers} Remaining</p>
                             </div>
                         </div>
 
@@ -507,8 +507,8 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                     isJoined 
                                     ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' 
                                     : lottery.currentMembers >= lottery.maxMembers
-                                    ? 'bg-white/5 text-slate-600 cursor-not-allowed border border-white/5'
-                                    : 'bg-white text-[#0A0B0F] shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:bg-slate-100'
+                                    ? 'bg-white/5 text-zinc-300 cursor-not-allowed border border-white/5'
+                                    : 'bg-[#15181D] text-[#022c22] shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:bg-white/10'
                                 }`}
                             >
                                 {isJoined ? (
@@ -536,14 +536,14 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="space-y-6">
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
+            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-2">
                 <Users className="w-4 h-4 text-blue-500" /> Recent Activity
             </h3>
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden min-h-[400px]">
+            <div className="bg-[#15181D] rounded-[2.5rem] border border-white/5 shadow-xl overflow-hidden min-h-[400px]">
                 <div className="p-2 space-y-1">
                     {recentEntries.length === 0 ? (
                         <div className="text-center py-20">
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-60">System idle. No recent activity.</p>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest italic opacity-60">System idle. No recent activity.</p>
                         </div>
                     ) : (
                         recentEntries.map((entry, i) => (
@@ -551,10 +551,10 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 key={entry.id || i} 
-                                className="flex items-center justify-between p-5 hover:bg-slate-50 transition-all rounded-[1.5rem] group"
+                                className="flex items-center justify-between p-5 hover:bg-white/5 transition-all rounded-[1.5rem] group"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shadow-sm overflow-hidden border border-slate-200">
+                                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shadow-sm overflow-hidden border border-white/10">
                                         <DynamicAvatar 
                                           avatarId={entry.userAvatar} 
                                           fallbackText={getDisplayName(entry)} 
@@ -562,13 +562,13 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                         />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-black text-slate-900 italic tracking-tight">{getDisplayName(entry)}</p>
-                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Acquired Entry</p>
+                                        <p className="text-xs font-black text-white italic tracking-tight">{getDisplayName(entry)}</p>
+                                        <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mt-1">Acquired Entry</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-[10px] font-black text-emerald-600 italic tracking-widest uppercase">Verified</p>
-                                    <p className="text-[8px] font-bold text-slate-400 mt-0.5">{entry.timestamp?.toDate ? entry.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Pending'}</p>
+                                    <p className="text-[10px] font-black text-emerald-400 italic tracking-widest uppercase">Verified</p>
+                                    <p className="text-[8px] font-bold text-zinc-500 mt-0.5">{entry.timestamp?.toDate ? entry.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Pending'}</p>
                                 </div>
                             </motion.div>
                         ))
@@ -578,10 +578,10 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-amber-500" /> Hall of Fame
+            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-emerald-500" /> Hall of Fame
             </h3>
-            <div className="bg-[#0A0B0F] rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden min-h-[400px] text-white">
+            <div className="bg-[#022c22] rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden min-h-[400px] text-white">
                  <div className="p-2 space-y-1 relative z-10">
                     {pastWinners.length === 0 ? (
                         <div className="text-center py-20 opacity-40">
@@ -592,18 +592,18 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                             <div key={i} className="flex items-center justify-between p-6 hover:bg-white/5 transition-all rounded-[1.5rem] border border-transparent hover:border-white/5">
                                 <div className="flex items-center gap-5">
                                     <div className="relative">
-                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center border border-white/10 shadow-2xl shadow-amber-500/20 overflow-hidden p-0.5">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center border border-white/10 shadow-2xl shadow-emerald-500/20 overflow-hidden p-0.5">
                                             <DynamicAvatar 
                                               avatarId={winner.userAvatar} 
                                               fallbackText={getDisplayName(winner)} 
                                               className="w-full h-full" 
                                             />
                                         </div>
-                                        <Star className="absolute -top-2 -right-2 w-5 h-5 text-amber-400 fill-current" />
+                                        <Star className="absolute -top-2 -right-2 w-5 h-5 text-emerald-400 fill-current" />
                                     </div>
                                     <div>
                                         <p className="text-lg font-black text-white italic tracking-tighter">{getDisplayName(winner)}</p>
-                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1 italic truncate max-w-[120px]">{winner.lotteryName}</p>
+                                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mt-1 italic truncate max-w-[120px]">{winner.lotteryName}</p>
                                     </div>
                                 </div>
                                 <div className="text-right flex-shrink-0">

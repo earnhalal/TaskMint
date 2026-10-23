@@ -34,7 +34,7 @@ const platforms = [
         icon: <Youtube className="w-5 h-5" />, 
         largeIcon: <Youtube className="w-12 h-12" />,
         color: '#FF0000',
-        bgColor: 'bg-red-50',
+        bgColor: 'bg-red-500/10',
         borderColor: 'border-red-100',
         glowColor: 'shadow-red-500/20',
         themeBg: 'bg-gradient-to-br from-red-600 via-red-900 to-black',
@@ -55,8 +55,8 @@ const platforms = [
         icon: <Music2 className="w-5 h-5" />, 
         largeIcon: <Music2 className="w-12 h-12" />,
         color: '#000000',
-        bgColor: 'bg-slate-50',
-        borderColor: 'border-slate-200',
+        bgColor: 'bg-white/5',
+        borderColor: 'border-white/10',
         glowColor: 'shadow-slate-500/20',
         themeBg: 'bg-[#010101]',
         themeText: 'text-white',
@@ -76,7 +76,7 @@ const platforms = [
         icon: <Facebook className="w-5 h-5" />, 
         largeIcon: <Facebook className="w-12 h-12" />,
         color: '#1877F2',
-        bgColor: 'bg-blue-50',
+        bgColor: 'bg-blue-500/10',
         borderColor: 'border-blue-100',
         glowColor: 'shadow-blue-500/20',
         themeBg: 'bg-gradient-to-br from-blue-600 via-blue-800 to-[#0f172a]',
@@ -96,14 +96,14 @@ const platforms = [
         icon: <Instagram className="w-5 h-5" />, 
         largeIcon: <Instagram className="w-12 h-12" />,
         color: '#E4405F',
-        bgColor: 'bg-pink-50',
+        bgColor: 'bg-pink-500/10',
         borderColor: 'border-pink-100',
         glowColor: 'shadow-pink-500/20',
         themeBg: 'bg-gradient-to-br from-[#f09433] via-[#dc2743] to-[#bc1888]',
         themeText: 'text-white',
         cardBg: 'bg-white/10 backdrop-blur-xl border-white/20',
         inputBg: 'bg-black/20 border-white/30 text-white placeholder:text-white/60 focus:border-white focus:ring-white/20',
-        btnBg: 'bg-white text-[#dc2743] hover:bg-slate-100 shadow-[0_0_20px_rgba(255,255,255,0.3)]',
+        btnBg: 'bg-[#15181D] text-[#dc2743] hover:bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.3)]',
         services: [
             { id: 'ig_followers', name: 'Followers', price: 0.70 },
             { id: 'ig_likes', name: 'Reels Likes', price: 0.40 },
@@ -116,10 +116,10 @@ const platforms = [
         icon: <Globe className="w-5 h-5" />, 
         largeIcon: <Globe className="w-12 h-12" />,
         color: '#10B981',
-        bgColor: 'bg-emerald-50',
-        borderColor: 'border-emerald-100',
+        bgColor: 'bg-emerald-500/10',
+        borderColor: 'border-emerald-500/20',
         glowColor: 'shadow-emerald-500/20',
-        themeBg: 'bg-gradient-to-br from-emerald-500 via-teal-700 to-slate-900',
+        themeBg: 'bg-gradient-to-br from-emerald-500 via-teal-700 to-[#0B0D10]',
         themeText: 'text-white',
         cardBg: 'bg-white/10 backdrop-blur-xl border-white/10',
         inputBg: 'bg-black/20 border-white/20 text-white placeholder:text-white/50 focus:border-emerald-400 focus:ring-emerald-400/20',
@@ -135,14 +135,14 @@ const platforms = [
         icon: <MoreHorizontal className="w-5 h-5" />, 
         largeIcon: <MoreHorizontal className="w-12 h-12" />,
         color: '#6366F1',
-        bgColor: 'bg-indigo-50',
-        borderColor: 'border-indigo-100',
-        glowColor: 'shadow-indigo-500/20',
-        themeBg: 'bg-gradient-to-br from-indigo-600 via-purple-800 to-slate-900',
+        bgColor: 'bg-teal-500/10',
+        borderColor: 'border-teal-100',
+        glowColor: 'shadow-teal-500/20',
+        themeBg: 'bg-gradient-to-br from-teal-600 via-emerald-800 to-[#0B0D10]',
         themeText: 'text-white',
         cardBg: 'bg-white/10 backdrop-blur-xl border-white/10',
-        inputBg: 'bg-black/20 border-white/20 text-white placeholder:text-white/50 focus:border-indigo-400 focus:ring-indigo-400/20',
-        btnBg: 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]',
+        inputBg: 'bg-black/20 border-white/20 text-white placeholder:text-white/50 focus:border-teal-400 focus:ring-teal-400/20',
+        btnBg: 'bg-teal-500 hover:bg-teal-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]',
         services: [
             { id: 'other_custom', name: 'Custom Service', price: 1.00 },
         ]
@@ -289,11 +289,11 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
     return (
         <div className="animate-fade-in-up" style={{ animationDelay: '350ms' }}>
             <div className="flex items-center justify-between mb-4 px-1">
-                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-amber-500 fill-amber-500" /> 
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-emerald-500 fill-emerald-500" /> 
                     Quick Promotions
                 </h2>
-                <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-tighter">Premium</span>
+                <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">Premium</span>
             </div>
 
             {/* Platform Grid */}
@@ -305,12 +305,12 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                         className={`p-3 rounded-2xl border ${platform.borderColor} ${platform.bgColor} flex flex-col items-center justify-center gap-2 transition-all hover:scale-[1.05] active:scale-95 shadow-sm ${platform.glowColor} group`}
                     >
                         <div 
-                            className="p-2.5 bg-white rounded-xl shadow-sm transition-transform group-hover:scale-110"
+                            className="p-2.5 bg-[#15181D] rounded-xl shadow-sm transition-transform group-hover:scale-110"
                             style={{ color: platform.color }}
                         >
                             {platform.icon}
                         </div>
-                        <span className="text-[10px] font-black text-slate-700">{platform.name}</span>
+                        <span className="text-[10px] font-black text-zinc-200">{platform.name}</span>
                     </button>
                 ))}
             </div>
@@ -340,7 +340,7 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                         <span className="text-sm font-bold text-white hidden sm:inline">Back</span>
                                     </button>
                                     <div className="font-black text-xl tracking-tighter text-white drop-shadow-md">
-                                        Task<span className="text-amber-400">Mint</span>
+                                        Task<span className="text-emerald-400">Mint</span>
                                     </div>
                                     <div className="w-16 sm:w-20"></div> {/* Spacer for centering */}
                                 </div>
@@ -365,7 +365,7 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                                         className={`w-full p-5 rounded-2xl ${selectedPlatform.cardBg} hover:bg-white/20 transition-all flex items-center justify-between group shadow-lg`}
                                                     >
                                                         <div className="flex items-center gap-4">
-                                                            <div className="w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+                                                            <div className="w-2.5 h-2.5 rounded-full bg-[#15181D] shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
                                                             <span className="text-lg font-bold">{service.name}</span>
                                                         </div>
                                                         <div className="flex items-center gap-4">
@@ -475,7 +475,7 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                                             <button 
                                                                 key={q}
                                                                 onClick={() => setQuantity(q)}
-                                                                className={`text-xs font-black px-4 py-2 rounded-xl transition-all ${quantity === q ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.5)]' : 'bg-black/30 hover:bg-black/50 text-white'}`}
+                                                                className={`text-xs font-black px-4 py-2 rounded-xl transition-all ${quantity === q ? 'bg-[#15181D] text-black shadow-[0_0_15px_rgba(255,255,255,0.5)]' : 'bg-black/30 hover:bg-black/50 text-white'}`}
                                                             >
                                                                 {q}
                                                             </button>
@@ -557,7 +557,7 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                                                 <div key={order.id} className={`p-5 rounded-2xl ${selectedPlatform.cardBg} flex flex-col gap-3 shadow-lg`}>
                                                                     <div className="flex justify-between items-center">
                                                                         <span className="font-bold text-base">{order.service}</span>
-                                                                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-lg ${order.status === 'completed' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : order.status === 'pending' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-white/10 border border-white/20'}`}>
+                                                                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-lg ${order.status === 'completed' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : order.status === 'pending' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/10 border border-white/20'}`}>
                                                                             {order.status}
                                                                         </span>
                                                                     </div>

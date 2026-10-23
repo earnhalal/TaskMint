@@ -427,7 +427,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Ads...</p>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Loading Ads...</p>
       </div>
     );
   }
@@ -440,15 +440,15 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     >
       {/* Neural Background Layers */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-full h-full bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-full h-[80%] bg-gradient-to-tl from-purple-500/10 via-transparent to-transparent blur-[140px] rounded-full" />
+        <div className="absolute top-[-20%] left-[-10%] w-full h-full bg-gradient-to-br from-teal-500/10 via-transparent to-transparent blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-full h-[80%] bg-gradient-to-tl from-emerald-500/10 via-transparent to-transparent blur-[140px] rounded-full" />
       </div>
 
       {/* Payout Ticker */}
-      <div className="relative z-[110] bg-indigo-600/10 backdrop-blur-md border-b border-white/5 h-8 flex items-center overflow-hidden w-full">
+      <div className="relative z-[110] bg-teal-600/10 backdrop-blur-md border-b border-white/5 h-8 flex items-center overflow-hidden w-full">
         <div className="flex items-center gap-4 px-6 animate-marquee whitespace-nowrap">
-           <Zap className="w-2.5 h-2.5 text-indigo-400" />
-           <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200/60">
+           <Zap className="w-2.5 h-2.5 text-teal-400" />
+           <p className="text-[10px] font-black uppercase tracking-widest text-teal-200/60">
              {tickerMessage || "Connecting to Neural Node..."}
            </p>
         </div>
@@ -464,7 +464,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             <ArrowLeft className="w-5 h-5 text-white/70" />
           </button>
           <div>
-            <h2 className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-0.5">Transmission</h2>
+            <h2 className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Transmission</h2>
             <h3 className="text-lg font-black text-white italic tracking-tight truncate max-w-[120px]">{userName}</h3>
           </div>
         </div>
@@ -479,7 +479,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
 
       <div className="relative z-10 w-full p-5 space-y-8">
         {/* Banner */}
-        <div className="relative rounded-3xl p-8 overflow-hidden bg-gradient-to-br from-indigo-600 to-indigo-900 shadow-2xl border border-white/10">
+        <div className="relative rounded-3xl p-8 overflow-hidden bg-gradient-to-br from-teal-600 to-teal-900 shadow-2xl border border-white/10">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
           <div className="relative z-10 flex items-center justify-between">
             <div>
@@ -573,7 +573,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     if (isTimeLocked) return;
                     handleWatchAd(ad);
                   }}
-                  className={`group relative bg-[#151E32]/50 border border-white/5 rounded-[2rem] overflow-hidden transition-all duration-300 hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10 cursor-pointer ${
+                  className={`group relative bg-[#064e3b]/50 border border-white/5 rounded-[2rem] overflow-hidden transition-all duration-300 hover:border-teal-500/40 hover:shadow-2xl hover:shadow-teal-500/10 cursor-pointer ${
                     isLocked ? 'grayscale opacity-70' : ''
                   }`}
                 >
@@ -585,13 +585,13 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     />
                     
                     {/* Dark Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#151E32] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#064e3b] via-transparent to-transparent" />
                     
                     {/* Payout Badge - VISIBLE AND PROMINENT */}
                     <div className="absolute bottom-4 right-4">
                       <div className={`px-4 py-1.5 rounded-xl border backdrop-blur-xl shadow-lg flex items-center gap-2 ${
-                         ad.tier === 'gold' ? 'bg-amber-500/90 border-amber-400 text-white' :
-                         ad.tier === 'silver' ? 'bg-indigo-600/90 border-indigo-400 text-white' :
+                         ad.tier === 'gold' ? 'bg-emerald-500/90 border-emerald-400 text-white' :
+                         ad.tier === 'silver' ? 'bg-teal-600/90 border-teal-400 text-white' :
                          'bg-emerald-500/90 border-emerald-400 text-white'
                       }`}>
                          <Zap className="w-3 h-3 fill-current" />
@@ -620,8 +620,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     {/* Category Label */}
                     <div className="absolute top-4 left-4">
                        <div className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
-                          ad.tier === 'gold' ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' :
-                          ad.tier === 'silver' ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-400' :
+                          ad.tier === 'gold' ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' :
+                          ad.tier === 'silver' ? 'bg-teal-500/20 border-teal-500/40 text-teal-400' :
                           'bg-white/10 border-white/10 text-white/60'
                        }`}>
                          {ad.tier || 'Basic'} Node
@@ -630,16 +630,16 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                   </div>
 
                   <div className="px-6 py-8">
-                     <h4 className="text-xl font-black text-white italic uppercase tracking-tight mb-2 truncate group-hover:text-indigo-400 transition-colors">
+                     <h4 className="text-xl font-black text-white italic uppercase tracking-tight mb-2 truncate group-hover:text-teal-400 transition-colors">
                        {ad.title}
                      </h4>
                      <div className="flex items-center gap-3">
-                       <div className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-500">
-                          <Sparkles className="w-3 h-3 text-amber-500" />
+                       <div className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                          <Sparkles className="w-3 h-3 text-emerald-500" />
                           {formatViews(ad.views || 0)} Harmonic Views
                        </div>
                        <div className="w-1 h-1 bg-white/10 rounded-full" />
-                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-600">60s Node</span>
+                       <span className="text-[9px] font-black uppercase tracking-widest text-zinc-300">60s Node</span>
                      </div>
                   </div>
                 </motion.div>
@@ -648,7 +648,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         </div>
 
         <div className="py-20 text-center opacity-30 border-t border-white/5">
-          <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.5em] leading-loose">
+          <p className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.5em] leading-loose">
             TaskMint Neural Node System<br/>
             Secure Earning Environment v3.1
           </p>
@@ -662,13 +662,13 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           <div className={`fixed inset-0 z-[110] flex flex-col ${
             activeAd.tier === 'gold' ? 'bg-[#150F02]' : 
             activeAd.tier === 'silver' ? 'bg-[#0A101F]' :
-            'bg-slate-900'
+            'bg-emerald-600'
           }`}>
             {/* Enchanted background glow */}
             <div className={`absolute inset-0 opacity-40 blur-[150px] pointer-events-none ${
-              activeAd.tier === 'gold' ? 'bg-amber-500/20' : 
+              activeAd.tier === 'gold' ? 'bg-emerald-500/20' : 
               activeAd.tier === 'silver' ? 'bg-blue-500/20' :
-              'bg-indigo-500/10'
+              'bg-teal-500/10'
             }`} />
 
             {/* Progress Bar Top */}
@@ -678,9 +678,9 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                 animate={{ width: adLoaded ? `${((totalTime - timeLeft) / totalTime) * 100}%` : '0%' }}
                 transition={{ duration: 0.5 }}
                 className={`h-full shadow-[0_0_20px_rgba(255,255,255,0.3)] ${
-                  activeAd.tier === 'gold' ? 'bg-gradient-to-r from-amber-500 to-yellow-300' : 
-                  activeAd.tier === 'silver' ? 'bg-gradient-to-r from-blue-500 to-indigo-300' :
-                  'bg-indigo-500'
+                  activeAd.tier === 'gold' ? 'bg-gradient-to-r from-emerald-500 to-amber-300' : 
+                  activeAd.tier === 'silver' ? 'bg-gradient-to-r from-blue-500 to-teal-300' :
+                  'bg-teal-500'
                 }`}
               />
             </div>
@@ -695,15 +695,15 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               <div className="flex items-center justify-between p-6 border-b border-white/5 bg-black/20 backdrop-blur-xl relative z-20">
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center p-[1px] ${
-                    activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-amber-500 to-yellow-300' : 
-                    activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-500 to-indigo-300' :
+                    activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-emerald-500 to-amber-300' : 
+                    activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-500 to-teal-300' :
                     'bg-white/10'
                   }`}>
-                    <div className="w-full h-full bg-slate-900 rounded-[calc(1rem-1px)] flex items-center justify-center">
+                    <div className="w-full h-full bg-emerald-600 rounded-[calc(1rem-1px)] flex items-center justify-center">
                       <PlayCircle className={`w-6 h-6 ${
-                        activeAd.tier === 'gold' ? 'text-amber-400' : 
+                        activeAd.tier === 'gold' ? 'text-emerald-400' : 
                         activeAd.tier === 'silver' ? 'text-blue-400' :
-                        'text-indigo-400'
+                        'text-teal-400'
                       }`} />
                     </div>
                   </div>
@@ -711,9 +711,9 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     <h3 className="text-white font-black text-base tracking-tight leading-none mb-1">{activeAd.title}</h3>
                     <div className="flex items-center gap-2">
                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
-                         activeAd.tier === 'gold' ? 'text-amber-400 border-amber-500/30' : 
+                         activeAd.tier === 'gold' ? 'text-emerald-400 border-emerald-500/30' : 
                          activeAd.tier === 'silver' ? 'text-blue-400 border-blue-500/30' :
-                         'text-indigo-400 border-indigo-500/30'
+                         'text-teal-400 border-teal-500/30'
                        }`}>
                          {activeAd.tier || 'Standard'} Mode
                        </span>
@@ -744,10 +744,10 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                         rotate: { duration: 3, repeat: Infinity, ease: 'linear' },
                         scale: { duration: 2, repeat: Infinity }
                       }}
-                      className="w-16 h-16 rounded-full border-t-2 border-r-2 border-indigo-500 mb-6 shadow-[0_0_30px_rgba(99,102,241,0.2)]"
+                      className="w-16 h-16 rounded-full border-t-2 border-r-2 border-teal-500 mb-6 shadow-[0_0_30px_rgba(99,102,241,0.2)]"
                     />
                     <p className="text-white font-black uppercase tracking-[0.4em] text-[10px] animate-pulse">Initializing Portal</p>
-                    <p className="text-slate-500 text-[9px] mt-4 font-bold max-w-[200px] text-center uppercase tracking-widest">establishing secure transmission link...</p>
+                    <p className="text-zinc-400 text-[9px] mt-4 font-bold max-w-[200px] text-center uppercase tracking-widest">establishing secure transmission link...</p>
                   </div>
                 )}
                 
@@ -755,9 +755,9 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                 <div id="ad-script-container" className="w-full h-full flex items-center justify-center relative z-0 bg-black">
                   {/* Neon border decoration */}
                   <div className={`absolute inset-4 border rounded-[2rem] pointer-events-none opacity-20 ${
-                    activeAd.tier === 'gold' ? 'border-amber-500 shadow-[0_0_50px_rgba(245,158,11,0.2)]' : 
+                    activeAd.tier === 'gold' ? 'border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.2)]' : 
                     activeAd.tier === 'silver' ? 'border-blue-500 shadow-[0_0_50px_rgba(59,130,246,0.2)]' :
-                    'border-indigo-500'
+                    'border-teal-500'
                   }`} />
                   
                   {activeAd.scriptUrl ? (
@@ -813,7 +813,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       }}
                     />
                   ) : (
-                    <p className="text-slate-500 text-xs text-center uppercase tracking-[0.3em]">No Signal</p>
+                    <p className="text-zinc-400 text-xs text-center uppercase tracking-[0.3em]">No Signal</p>
                   )}
                 </div>
               </div>
@@ -823,14 +823,14 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                 {timeLeft > 0 ? (
                   <div className="space-y-6">
                     <div className="flex justify-between items-center px-4">
-                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Node Syncing</span>
-                       <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{Math.round(((totalTime - timeLeft) / totalTime) * 100)}% Complete</span>
+                       <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Node Syncing</span>
+                       <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{Math.round(((totalTime - timeLeft) / totalTime) * 100)}% Complete</span>
                     </div>
                     
                     <div className="bg-white/5 p-6 rounded-[2rem] border border-white/10 text-center relative group overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-2000"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/5 to-teal-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-2000"></div>
                       <p className="text-white text-xs font-black tracking-widest uppercase mb-2">Maintain Connection</p>
-                      <p className="text-slate-500 font-bold text-[9px] uppercase tracking-widest mb-4">do not interrupt the neural stream</p>
+                      <p className="text-zinc-400 font-bold text-[9px] uppercase tracking-widest mb-4">do not interrupt the neural stream</p>
                       
                       <div className="pt-4 border-t border-white/5">
                         <p className="text-rose-500 text-[10px] font-black uppercase tracking-widest animate-pulse flex items-center justify-center gap-2 italic">
@@ -844,17 +844,17 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                   <div className="space-y-4">
                     <motion.div 
                       animate={{ 
-                        boxShadow: activeAd.tier === 'gold' ? ['0 0 20px rgba(245,158,11,0.2)', '0 0 50px rgba(245,158,11,0.6)', '0 0 20px rgba(245,158,11,0.2)'] : []
+                        boxShadow: activeAd.tier === 'gold' ? ['0 0 20px rgba(16,185,129,0.2)', '0 0 50px rgba(16,185,129,0.6)', '0 0 20px rgba(16,185,129,0.2)'] : []
                       }}
                       transition={{ duration: 2, repeat: Infinity }}
                       className={`p-4 rounded-[1.5rem] border text-center transition-all ${
-                        activeAd.tier === 'gold' ? 'bg-amber-500/10 border-amber-500/30' : 
+                        activeAd.tier === 'gold' ? 'bg-emerald-500/10 border-emerald-500/30' : 
                         activeAd.tier === 'silver' ? 'bg-blue-500/10 border-blue-500/30' :
                         'bg-emerald-500/10 border-emerald-500/30'
                       }`}
                     >
                       <p className={`text-sm font-black uppercase tracking-[0.3em] ${
-                        activeAd.tier === 'gold' ? 'text-amber-400' : 
+                        activeAd.tier === 'gold' ? 'text-emerald-400' : 
                         activeAd.tier === 'silver' ? 'text-blue-400' :
                         'text-emerald-400'
                       }`}>Transmission Finalized</p>
@@ -867,16 +867,16 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       onClick={finishAdWatch}
                       disabled={isClaiming}
                       className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden group transition-all duration-500 ${
-                        activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-amber-600 to-yellow-400 text-black' : 
-                        activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-600 to-indigo-400 text-white shadow-blue-500/30' :
-                        'bg-indigo-600 text-white shadow-indigo-600/30 font-black'
+                        activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-emerald-600 to-amber-400 text-black' : 
+                        activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-600 to-teal-400 text-white shadow-blue-500/30' :
+                        'bg-teal-600 text-white shadow-teal-600/30 font-black'
                       }`}
                     >
                       <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                       {isClaiming ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
-                        <Sparkles className={`w-5 h-5 ${activeAd.tier === 'gold' ? 'text-black' : 'text-amber-300'}`} />
+                        <Sparkles className={`w-5 h-5 ${activeAd.tier === 'gold' ? 'text-black' : 'text-emerald-300'}`} />
                       )}
                       {isClaiming ? 'Extracting...' : `Harvest Reward (Rs. ${activeAd.reward})`}
                     </motion.button>
@@ -903,9 +903,9 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               initial={{ opacity: 0, scale: 0.5, y: 100 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5, y: 100 }}
-              className="relative bg-white w-full max-w-sm rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden text-center border-4 border-emerald-500/20"
+              className="relative bg-[#15181D] w-full max-w-sm rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden text-center border-4 border-emerald-500/20"
             >
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-indigo-600"></div>
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-teal-600"></div>
               <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
               
               <div className="relative z-10 flex flex-col items-center">
@@ -913,27 +913,27 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                   <CheckCircle2 className="w-12 h-12" />
                 </div>
 
-                <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Congratulations! 🎉</h3>
-                <p className="text-emerald-600 font-bold text-sm uppercase tracking-[0.2em] mb-6 tracking-widest italic">Dear {userName}</p>
+                <h3 className="text-3xl font-black text-white mb-2 tracking-tight">Congratulations! 🎉</h3>
+                <p className="text-emerald-400 font-bold text-sm uppercase tracking-[0.2em] mb-6 tracking-widest italic">Dear {userName}</p>
                 
-                <div className="bg-slate-50 w-full p-6 rounded-[2rem] mb-6 border border-slate-100 flex flex-col items-center">
+                <div className="bg-white/5 w-full p-6 rounded-[2rem] mb-6 border border-white/5 flex flex-col items-center">
                   <div className="w-full text-left space-y-4">
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-zinc-500">
                       <span>Neural Task</span>
-                      <span className="text-slate-900 line-clamp-1 max-w-[120px]">{showSuccessPopup.adTitle}</span>
+                      <span className="text-white line-clamp-1 max-w-[120px]">{showSuccessPopup.adTitle}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-zinc-500">
                       <span>Harvested</span>
-                      <span className="text-emerald-600 font-black">Rs. {showSuccessPopup.amount.toFixed(2)}</span>
+                      <span className="text-emerald-400 font-black">Rs. {showSuccessPopup.amount.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-400">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-zinc-500">
                       <span>Cycle Date</span>
-                      <span className="text-slate-900">{showSuccessPopup.timestamp}</span>
+                      <span className="text-white">{showSuccessPopup.timestamp}</span>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6 border-b border-slate-100 pb-4">
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-6 border-b border-white/5 pb-4">
                   Verified Reward by TaskMint
                 </p>
 
@@ -964,16 +964,16 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm bg-gradient-to-b from-slate-900 to-black rounded-[3rem] p-8 border border-white/10 shadow-2xl overflow-hidden text-center"
+              className="relative w-full max-w-sm bg-gradient-to-b from-[#15181D] to-black rounded-[3rem] p-8 border border-white/10 shadow-2xl overflow-hidden text-center"
             >
               {/* Decorative Glow */}
               <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 opacity-20 blur-[60px] ${
-                tierLockModal === 'gold' ? 'bg-amber-500' : 'bg-blue-500'
+                tierLockModal === 'gold' ? 'bg-emerald-500' : 'bg-blue-500'
               }`} />
 
               <div className="relative z-10 flex flex-col items-center">
                 <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-2xl ${
-                  tierLockModal === 'gold' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-blue-600 shadow-blue-600/20'
+                  tierLockModal === 'gold' ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-blue-600 shadow-blue-600/20'
                 }`}>
                   <Crown className="w-10 h-10 text-white" />
                 </div>
@@ -982,7 +982,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                   {tierLockModal === 'gold' ? 'Gold VIP' : 'Silver Partner'} Required
                 </h3>
                 
-                <p className="text-slate-400 text-xs font-bold leading-relaxed mb-8 px-4 opacity-80">
+                <p className="text-zinc-500 text-xs font-bold leading-relaxed mb-8 px-4 opacity-80">
                   Yeh premium ad nodes sirf {tierLockModal === 'gold' ? 'Gold VIP' : 'Silver Partner'} members ke liye available hain. Mazeed earning ke liye apna plan upgrade karein.
                 </p>
 
@@ -994,15 +994,15 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     }}
                     className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 ${
                       tierLockModal === 'gold' 
-                        ? 'bg-gradient-to-r from-amber-600 to-yellow-400 text-black' 
-                        : 'bg-gradient-to-r from-blue-600 to-indigo-400 text-white shadow-blue-500/20'
+                        ? 'bg-gradient-to-r from-emerald-600 to-amber-400 text-black' 
+                        : 'bg-gradient-to-r from-blue-600 to-teal-400 text-white shadow-blue-500/20'
                     }`}
                   >
                     Upgrade Plan Now
                   </button>
                   <button 
                     onClick={() => setTierLockModal(null)}
-                    className="w-full py-4 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-white transition-colors"
+                    className="w-full py-4 text-zinc-400 font-black text-[10px] uppercase tracking-widest hover:text-white transition-colors"
                   >
                     Maybe Later
                   </button>
@@ -1028,30 +1028,30 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+              className="relative bg-[#15181D] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
               
               <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-amber-500 mb-6 shadow-sm">
+                <div className="w-20 h-20 bg-emerald-500/10 rounded-3xl flex items-center justify-center text-emerald-500 mb-6 shadow-sm">
                   <Construction className="w-10 h-10" />
                 </div>
                 
-                <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Coming Soon!</h3>
-                <p className="text-amber-600 font-black text-[10px] uppercase tracking-[0.2em] mb-4">Under Maintenance</p>
+                <h3 className="text-2xl font-black text-white mb-2 tracking-tight">Coming Soon!</h3>
+                <p className="text-emerald-400 font-black text-[10px] uppercase tracking-[0.2em] mb-4">Under Maintenance</p>
                 
-                <div className="bg-slate-50 p-6 rounded-3xl mb-8 w-full border border-slate-100">
-                  <p className="text-slate-700 font-bold text-lg leading-relaxed mb-2">
+                <div className="bg-white/5 p-6 rounded-3xl mb-8 w-full border border-white/5">
+                  <p className="text-zinc-200 font-bold text-lg leading-relaxed mb-2">
                     Is feature par kaam ho raha hai.
                   </p>
-                  <p className="text-slate-500 font-medium text-sm">
+                  <p className="text-zinc-400 font-medium text-sm">
                     Thora intezar karein, jald hi high-paying ads active kar diye jayenge. Shukriya!
                   </p>
                 </div>
                 
                 <button 
                   onClick={() => setShowComingSoon(false)}
-                  className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95 shadow-xl shadow-slate-900/20"
+                  className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-emerald-500 transition-all active:scale-95 shadow-xl shadow-slate-900/20"
                 >
                   Theek Hai
                 </button>

@@ -67,18 +67,18 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
     switch (source) {
       case 'ad_watch': return <PlayCircle className="w-5 h-5 text-red-500" />;
       case 'task': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
-      case 'spin': return <Sparkles className="w-5 h-5 text-amber-500" />;
-      case 'lottery': return <Gift className="w-5 h-5 text-purple-500" />;
+      case 'spin': return <Sparkles className="w-5 h-5 text-emerald-500" />;
+      case 'lottery': return <Gift className="w-5 h-5 text-emerald-500" />;
       case 'referral':
       case 'invite_commission': 
       case 'indirect_invite_commission': 
         return <Users className="w-5 h-5 text-blue-500" />;
       case 'app_bonus': return <Wallet className="w-5 h-5 text-rose-500" />;
-      case 'daily_reward': return <Calendar className="w-5 h-5 text-indigo-500" />;
+      case 'daily_reward': return <Calendar className="w-5 h-5 text-teal-500" />;
       case 'commission': return <TrendingUp className="w-5 h-5 text-orange-500" />;
-      case 'partner_upgrade': return <Star className="w-5 h-5 text-indigo-500" />;
-      case 'withdrawal': return <Wallet className="w-5 h-5 text-purple-500" />;
-      default: return <History className="w-5 h-5 text-slate-500" />;
+      case 'partner_upgrade': return <Star className="w-5 h-5 text-teal-500" />;
+      case 'withdrawal': return <Wallet className="w-5 h-5 text-emerald-500" />;
+      default: return <History className="w-5 h-5 text-zinc-400" />;
     }
   };
 
@@ -100,18 +100,18 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
       <div className="flex items-center gap-4 mb-6">
         <button 
           onClick={onBack}
-          className="p-2 bg-white rounded-xl shadow-sm hover:bg-slate-50 transition-colors"
+          className="p-2 bg-[#15181D] rounded-xl shadow-sm hover:bg-white/5 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
+          <ArrowLeft className="w-5 h-5 text-zinc-300" />
         </button>
         <div>
-          <h2 className="text-xl font-black text-slate-900 tracking-tight">Earning History</h2>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Track all your rewards</p>
+          <h2 className="text-xl font-black text-white tracking-tight">Earning History</h2>
+          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Track all your rewards</p>
         </div>
       </div>
 
       {/* Summary Card */}
-      <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white mb-6 relative overflow-hidden shadow-2xl shadow-slate-900/20 flex flex-col gap-6">
+      <div className="bg-emerald-600 rounded-[2.5rem] p-8 text-white mb-6 relative overflow-hidden shadow-2xl shadow-slate-900/20 flex flex-col gap-6">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
         <div className="relative z-10 flex flex-col sm:flex-row justify-between gap-6">
             <div>
@@ -127,7 +127,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
             <div className="pt-4 sm:pt-0 sm:pl-6 sm:border-l border-white/10">
               <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Indirect Team Income</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-amber-400 tracking-tighter">Rs. {totalIndirectCommission.toFixed(2)}</span>
+                <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rs. {totalIndirectCommission.toFixed(2)}</span>
               </div>
             </div>
             )}
@@ -142,8 +142,8 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
             onClick={() => setFilter(f)}
             className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all ${
               filter === f 
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20' 
-                : 'bg-white text-slate-500 border border-slate-100'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-slate-900/20' 
+                : 'bg-[#15181D] text-zinc-400 border border-white/5'
             }`}
           >
             {f === 'all' ? 'All Activity' : getSourceLabel(f)}
@@ -156,7 +156,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <Loader2 className="w-8 h-8 text-slate-300 animate-spin" />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loading History...</p>
+            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Loading History...</p>
           </div>
         ) : filteredHistory.length > 0 ? (
           filteredHistory.map((item, index) => (
@@ -165,21 +165,21 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between"
+              className="bg-[#15181D] p-4 rounded-2xl border border-white/5 shadow-sm flex items-center justify-between"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
                   {getSourceIcon(item.source)}
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm">{item.description}</h4>
-                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                  <h4 className="font-bold text-white text-sm">{item.description}</h4>
+                  <p className="text-[10px] text-zinc-500 font-medium mt-0.5">
                     {item.timestamp?.toDate ? item.timestamp.toDate().toLocaleString() : 'Just now'}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <span className={`font-black text-sm ${(item.type === 'expense' || item.amount < 0) ? 'text-red-500' : 'text-emerald-600'}`}>
+                <span className={`font-black text-sm ${(item.type === 'expense' || item.amount < 0) ? 'text-red-500' : 'text-emerald-400'}`}>
                   {(item.type === 'expense' || item.amount < 0) ? '-' : '+'}Rs. {Math.abs(item.amount).toFixed(2)}
                 </span>
                 <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5">
@@ -189,12 +189,12 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
             </motion.div>
           ))
         ) : (
-          <div className="bg-slate-50 rounded-[2rem] p-12 text-center border border-dashed border-slate-200">
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <div className="bg-white/5 rounded-[2rem] p-12 text-center border border-dashed border-white/10">
+            <div className="w-16 h-16 bg-[#15181D] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
               <History className="w-8 h-8 text-slate-300" />
             </div>
-            <h3 className="text-slate-900 font-black text-lg mb-1">No History Yet</h3>
-            <p className="text-slate-400 text-xs font-medium">Start earning to see your activity here!</p>
+            <h3 className="text-white font-black text-lg mb-1">No History Yet</h3>
+            <p className="text-zinc-500 text-xs font-medium">Start earning to see your activity here!</p>
           </div>
         )}
       </div>

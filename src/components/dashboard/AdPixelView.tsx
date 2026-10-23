@@ -29,22 +29,22 @@ export default function AdPixelView({ onBack }: AdPixelViewProps) {
   return (
     <div className="animate-fade-in pb-24">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={onBack} className="p-2 bg-white rounded-full shadow-sm border border-slate-100 hover:bg-slate-50">
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
+        <button onClick={onBack} className="p-2 bg-[#15181D] rounded-full shadow-sm border border-white/5 hover:bg-white/5">
+          <ArrowLeft className="w-5 h-5 text-zinc-300" />
         </button>
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Tracking Pixel Setup</h2>
-          <p className="text-xs text-slate-500">Track conversions on your website.</p>
+          <h2 className="text-xl font-bold text-white">Tracking Pixel Setup</h2>
+          <p className="text-xs text-zinc-400">Track conversions on your website.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-        <p className="text-sm text-slate-600 mb-6">
+      <div className="bg-[#15181D] rounded-2xl p-5 shadow-sm border border-white/5">
+        <p className="text-sm text-zinc-300 mb-6">
           Install this code snippet in the <code>&lt;head&gt;</code> of your website to track conversions and optimize your ad campaigns.
         </p>
         
         <div className="relative group">
-          <div className="bg-slate-900 p-4 rounded-xl overflow-x-auto mb-6">
+          <div className="bg-emerald-600 p-4 rounded-xl overflow-x-auto mb-6">
             <pre className="text-green-400 text-xs sm:text-sm font-mono whitespace-pre-wrap break-all">
               {pixelCode}
             </pre>

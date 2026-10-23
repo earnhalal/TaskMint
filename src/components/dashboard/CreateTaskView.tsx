@@ -9,11 +9,11 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 );
 
 const TASK_TYPES = [
-  { id: 'yt_sub', name: 'YouTube Subscribers', icon: <Youtube className="w-6 h-6" />, color: 'bg-red-50 text-red-600 border-red-100', placeholder: 'https://youtube.com/c/yourchannel' },
-  { id: 'fb_follow', name: 'Facebook Followers', icon: <Facebook className="w-6 h-6" />, color: 'bg-blue-50 text-blue-600 border-blue-100', placeholder: 'https://facebook.com/yourpage' },
-  { id: 'tt_follow', name: 'TikTok Followers', icon: <TikTokIcon className="w-6 h-6" />, color: 'bg-slate-100 text-slate-900 border-slate-200', placeholder: 'https://tiktok.com/@yourprofile' },
-  { id: 'tt_like', name: 'TikTok Likes', icon: <Heart className="w-6 h-6" />, color: 'bg-pink-50 text-pink-600 border-pink-100', placeholder: 'https://tiktok.com/@yourprofile/video/123' },
-  { id: 'web_visit', name: 'Website Visit', icon: <Globe className="w-6 h-6" />, color: 'bg-emerald-50 text-emerald-600 border-emerald-100', placeholder: 'https://yourwebsite.com' },
+  { id: 'yt_sub', name: 'YouTube Subscribers', icon: <Youtube className="w-6 h-6" />, color: 'bg-red-500/10 text-red-600 border-red-100', placeholder: 'https://youtube.com/c/yourchannel' },
+  { id: 'fb_follow', name: 'Facebook Followers', icon: <Facebook className="w-6 h-6" />, color: 'bg-blue-500/10 text-blue-400 border-blue-100', placeholder: 'https://facebook.com/yourpage' },
+  { id: 'tt_follow', name: 'TikTok Followers', icon: <TikTokIcon className="w-6 h-6" />, color: 'bg-white/10 text-white border-white/10', placeholder: 'https://tiktok.com/@yourprofile' },
+  { id: 'tt_like', name: 'TikTok Likes', icon: <Heart className="w-6 h-6" />, color: 'bg-pink-500/10 text-pink-600 border-pink-100', placeholder: 'https://tiktok.com/@yourprofile/video/123' },
+  { id: 'web_visit', name: 'Website Visit', icon: <Globe className="w-6 h-6" />, color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', placeholder: 'https://yourwebsite.com' },
 ];
 
 export default function CreateTaskView({ onBack }: { onBack: () => void }) {
@@ -50,8 +50,8 @@ export default function CreateTaskView({ onBack }: { onBack: () => void }) {
         >
           <CheckCircle2 className="w-10 h-10 text-emerald-500" />
         </motion.div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Task Created!</h2>
-        <p className="text-sm text-slate-500">Your campaign is now live and users will start completing it shortly.</p>
+        <h2 className="text-2xl font-bold text-white mb-2">Task Created!</h2>
+        <p className="text-sm text-zinc-400">Your campaign is now live and users will start completing it shortly.</p>
       </div>
     );
   }
@@ -62,19 +62,19 @@ export default function CreateTaskView({ onBack }: { onBack: () => void }) {
       <div className="flex items-center gap-3 mb-6">
         <button 
           onClick={step === 2 ? () => setStep(1) : onBack}
-          className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50"
+          className="w-8 h-8 rounded-full bg-[#15181D] border border-white/10 flex items-center justify-center text-zinc-300 hover:bg-white/5"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Create New Task</h2>
-          <p className="text-xs text-slate-500">Step {step} of 2</p>
+          <h2 className="text-xl font-bold text-white">Create New Task</h2>
+          <p className="text-xs text-zinc-400">Step {step} of 2</p>
         </div>
       </div>
 
       {step === 1 ? (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-          <h3 className="text-sm font-bold text-slate-900 mb-4">Select Task Type</h3>
+          <h3 className="text-sm font-bold text-white mb-4">Select Task Type</h3>
           <div className="grid grid-cols-1 gap-3">
             {TASK_TYPES.map((type) => (
               <button
@@ -86,15 +86,15 @@ export default function CreateTaskView({ onBack }: { onBack: () => void }) {
                 className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
                   selectedType === type.id 
                     ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/20' 
-                    : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'
+                    : 'border-white/10 bg-[#15181D] hover:border-blue-300 hover:bg-white/5'
                 }`}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${type.color}`}>
                   {type.icon}
                 </div>
                 <div className="text-left">
-                  <h4 className="text-sm font-bold text-slate-900">{type.name}</h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Get real {type.name.toLowerCase()}</p>
+                  <h4 className="text-sm font-bold text-white">{type.name}</h4>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">Get real {type.name.toLowerCase()}</p>
                 </div>
               </button>
             ))}
@@ -102,20 +102,20 @@ export default function CreateTaskView({ onBack }: { onBack: () => void }) {
         </motion.div>
       ) : (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-          <div className="bg-white rounded-2xl p-5 border border-slate-200 mb-6">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+          <div className="bg-[#15181D] rounded-2xl p-5 border border-white/10 mb-6">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center border ${selectedTaskDef?.color}`}>
                 {selectedTaskDef?.icon}
               </div>
               <div>
-                <h4 className="text-sm font-bold text-slate-900">{selectedTaskDef?.name}</h4>
-                <p className="text-[10px] text-slate-500">Configure your campaign</p>
+                <h4 className="text-sm font-bold text-white">{selectedTaskDef?.name}</h4>
+                <p className="text-[10px] text-zinc-400">Configure your campaign</p>
               </div>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                <label className="block text-xs font-bold text-zinc-200 mb-2 flex items-center gap-1.5">
                   <LinkIcon className="w-3.5 h-3.5" /> Target Link
                 </label>
                 <input
@@ -123,13 +123,13 @@ export default function CreateTaskView({ onBack }: { onBack: () => void }) {
                   value={taskLink}
                   onChange={(e) => setTaskLink(e.target.value)}
                   placeholder={selectedTaskDef?.placeholder}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                  <label className="block text-xs font-bold text-zinc-200 mb-2 flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5" /> Quantity
                   </label>
                   <input
@@ -137,11 +137,11 @@ export default function CreateTaskView({ onBack }: { onBack: () => void }) {
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
                     min="10"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                  <label className="block text-xs font-bold text-zinc-200 mb-2 flex items-center gap-1.5">
                     <DollarSign className="w-3.5 h-3.5" /> Reward (Rs)
                   </label>
                   <input
@@ -149,28 +149,28 @@ export default function CreateTaskView({ onBack }: { onBack: () => void }) {
                     value={reward}
                     onChange={(e) => setReward(e.target.value)}
                     min="1"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100 mb-6">
+          <div className="bg-blue-500/10 rounded-2xl p-5 border border-blue-100 mb-6">
             <h4 className="text-xs font-bold text-blue-900 mb-3 uppercase tracking-wider">Campaign Summary</h4>
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
-                <span className="text-blue-700">Cost per action</span>
+                <span className="text-blue-300">Cost per action</span>
                 <span className="font-bold text-blue-900">Rs {reward}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-blue-700">Total actions</span>
+                <span className="text-blue-300">Total actions</span>
                 <span className="font-bold text-blue-900">x {quantity}</span>
               </div>
               <div className="h-px bg-blue-200 my-2"></div>
               <div className="flex justify-between text-base">
                 <span className="font-bold text-blue-900">Total Cost</span>
-                <span className="font-black text-blue-700">Rs {totalCost}</span>
+                <span className="font-black text-blue-300">Rs {totalCost}</span>
               </div>
             </div>
           </div>

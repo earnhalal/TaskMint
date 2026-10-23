@@ -16,9 +16,9 @@ export default function WannadsSurveyView({ userId, onBack }: WannadsSurveyViewP
       animate={{ opacity: 1, y: 0 }}
       className="pb-24 px-0 pt-0 h-full w-full"
     >
-      <div className="flex items-center justify-between p-4 bg-white border-b border-slate-100">
-        <h2 className="font-black text-slate-900 text-lg">Easy Tasks</h2>
-        <button onClick={onBack} className="p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200">
+      <div className="flex items-center justify-between p-4 bg-[#15181D] border-b border-white/5">
+        <h2 className="font-black text-white text-lg">Easy Tasks</h2>
+        <button onClick={onBack} className="p-2 bg-white/10 rounded-full text-zinc-400 hover:bg-white/15">
           <X className="w-5 h-5" />
         </button>
       </div>
