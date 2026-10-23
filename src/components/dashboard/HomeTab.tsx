@@ -35,7 +35,6 @@ import { useCurrency } from '../../context/CurrencyContext';
 interface HomeTabProps {
   name: string;
   balance: number;
-  spinBalance?: number;
   lastUpdated?: number;
   totalEarnings?: number;
   totalIndirectCommission?: number;
@@ -43,7 +42,6 @@ interface HomeTabProps {
   accountStatus: string;
   role: string;
   topEarners: any[];
-  onSpinClick: () => void;
   onInviteClick: () => void;
   onDepositClick: () => void;
   onWithdrawClick: () => void;
@@ -63,7 +61,6 @@ interface HomeTabProps {
   onSocialTaskPlusClick: () => void;
   onOfferWallClick: () => void;
   onPartnerToolsClick: () => void;
-  onProductDrawClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string, transactionId?: string) => Promise<boolean>;
   onReloadData?: () => void;
   appSettings: {
@@ -73,69 +70,6 @@ interface HomeTabProps {
   lastDailyCheckin: any;
   unreadChatCount?: number;
 }
-
-const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; bgClass: string; iconColor: string; delay: number }> = ({ icon, label, value, bgClass, iconColor, delay }) => (
-    <div 
-        className={`p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-start justify-between min-h-[100px] ${bgClass} transition-all duration-300 hover:shadow-emerald-500/20 hover:-translate-y-1 animate-fade-in-up`}
-        style={{ animationDelay: `${delay}ms` }}
-    >
-        <div className={`p-2.5 rounded-xl bg-white shadow-sm ${iconColor} mb-2`}>
-            {icon}
-        </div>
-        <div>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">{label}</p>
-            <p className="text-xl font-black text-slate-900 tracking-tight">{value}</p>
-        </div>
-    </div>
-);
-
-const QuickActionBtn: React.FC<{ 
-    icon: React.ReactNode; 
-    label: string; 
-    onClick: () => void; 
-    colorClass: string; 
-    delay: number;
-    badge?: string;
-    labelColor?: string;
-    shadowColor?: string;
-}> = ({ icon, label, onClick, colorClass, delay, badge, labelColor = "text-slate-700", shadowColor = "shadow-teal-500/20" }) => (
-    <motion.button 
-        initial="hidden"
-        animate="visible"
-        variants={{
-            hidden: { opacity: 0, scale: 0.8 },
-            visible: { opacity: 1, scale: 1 }
-        }}
-        transition={{ delay: delay / 1000 }}
-        whileHover={{ scale: 1.05, y: -5 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={onClick} 
-        className="flex flex-col items-center gap-2 group w-full relative"
-    >
-        <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-[28px] flex items-center justify-center text-white shadow-2xl transition-all duration-300 ${colorClass} ${shadowColor} hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] overflow-visible group-hover:ring-4 ring-white/20`}>
-            {/* Real Glow Layer */}
-            <div className={`absolute -inset-1 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300 rounded-[28px] ${colorClass.replace('bg-gradient-to-br', 'bg')}`}></div>
-            
-            {badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#FF7E8B] text-white text-[8px] font-black px-2.5 py-0.5 rounded-md shadow-lg z-20 border border-white/20 whitespace-nowrap animate-bounce-subtle">
-                    {badge}
-                </div>
-            )}
-            
-            <div className="relative z-10 drop-shadow-md transform group-hover:scale-110 transition-transform duration-300">
-                {React.isValidElement(icon) && React.cloneElement(icon as React.ReactElement, { className: "w-8 h-8 sm:w-10 sm:h-10" } as any)}
-            </div>
-            
-            {/* High-end glass reflection */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-transparent opacity-60 rounded-[28px]"></div>
-            <div className="absolute top-1 left-1 right-1 h-[40%] bg-white/20 rounded-t-[24px] blur-[1px]"></div>
-        </div>
-
-        <span className={`text-[9px] sm:text-[10px] font-black tracking-tight uppercase leading-tight text-center ${labelColor} transform group-hover:translate-y-0.5 transition-transform`}>
-            {label}
-        </span>
-    </motion.button>
-);
 
 const AnimatedCounter = ({ value }: { value: number }) => {
   const { currency } = useCurrency();
@@ -179,14 +113,12 @@ const AnimatedCounter = ({ value }: { value: number }) => {
 export default function HomeTab({ 
   name, 
   balance, 
-  spinBalance,
   totalEarnings = 0,
   totalIndirectCommission = 0,
   lockedBalance,
   accountStatus,
   role,
   topEarners,
-  onSpinClick, 
   onInviteClick, 
   onDepositClick, 
   onWithdrawClick, 
@@ -206,7 +138,6 @@ export default function HomeTab({
   onSocialTaskPlusClick,
   onOfferWallClick,
   onPartnerToolsClick,
-  onProductDrawClick,
   onUpdateBalance,
   onReloadData,
   lastUpdated = Date.now(),
@@ -340,433 +271,215 @@ export default function HomeTab({
   }, []);
 
   return (
-    <div className="space-y-8 animate-fade-in pb-32 font-sans relative">
-      {/* Decorative Floating Blobs */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[10%] left-[-10%] w-64 h-64 bg-teal-500/5 rounded-full blur-[100px] animate-pulse-slow"></div>
-        <div className="absolute bottom-[20%] right-[-5%] w-80 h-80 bg-emerald-500/5 rounded-full blur-[120px] animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
-      </div>
+    <div className="space-y-5 animate-fade-in pb-28 font-sans">
+      {/* Compact alerts */}
+      {isApp && !appBonusClaimed && (
+        <button
+          onClick={handleClaimAppBonus}
+          disabled={isClaiming}
+          className="w-full flex items-center gap-3 bg-emerald-600 text-white rounded-2xl px-4 py-3.5 shadow-lg shadow-emerald-600/20 text-left active:scale-[0.99] transition"
+        >
+          <Gift className="w-6 h-6 shrink-0" />
+          <span className="flex-1">
+            <span className="block text-sm font-extrabold leading-tight">Claim Rs. 100 App Bonus</span>
+            <span className="block text-[11px] text-emerald-100 font-semibold">App installer welcome reward — tap to claim</span>
+          </span>
+          <ArrowRight className="w-4 h-4 shrink-0" />
+        </button>
+      )}
 
-      {/* Header & Greeting Section */}
-      <div className="relative z-10 flex justify-between items-center px-1">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-5 bg-teal-600 rounded-full"></div>
-            <p className="text-[10px] font-black text-teal-600/60 uppercase tracking-[0.3em]">{getGreeting()}</p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-              <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onLeaderboardClick}
-                  className="flex items-center gap-2 bg-[#022c22] text-white text-[9px] font-black px-4 py-2.5 rounded-xl shadow-xl transition-all border border-white/10 group"
-              >
-                  <Trophy className="w-3.5 h-3.5 text-emerald-500" /> 
-                  <span className="tracking-widest uppercase">Hall of Fame</span>
-              </motion.button>
+      {!isApp && (
+        <button
+          onClick={() => navigate('/app-download')}
+          className="w-full flex items-center gap-3 bg-white border border-emerald-100 rounded-2xl px-4 py-3.5 shadow-sm text-left active:scale-[0.99] transition"
+        >
+          <span className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+            <Download className="w-5 h-5 text-emerald-600" />
+          </span>
+          <span className="flex-1">
+            <span className="block text-sm font-extrabold text-slate-900 leading-tight">TaskMint App download karein</span>
+            <span className="block text-[11px] text-slate-500 font-semibold">Installation par Rs. 100 bonus</span>
+          </span>
+          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1.5 rounded-full shrink-0">GET APP</span>
+        </button>
+      )}
 
-              <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-teal-500 via-emerald-500 to-emerald-500 overflow-hidden cursor-pointer" onClick={onProfileClick}>
-                  <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-white text-slate-900 text-sm font-black shadow-inner">
-                    {avatar ? (
-                      <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      name.substring(0, 1).toUpperCase()
-                    )}
-                  </div>
-              </div>
-          </div>
-      </div>
+      {accountStatus.toLowerCase() === 'inactive' && (
+        <button
+          onClick={onActivateClick}
+          className="w-full flex items-center gap-3 bg-rose-50 border border-rose-100 rounded-2xl px-4 py-3.5 text-left active:scale-[0.99] transition"
+        >
+          <span className="w-9 h-9 rounded-xl bg-rose-500 flex items-center justify-center shrink-0">
+            <Lock className="w-5 h-5 text-white" />
+          </span>
+          <span className="flex-1">
+            <span className="block text-sm font-extrabold text-rose-900 leading-tight">Account inactive hai</span>
+            <span className="block text-[11px] text-rose-600 font-semibold">Earning shuru karne ke liye Rs. {appSettings.activationFee} joining fee jama karein</span>
+          </span>
+          <ArrowRight className="w-4 h-4 text-rose-500 shrink-0" />
+        </button>
+      )}
 
-      {/* APK Welcome & High-Priority Alerts */}
-      <div className="grid grid-cols-1 gap-4 relative z-10">
-        {isApp && !appBonusClaimed && (
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleClaimAppBonus}
-            disabled={isClaiming}
-            className="relative bg-gradient-to-br from-emerald-500 to-orange-700 p-6 rounded-[32px] shadow-2xl shadow-emerald-500/40 border-b-4 border-black/20 overflow-hidden group"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-            <div className="flex items-center gap-5 relative z-10">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
-                <Gift className="w-8 h-8 text-white animate-bounce" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-xl font-black text-white uppercase tracking-tighter leading-none">Claim Rs. 100 Bonus</h3>
-                <p className="text-[10px] text-emerald-100 font-bold uppercase tracking-widest mt-1 opacity-70">App Installer Welcome Reward</p>
-              </div>
-            </div>
-          </motion.button>
-        )}
-
-        {!isApp && (
-          <div 
-            onClick={() => navigate('/app-download')}
-            className="relative bg-emerald-600 rounded-[24px] p-5 border border-white/10 shadow-xl shadow-emerald-900/20 flex items-center justify-between cursor-pointer group overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center">
-                <Download className="w-6 h-6 text-white group-hover:animate-bounce" />
-              </div>
-              <div>
-                <p className="text-sm font-black text-white lowercase">taskmint.apk</p>
-                <p className="text-[10px] text-emerald-100 font-bold uppercase tracking-widest">Get Rs. 100 on Installation</p>
-              </div>
-            </div>
-            <div className="bg-emerald-500 text-white text-[9px] font-black px-3 py-1.5 rounded-full border border-white/20 shadow-lg">
-              GET APP
-            </div>
-          </div>
-        )}
-
-        {accountStatus.toLowerCase() === 'inactive' && (
-          <div 
-            onClick={onActivateClick}
-            className="bg-rose-50 border border-rose-100 p-5 rounded-[24px] flex items-center justify-between cursor-pointer group hover:bg-rose-100 transition-all shadow-lg shadow-rose-100/50"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:scale-110 transition-transform">
-                <Lock className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-black text-rose-900 uppercase tracking-tighter">Account Inactive</p>
-                <p className="text-[10px] text-rose-600 font-bold">Pay Rs {appSettings.activationFee} to verify account</p>
-              </div>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-600 group-hover:translate-x-1 transition-transform">
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Futuristic Balance Card */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative z-10 group"
-      >
-        {/* Glow Effects */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-500 rounded-[36px] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-        
-        <div className="relative bg-[#022c22] rounded-[32px] p-8 overflow-hidden shadow-2xl border border-white/5">
-          {/* Internal Geometric Pattern */}
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]"></div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-[80px] -mr-32 -mt-32 animate-pulse-slow"></div>
-          
-          <div className="relative z-10 flex flex-col gap-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-md overflow-hidden">
-                    {avatar ? (
-                      <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-white font-black text-xl">{name.substring(0, 1).toUpperCase()}</span>
-                    )}
-                  </div>
-                  {accountStatus === 'Active' && (
-                    <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg border-2 border-[#022c22]">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    </div>
-                  )}
-                </div>
-                <div>
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-black text-white tracking-tight leading-none uppercase italic">{name}</h3>
-                        {role === 'partner' && (
-                            <div className="flex items-center gap-1 bg-emerald-500/20 text-emerald-500 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                <Crown className="w-2.5 h-2.5 fill-emerald-500" />
-                                <span className="text-[7px] font-black uppercase tracking-widest">PRO</span>
-                            </div>
-                        )}
-                    </div>
-                    <p className="text-teal-300/40 text-[9px] font-black uppercase tracking-[0.3em] mt-2">Active App Member</p>
-                </div>
-              </div>
-              <button 
-                onClick={toggleCurrency}
-                className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center transition-all hover:bg-white/20 text-white font-black text-xs"
-              >
-                {currency}
-              </button>
-            </div>
-
-              <div className={`flex flex-col p-6 rounded-2xl border transition-all ${currency === 'USD' ? 'bg-gradient-to-tr from-blue-900/40 to-teal-900/40 border-blue-500/30' : 'bg-white/5 border-white/10'}`}>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
-                  <span className="text-[10px] font-black text-teal-300/60 uppercase tracking-[0.2em]">Secured Hub Balance</span>
-                </div>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-5xl sm:text-6xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                    <AnimatedCounter value={Math.max(0, convertAmount(balance))} />
-                  </span>
-                  <span className="text-xl font-black text-teal-500 tracking-tighter italic">
-                    {currency === 'PKR' ? 'RS' : '$'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 mt-2">
-                    <div className="flex items-center gap-1.5">
-                        <Clock className="w-3 h-3 text-slate-500" />
-                        <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
-                            Updated: {Math.floor((Date.now() - lastUpdated) / 60000)} mins ago
-                        </span>
-                    </div>
-                  {lockedBalance > 0 && (
-                    <div className="flex items-center gap-2 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                      <Lock className="w-2.5 h-2.5 text-emerald-500" />
-                      <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Locked: {convertAmount(lockedBalance).toFixed(2)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <motion.button 
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onDepositClick}
-                className="bg-teal-600 hover:bg-teal-500 h-14 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-teal-600/20 transition-all group/btn"
-              >
-                <PlusCircleIcon className="w-5 h-5 text-white group-hover/btn:rotate-90 transition-transform" />
-                <span className="text-xs font-black text-white uppercase tracking-widest">Add Funds</span>
-              </motion.button>
-              
-              <motion.button 
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onWithdrawClick}
-                className="bg-white hover:bg-slate-50 h-14 rounded-2xl flex items-center justify-center gap-3 shadow-xl transition-all"
-              >
-                <ArrowRight className="w-5 h-5 text-slate-900" />
-                <span className="text-xs font-black text-slate-900 uppercase tracking-widest">Cash Out</span>
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Quick Actions Grid matching screenshot */}
-      <div className="relative z-10 space-y-6">
-        <div className="flex flex-col px-1">
-          <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-emerald-500 fill-emerald-500" />
-            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase font-sans">
-              Quick Actions
-            </h2>
-          </div>
-          <p className="text-[10px] font-black text-slate-400/60 mt-0.5 uppercase tracking-[0.2em] ml-1">Fast Shortcuts</p>
-        </div>
-
-        <div className="grid grid-cols-3 min-[400px]:grid-cols-4 gap-x-2 gap-y-8 sm:gap-6">
-          {/* Row 1 */}
-          <QuickActionBtn 
-            icon={<MessageCircle />} label="WhatsApp" badge="HELP" 
-            onClick={() => window.open('https://whatsapp.com/channel/0029VbCpKTp2P59cvqS4CL2L', '_blank')} 
-            colorClass="bg-gradient-to-br from-[#25D366] to-[#128C7E]" 
-            shadowColor="shadow-emerald-500/40"
-            labelColor="text-emerald-500" delay={100}
-          />
-          <QuickActionBtn 
-            icon={<PlayCircleIcon />} label="Watch Ads" badge="HOT" 
-            onClick={onWatchAdsClick} 
-            colorClass="bg-gradient-to-br from-[#FF4B2B] to-[#FF416C]" 
-            shadowColor="shadow-rose-500/40"
-            labelColor="text-rose-600" delay={100}
-          />
-          <QuickActionBtn 
-            icon={<Clock />} label="Tasks" 
-            onClick={onTasksClick} 
-            colorClass="bg-gradient-to-br from-[#F09819] to-[#EDDE5D]" 
-            shadowColor="shadow-emerald-500/40"
-            labelColor="text-slate-700" delay={200}
-          />
-          <QuickActionBtn 
-            icon={<Zap />} label="Offer Wall" 
-            onClick={onOfferWallClick} 
-            colorClass="bg-gradient-to-br from-[#4facfe] to-[#00f2fe]" 
-            shadowColor="shadow-cyan-500/40"
-            labelColor="text-teal-900" delay={300}
-          />
-
-          {/* Row 2 */}
-          <QuickActionBtn 
-            icon={<Rocket />} label="CPX Surveys" badge="HIGH REWARD"
-            onClick={onTaskWallClick} 
-            colorClass="bg-gradient-to-br from-[#FF0080] to-[#7928CA] shadow-[0_0_20px_rgba(255,0,128,0.4)]" 
-            shadowColor="shadow-emerald-500/40"
-            labelColor="text-emerald-600 font-black" delay={400}
-          />
-          <QuickActionBtn 
-            icon={<CheckSquareIcon />} label="Easy Task" badge="NEW" 
-            onClick={onEasyTaskClick} 
-            colorClass="bg-gradient-to-br from-[#00c6ff] to-[#0072ff]" 
-            shadowColor="shadow-blue-500/40"
-            labelColor="text-blue-800" delay={500}
-          />
-          <QuickActionBtn 
-            icon={<SparklesIcon />} label="Social+" badge="BONUS" 
-            onClick={onSocialTaskPlusClick} 
-            colorClass="bg-gradient-to-br from-[#a18cd1] to-[#fbc2eb]" 
-            shadowColor="shadow-emerald-500/40"
-            labelColor="text-orange-500" delay={600}
-          />
-          <QuickActionBtn 
-            icon={<CalendarIcon />} label="Daily Gift" badge="GIFT" 
-            onClick={handleDailyCheckin} 
-            colorClass="bg-gradient-to-br from-[#f6d365] to-[#fda085]" 
-            shadowColor="shadow-orange-500/40"
-            labelColor="text-emerald-600" delay={700}
-          />
-
-          {/* Row 3 */}
-          <QuickActionBtn 
-            icon={<TicketIcon />} label="Lottery" 
-            onClick={onLotteryClick} 
-            colorClass="bg-gradient-to-br from-[#1e3c72] to-[#2a5298]" 
-            shadowColor="shadow-blue-900/40"
-            labelColor="text-slate-700" delay={800}
-          />
-          <QuickActionBtn 
-            icon={<GiftIcon />} label="Spin" badge="NEW" 
-            onClick={onSpinClick} 
-            colorClass="bg-gradient-to-br from-[#f093fb] to-[#f5576c]" 
-            shadowColor="shadow-pink-500/40"
-            labelColor="text-blue-900" delay={900}
-          />
-          <QuickActionBtn 
-            icon={<InviteIcon />} label="Invite" 
-            onClick={onInviteClick} 
-            colorClass="bg-gradient-to-br from-[#5ee7df] to-[#b490ca]" 
-            shadowColor="shadow-teal-500/40"
-            labelColor="text-blue-900" delay={1000}
-          />
-          <QuickActionBtn 
-            icon={<Headphones />} label="Live Support" badge="HELP" 
-            onClick={onSupportAIClick} 
-            colorClass="bg-gradient-to-br from-[#8e2de2] to-[#4a00e0]" 
-            shadowColor="shadow-emerald-700/40"
-            labelColor="text-[#8e2de2]" delay={1100}
-          />
-        </div>
-      </div>
-
-      {/* Product Draw */}
-      <div className="relative z-10 px-1 py-4">
-        <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-4">Product Draws</h2>
-        <div className="overflow-hidden bg-[#022c22] rounded-3xl p-4 border border-white/10 shadow-lg">
-            <motion.div 
-                className="flex gap-4"
-                animate={{ x: ["0%", "-100%"] }}
-                transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
-            >
-                {[
-                    { name: "Wireless Earbuds", price: "3,500", image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&q=80", entryFee: 100 },
-                    { name: "Romoss SW10PF Power Bank", price: "6,999", image: "https://images.unsplash.com/photo-1609592813106-c79d6882269a?w=300&q=80", entryFee: 100 },
-                    { name: "Headphones", price: "3,500", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80", entryFee: 100 },
-                ].concat([
-                    { name: "Wireless Earbuds", price: "3,500", image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&q=80", entryFee: 100 },
-                    { name: "Romoss SW10PF Power Bank", price: "6,999", image: "https://images.unsplash.com/photo-1609592813106-c79d6882269a?w=300&q=80", entryFee: 100 },
-                    { name: "Headphones", price: "3,500", image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80", entryFee: 100 },
-                ]).map((item, i) => (
-                    <div key={i} className="min-w-[140px] bg-white/5 rounded-2xl p-3 border border-white/5 flex flex-col items-center">
-                        <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl mb-2 object-cover" />
-                        <p className="text-[10px] font-bold text-white uppercase text-center line-clamp-1">{item.name}</p>
-                        <p className="text-[10px] text-slate-500 font-bold line-through">Rs. {item.price}</p>
-                        <p className="text-xs text-emerald-500 font-black mb-2">Rs. {item.entryFee}</p>
-                        <button 
-                            onClick={onProductDrawClick}
-                            className="bg-teal-600 text-[9px] font-bold text-white px-3 py-1.5 rounded-lg w-full"
-                        >
-                            Participate
-                        </button>
-                    </div>
-                ))}
-            </motion.div>
-        </div>
-      </div>
-
-
-      {/* Promotions Section */}
-      <QuickPromotions balance={balance} onUpdateBalance={onUpdateBalance} />
-
-      {/* Mega Bonus Invite Card */}
-      <motion.div 
-        whileHover={{ y: -5 }}
-        onClick={onInviteClick}
-        className="relative z-10 animate-fade-in-up" 
-        style={{ animationDelay: '400ms' }}
-      >
-        <div className="bg-[#022c22] rounded-[32px] p-8 overflow-hidden relative border border-white/5 shadow-2xl">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] -mr-40 -mt-40"></div>
-          
-          <div className="flex flex-col gap-6 relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="px-3 py-1 bg-emerald-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">TOP EARNING</div>
-              <div className="h-px flex-1 bg-white/10"></div>
-            </div>
-
-            <div>
-              <h3 className="text-3xl font-black text-white italic tracking-tighter mb-2">MEGA <span className="text-emerald-500">REFERRAL</span></h3>
-              <p className="text-sm font-bold text-slate-400 leading-relaxed mb-6">Mera referral code use karo aur har friend ke account activation par <span className="text-white font-black italic">Rs. 100</span> earn karo.</p>
-              
-              <div className="flex items-center justify-between bg-white/5 rounded-2xl p-4 border border-white/10 border-dashed">
-                <div>
-                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Commission Earned</p>
-                  <p className="text-xl font-black text-emerald-500 italic">Rs 100.00</p>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                  <ArrowRight className="w-6 h-6 text-emerald-500" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Live Support Card */}
-      <motion.div 
-        whileHover={{ y: -5 }}
-        onClick={onSupportAIClick}
-        className="relative z-10 animate-fade-in-up mt-2 mb-4 cursor-pointer group px-1" 
-        style={{ animationDelay: '500ms' }}
-      >
-        <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] rounded-[32px] p-6 sm:p-8 overflow-hidden relative border border-white/5 shadow-2xl hover:shadow-teal-500/20 transition-shadow">
-          <div className="absolute -top-10 -right-10 w-64 h-64 bg-teal-500/20 rounded-full blur-[80px] group-hover:bg-teal-500/30 transition-colors duration-500"></div>
-          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-emerald-500/20 rounded-full blur-[60px] group-hover:bg-emerald-500/30 transition-colors duration-500"></div>
-
-          <div className="flex flex-col gap-6 relative z-10">
-            <div className="flex items-center gap-3 w-full">
-              <div className="px-3 py-1 bg-teal-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)] flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                LIVE 24/7
-              </div>
-              <div className="h-px flex-1 bg-white/10"></div>
-              {unreadChatCount > 0 && (
-                <div className="w-6 h-6 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-lg animate-bounce">
-                  {unreadChatCount}
-                </div>
+      {/* Compact balance card */}
+      <div className="bg-white rounded-3xl border border-emerald-100/80 shadow-[0_10px_35px_-15px_rgba(4,120,87,0.25)] p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black overflow-hidden shrink-0">
+              {avatar ? (
+                <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                name.substring(0, 1).toUpperCase()
               )}
             </div>
-
-            <div className="flex flex-col gap-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tighter mb-1">
-                    Agent <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Support</span>
-                  </h3>
-                  <p className="text-sm font-bold text-teal-200/60 w-3/4">Need help? Chat with our team now.</p>
-                </div>
-                <div className="w-14 h-14 rounded-2xl bg-teal-500/20 flex flex-shrink-0 items-center justify-center border border-teal-500/30 group-hover:scale-110 transition-transform shadow-inner">
-                  <Headphones className="w-7 h-7 text-teal-400" />
-                </div>
-              </div>
+            <div className="min-w-0">
+              <p className="text-sm font-extrabold text-slate-900 truncate">{name}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                {accountStatus === 'Active' && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
+                <span>{accountStatus === 'Active' ? 'Active Member' : 'Member'}</span>
+                {role === 'partner' && (
+                  <span className="text-emerald-600 flex items-center gap-0.5">
+                    <Crown className="w-3 h-3" /> PRO
+                  </span>
+                )}
+              </p>
             </div>
           </div>
+          <button
+            onClick={toggleCurrency}
+            className="text-[11px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1.5 shrink-0"
+          >
+            {currency}
+          </button>
         </div>
-      </motion.div>
+
+        <div className="mt-4">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.18em]">Total Balance</p>
+          <p className="text-[34px] leading-9 font-black text-slate-900 tracking-tight mt-1">
+            {currency === 'PKR' ? 'Rs. ' : '$ '}
+            <AnimatedCounter value={Math.max(0, convertAmount(balance))} />
+          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] font-bold text-slate-500">
+            <span>Total Earned: {currency === 'PKR' ? 'Rs. ' : '$ '}{convertAmount(totalEarnings).toFixed(2)}</span>
+            {lockedBalance > 0 && (
+              <span className="flex items-center gap-1 text-amber-600">
+                <Lock className="w-3 h-3" /> Locked: {convertAmount(lockedBalance).toFixed(2)}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <button
+            onClick={onDepositClick}
+            className="h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
+          >
+            <PlusCircleIcon className="w-4 h-4" /> Add Funds
+          </button>
+          <button
+            onClick={onWithdrawClick}
+            className="h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
+          >
+            <WalletIcon className="w-4 h-4" /> Cash Out
+          </button>
+        </div>
+      </div>
+
+      {/* Earn — main actions */}
+      <div>
+        <h2 className="text-base font-black text-slate-900 px-1 mb-3">Kamana shuru karein</h2>
+        <div className="grid grid-cols-4 gap-2.5">
+          {[
+            { icon: <PlayCircleIcon className="w-6 h-6" />, label: 'Watch Ads', onClick: onWatchAdsClick, bg: 'bg-rose-50 text-rose-600' },
+            { icon: <CheckSquareIcon className="w-6 h-6" />, label: 'Tasks', onClick: onTasksClick, bg: 'bg-amber-50 text-amber-600' },
+            { icon: <Rocket className="w-6 h-6" />, label: 'Surveys', onClick: onTaskWallClick, bg: 'bg-teal-50 text-teal-600' },
+            { icon: <Zap className="w-6 h-6" />, label: 'Offer Wall', onClick: onOfferWallClick, bg: 'bg-cyan-50 text-cyan-600' },
+            { icon: <SparklesIcon className="w-6 h-6" />, label: 'Easy Task', onClick: onEasyTaskClick, bg: 'bg-sky-50 text-sky-600' },
+            { icon: <MessageCircle className="w-6 h-6" />, label: 'Social+', onClick: onSocialTaskPlusClick, bg: 'bg-emerald-50 text-emerald-600' },
+            { icon: <GiftIcon className="w-6 h-6" />, label: 'Daily Gift', onClick: handleDailyCheckin, bg: 'bg-orange-50 text-orange-600' },
+            { icon: <InviteIcon className="w-6 h-6" />, label: 'Invite', onClick: onInviteClick, bg: 'bg-emerald-50 text-emerald-700' },
+          ].map((a) => (
+            <button
+              key={a.label}
+              onClick={a.onClick}
+              className="flex flex-col items-center gap-2 py-3 rounded-2xl bg-white border border-slate-100 shadow-sm active:scale-95 transition"
+            >
+              <span className={`w-11 h-11 rounded-xl flex items-center justify-center ${a.bg}`}>{a.icon}</span>
+              <span className="text-[10px] font-extrabold text-slate-700 leading-none">{a.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Compact referral banner */}
+      <button
+        onClick={onInviteClick}
+        className="w-full flex items-center gap-3 bg-[#022c22] rounded-2xl px-4 py-4 text-left active:scale-[0.99] transition"
+      >
+        <span className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
+          <InviteIcon className="w-5 h-5 text-emerald-400" />
+        </span>
+        <span className="flex-1">
+          <span className="block text-sm font-extrabold text-white leading-tight">Doston ko invite karein</span>
+          <span className="block text-[11px] text-emerald-200/70 font-semibold">Har dost ke account activation par commission payein</span>
+        </span>
+        <ArrowRight className="w-4 h-4 text-emerald-400 shrink-0" />
+      </button>
+
+      {/* Promotions */}
+      <QuickPromotions balance={balance} onUpdateBalance={onUpdateBalance} />
+
+      {/* More — simple list */}
+      <div>
+        <h2 className="text-base font-black text-slate-900 px-1 mb-3">Mazeed</h2>
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden">
+          <button onClick={onLotteryClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><TicketIcon className="w-4.5 h-4.5" /></span>
+            <span className="flex-1 text-sm font-bold text-slate-800">Lottery</span>
+            <ArrowRight className="w-4 h-4 text-slate-300" />
+          </button>
+          <button onClick={onStreakClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><CalendarIcon className="w-4.5 h-4.5" /></span>
+            <span className="flex-1 text-sm font-bold text-slate-800">Streak Vault</span>
+            <ArrowRight className="w-4 h-4 text-slate-300" />
+          </button>
+          <button onClick={onLeaderboardClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Trophy className="w-4.5 h-4.5" /></span>
+            <span className="flex-1 text-sm font-bold text-slate-800">Leaderboard</span>
+            <ArrowRight className="w-4 h-4 text-slate-300" />
+          </button>
+          <button onClick={onHistoryClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Clock className="w-4.5 h-4.5" /></span>
+            <span className="flex-1 text-sm font-bold text-slate-800">Earning History</span>
+            <ArrowRight className="w-4 h-4 text-slate-300" />
+          </button>
+          {role === 'partner' ? (
+            <button onClick={onPartnerToolsClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
+              <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Crown className="w-4.5 h-4.5" /></span>
+              <span className="flex-1 text-sm font-bold text-slate-800">Partner Tools</span>
+              <ArrowRight className="w-4 h-4 text-slate-300" />
+            </button>
+          ) : (
+            <button onClick={onPartnerUpgradeClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
+              <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Crown className="w-4.5 h-4.5" /></span>
+              <span className="flex-1 text-sm font-bold text-slate-800">PRO Partner banein</span>
+              <ArrowRight className="w-4 h-4 text-slate-300" />
+            </button>
+          )}
+          <button onClick={onSupportAIClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Headphones className="w-4.5 h-4.5" /></span>
+            <span className="flex-1 text-sm font-bold text-slate-800">Live Support</span>
+            {unreadChatCount > 0 && (
+              <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center">{unreadChatCount}</span>
+            )}
+            <ArrowRight className="w-4 h-4 text-slate-300" />
+          </button>
+          <button onClick={() => window.open('https://whatsapp.com/channel/0029VbCpKTp2P59cvqS4CL2L', '_blank')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><MessageCircle className="w-4.5 h-4.5" /></span>
+            <span className="flex-1 text-sm font-bold text-slate-800">WhatsApp Channel</span>
+            <ArrowRight className="w-4 h-4 text-slate-300" />
+          </button>
+        </div>
+      </div>
 
       <style>{`
         .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }

@@ -48,7 +48,7 @@ const faqs = [
   },
   {
     q: 'Which tasks pay the most?',
-    a: 'Surveys and offer walls from partners such as CPX Research, CPA Lead and Wannads usually pay the highest rewards. Video ads, daily check-ins and Spin & Win are quicker tasks that add up steadily every day.',
+    a: 'Surveys and offer walls from partners such as CPX Research, CPA Lead and Wannads usually pay the highest rewards. Video ads and daily check-ins are quicker tasks that add up steadily every day.',
   },
   {
     q: 'Is there a TaskMint mobile app?',
@@ -78,8 +78,8 @@ const earnWays = [
   {
     icon: Dices,
     color: 'bg-amber-50 text-amber-600',
-    title: 'Spin & Win + Lottery',
-    text: 'Try your luck on the daily spin wheel and lottery draws for bonus cash prizes.',
+    title: 'Lottery Draws',
+    text: 'Try your luck in regular lottery draws for bonus cash prizes.',
   },
   {
     icon: CalendarCheck,
@@ -98,7 +98,6 @@ const earnWays = [
 export default function Landing() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [latestWinner, setLatestWinner] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number>(0);
   const navigate = useNavigate();
 
@@ -113,22 +112,6 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    // Show only real, latest Spin & Win result from the database.
-    const unsubscribe = onSnapshot(
-      query(collection(db, 'spin_winners'), orderBy('timestamp', 'desc'), limit(1)),
-      (snapshot) => {
-        if (!snapshot.empty) {
-          const latest = snapshot.docs[0].data();
-          if (latest.userName && latest.prize) {
-            setLatestWinner(`${latest.userName} won ${latest.prize} on Spin & Win`);
-          }
-        }
-      },
-      () => {}
-    );
-    return () => unsubscribe();
-  }, []);
 
   const onGetStarted = (view: 'login' | 'signup') => navigate(`/${view}`);
   const scrollTo = (id: string) => {
@@ -211,11 +194,6 @@ export default function Landing() {
                 <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> Minimum payout Rs. 100</li>
                 <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> JazzCash &amp; EasyPaisa</li>
               </ul>
-              {latestWinner && (
-                <p className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-100 px-3.5 py-2 rounded-full">
-                  <GiftIcon className="w-4 h-4" /> {latestWinner}
-                </p>
-              )}
             </motion.div>
 
             {/* Wallet preview card */}
@@ -368,7 +346,7 @@ export default function Landing() {
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">About TaskMint</h2>
               <div className="mt-5 space-y-4 text-[17px] leading-relaxed text-slate-600">
                 <p>TaskMint is an online earning platform built for Pakistan. We connect users with global advertising and research partners — including CPX Research, CPA Lead, Wannads and Unity Ads — and share the revenue with the people who complete the tasks.</p>
-                <p>Instead of spending hours searching for scattered earning apps, you get one wallet, one dashboard and tasks that are available around the clock: rewarded videos, surveys, offer walls, daily check-ins, Spin &amp; Win and a referral programme that keeps paying as your network grows.</p>
+                <p>Instead of spending hours searching for scattered earning apps, you get one wallet, one dashboard and tasks that are available around the clock: rewarded videos, surveys, offer walls, daily check-ins and a referral programme that keeps paying as your network grows.</p>
                 <p>Whether you are a student covering pocket money or simply want a productive use for your free time, TaskMint keeps the rules simple: complete a task, earn the reward, withdraw from Rs. 100.</p>
               </div>
             </div>

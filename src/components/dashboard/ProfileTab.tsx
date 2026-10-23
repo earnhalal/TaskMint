@@ -28,7 +28,6 @@ export default function ProfileTab({
   onEarningHistoryClick,
   onActivateClick,
   onMailboxClick,
-  onProductDrawClick,
   onSupportAIClick,
   appSettings,
   accountNumber,
@@ -53,7 +52,6 @@ export default function ProfileTab({
   onEarningHistoryClick?: () => void,
   onActivateClick?: () => void,
   onMailboxClick?: () => void,
-  onProductDrawClick?: () => void,
   onSupportAIClick?: () => void,
   appSettings?: any,
   accountNumber?: string,
@@ -313,12 +311,7 @@ export default function ProfileTab({
           label="Premium Jobs" 
           onClick={() => setShowJobsModal(true)}
         />
-        <Item 
-          icon={<Sparkles className="w-4 h-4" />} 
-          label="Product Draws" 
-          onClick={onProductDrawClick}
-        />
-      </Section>
+              </Section>
 
       <Section title="Support">
         <Item icon={<Headphones className="w-4 h-4 text-blue-600" />} label="Live Support Chat" onClick={onSupportAIClick} />

@@ -81,9 +81,7 @@ import TasksTab from '../components/dashboard/TasksTab';
 import ManageWalletView from '../components/dashboard/ManageWalletView';
 import LotteryView from '../components/dashboard/LotteryView';
 import StreakRewardView from '../components/dashboard/StreakRewardView';
-import SpinWheel from '../components/dashboard/SpinWheel';
 import PartnerToolsView from '../components/dashboard/PartnerToolsView';
-import ProductDrawView from '../components/dashboard/ProductDrawView';
 import { DynamicAvatar } from '../components/ui/DynamicAvatar';
 
 export default function Dashboard() {
@@ -158,22 +156,12 @@ export default function Dashboard() {
     }
   }, [activeTab]);
 
-  const names = ['Ahmed', 'Fatima', 'Ali', 'Ayesha', 'Zainab', 'Bilal', 'Hassan', 'Sana', 'Usman', 'Maryam', 'Abdullah', 'Khadija'];
-  const amounts = [100, 250, 500, 750, 1000, 1250, 2000];
-  const eventTemplates = [
-    { action: 'earned', source: 'from Spin & Win!' },
-    { action: 'earned', source: 'by completing a Task!' },
-    { action: 'earned', source: 'from a Referral Bonus!' }
-  ];
-
   const [balance, setBalance] = useState(0);
-  const [spinBalance, setSpinBalance] = useState(0);
   const [pendingIndirect, setPendingIndirect] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
   const [appBonusClaimed, setAppBonusClaimed] = useState(false);
   const [lastDailyCheckin, setLastDailyCheckin] = useState<any>(null);
-  const [freeSpins, setFreeSpins] = useState(0);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
 
   const withdrawalHistory = useMemo(() => {
@@ -237,7 +225,6 @@ export default function Dashboard() {
       if (snapshot.exists()) {
         const data = snapshot.data();
         if (data.balance !== undefined) setBalance(data.balance);
-        if (data.spinBalance !== undefined) setSpinBalance(data.spinBalance);
         if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
         setUserPin(data.pin || '');
@@ -431,7 +418,6 @@ export default function Dashboard() {
         
         // Priority Sync for Real-time Balance & Commission
         if (data.balance !== undefined) setBalance(data.balance);
-        if (data.spinBalance !== undefined) setSpinBalance(data.spinBalance);
         if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
@@ -593,66 +579,8 @@ export default function Dashboard() {
     // localStorage.setItem('taskmint_seen_updates', JSON.stringify(seenUpdates));
   }, [seenUpdates]);
 
-  useEffect(() => {
-    // Real-time winners listener
-    const winnersRef = ref(rtdb, 'spin_winners');
-    let realWinnerFound = false;
 
-    const unsubscribe = onValue(winnersRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const list = Object.values(data) as any[];
-        const sorted = list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        if (sorted.length > 0) {
-          realWinnerFound = true;
-          const latest = sorted[0];
-          setIsNotificationAnimating(false);
-          setTimeout(() => {
-            setNotificationMessage(`${latest.userName} just won <span class="font-bold">${latest.prize}</span> from Spin & Win!`);
-            setIsNotificationAnimating(true);
-          }, 500);
-        }
-      }
-    });
 
-    // Fallback interval if no real winners exist yet or to keep it dynamic
-    const fallbackInterval = setInterval(() => {
-      if (!realWinnerFound || Math.random() > 0.7) { // 30% chance to show a fake one even if real ones exist, to keep it busy
-        setIsNotificationAnimating(false);
-        setTimeout(() => {
-          const randomName = names[Math.floor(Math.random() * names.length)];
-          const randomAmount = amounts[Math.floor(Math.random() * amounts.length)];
-          const randomEvent = eventTemplates[Math.floor(Math.random() * eventTemplates.length)];
-          setNotificationMessage(`${randomName} just ${randomEvent.action} <span class="font-bold">Rs ${randomAmount}</span> ${randomEvent.source}`);
-          setIsNotificationAnimating(true);
-        }, 500);
-      }
-    }, 10000);
-
-    return () => {
-      unsubscribe();
-      clearInterval(fallbackInterval);
-    };
-  }, []);
-
-  useEffect(() => {
-    const lastSpin = localStorage.getItem('taskmint_last_spin');
-    if (lastSpin) {
-      const lastSpinDate = new Date(parseInt(lastSpin));
-      const now = new Date();
-      const diffHours = Math.abs(now.getTime() - lastSpinDate.getTime()) / 36e5;
-      if (diffHours >= 24) {
-        setFreeSpins(1);
-      }
-    } else {
-      setFreeSpins(1);
-    }
-  }, []);
-
-  const handleUseFreeSpin = () => {
-    setFreeSpins(0);
-    localStorage.setItem('taskmint_last_spin', Date.now().toString());
-  };
 
   const [isBalanceUpdating, setIsBalanceUpdating] = useState(false);
 
@@ -665,14 +593,7 @@ export default function Dashboard() {
     try {
       const userRtdbRef = ref(rtdb, `users/${user.uid}`);
       
-      let spinAmt = 0;
-      let balAmt = 0;
-
-      if (source === 'app_bonus') {
-        spinAmt = amount;
-      } else {
-        balAmt = amount;
-      }
+      const balAmt = amount;
 
       let success = false;
       await runRtdbTransaction(userRtdbRef, (data) => {
@@ -681,10 +602,9 @@ export default function Dashboard() {
         let newBalance = (data.balance || 0) + balAmt;
         if (newBalance < 0) return; // Abort transaction if insufficient funds
         
-        let newSpinBalance = (data.spinBalance || 0) + spinAmt;
         let newTotalEarnings = (data.totalEarnings || 0);
 
-        if (balAmt > 0 && source !== 'spin') {
+        if (balAmt > 0) {
             newTotalEarnings += balAmt;
         }
 
@@ -692,7 +612,6 @@ export default function Dashboard() {
         return {
             ...data,
             balance: newBalance,
-            spinBalance: newSpinBalance,
             totalEarnings: newTotalEarnings,
             lastUpdatedAt: Date.now()
         };
@@ -1215,7 +1134,7 @@ export default function Dashboard() {
     // Restriction logic
     const currentAccountStatus = accountStatus.toLowerCase();
     const isInactive = currentAccountStatus !== 'active';
-    const earningTabs = ['spin', 'tasks', 'watch', 'lottery', 'streak'];
+    const earningTabs = ['tasks', 'watch', 'lottery', 'streak'];
     
     if (isInactive && earningTabs.includes(activeTab)) {
       return (
@@ -1330,17 +1249,6 @@ export default function Dashboard() {
         return <StreakRewardView 
           onBack={() => setActiveTab('home')} 
           onUpdateBalance={handleUpdateBalance} 
-        />;
-      case 'spin':
-        return <SpinWheel 
-          onClose={() => setActiveTab('home')}
-          balance={balance}
-          spinBalance={spinBalance}
-          onUpdateBalance={handleUpdateBalance}
-          freeSpins={freeSpins}
-          onUseFreeSpin={handleUseFreeSpin}
-          onGoToDeposit={() => setActiveTab('deposit')}
-          activeInvites={referralStats.activeMembers}
         />;
       case 'withdraw':
         return <WithdrawTab 
@@ -1457,26 +1365,17 @@ export default function Dashboard() {
                  referralStats={referralStats}
                  onApproveMember={handleActivateUser}
                />;
-      case 'product-draw':
-        return <ProductDrawView 
-            onBack={() => setActiveTab('home')} 
-            balance={balance} 
-            userName={userName}
-            onUpdateBalance={handleUpdateBalance} 
-        />;
       // Add other tabs as needed
       default:
         return <HomeTab 
           name={userName}
           balance={balance}
-          spinBalance={spinBalance}
           totalEarnings={totalEarnings}
           totalIndirectCommission={totalIndirectCommission}
           lockedBalance={lockedBalance}
           accountStatus={accountStatus}
           role={role}
           topEarners={topEarners}
-          onSpinClick={() => setActiveTab('spin')} 
           onInviteClick={() => setActiveTab('invite')}
           onDepositClick={() => setActiveTab('deposit')}
           onWithdrawClick={() => setActiveTab('withdraw')}
@@ -1496,7 +1395,6 @@ export default function Dashboard() {
           onEasyTaskClick={() => setActiveTab('wannads')}
           onOfferWallClick={() => setActiveTab('cpalead')}
           onPartnerToolsClick={() => setActiveTab('partner_tools')}
-          onProductDrawClick={() => setActiveTab('product-draw')}
           onUpdateBalance={handleUpdateBalance}
           onReloadData={reloadData}
           appSettings={activeAppSettings}
@@ -1594,9 +1492,6 @@ export default function Dashboard() {
       {/* Mobile App Container */}
       <div className={`w-full ${activeTab === 'watch' ? 'max-w-full' : 'sm:max-w-[440px]'} ${role === 'partner' ? 'bg-emerald-50' : 'bg-slate-50'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-slate-900`}>
         
-        {/* Notch simulation (Desktop only) */}
-        <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-3xl z-50"></div>
-
         {/* Top Notification Bar & Announcements */}
         <AnimatePresence>
           {showNotification && activeTab !== 'support_ai' && (
@@ -1609,22 +1504,18 @@ export default function Dashboard() {
 
         {/* Modern Polished Header */}
         {activeTab !== 'support_ai' && (
-          <div className={`px-5 py-5 ${role === 'partner' ? 'bg-gradient-to-r from-[#022c22] to-[#064e3b]' : 'bg-white/80 backdrop-blur-xl'} flex items-center justify-between sticky top-0 z-40 border-b border-gray-100/20 shadow-sm transition-all duration-300`}>
+          <div className={`px-4 py-3 ${role === 'partner' ? 'bg-gradient-to-r from-[#022c22] to-[#064e3b]' : 'bg-white/80 backdrop-blur-xl'} flex items-center justify-between sticky top-0 z-40 border-b border-gray-100/20 shadow-sm transition-all duration-300`}>
             <div className="flex items-center gap-3 cursor-pointer group relative" onClick={() => setActiveTab('home')}>
-              <div className={`relative w-11 h-11 rounded-2xl ${role === 'partner' ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-emerald-600 shadow-emerald-600/30'} flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 overflow-hidden`}>
+              <div className={`relative w-9 h-9 rounded-xl ${role === 'partner' ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-emerald-600 shadow-emerald-600/30'} flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 overflow-hidden`}>
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                <Coins className="w-6 h-6" />
+                <Coins className="w-5 h-5" />
               </div>
               <div className="flex flex-col -space-y-1">
-                <h1 className={`font-extrabold text-2xl sm:text-3xl tracking-tight`}>
+                <h1 className={`font-extrabold text-xl tracking-tight`}>
                   <span className={role === 'partner' ? 'text-white' : 'text-slate-900'}>Task</span>
                   <span className={role === 'partner' ? 'text-emerald-400' : 'text-emerald-600'}>Mint</span>
                 </h1>
-                <div className={`flex items-center gap-1 ${role === 'partner' ? 'text-emerald-400/70' : 'text-emerald-600/50'}`}>
-                   <div className="w-1 h-1 rounded-full bg-current"></div>
-                   <span className="text-[8px] font-black uppercase tracking-[0.3em]">Version 2.0</span>
-                </div>
-              </div>
+                              </div>
             </div>
             <div className="flex items-center gap-3">
               <motion.button 
@@ -1657,15 +1548,15 @@ export default function Dashboard() {
         )}
 
         {/* Scrollable Content */}
-        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-5 pt-6'} hide-scrollbar ${role === 'partner' ? 'bg-[#022c22]' : 'bg-slate-50'}`}>
-          <div className={`${['watch', 'support_ai'].includes(activeTab) ? 'max-w-full h-full' : 'max-w-2xl mx-auto pb-40'}`}>
+        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-4 pt-4'} hide-scrollbar ${role === 'partner' ? 'bg-[#022c22]' : 'bg-slate-50'}`}>
+          <div className={`${['watch', 'support_ai'].includes(activeTab) ? 'max-w-full h-full' : 'max-w-2xl mx-auto pb-28'}`}>
             {renderTabContent()}
           </div>
         </div>
 
         {/* Fixed Bottom Tab Bar - Glassmorphism UI */}
         {activeTab !== 'support_ai' && (
-          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22]/90' : 'bg-white/80'} backdrop-blur-3xl px-2 pt-2 pb-6 flex items-center justify-around shadow-[0_-15px_45px_rgba(0,0,0,0.1)] border-t border-white/5 transition-colors duration-500 rounded-t-[2.5rem]`}>
+          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22]/90' : 'bg-white/80'} backdrop-blur-3xl px-2 pt-2 pb-4 flex items-center justify-around shadow-[0_-15px_45px_rgba(0,0,0,0.1)] border-t border-white/5 transition-colors duration-500 rounded-t-[2.5rem]`}>
             {/* Decorative shine only for partner */}
             {role === 'partner' && <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>}
             
