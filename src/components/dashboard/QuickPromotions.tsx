@@ -135,14 +135,14 @@ const platforms = [
         icon: <MoreHorizontal className="w-5 h-5" />, 
         largeIcon: <MoreHorizontal className="w-12 h-12" />,
         color: '#6366F1',
-        bgColor: 'bg-indigo-50',
-        borderColor: 'border-indigo-100',
-        glowColor: 'shadow-indigo-500/20',
-        themeBg: 'bg-gradient-to-br from-indigo-600 via-purple-800 to-slate-900',
+        bgColor: 'bg-teal-50',
+        borderColor: 'border-teal-100',
+        glowColor: 'shadow-teal-500/20',
+        themeBg: 'bg-gradient-to-br from-teal-600 via-emerald-800 to-slate-900',
         themeText: 'text-white',
         cardBg: 'bg-white/10 backdrop-blur-xl border-white/10',
-        inputBg: 'bg-black/20 border-white/20 text-white placeholder:text-white/50 focus:border-indigo-400 focus:ring-indigo-400/20',
-        btnBg: 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]',
+        inputBg: 'bg-black/20 border-white/20 text-white placeholder:text-white/50 focus:border-teal-400 focus:ring-teal-400/20',
+        btnBg: 'bg-teal-500 hover:bg-teal-400 text-white shadow-[0_0_20px_rgba(99,102,241,0.4)]',
         services: [
             { id: 'other_custom', name: 'Custom Service', price: 1.00 },
         ]
@@ -290,10 +290,10 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
         <div className="animate-fade-in-up" style={{ animationDelay: '350ms' }}>
             <div className="flex items-center justify-between mb-4 px-1">
                 <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-amber-500 fill-amber-500" /> 
+                    <Zap className="w-4 h-4 text-emerald-500 fill-emerald-500" /> 
                     Quick Promotions
                 </h2>
-                <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-tighter">Premium</span>
+                <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-tighter">Premium</span>
             </div>
 
             {/* Platform Grid */}
@@ -340,7 +340,7 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                         <span className="text-sm font-bold text-white hidden sm:inline">Back</span>
                                     </button>
                                     <div className="font-black text-xl tracking-tighter text-white drop-shadow-md">
-                                        Task<span className="text-amber-400">Mint</span>
+                                        Task<span className="text-emerald-400">Mint</span>
                                     </div>
                                     <div className="w-16 sm:w-20"></div> {/* Spacer for centering */}
                                 </div>
@@ -557,7 +557,7 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                                                                 <div key={order.id} className={`p-5 rounded-2xl ${selectedPlatform.cardBg} flex flex-col gap-3 shadow-lg`}>
                                                                     <div className="flex justify-between items-center">
                                                                         <span className="font-bold text-base">{order.service}</span>
-                                                                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-lg ${order.status === 'completed' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : order.status === 'pending' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-white/10 border border-white/20'}`}>
+                                                                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-lg ${order.status === 'completed' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : order.status === 'pending' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/10 border border-white/20'}`}>
                                                                             {order.status}
                                                                         </span>
                                                                     </div>

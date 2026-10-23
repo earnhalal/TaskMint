@@ -166,7 +166,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       animate={{ opacity: 1, y: 0 }}
       className="pb-32 px-4 sm:px-6 pt-2 max-w-2xl mx-auto w-full"
     >
-      <div className="relative mb-8 overflow-hidden rounded-[2rem] p-8 sm:p-10 bg-[#0A0A0B] shadow-[0_20px_50px_rgba(255,255,255,0.03)] border border-white/10">
+      <div className="relative mb-8 overflow-hidden rounded-[2rem] p-8 sm:p-10 bg-[#022c22] shadow-[0_20px_50px_rgba(255,255,255,0.03)] border border-white/10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] -mr-32 -mt-32 mix-blend-screen pointer-events-none"></div>
         <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] mix-blend-screen pointer-events-none"></div>
         
@@ -190,7 +190,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
         </div>
       </div>
 
-      <div className="mb-8 rounded-[2rem] p-6 shadow-xl border relative overflow-hidden bg-[#0A0A0B] border-white/5">
+      <div className="mb-8 rounded-[2rem] p-6 shadow-xl border relative overflow-hidden bg-[#022c22] border-white/5">
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4 px-1">
             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Your Invite Link</label>
@@ -203,7 +203,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             </span>
             <button 
               onClick={handleCopy}
-              className={`h-12 shrink-0 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'bg-emerald-500 text-[#0A0A0B] shadow-lg shadow-emerald-500/20' : 'bg-white text-[#0A0A0B] hover:bg-slate-200 shadow-lg shadow-white/10'}`}
+              className={`h-12 shrink-0 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'bg-emerald-500 text-[#022c22] shadow-lg shadow-emerald-500/20' : 'bg-white text-[#022c22] hover:bg-slate-200 shadow-lg shadow-white/10'}`}
             >
               {copied ? 'Copied!' : 'Copy Link'}
             </button>
@@ -227,7 +227,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       </div>
 
       {pendingIndirect > 0 && (
-          <div className="bg-[#111112] rounded-2xl p-6 shadow-xl border border-emerald-500/30 mb-8 mt-4">
+          <div className="bg-[#064e3b] rounded-2xl p-6 shadow-xl border border-emerald-500/30 mb-8 mt-4">
             <div className="flex items-center justify-between mb-4">
               <div className="text-white">
                   <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Legacy Indirect Commission</p>
@@ -237,7 +237,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             </div>
             <button 
                 onClick={onClaimIndirect}
-                className="w-full bg-emerald-500 text-[#0A0A0B] py-4 rounded-xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
+                className="w-full bg-emerald-500 text-[#022c22] py-4 rounded-xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
             >
                 Claim Now
             </button>
@@ -268,9 +268,9 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             }
 
             const colorMap = {
-              L1: { text: 'text-emerald-400', border: 'border-emerald-500/50', shadow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)]', bgGlow: 'bg-emerald-500/5', icon: 'text-emerald-400', activeBg: 'bg-[#111112]' },
-              L2: { text: 'text-cyan-400', border: 'border-cyan-500/50', shadow: 'shadow-[0_0_20px_rgba(6,182,212,0.15)]', bgGlow: 'bg-cyan-500/5', icon: 'text-cyan-400', activeBg: 'bg-[#111112]' },
-              L3: { text: 'text-indigo-400', border: 'border-indigo-500/50', shadow: 'shadow-[0_0_20px_rgba(99,102,241,0.15)]', bgGlow: 'bg-indigo-500/5', icon: 'text-indigo-400', activeBg: 'bg-[#111112]' }
+              L1: { text: 'text-emerald-400', border: 'border-emerald-500/50', shadow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)]', bgGlow: 'bg-emerald-500/5', icon: 'text-emerald-400', activeBg: 'bg-[#064e3b]' },
+              L2: { text: 'text-cyan-400', border: 'border-cyan-500/50', shadow: 'shadow-[0_0_20px_rgba(6,182,212,0.15)]', bgGlow: 'bg-cyan-500/5', icon: 'text-cyan-400', activeBg: 'bg-[#064e3b]' },
+              L3: { text: 'text-teal-400', border: 'border-teal-500/50', shadow: 'shadow-[0_0_20px_rgba(99,102,241,0.15)]', bgGlow: 'bg-teal-500/5', icon: 'text-teal-400', activeBg: 'bg-[#064e3b]' }
             };
 
             const styles = colorMap[lvl];
@@ -282,7 +282,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                 className={`relative flex flex-col items-center py-3 px-2 sm:p-4 rounded-[1.25rem] sm:rounded-[1.5rem] border transition-all duration-300 overflow-hidden group active:scale-95 ${
                   isActive 
                     ? `${styles.border} ${styles.shadow} ${styles.activeBg}` 
-                    : 'border-white/5 bg-[#0A0A0B] hover:bg-[#111112] hover:border-white/10'
+                    : 'border-white/5 bg-[#022c22] hover:bg-[#064e3b] hover:border-white/10'
                 }`}
               >
                 {isActive && (
@@ -314,12 +314,12 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
 
         <div className="flex flex-col gap-3">
           {loadingTree ? (
-            <div className="rounded-[2rem] p-12 text-center border border-dashed bg-[#0A0A0B] border-white/10">
+            <div className="rounded-[2rem] p-12 text-center border border-dashed bg-[#022c22] border-white/10">
               <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-20 text-emerald-500 animate-pulse" />
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Scanning Network...</p>
             </div>
           ) : activeData.length === 0 ? (
-            <div className="rounded-[2rem] p-12 text-center border border-dashed bg-[#0A0A0B] border-white/10">
+            <div className="rounded-[2rem] p-12 text-center border border-dashed bg-[#022c22] border-white/10">
               <UsersRound className="w-10 h-10 mx-auto mb-3 opacity-20 text-white" />
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">No members in this level</p>
             </div>
@@ -332,10 +332,10 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(idx * 0.05, 0.5) }}
-                className="p-4 rounded-[1.5rem] border flex items-center justify-between group transition-all bg-[#0A0A0B] border-white/5 hover:bg-white/5 hover:border-white/10"
+                className="p-4 rounded-[1.5rem] border flex items-center justify-between group transition-all bg-[#022c22] border-white/5 hover:bg-white/5 hover:border-white/10"
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center font-black text-lg shrink-0 transition-transform group-hover:scale-105 ${isPaid ? 'bg-emerald-500 text-[#0A0A0B]' : 'bg-[#151515] text-slate-600 border border-white/5'}`}>
+                  <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center font-black text-lg shrink-0 transition-transform group-hover:scale-105 ${isPaid ? 'bg-emerald-500 text-[#022c22]' : 'bg-[#151515] text-slate-600 border border-white/5'}`}>
                     {r.name ? r.name.substring(0, 1).toUpperCase() : '?'}
                   </div>
                   <div className="min-w-0">

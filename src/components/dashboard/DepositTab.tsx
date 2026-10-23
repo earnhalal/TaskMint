@@ -31,7 +31,7 @@ const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
     if (!status) return null;
     
     const styles: Record<string, string> = {
-        'Pending': 'bg-amber-100 text-amber-700 border-amber-200',
+        'Pending': 'bg-emerald-100 text-emerald-700 border-emerald-200',
         'Approved': 'bg-green-100 text-green-700 border-green-200',
         'Completed': 'bg-green-100 text-green-700 border-green-200',
         'Rejected': 'bg-red-100 text-red-700 border-red-200',
@@ -119,7 +119,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
       className="max-w-5xl mx-auto pb-24 px-4 pt-6"
     >
       {/* High-End Protocol Header */}
-      <div className="bg-[#0A0B0F] rounded-[2.5rem] p-10 text-white shadow-2xl mb-10 relative overflow-hidden border border-white/5">
+      <div className="bg-[#022c22] rounded-[2.5rem] p-10 text-white shadow-2xl mb-10 relative overflow-hidden border border-white/5">
         <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full -mr-40 -mt-40 blur-3xl animate-pulse-slow"></div>
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-emerald-600/5 rounded-full -ml-20 -mb-20 blur-2xl"></div>
         
@@ -179,22 +179,22 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                     ))}
 
                     {userCountry !== 'Pakistan' && (
-                        <div className="relative flex items-center gap-4 p-6 rounded-[2rem] border-2 border-dashed border-indigo-200 bg-indigo-50/50 opacity-80 cursor-not-allowed group/usdt">
-                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden border border-indigo-100 shrink-0">
-                                <div className="bg-indigo-600 text-white text-[8px] font-black p-1 rounded">USDT</div>
+                        <div className="relative flex items-center gap-4 p-6 rounded-[2rem] border-2 border-dashed border-teal-200 bg-teal-50/50 opacity-80 cursor-not-allowed group/usdt">
+                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden border border-teal-100 shrink-0">
+                                <div className="bg-teal-600 text-white text-[8px] font-black p-1 rounded">USDT</div>
                              </div>
                              <div className="text-left flex-1">
-                                <span className="font-black text-xs text-indigo-900 uppercase tracking-widest block">USDT (Binance)</span>
-                                <span className="text-[8px] font-bold text-indigo-600/40 uppercase">International Transfer</span>
+                                <span className="font-black text-xs text-teal-900 uppercase tracking-widest block">USDT (Binance)</span>
+                                <span className="text-[8px] font-bold text-teal-600/40 uppercase">International Transfer</span>
                              </div>
-                             <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-[8px] font-black px-2 py-1 rounded shadow-lg">
+                             <div className="absolute -top-3 right-4 bg-teal-500 text-white text-[8px] font-black px-2 py-1 rounded shadow-lg">
                                 COMING SOON
                              </div>
                         </div>
                     )}
                 </div>
 
-                <div className="mt-8 bg-[#0A0B0F] rounded-[2.5rem] p-8 text-white relative overflow-hidden group/acc shadow-2xl">
+                <div className="mt-8 bg-[#022c22] rounded-[2.5rem] p-8 text-white relative overflow-hidden group/acc shadow-2xl">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover/acc:bg-emerald-500/10 transition-colors"></div>
                     
                     <div className="space-y-6 relative z-10">
@@ -248,7 +248,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                       whileTap={{ scale: 0.99 }}
                       type="submit" 
                       disabled={isSubmitting} 
-                      className="w-full bg-[#0A0B0F] text-white font-black py-6 rounded-[1.5rem] transition-all shadow-2xl shadow-slate-900/10 active:scale-95 disabled:opacity-70 flex items-center justify-center gap-3 uppercase tracking-[0.3em] text-xs italic"
+                      className="w-full bg-[#022c22] text-white font-black py-6 rounded-[1.5rem] transition-all shadow-2xl shadow-slate-900/10 active:scale-95 disabled:opacity-70 flex items-center justify-center gap-3 uppercase tracking-[0.3em] text-xs italic"
                     >
                         {isSubmitting ? (
                             <span className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
@@ -273,7 +273,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
         {/* Right: Security Ledger & History */}
         <div className="lg:col-span-5 space-y-8">
             <div className="bg-white rounded-[3rem] shadow-xl border border-slate-100/50 overflow-hidden flex flex-col min-h-[600px]">
-                <div className="p-8 border-b border-slate-50 bg-[#0A0B0F] text-white relative">
+                <div className="p-8 border-b border-slate-50 bg-[#022c22] text-white relative">
                     <div className="absolute bottom-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mb-16 blur-2xl"></div>
                     <div className="flex items-center gap-4 relative z-10">
                         <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-2xl shadow-emerald-500/30">

@@ -35,10 +35,10 @@ interface UpdatesViewProps {
 
 const getIcon = (type: string) => {
   switch (type) {
-    case 'welcome': return <Gamepad2 className="w-5 h-5 text-amber-500" />;
+    case 'welcome': return <Gamepad2 className="w-5 h-5 text-emerald-500" />;
     case 'activation': return <ShieldCheck className="w-5 h-5 text-emerald-500" />;
     case 'deposit': return <Wallet className="w-5 h-5 text-blue-500" />;
-    case 'withdrawal': return <ArrowRightLeft className="w-5 h-5 text-purple-500" />;
+    case 'withdrawal': return <ArrowRightLeft className="w-5 h-5 text-emerald-500" />;
     case 'verification': return <Mail className="w-5 h-5 text-red-500" />;
     default: return <Info className="w-5 h-5 text-slate-500" />;
   }
@@ -50,17 +50,17 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[100] bg-[#0A0B0F] flex flex-col font-sans overflow-hidden"
+            className="absolute inset-0 z-[100] bg-[#022c22] flex flex-col font-sans overflow-hidden"
         >
             {/* Ambient Background Elements */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/5 rounded-full blur-[100px]" />
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[100px]" />
+                <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/5 rounded-full blur-[100px]" />
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px]" />
                 <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
             </div>
 
             {/* Premium Dynamic Header */}
-            <div className="relative bg-[#0A0B0F]/80 backdrop-blur-xl border-b border-white/5 px-6 py-8 flex items-center justify-between z-20">
+            <div className="relative bg-[#022c22]/80 backdrop-blur-xl border-b border-white/5 px-6 py-8 flex items-center justify-between z-20">
                 <div className="flex items-center gap-5">
                     <button 
                         onClick={onBack}
@@ -70,7 +70,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                     </button>
                     <div>
                         <h2 className="text-2xl font-black text-white tracking-tighter italic uppercase flex items-center gap-2">
-                             System <span className="text-indigo-400">Mailbox</span>
+                             System <span className="text-teal-400">Mailbox</span>
                         </h2>
                         <div className="flex items-center gap-2 mt-1">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -84,9 +84,9 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                         onClick={onMarkAllAsRead}
                         className="group relative px-4 py-2.5 rounded-xl overflow-hidden active:scale-95 transition-all"
                     >
-                        <div className="absolute inset-0 bg-indigo-600 opacity-10 group-hover:opacity-20 transition-opacity" />
-                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-indigo-500 scale-x-0 group-hover:scale-x-100 transition-transform" />
-                        <span className="relative text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                        <div className="absolute inset-0 bg-teal-600 opacity-10 group-hover:opacity-20 transition-opacity" />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-teal-500 scale-x-0 group-hover:scale-x-100 transition-transform" />
+                        <span className="relative text-[10px] font-black text-teal-400 uppercase tracking-widest flex items-center gap-2">
                             <CheckCircle2 className="w-3.5 h-3.5" /> Read All
                         </span>
                     </button>
@@ -102,11 +102,11 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                 {updates.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-[50vh] text-center">
                         <div className="relative mb-8 group">
-                            <div className="absolute inset-0 bg-indigo-500/20 rounded-full blur-[60px] animate-pulse" />
-                            <div className="relative w-28 h-28 bg-[#111218] rounded-[2.5rem] border border-white/5 flex items-center justify-center text-slate-700 shadow-2xl transition-all group-hover:scale-105 duration-500">
+                            <div className="absolute inset-0 bg-teal-500/20 rounded-full blur-[60px] animate-pulse" />
+                            <div className="relative w-28 h-28 bg-[#022c22] rounded-[2.5rem] border border-white/5 flex items-center justify-center text-slate-700 shadow-2xl transition-all group-hover:scale-105 duration-500">
                                 <Mail className="w-12 h-12 opacity-20" />
-                                <div className="absolute -top-2 -right-2 w-10 h-10 bg-indigo-600/10 rounded-2xl flex items-center justify-center border border-indigo-500/20">
-                                    <Zap className="w-5 h-5 text-indigo-400" />
+                                <div className="absolute -top-2 -right-2 w-10 h-10 bg-teal-600/10 rounded-2xl flex items-center justify-center border border-teal-500/20">
+                                    <Zap className="w-5 h-5 text-teal-400" />
                                 </div>
                             </div>
                         </div>
@@ -125,19 +125,19 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                     onClick={() => onMarkAsRead(update.id)}
                                     className={`group relative p-6 rounded-[2.5rem] border transition-all duration-500 cursor-pointer overflow-hidden ${
                                         update.status === 'unread' 
-                                            ? 'bg-gradient-to-r from-white/5 to-transparent border-white/10 shadow-2xl shadow-indigo-500/5' 
+                                            ? 'bg-gradient-to-r from-white/5 to-transparent border-white/10 shadow-2xl shadow-teal-500/5' 
                                             : 'bg-transparent border-white/5 opacity-50 grayscale hover:opacity-100 hover:grayscale-0'
                                     }`}
                                 >
                                     {/* Unread Glow Accent */}
                                     {update.status === 'unread' && (
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-teal-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
                                     )}
 
                                     <div className="flex gap-5 relative z-10">
                                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 ${
                                             update.status === 'unread' 
-                                                ? 'bg-indigo-600 shadow-xl shadow-indigo-500/20 text-white' 
+                                                ? 'bg-teal-600 shadow-xl shadow-teal-500/20 text-white' 
                                                 : 'bg-white/5 text-slate-500 border border-white/5'
                                         }`}>
                                             {getIcon(update.type)}
@@ -150,9 +150,9 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                                         {update.title}
                                                     </h4>
                                                     {update.status === 'unread' && (
-                                                        <div className="flex items-center gap-1 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
-                                                            <div className="w-1 h-1 rounded-full bg-indigo-400 animate-pulse" />
-                                                            <span className="text-[7px] font-black text-indigo-400 uppercase tracking-widest leading-none">New Log</span>
+                                                        <div className="flex items-center gap-1 bg-teal-500/10 px-2 py-0.5 rounded-md border border-teal-500/20">
+                                                            <div className="w-1 h-1 rounded-full bg-teal-400 animate-pulse" />
+                                                            <span className="text-[7px] font-black text-teal-400 uppercase tracking-widest leading-none">New Log</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -173,7 +173,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                                     <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
                                                         <div className={`w-1 h-1 rounded-full ${
                                                             update.type === 'activation' ? 'bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.5)]' :
-                                                            update.type === 'withdrawal' ? 'bg-purple-400 shadow-[0_0_5px_rgba(192,132,252,0.5)]' :
+                                                            update.type === 'withdrawal' ? 'bg-emerald-400 shadow-[0_0_5px_rgba(192,132,252,0.5)]' :
                                                             update.type === 'deposit' ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.5)]' :
                                                             'bg-slate-400'
                                                         }`} />
@@ -184,7 +184,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                                     </span>
                                                 </div>
                                                 
-                                                <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all border border-white/5">
+                                                <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-teal-500 group-hover:text-white transition-all border border-white/5">
                                                     <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                                                 </div>
                                             </div>
@@ -199,10 +199,10 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
 
             {/* Information Hub Footer */}
             {updates.length > 0 && (
-                <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-[#0A0B0F] via-[#0A0B0F]/95 to-transparent z-20">
+                <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-[#022c22] via-[#022c22]/95 to-transparent z-20">
                     <div className="bg-white/5 backdrop-blur-md rounded-2xl p-5 flex items-center gap-4 border border-white/5 shadow-2xl relative group overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform" />
-                        <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shrink-0">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform" />
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20 shrink-0">
                             <Sparkles className="w-6 h-6" />
                         </div>
                         <div className="flex-1">

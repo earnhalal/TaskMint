@@ -112,7 +112,7 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
             <h2 className="text-lg font-black text-slate-900 uppercase tracking-tighter leading-none">Lucky Draw</h2>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-              <p className="text-[9px] text-violet-600 font-black uppercase tracking-[0.1em] opacity-90">Live Activity</p>
+              <p className="text-[9px] text-teal-600 font-black uppercase tracking-[0.1em] opacity-90">Live Activity</p>
             </div>
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
           className="group flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-2xl active:scale-95 transition-all shadow-lg shadow-slate-200 border border-slate-800"
         >
           <span className="text-[9px] font-black uppercase tracking-widest">View Rules</span>
-          <Info className="w-4 h-4 text-violet-400 group-hover:rotate-12 transition-transform" />
+          <Info className="w-4 h-4 text-teal-400 group-hover:rotate-12 transition-transform" />
         </button>
       </div>
 
@@ -139,7 +139,7 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
               <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-8 sm:hidden" />
               <div className="flex justify-between items-center mb-8">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-violet-100 rounded-2xl text-violet-600">
+                  <div className="p-3 bg-teal-100 rounded-2xl text-teal-600">
                     <Gift className="w-6 h-6" />
                   </div>
                   <h3 className="font-black text-2xl text-slate-900 tracking-tight">Draw Rules</h3>
@@ -156,8 +156,8 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
                   { title: "Fair Play", text: "Sirf wohi real users select honge jin ki profile verified hogi.", icon: <Users className="w-5 h-5" /> },
                   { title: "Winner Pride", text: "Jeetne wala user Hall of Fame mein show hoga aur usay gadget deliver kiya jaye ga.", icon: <Gift className="w-5 h-5" /> }
                 ].map((item, i) => (
-                  <div key={i} className="flex gap-4 p-4 bg-slate-50 rounded-3xl border border-slate-100 transition-all hover:bg-white hover:shadow-md hover:border-violet-100 group">
-                    <div className="mt-1 text-slate-400 group-hover:text-violet-500 transition-colors">{item.icon}</div>
+                  <div key={i} className="flex gap-4 p-4 bg-slate-50 rounded-3xl border border-slate-100 transition-all hover:bg-white hover:shadow-md hover:border-teal-100 group">
+                    <div className="mt-1 text-slate-400 group-hover:text-teal-500 transition-colors">{item.icon}</div>
                     <div className="space-y-1">
                         <p className="text-xs font-black uppercase text-slate-900 tracking-wider font-sans">{item.title}</p>
                         <p className="text-sm text-slate-500 font-medium leading-relaxed">{item.text}</p>
@@ -179,9 +179,9 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
 
       <div className="px-1 space-y-8">
         {/* Banner Section */}
-        <div className="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-[32px] p-8 text-white relative overflow-hidden shadow-2xl shadow-violet-200">
+        <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-[32px] p-8 text-white relative overflow-hidden shadow-2xl shadow-teal-200">
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-400/20 rounded-full -ml-16 -mb-16 blur-xl" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-teal-400/20 rounded-full -ml-16 -mb-16 blur-xl" />
             
             <div className="relative z-10 space-y-4">
                 <div className="inline-flex px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">Limited Time Draws</div>
@@ -202,14 +202,14 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
               layout
               className="bg-white rounded-[32px] p-4 border border-slate-100 shadow-xl shadow-slate-200/30 relative overflow-hidden group active:scale-[0.98] transition-all"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-violet-50/50 rounded-full -mr-16 -mt-16 scale-0 group-hover:scale-100 transition-transform duration-500 ease-out" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50/50 rounded-full -mr-16 -mt-16 scale-0 group-hover:scale-100 transition-transform duration-500 ease-out" />
               
               <div className="flex gap-5 items-center relative z-10">
                 <div className="relative shrink-0">
                   <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-lg shadow-slate-200 border-2 border-white">
                     <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
-                  <div className="absolute -bottom-1 -right-1 bg-violet-600 text-white p-1.5 rounded-xl shadow-lg border-2 border-white">
+                  <div className="absolute -bottom-1 -right-1 bg-teal-600 text-white p-1.5 rounded-xl shadow-lg border-2 border-white">
                     <Gift className="w-3.5 h-3.5" />
                   </div>
                   <div className="absolute -top-1 -left-1 bg-red-600 text-white text-[8px] font-black px-2 py-0.5 rounded-lg shadow-md border border-white uppercase tracking-tighter">
@@ -230,7 +230,7 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
                   
                   <div className="flex flex-col gap-2 mt-2">
                     <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-slate-400">
-                      <span className="text-violet-600 bg-violet-50 px-2 py-0.5 rounded-lg border border-violet-100">Fee: Rs. {product.entryFee}</span>
+                      <span className="text-teal-600 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-100">Fee: Rs. {product.entryFee}</span>
                       <span className="flex items-center gap-1">
                         <Users className="w-3 h-3 text-slate-300" /> {product.totalParticipants} Joined
                       </span>
@@ -239,7 +239,7 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
                       <motion.div 
                         initial={{ width: 0 }} 
                         animate={{ width: `${Math.min((product.totalParticipants/1000)*100, 100)}%` }} 
-                        className="h-full bg-gradient-to-r from-violet-500 to-indigo-600 rounded-full"
+                        className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full"
                       />
                     </div>
                   </div>
@@ -253,12 +253,12 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
                             ? 'bg-slate-100 text-slate-400 shadow-none border border-slate-100 cursor-not-allowed' 
                             : isProcessing
                               ? 'bg-slate-400 cursor-wait'
-                              : 'bg-slate-900 text-white shadow-slate-300 hover:shadow-violet-200 active:scale-[0.97] hover:bg-black'
+                              : 'bg-slate-900 text-white shadow-slate-300 hover:shadow-teal-200 active:scale-[0.97] hover:bg-black'
                         }`}
                     >
                       {isProcessing ? 'Processing...' : participatedProducts.has(product.id) ? (
                         <span className="flex items-center justify-center gap-2">
-                          Joined <Trophy className="w-3 h-3 text-amber-500" />
+                          Joined <Trophy className="w-3 h-3 text-emerald-500" />
                         </span>
                       ) : 'Join Lucky Draw'}
                     </button>
@@ -282,7 +282,7 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
             {participants.length > 10 && (
                 <button 
                     onClick={() => setShowFullHistory(!showFullHistory)}
-                    className="text-[10px] font-black text-violet-600 uppercase tracking-widest hover:underline"
+                    className="text-[10px] font-black text-teal-600 uppercase tracking-widest hover:underline"
                 >
                     {showFullHistory ? 'Show Recent' : 'View All'}
                 </button>
@@ -302,7 +302,7 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
                     className="grid grid-cols-3 items-center text-sm px-2 py-1"
                 >
                     <span className="text-slate-900 font-extrabold pr-2 truncate">{h.user}</span>
-                    <span className="text-violet-600 font-black text-[10px] uppercase tracking-tighter truncate pr-2">{h.item}</span>
+                    <span className="text-teal-600 font-black text-[10px] uppercase tracking-tighter truncate pr-2">{h.item}</span>
                     <span className="text-slate-400 text-[10px] font-black tabular-nums text-right uppercase tracking-tighter">{getTimeAgo(h.time)}</span>
                 </motion.div>
                 ))}
@@ -311,7 +311,7 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
         </div>
 
       {/* Winner Announcement Section */}
-      <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 rounded-[40px] p-10 text-white shadow-2xl shadow-amber-200 relative overflow-hidden group border-4 border-white/20">
+      <div className="bg-gradient-to-br from-emerald-400 via-emerald-500 to-orange-600 rounded-[40px] p-10 text-white shadow-2xl shadow-emerald-200 relative overflow-hidden group border-4 border-white/20">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-125 transition-transform duration-1000" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24 blur-3xl" />
         
@@ -321,18 +321,18 @@ export default function ProductDrawView({ onBack, balance, userName, onUpdateBal
           </div>
           <div className="space-y-2">
             <h3 className="font-black text-3xl uppercase tracking-tighter italic drop-shadow-md">Hall of Fame</h3>
-            <p className="text-[10px] text-amber-50 font-black uppercase tracking-[0.4em] opacity-90">Season 04 Grand Finale</p>
+            <p className="text-[10px] text-emerald-50 font-black uppercase tracking-[0.4em] opacity-90">Season 04 Grand Finale</p>
           </div>
           
           <div className="w-full p-8 bg-black/10 rounded-[32px] border border-white/20 backdrop-blur-md space-y-4 shadow-inner">
-            <p className="text-sm font-bold text-amber-50 leading-relaxed italic">"Luck favors those who take the first step!"</p>
+            <p className="text-sm font-bold text-emerald-50 leading-relaxed italic">"Luck favors those who take the first step!"</p>
             <div className="pt-4 border-t border-white/10">
               <p className="text-[10px] font-black text-white uppercase tracking-[0.2em] opacity-80">Next Results Announcement</p>
               <p className="text-2xl font-black mt-1 tracking-tighter tabular-nums drop-shadow-sm">15 MAY</p>
             </div>
           </div>
           
-          <p className="text-[9px] font-black uppercase tracking-widest text-amber-100/60">* Only real participants are eligible for physical delivery.</p>
+          <p className="text-[9px] font-black uppercase tracking-widest text-emerald-100/60">* Only real participants are eligible for physical delivery.</p>
         </div>
       </div>
       </div>

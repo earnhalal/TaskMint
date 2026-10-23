@@ -47,16 +47,16 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-black text-white leading-none">Survey Wall</h2>
-              <div className="bg-amber-500 text-[8px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-tighter">Live</div>
+              <div className="bg-emerald-500 text-[8px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-tighter">Live</div>
             </div>
-            <p className="text-[10px] text-violet-300 font-bold uppercase tracking-widest mt-1">CPX Research</p>
+            <p className="text-[10px] text-teal-300 font-bold uppercase tracking-widest mt-1">CPX Research</p>
           </div>
         </div>
         
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowInfo(!showInfo)}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showInfo ? 'bg-white text-violet-900 shadow-lg' : 'bg-white/10 text-violet-100 hover:bg-white/20'}`}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showInfo ? 'bg-white text-teal-900 shadow-lg' : 'bg-white/10 text-teal-100 hover:bg-white/20'}`}
           >
             <Info className="w-5 h-5" />
           </button>
@@ -74,20 +74,20 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
           >
             <div className="bg-white rounded-3xl p-5 shadow-2xl border border-slate-100">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-violet-100 rounded-xl flex items-center justify-center">
-                  <Star className="w-4 h-4 text-violet-600" />
+                <div className="w-8 h-8 bg-teal-100 rounded-xl flex items-center justify-center">
+                  <Star className="w-4 h-4 text-teal-600" />
                 </div>
                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Survey Info</h3>
               </div>
               <div className="space-y-3">
                 <div className="flex gap-3 items-start">
-                  <div className="w-1.5 h-1.5 rounded-full bg-violet-500 mt-1.5 shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div>
                   <p className="text-xs text-slate-600 font-bold leading-relaxed">
                     Answer all questions honestly to avoid disqualification.
                   </p>
                 </div>
                 <div className="flex gap-3 items-start">
-                  <div className="w-1.5 h-1.5 rounded-full bg-violet-500 mt-1.5 shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div>
                   <p className="text-xs text-slate-600 font-bold leading-relaxed">
                     Earnings will be added to your wallet within 5-10 minutes. Conversion: $1 = Rs. 150.
                   </p>
@@ -108,7 +108,7 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
       <div className="flex-1 relative bg-slate-50">
         {isLoading && (
           <div className="absolute inset-0 z-20 bg-white flex flex-col items-center justify-center">
-            <div className="w-12 h-12 border-4 border-slate-100 border-t-violet-600 rounded-full animate-spin mb-4"></div>
+            <div className="w-12 h-12 border-4 border-slate-100 border-t-teal-600 rounded-full animate-spin mb-4"></div>
             <p className="text-sm font-black text-slate-900 animate-pulse">Loading Surveys...</p>
           </div>
         )}
@@ -117,7 +117,7 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
         {!isApproved && (
           <div className="absolute inset-0 z-30 backdrop-blur-md bg-white/60 flex flex-col items-center justify-center p-8 text-center">
             <div className="w-24 h-24 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center mb-8 -rotate-3 border border-slate-100">
-              <Lock className="w-10 h-10 text-amber-600" />
+              <Lock className="w-10 h-10 text-emerald-600" />
             </div>
             <h3 className="text-3xl font-black text-slate-900 mb-4 leading-tight">Unlock Premium Surveys!</h3>
             <p className="text-base text-slate-600 font-bold mb-10 max-w-xs mx-auto">
@@ -125,7 +125,7 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
             </p>
             <button 
               onClick={onPayClick}
-              className="w-full max-w-xs bg-gradient-to-r from-violet-600 to-indigo-700 text-white py-5 rounded-2xl font-black text-sm shadow-2xl shadow-violet-600/40 active:scale-95 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+              className="w-full max-w-xs bg-gradient-to-r from-teal-600 to-teal-700 text-white py-5 rounded-2xl font-black text-sm shadow-2xl shadow-teal-600/40 active:scale-95 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
             >
               <Zap className="w-4 h-4" />
               Pay Now to Unlock

@@ -287,16 +287,16 @@ export default function SpinWheel({
         themeClass: 'silver-glow'
       };
       case 100: return {
-        border: 'border-amber-500',
-        glow: 'shadow-[0_0_60px_rgba(245,158,11,0.5)] ring-8 ring-amber-500/20',
+        border: 'border-emerald-500',
+        glow: 'shadow-[0_0_60px_rgba(16,185,129,0.5)] ring-8 ring-emerald-500/20',
         wheelBg: 'conic-gradient(from -22.5deg, #F59E0B 0deg 45deg, #1A1A1A 45deg 90deg, #F59E0B 90deg 135deg, #1A1A1A 135deg 180deg, #F59E0B 180deg 225deg, #1A1A1A 225deg 270deg, #F59E0B 270deg 315deg, #1A1A1A 315deg 360deg)',
         pointer: '#F59E0B',
         sparkle: true,
         themeClass: 'golden-sparkle'
       };
       default: return {
-        border: 'border-yellow-500',
-        glow: 'shadow-[0_0_40px_rgba(250,204,21,0.3)]',
+        border: 'border-amber-500',
+        glow: 'shadow-[0_0_40px_rgba(245,158,11,0.3)]',
         wheelBg: 'conic-gradient(from -22.5deg, #FBBF24 0deg 45deg, #0F172A 45deg 90deg, #FBBF24 90deg 135deg, #0F172A 135deg 180deg, #FBBF24 180deg 225deg, #0F172A 225deg 270deg, #FBBF24 270deg 315deg, #0F172A 315deg 360deg)',
         pointer: '#FBBF24',
         sparkle: false
@@ -324,7 +324,7 @@ export default function SpinWheel({
           </button>
           <div>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter italic flex items-center gap-2">
-              Helix <span className="text-amber-500">Spinner</span> <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 animate-pulse" />
+              Helix <span className="text-emerald-500">Spinner</span> <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 animate-pulse" />
             </h2>
             <p className="text-[8px] sm:text-[10px] text-slate-400 font-black uppercase tracking-widest">3D Quantum Yield Engine</p>
           </div>
@@ -344,8 +344,8 @@ export default function SpinWheel({
         {/* Left: The 3D Quantum Wheel */}
         <div className="lg:col-span-7 flex flex-col items-center">
             {/* Live Winners Ticker */}
-            <div className="w-full bg-[#0A0B0F] rounded-full py-2.5 px-6 sm:px-8 mb-4 sm:mb-12 border border-white/5 overflow-hidden relative shadow-2xl">
-                 <div className="absolute inset-0 bg-amber-500/5 blur-xl"></div>
+            <div className="w-full bg-[#022c22] rounded-full py-2.5 px-6 sm:px-8 mb-4 sm:mb-12 border border-white/5 overflow-hidden relative shadow-2xl">
+                 <div className="absolute inset-0 bg-emerald-500/5 blur-xl"></div>
                  <motion.div 
                     animate={{ x: [400, -1200] }}
                     transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
@@ -354,7 +354,7 @@ export default function SpinWheel({
                     {winners.length > 0 ? (
                         winners.map((winner, idx) => (
                             <div key={idx} className="flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></div>
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
                                 <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                     <span className="text-white italic">{winner.userName}</span> captured <span className="text-emerald-400">Rs {winner.prize}</span>
                                 </span>
@@ -370,7 +370,7 @@ export default function SpinWheel({
             <div className="relative pt-6 sm:pt-12 pb-6 sm:pb-20 w-full flex justify-center items-center group overflow-hidden sm:overflow-visible" style={{ perspective: '1200px' }}>
               <div className="transform scale-[0.6] sm:scale-100 origin-center -my-16 sm:my-0">
                 {/* Outer Portal Glow */}
-                <div className={`absolute inset-[-60px] rounded-full blur-[100px] opacity-20 transition-all duration-1000 ${activeTier === 100 ? 'bg-amber-500' : activeTier === 50 ? 'bg-indigo-500' : 'bg-emerald-500'}`}></div>
+                <div className={`absolute inset-[-60px] rounded-full blur-[100px] opacity-20 transition-all duration-1000 ${activeTier === 100 ? 'bg-emerald-500' : activeTier === 50 ? 'bg-teal-500' : 'bg-emerald-500'}`}></div>
                 
                 {/* Pointer (3D Pin) */}
                 <div className="absolute top-[20px] left-1/2 -translate-x-1/2 z-[60] transform group-hover:scale-110 transition-transform duration-500">
@@ -378,7 +378,7 @@ export default function SpinWheel({
                         <div className="absolute inset-[-15px] bg-white blur-3xl opacity-40 animate-pulse"></div>
                         <div className="w-14 h-16 bg-white rounded-t-full rounded-b-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] flex items-center justify-center border-4 border-slate-50 relative overflow-hidden">
                             <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-slate-100 to-transparent"></div>
-                            <div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.8)] z-10"></div>
+                            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.8)] z-10"></div>
                         </div>
                     </div>
                 </div>
@@ -445,15 +445,15 @@ export default function SpinWheel({
 
                             {/* Center Reactor Core */}
                             <div className="absolute inset-0 m-auto w-24 h-24 bg-white rounded-full shadow-[0_0_50px_rgba(0,0,0,0.5)] flex items-center justify-center z-10 border-8 border-slate-100 transform translate-z-[40px]">
-                                 <div className="w-16 h-16 bg-[#0A0B0F] rounded-2xl flex items-center justify-center text-amber-500 shadow-inner group overflow-hidden relative">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-transparent animate-pulse"></div>
+                                 <div className="w-16 h-16 bg-[#022c22] rounded-2xl flex items-center justify-center text-emerald-500 shadow-inner group overflow-hidden relative">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/10 to-transparent animate-pulse"></div>
                                     <Sparkles className="w-8 h-8 animate-pulse z-10" />
                                     {/* Spinner Internal Light */}
                                     {isSpinning && (
                                         <motion.div 
                                             animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.8, 0.5] }}
                                             transition={{ repeat: Infinity, duration: 1 }}
-                                            className="absolute inset-0 bg-amber-500/20 blur-xl"
+                                            className="absolute inset-0 bg-emerald-500/20 blur-xl"
                                         />
                                     )}
                                  </div>
@@ -478,12 +478,12 @@ export default function SpinWheel({
                                 onClick={() => setActiveTier(t.id)}
                                 className={`flex-1 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden flex flex-col items-center gap-1 ${
                                     isSelected 
-                                    ? 'bg-[#0A0B0F] text-white shadow-2xl' 
+                                    ? 'bg-[#022c22] text-white shadow-2xl' 
                                     : 'text-slate-400 hover:text-slate-900'
                                 } ${isLocked ? 'opacity-30 cursor-not-allowed grayscale' : ''}`}
                             >
                                 {t.label}
-                                <span className={`text-[7px] font-bold ${isSelected ? 'text-amber-500/60' : 'text-slate-400/40'}`}>NODE {t.id}</span>
+                                <span className={`text-[7px] font-bold ${isSelected ? 'text-emerald-500/60' : 'text-slate-400/40'}`}>NODE {t.id}</span>
                             </button>
                         );
                     })}
@@ -500,24 +500,24 @@ export default function SpinWheel({
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' 
                             : ((balance + spinBalance) < activeTier) 
                             ? 'bg-red-50 text-red-300 border border-red-100'
-                            : `bg-[#0A0B0F] text-white`
+                            : `bg-[#022c22] text-white`
                         }`}
                     >
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl group-hover:bg-amber-500/10 transition-colors"></div>
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors"></div>
                         
                         <span className="text-sm italic tracking-widest flex items-center gap-3">
-                            {isSpinning ? 'PROCESSING...' : `Initiate Sequence`} <ArrowRight className="w-4 h-4 text-amber-500" />
+                            {isSpinning ? 'PROCESSING...' : `Initiate Sequence`} <ArrowRight className="w-4 h-4 text-emerald-500" />
                         </span>
                         
                         {!isSpinning && (
-                            <span className="text-[9px] font-black text-amber-500/60 opacity-60">COST: RS {activeTier} PROTOCOL FEED</span>
+                            <span className="text-[9px] font-black text-emerald-500/60 opacity-60">COST: RS {activeTier} PROTOCOL FEED</span>
                         )}
                     </motion.button>
 
                     <button
                         onClick={() => spinWheel(false)}
                         disabled={isSpinning || freeSpins <= 0}
-                        className={`w-full py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all border-2 border-slate-100 bg-white shadow-sm flex items-center justify-center gap-3 hover:bg-slate-50 active:scale-95 disabled:opacity-30 ${freeSpins > 0 ? 'text-indigo-600 border-indigo-100' : 'text-slate-400'}`}
+                        className={`w-full py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all border-2 border-slate-100 bg-white shadow-sm flex items-center justify-center gap-3 hover:bg-slate-50 active:scale-95 disabled:opacity-30 ${freeSpins > 0 ? 'text-teal-600 border-teal-100' : 'text-slate-400'}`}
                     >
                         <Ticket className="w-4 h-4" /> Use Free Entry ({freeSpins})
                     </button>
@@ -532,12 +532,12 @@ export default function SpinWheel({
                 <div className="absolute top-6 right-8 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div> LIVE STATS
                 </div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tighter italic mb-8 uppercase">Unit <span className="text-indigo-600">Diagnostics</span></h3>
+                <h3 className="text-xl font-black text-slate-900 tracking-tighter italic mb-8 uppercase">Unit <span className="text-teal-600">Diagnostics</span></h3>
                 
                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:border-indigo-200 transition-all">
+                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:border-teal-200 transition-all">
                         <div className="flex items-center gap-5">
-                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover:text-indigo-600 transition-colors">
+                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover:text-teal-600 transition-colors">
                                 <Trophy className="w-5 h-5" />
                              </div>
                              <div>
@@ -545,12 +545,12 @@ export default function SpinWheel({
                                 <p className="text-xs font-black text-slate-900 italic uppercase">Jackpot Capacity</p>
                              </div>
                         </div>
-                        <p className="text-2xl font-black text-indigo-600 italic tracking-tighter">Rs {Math.max(...currentSegments.map(s => s.value))}</p>
+                        <p className="text-2xl font-black text-teal-600 italic tracking-tighter">Rs {Math.max(...currentSegments.map(s => s.value))}</p>
                     </div>
 
-                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:border-amber-200 transition-all">
+                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:border-emerald-200 transition-all">
                         <div className="flex items-center gap-5">
-                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover:text-amber-600 transition-colors">
+                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover:text-emerald-600 transition-colors">
                                 <Users className="w-5 h-5" />
                              </div>
                              <div>
@@ -558,12 +558,12 @@ export default function SpinWheel({
                                 <p className="text-xs font-black text-slate-900 italic uppercase">Network Entries</p>
                              </div>
                         </div>
-                        <p className="text-2xl font-black text-amber-600 italic tracking-tighter">{winners.length * 127}+</p>
+                        <p className="text-2xl font-black text-emerald-600 italic tracking-tighter">{winners.length * 127}+</p>
                     </div>
                 </div>
 
-                <div className="mt-8 p-6 bg-[#0A0B0F] rounded-[2rem] text-white border border-white/5 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl"></div>
+                <div className="mt-8 p-6 bg-[#022c22] rounded-[2rem] text-white border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/5 rounded-full blur-2xl"></div>
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Protocol Rule</p>
                     <p className="text-[11px] font-bold text-slate-400 leading-relaxed uppercase italic">Every sequence is verified via decentralized randomization. Higher tiers significantly increase probability of complex yield nodes.</p>
                 </div>
@@ -620,7 +620,7 @@ export default function SpinWheel({
         {prize && !showLockedModal && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] bg-[#0A0B0F]/90 backdrop-blur-xl flex items-center justify-center p-8"
+            className="fixed inset-0 z-[120] bg-[#022c22]/90 backdrop-blur-xl flex items-center justify-center p-8"
           >
             <motion.div 
               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
@@ -642,7 +642,7 @@ export default function SpinWheel({
               </p>
               <button 
                 onClick={() => setPrize(null)}
-                className="w-full bg-[#0A0B0F] text-white font-black py-5 rounded-[1.5rem] shadow-xl active:scale-95 transition-all text-[10px] uppercase tracking-[0.3em] italic"
+                className="w-full bg-[#022c22] text-white font-black py-5 rounded-[1.5rem] shadow-xl active:scale-95 transition-all text-[10px] uppercase tracking-[0.3em] italic"
               >
                 Accept and Continue
               </button>
@@ -658,17 +658,17 @@ export default function SpinWheel({
           >
             <motion.div 
               initial={{ scale: 0.8, y: 50 }} animate={{ scale: 1, y: 0 }}
-              className="bg-gradient-to-br from-amber-400 to-amber-600 p-1 rounded-[3rem] shadow-[0_40px_80px_rgba(245,158,11,0.3)] w-full max-w-sm"
+              className="bg-gradient-to-br from-emerald-400 to-emerald-600 p-1 rounded-[3rem] shadow-[0_40px_80px_rgba(16,185,129,0.3)] w-full max-w-sm"
             >
-                <div className="bg-[#0A0B0F] rounded-[2.8rem] p-10 text-center relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-                    <div className="w-24 h-24 bg-amber-500 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-amber-500/40 relative border-4 border-white/5">
+                <div className="bg-[#022c22] rounded-[2.8rem] p-10 text-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
+                    <div className="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-emerald-500/40 relative border-4 border-white/5">
                         <Crown className="w-12 h-12 text-white" />
                         <div className="absolute -bottom-2 -right-2 bg-slate-900 rounded-full p-2 border-2 border-white shadow-xl">
                             <Lock className="w-4 h-4 text-white" />
                         </div>
                     </div>
-                    <h3 className="text-3xl font-black text-white mb-3 tracking-tighter italic">CRYPTO <span className="text-amber-500">LOCK</span></h3>
+                    <h3 className="text-3xl font-black text-white mb-3 tracking-tighter italic">CRYPTO <span className="text-emerald-500">LOCK</span></h3>
                     <p className="text-slate-400 text-xs font-bold leading-relaxed mb-8 uppercase tracking-widest">
                         A massive yield of <span className="text-white italic">Rs {showLockedModal.amount}</span> is pending. Verify your network to unlock.
                     </p>
@@ -676,7 +676,7 @@ export default function SpinWheel({
                         <p className="text-white font-black text-sm uppercase italic tracking-widest">
                             Required: {showLockedModal.invites} Direct Referrals
                         </p>
-                        <p className="text-[10px] text-amber-500 font-bold mt-2 uppercase tracking-tight">Active Invites: {activeInvites}</p>
+                        <p className="text-[10px] text-emerald-500 font-bold mt-2 uppercase tracking-tight">Active Invites: {activeInvites}</p>
                     </div>
                     <button 
                         onClick={() => { setShowLockedModal(null); setPrize(null); }}
@@ -709,7 +709,7 @@ export default function SpinWheel({
               <div className="flex flex-col gap-4">
                 <button 
                   onClick={() => { setShowDepositPopup(false); if (onGoToDeposit) onGoToDeposit(); }}
-                  className="w-full bg-[#0A0B0F] text-white font-black py-5 rounded-[1.5rem] shadow-xl active:scale-95 transition-all text-[10px] uppercase tracking-[0.3em] italic"
+                  className="w-full bg-[#022c22] text-white font-black py-5 rounded-[1.5rem] shadow-xl active:scale-95 transition-all text-[10px] uppercase tracking-[0.3em] italic"
                 >
                   Reload Assets
                 </button>

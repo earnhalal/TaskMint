@@ -143,7 +143,7 @@ export default function ManageWalletView({ balance, accounts, onBack }: ManageWa
 
       {/* Balance Card */}
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl mb-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-4 opacity-60">
             <Wallet className="w-4 h-4" />

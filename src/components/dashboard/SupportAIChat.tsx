@@ -327,7 +327,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
 
   if (showFeedback) {
     return (
-      <div className="flex flex-col h-full bg-[#060B19] items-center justify-center p-8 text-center">
+      <div className="flex flex-col h-full bg-[#022c22] items-center justify-center p-8 text-center">
         <motion.div
            initial={{ scale: 0.8, opacity: 0 }}
            animate={{ scale: 1, opacity: 1 }}
@@ -335,21 +335,21 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
         >
           {feedbackSubmitted ? (
             <div className="space-y-6">
-              <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto">
-                 <CheckCheck className="w-8 h-8 text-indigo-500" />
+              <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto">
+                 <CheckCheck className="w-8 h-8 text-teal-500" />
               </div>
               <h2 className="text-xl font-black text-white tracking-tight">Feedback Received!</h2>
               <p className="text-slate-400 text-sm italic">"Shukriya! Aap ki feedback hamare liye bohat important hai."</p>
               <button 
                 onClick={onBack}
-                className="w-full py-4 rounded-2xl bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+                className="w-full py-4 rounded-2xl bg-teal-600 text-white font-bold shadow-lg shadow-teal-500/20 active:scale-95 transition-all"
               >
                 Go to Home
               </button>
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="w-16 h-16 rounded-full overflow-hidden mx-auto border-2 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+              <div className="w-16 h-16 rounded-full overflow-hidden mx-auto border-2 border-teal-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]">
                 <img src={agent.image} alt={agent.name} className="w-full h-full object-cover" />
               </div>
               <div>
@@ -362,7 +362,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
                    <button
                      key={star}
                      onClick={() => setRating(star)}
-                     className={`text-2xl transition-all ${rating >= star ? 'text-amber-500 scale-110' : 'text-slate-700 hover:text-slate-500'}`}
+                     className={`text-2xl transition-all ${rating >= star ? 'text-emerald-500 scale-110' : 'text-slate-700 hover:text-slate-500'}`}
                    >
                      ★
                    </button>
@@ -372,7 +372,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
               <button 
                 disabled={rating === 0}
                 onClick={() => setFeedbackSubmitted(true)}
-                className="w-full py-4 rounded-2xl bg-indigo-600 text-white font-black shadow-lg shadow-indigo-500/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95"
+                className="w-full py-4 rounded-2xl bg-teal-600 text-white font-black shadow-lg shadow-teal-500/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95"
               >
                 SUBMIT FEEDBACK
               </button>
@@ -390,13 +390,13 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
   if (chatLockedUntil && chatLockedUntil > Date.now()) {
      const remainingMins = Math.ceil((chatLockedUntil - Date.now()) / (1000 * 60));
      return (
-       <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#060B19]">
-          <div className="w-24 h-24 rounded-full border border-indigo-500/20 flex items-center justify-center relative bg-[#0F172A] mb-8 shadow-2xl">
+       <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#022c22]">
+          <div className="w-24 h-24 rounded-full border border-teal-500/20 flex items-center justify-center relative bg-[#0F172A] mb-8 shadow-2xl">
              <Lock className="w-10 h-10 text-slate-500" />
           </div>
           <h2 className="text-white font-black text-2xl mb-4 tracking-tighter uppercase">Session Locked</h2>
           <p className="text-slate-400 text-sm leading-relaxed max-w-xs mb-8">
-            {agent.name} abhi dusre users ke saath masroof hai. Aap <span className="text-indigo-400 font-black">{remainingMins} minutes</span> baad dubara rabta kar sakte hain.
+            {agent.name} abhi dusre users ke saath masroof hai. Aap <span className="text-teal-400 font-black">{remainingMins} minutes</span> baad dubara rabta kar sakte hain.
           </p>
           <button 
             onClick={onBack} 
@@ -410,10 +410,10 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
 
   if (isConnecting) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#060B19] relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#022c22] relative overflow-hidden">
         {/* Animated Background Pulse */}
         <div className="absolute inset-0 z-0 opacity-30">
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-500/20 rounded-full blur-[120px] animate-pulse-slow"></div>
         </div>
 
         <motion.div 
@@ -421,9 +421,9 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
           animate={{ opacity: 1, scale: 1 }}
           className="relative z-10 mb-12"
         >
-           <div className="w-32 h-32 rounded-full border border-indigo-500/20 flex items-center justify-center relative bg-[#0F172A] shadow-[0_0_30px_rgba(99,102,241,0.2)]">
-              <div className="absolute inset-0 rounded-full border-t-2 border-indigo-500 animate-spin"></div>
-              <Headphones className="w-12 h-12 text-indigo-400 animate-pulse" />
+           <div className="w-32 h-32 rounded-full border border-teal-500/20 flex items-center justify-center relative bg-[#0F172A] shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+              <div className="absolute inset-0 rounded-full border-t-2 border-teal-500 animate-spin"></div>
+              <Headphones className="w-12 h-12 text-teal-400 animate-pulse" />
            </div>
         </motion.div>
         
@@ -433,7 +433,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
              key={connectionStep}
              initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
-             className="text-indigo-400 text-[11px] font-black uppercase tracking-[0.4em]"
+             className="text-teal-400 text-[11px] font-black uppercase tracking-[0.4em]"
            >
              {[
                "Securing Chat Tunnel...",
@@ -449,26 +449,26 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#060B19] text-white overflow-hidden relative">
+    <div className="flex flex-col h-full bg-[#022c22] text-white overflow-hidden relative">
       {/* Chat Header */}
-      <div className="bg-[#0A0F1C]/90 backdrop-blur-xl px-4 py-3 flex items-center justify-between border-b border-indigo-500/20 h-16 shrink-0 shadow-lg relative z-20">
+      <div className="bg-[#022c22]/90 backdrop-blur-xl px-4 py-3 flex items-center justify-between border-b border-teal-500/20 h-16 shrink-0 shadow-lg relative z-20">
         <div className="flex items-center gap-3 w-full">
           <button onClick={onBack} className="p-1.5 hover:bg-white/10 rounded-full transition-colors shrink-0">
             <ArrowLeft className="w-5 h-5 text-white/80" />
           </button>
           
           <div className="relative shrink-0">
-            <div className="w-10 h-10 rounded-[12px] bg-slate-800 overflow-hidden border border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]">
+            <div className="w-10 h-10 rounded-[12px] bg-slate-800 overflow-hidden border border-teal-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]">
                <img src={agent.image} alt={agent.name} className="w-full h-full object-cover" />
             </div>
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#0A0F1C] rounded-full"></div>
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#022c22] rounded-full"></div>
           </div>
           
           <div className="flex-1 overflow-hidden">
              <h3 className="text-xs sm:text-sm font-black text-white tracking-widest uppercase truncate">{agent.name}</h3>
              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3 h-3 text-indigo-400" />
-                <p className="text-[8px] sm:text-[9px] text-indigo-400/80 font-black uppercase tracking-[0.2em] truncate">Encrypted Mode</p>
+                <ShieldCheck className="w-3 h-3 text-teal-400" />
+                <p className="text-[8px] sm:text-[9px] text-teal-400/80 font-black uppercase tracking-[0.2em] truncate">Encrypted Mode</p>
              </div>
           </div>
         </div>
@@ -480,27 +480,27 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
       >
         {/* Abstract Background Design */}
         <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center opacity-[0.03]">
-           <Zap className="w-[120%] h-[120%] text-indigo-100" />
+           <Zap className="w-[120%] h-[120%] text-teal-100" />
         </div>
 
         <div className="relative z-10 flex flex-col gap-4">
           {/* Top Info Notice */}
           <div className="flex justify-center mb-4">
-             <div className="bg-indigo-900/20 backdrop-blur-md px-5 py-3 rounded-[1.5rem] border border-indigo-500/20 text-center max-w-[90%] shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+             <div className="bg-teal-900/20 backdrop-blur-md px-5 py-3 rounded-[1.5rem] border border-teal-500/20 text-center max-w-[90%] shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                   <Clock className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                   <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.3em]">Live Session Active</p>
+                   <Clock className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                   <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em]">Live Session Active</p>
                 </div>
-                <p className="text-[10px] text-indigo-200/60 font-bold leading-relaxed">
+                <p className="text-[10px] text-teal-200/60 font-bold leading-relaxed">
                   Your chat is end-to-end encrypted. The entire chat history will be automatically wiped after 30 minutes of inactivity.
                 </p>
              </div>
           </div>
 
           <div className="flex justify-center mb-6">
-            <div className="bg-[#0A0F1C] px-4 py-2 rounded-xl border border-white/5 text-center shadow-lg">
-               <p className="text-[9px] text-indigo-300/80 font-black tracking-widest uppercase">
-                 <ShieldCheck className="w-3 h-3 inline-block mr-1 text-indigo-500" />
+            <div className="bg-[#022c22] px-4 py-2 rounded-xl border border-white/5 text-center shadow-lg">
+               <p className="text-[9px] text-teal-300/80 font-black tracking-widest uppercase">
+                 <ShieldCheck className="w-3 h-3 inline-block mr-1 text-teal-500" />
                  Secured Connection
                </p>
             </div>
@@ -515,8 +515,8 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
             >
               <div className={`relative max-w-[80%] p-3.5 sm:p-4 pt-3 shadow-lg ${
                 msg.role === 'user'
-                ? 'bg-gradient-to-br from-[#FF3366] to-[#9933FF] text-white rounded-[1.2rem] rounded-br-[0.2rem] border border-white/10 shadow-purple-500/30'
-                : 'bg-gradient-to-br from-[#2D3748] to-[#1A202C] text-slate-100 rounded-[1.2rem] rounded-bl-[0.2rem] border border-indigo-500/30 shadow-indigo-900/30'
+                ? 'bg-gradient-to-br from-[#FF3366] to-[#9933FF] text-white rounded-[1.2rem] rounded-br-[0.2rem] border border-white/10 shadow-emerald-500/30'
+                : 'bg-gradient-to-br from-[#2D3748] to-[#1A202C] text-slate-100 rounded-[1.2rem] rounded-bl-[0.2rem] border border-teal-500/30 shadow-teal-900/30'
               }`}>
                 {msg.image && (
                   <div className="mb-3 rounded-xl overflow-hidden border border-white/20 shadow-inner">
@@ -536,11 +536,11 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
 
           {isLoading && (
             <div className="flex justify-start">
-               <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] px-5 py-4 rounded-[1.5rem] rounded-bl-[0.2rem] border border-indigo-500/20 shadow-lg shadow-indigo-900/20">
+               <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] px-5 py-4 rounded-[1.5rem] rounded-bl-[0.2rem] border border-teal-500/20 shadow-lg shadow-teal-900/20">
                  <div className="flex gap-2.5">
                     <span className="w-2.5 h-2.5 bg-[#FF0080] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                     <span className="w-2.5 h-2.5 bg-[#7928CA] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                    <span className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-bounce"></span>
+                    <span className="w-2.5 h-2.5 bg-teal-500 rounded-full animate-bounce"></span>
                  </div>
                </div>
             </div>
@@ -549,7 +549,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
         </div>
       </div>
 
-      <div className={`bg-[#0A0F1C]/90 backdrop-blur-2xl p-4 flex flex-col gap-2 border-t border-white/10 relative z-20 pb-8 ${chatLockedUntil ? 'grayscale opacity-70 pointer-events-none' : ''}`}>
+      <div className={`bg-[#022c22]/90 backdrop-blur-2xl p-4 flex flex-col gap-2 border-t border-white/10 relative z-20 pb-8 ${chatLockedUntil ? 'grayscale opacity-70 pointer-events-none' : ''}`}>
          <AnimatePresence>
            {selectedImage && (
                <motion.div 
@@ -558,7 +558,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
                  exit={{ opacity: 0, scale: 0.9 }}
                  className="relative self-start mb-1"
                >
-                   <img src={selectedImage} alt="Selected" className="h-16 w-16 object-cover rounded-xl border border-indigo-500/50 shadow-lg" />
+                   <img src={selectedImage} alt="Selected" className="h-16 w-16 object-cover rounded-xl border border-teal-500/50 shadow-lg" />
                    <button onClick={() => setSelectedImage(null)} className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 shadow-lg hover:bg-rose-600 transition-colors">
                       <X className="w-3 h-3" />
                    </button>
@@ -570,13 +570,13 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
              <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} disabled={!!chatLockedUntil} />
              <button 
                onClick={() => fileInputRef.current?.click()} 
-               className="w-12 h-12 bg-[#151E32] rounded-[1.2rem] flex items-center justify-center text-indigo-400 hover:text-indigo-300 hover:bg-[#1E293B] transition-all border border-white/5 active:scale-95 shrink-0"
+               className="w-12 h-12 bg-[#064e3b] rounded-[1.2rem] flex items-center justify-center text-teal-400 hover:text-teal-300 hover:bg-[#1E293B] transition-all border border-white/5 active:scale-95 shrink-0"
                disabled={!!chatLockedUntil}
              >
                 <Paperclip className="w-5 h-5" />
              </button>
              
-             <div className="flex-1 bg-black/40 backdrop-blur-xl rounded-[1.2rem] flex items-center px-4 py-3 shadow-inner border border-white/10 transition-all focus-within:border-purple-500/50 focus-within:bg-black/50">
+             <div className="flex-1 bg-black/40 backdrop-blur-xl rounded-[1.2rem] flex items-center px-4 py-3 shadow-inner border border-white/10 transition-all focus-within:border-emerald-500/50 focus-within:bg-black/50">
                 <input
                   type="text"
                   value={chatLockedUntil ? 'Session Locked' : input}

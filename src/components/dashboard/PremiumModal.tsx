@@ -132,7 +132,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       price: `Rs ${appSettings?.partnerFee || 1000}`,
       duration: 'Lifetime High-Yield',
       icon: <Shield className="w-6 h-6" />,
-      color: 'from-indigo-600 to-blue-700',
+      color: 'from-teal-600 to-blue-700',
       tagline: 'Business Pro Partner',
       adEarnings: 'Rs 125 - 250 / Daily',
       features: [
@@ -143,7 +143,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
         'Priority Admin Support'
       ],
       buttonText: partnerTier === 'silver' ? 'Current Plan' : 'Buy Silver Pro',
-      buttonColor: partnerTier === 'silver' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-600/30',
+      buttonColor: partnerTier === 'silver' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700 text-white shadow-xl shadow-teal-600/30',
       isCurrent: partnerTier === 'silver',
       action: () => {
         if (partnerTier !== 'silver' && partnerTier !== 'gold') {
@@ -157,7 +157,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       price: 'Rs 2000',
       duration: 'Elite Lifetime VIP',
       icon: <Crown className="w-6 h-6" />,
-      color: 'from-amber-500 to-orange-600',
+      color: 'from-emerald-500 to-orange-600',
       tagline: 'Maximum Revenue Mode',
       adEarnings: 'Rs 300 - 600 / Daily',
       features: [
@@ -168,7 +168,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
         'VIP WhatsApp Group Access'
       ],
       buttonText: partnerTier === 'gold' ? 'Current Plan' : 'Go VIP Elite',
-      buttonColor: partnerTier === 'gold' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:scale-[1.02] text-white shadow-xl shadow-amber-500/30',
+      buttonColor: partnerTier === 'gold' ? 'bg-emerald-500 text-white cursor-not-allowed' : 'bg-gradient-to-r from-emerald-500 to-orange-600 hover:scale-[1.02] text-white shadow-xl shadow-emerald-500/30',
       isPopular: true,
       isCurrent: partnerTier === 'gold',
       action: () => {
@@ -187,20 +187,20 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       className="w-full h-full pb-32 overflow-y-auto hide-scrollbar bg-[#F8FAFC]"
     >
       {/* Immersive Header - Now scrolls with content */}
-      <div className="bg-[#060D2D] pt-10 pb-20 px-6 text-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-32 -mt-32 blur-[120px]"></div>
+      <div className="bg-[#022c22] pt-10 pb-20 px-6 text-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full -mr-32 -mt-32 blur-[120px]"></div>
         
         <div className="relative z-10 max-w-lg mx-auto">
           <motion.div 
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-14 h-14 bg-gradient-to-tr from-amber-400 to-yellow-600 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-2xl shadow-amber-500/40 rotate-12"
+            className="w-14 h-14 bg-gradient-to-tr from-emerald-400 to-amber-600 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-2xl shadow-emerald-500/40 rotate-12"
           >
             <Crown className="w-7 h-7 text-white" />
           </motion.div>
           
           <h2 className="text-3xl font-black text-white mb-2 tracking-tighter italic uppercase">
-            Partner <span className="text-amber-500">Plans</span>
+            Partner <span className="text-emerald-500">Plans</span>
           </h2>
           <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] max-w-xs mx-auto mb-6 opacity-60">
             More Earnings Every Day
@@ -221,7 +221,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`bg-white rounded-[2.5rem] border ${plan.isPopular ? 'border-amber-200' : 'border-slate-100'} overflow-hidden shadow-2xl shadow-slate-200/50 flex flex-col relative group`}
+              className={`bg-white rounded-[2.5rem] border ${plan.isPopular ? 'border-emerald-200' : 'border-slate-100'} overflow-hidden shadow-2xl shadow-slate-200/50 flex flex-col relative group`}
             >
               {plan.isCurrent && (
                 <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full z-10 uppercase tracking-widest shadow-lg shadow-emerald-500/20">
@@ -252,12 +252,12 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
 
               <div className="p-8">
                 {/* Daily Ad Earnings Section - ENHANCED */}
-                <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group-hover:bg-indigo-50 transition-colors">
+                <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group-hover:bg-teal-50 transition-colors">
                    <div className="flex items-center gap-3">
-                      <Zap className={`w-5 h-5 ${plan.isPopular ? 'text-amber-500' : 'text-indigo-500'}`} />
+                      <Zap className={`w-5 h-5 ${plan.isPopular ? 'text-emerald-500' : 'text-teal-500'}`} />
                       <div>
                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Estimated Daily Ads Income</p>
-                        <p className={`text-sm font-black italic tracking-tight ${plan.isPopular ? 'text-amber-600' : 'text-indigo-600'}`}>{plan.adEarnings}</p>
+                        <p className={`text-sm font-black italic tracking-tight ${plan.isPopular ? 'text-emerald-600' : 'text-teal-600'}`}>{plan.adEarnings}</p>
                       </div>
                    </div>
                 </div>
@@ -265,7 +265,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
                 <ul className="space-y-4 mb-10">
                   {plan.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-4 text-xs font-black text-slate-600 uppercase tracking-tight">
-                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${plan.isPopular ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'}`}>
+                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${plan.isPopular ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
                         <Check className="w-3 h-3" strokeWidth={3} />
                       </div>
                       {feature}

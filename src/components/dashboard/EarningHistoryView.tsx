@@ -67,17 +67,17 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
     switch (source) {
       case 'ad_watch': return <PlayCircle className="w-5 h-5 text-red-500" />;
       case 'task': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
-      case 'spin': return <Sparkles className="w-5 h-5 text-amber-500" />;
-      case 'lottery': return <Gift className="w-5 h-5 text-purple-500" />;
+      case 'spin': return <Sparkles className="w-5 h-5 text-emerald-500" />;
+      case 'lottery': return <Gift className="w-5 h-5 text-emerald-500" />;
       case 'referral':
       case 'invite_commission': 
       case 'indirect_invite_commission': 
         return <Users className="w-5 h-5 text-blue-500" />;
       case 'app_bonus': return <Wallet className="w-5 h-5 text-rose-500" />;
-      case 'daily_reward': return <Calendar className="w-5 h-5 text-indigo-500" />;
+      case 'daily_reward': return <Calendar className="w-5 h-5 text-teal-500" />;
       case 'commission': return <TrendingUp className="w-5 h-5 text-orange-500" />;
-      case 'partner_upgrade': return <Star className="w-5 h-5 text-indigo-500" />;
-      case 'withdrawal': return <Wallet className="w-5 h-5 text-purple-500" />;
+      case 'partner_upgrade': return <Star className="w-5 h-5 text-teal-500" />;
+      case 'withdrawal': return <Wallet className="w-5 h-5 text-emerald-500" />;
       default: return <History className="w-5 h-5 text-slate-500" />;
     }
   };
@@ -127,7 +127,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
             <div className="pt-4 sm:pt-0 sm:pl-6 sm:border-l border-white/10">
               <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Indirect Team Income</p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-amber-400 tracking-tighter">Rs. {totalIndirectCommission.toFixed(2)}</span>
+                <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rs. {totalIndirectCommission.toFixed(2)}</span>
               </div>
             </div>
             )}

@@ -5,8 +5,8 @@ import { Rocket, Flame, Crown, PartyPopper, X, Bell } from 'lucide-react';
 const defaultAnnouncements = [
   { text: "Omar just withdrew Rs 500", icon: <Flame className="w-3 h-3 text-orange-500" /> },
   { text: "Ayesha earned Rs 1,200 from Spin", icon: <PartyPopper className="w-3 h-3 text-emerald-500" /> },
-  { text: "Zainab activated Silver Package", icon: <Crown className="w-3 h-3 text-amber-500" /> },
-  { text: "Hamza just joined the Gold Tier", icon: <Rocket className="w-3 h-3 text-indigo-500" /> },
+  { text: "Zainab activated Silver Package", icon: <Crown className="w-3 h-3 text-emerald-500" /> },
+  { text: "Hamza just joined the Gold Tier", icon: <Rocket className="w-3 h-3 text-teal-500" /> },
   { text: "New CPX Surveys available - High Rewards!", icon: <Flame className="w-3 h-3 text-red-500" /> },
 ];
 
@@ -31,9 +31,9 @@ export default function AnnouncementBar({ dynamicMessage, onClose }: Announcemen
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: 'auto', opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
-      className="w-full bg-[#0A0B0F] border-b border-white/5 py-2 overflow-hidden relative group"
+      className="w-full bg-[#022c22] border-b border-white/5 py-2 overflow-hidden relative group"
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-transparent to-indigo-500/5 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-transparent to-teal-500/5 pointer-events-none"></div>
       <div className="max-w-md mx-auto px-10 flex items-center justify-center relative">
         <AnimatePresence mode="wait">
           {dynamicMessage ? (
@@ -45,7 +45,7 @@ export default function AnnouncementBar({ dynamicMessage, onClose }: Announcemen
               transition={{ duration: 0.5 }}
               className="flex items-center gap-2"
             >
-              <Bell className="w-3 h-3 text-amber-500 animate-bounce" />
+              <Bell className="w-3 h-3 text-emerald-500 animate-bounce" />
               <span 
                 className="text-[10px] font-black text-slate-300 uppercase tracking-widest italic truncate"
                 dangerouslySetInnerHTML={{ __html: dynamicMessage }}

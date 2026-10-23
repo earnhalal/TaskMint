@@ -93,7 +93,7 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
                    setGender('male');
                    if (!maleAvatarIds.includes(avatarId)) setAvatarId(maleAvatarIds[0]);
                  }}
-                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${gender === 'male' ? 'bg-white shadow text-indigo-600' : 'text-slate-500'}`}
+                 className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${gender === 'male' ? 'bg-white shadow text-teal-600' : 'text-slate-500'}`}
                >
                  Male
                </button>
@@ -113,7 +113,7 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
                  <button
                    key={avId}
                    onClick={() => setAvatarId(avId)}
-                   className={`aspect-square w-full rounded-full overflow-hidden border-[3px] transition-all p-0 ${avatarId === avId ? 'border-amber-400 scale-110 shadow-xl' : 'border-transparent hover:scale-105 opacity-70 hover:opacity-100 shadow-sm'}`}
+                   className={`aspect-square w-full rounded-full overflow-hidden border-[3px] transition-all p-0 ${avatarId === avId ? 'border-emerald-400 scale-110 shadow-xl' : 'border-transparent hover:scale-105 opacity-70 hover:opacity-100 shadow-sm'}`}
                  >
                    <DynamicAvatar avatarId={avId} fallbackText={name} className="w-full h-full" />
                  </button>

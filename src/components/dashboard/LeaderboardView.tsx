@@ -32,18 +32,18 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pb-24 min-h-screen bg-[#0A0B0F] text-white overflow-hidden"
+      className="pb-24 min-h-screen bg-[#022c22] text-white overflow-hidden"
     >
       {/* Ambient background elements */}
       <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px]" />
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-teal-500/5 rounded-full blur-[120px]" />
           <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
       </div>
 
       {/* Futuristic Header */}
-      <div className="relative bg-[#0A0B0F]/80 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 px-6 py-6 mb-8 group overflow-hidden">
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-1000" />
+      <div className="relative bg-[#022c22]/80 backdrop-blur-xl sticky top-0 z-40 border-b border-white/5 px-6 py-6 mb-8 group overflow-hidden">
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-1000" />
         
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-5">
@@ -55,7 +55,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
             </button>
             <div>
               <h2 className="text-2xl font-black italic tracking-tighter uppercase leading-none">
-                Global <span className="text-amber-500">Member</span> Rankings
+                Global <span className="text-emerald-500">Member</span> Rankings
               </h2>
               <div className="flex items-center gap-2 mt-1">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
@@ -64,7 +64,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
-              <Trophy className="w-4 h-4 text-amber-500" />
+              <Trophy className="w-4 h-4 text-emerald-500" />
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Total Earning: 2.4M PKR</span>
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
         {/* Dynamic Podium Architecture */}
         <div className="relative mb-20 mt-12 flex justify-center items-end gap-3 h-72">
           {/* Base Glow */}
-          <div className="absolute -bottom-8 inset-x-0 h-24 bg-gradient-to-t from-amber-500/10 to-transparent blur-3xl opacity-30" />
+          <div className="absolute -bottom-8 inset-x-0 h-24 bg-gradient-to-t from-emerald-500/10 to-transparent blur-3xl opacity-30" />
           
           {/* 2nd Place: Silver Sync */}
           {topThree[1] && (
@@ -86,11 +86,11 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
             >
               <div className="relative group">
                 <div className="absolute inset-0 bg-slate-400 blur-xl opacity-0 group-hover:opacity-40 transition-opacity" />
-                <div className="relative w-20 h-20 rounded-[2rem] bg-[#1a1b23] border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-500">
+                <div className="relative w-20 h-20 rounded-[2rem] bg-[#064e3b] border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-500">
                   <DynamicAvatar avatarId={topThree[1].profile_avatar_id} fallbackText={topThree[1].username} className="w-full h-full" />
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0" />
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-400 rounded-xl flex items-center justify-center text-white border-2 border-[#0A0B0F] shadow-lg">
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-400 rounded-xl flex items-center justify-center text-white border-2 border-[#022c22] shadow-lg">
                   <Medal className="w-4 h-4" />
                 </div>
               </div>
@@ -98,7 +98,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest truncate w-24">{topThree[1].username}</p>
                 <p className="text-sm font-black text-slate-300 italic">Rs {topThree[1].balance?.toLocaleString()}</p>
               </div>
-              <div className="w-full h-28 bg-gradient-to-b from-[#1a1b23] to-[#0A0B0F] rounded-t-3xl border-x border-t border-white/5 shadow-inner flex flex-col items-center pt-4">
+              <div className="w-full h-28 bg-gradient-to-b from-[#064e3b] to-[#022c22] rounded-t-3xl border-x border-t border-white/5 shadow-inner flex flex-col items-center pt-4">
                  <div className="w-8 h-8 rounded-full bg-slate-400/20 flex items-center justify-center text-slate-400 mb-2">
                     <span className="text-lg font-black italic">2</span>
                  </div>
@@ -123,32 +123,32 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   className="absolute -top-10 left-1/2 -translate-x-1/2 z-30"
                 >
-                  <Crown className="w-10 h-10 text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.6)]" />
+                  <Crown className="w-10 h-10 text-emerald-500 drop-shadow-[0_0_15px_rgba(16,185,129,0.6)]" />
                 </motion.div>
                 
-                <div className="absolute inset-0 bg-amber-500 blur-2xl opacity-20 group-hover:opacity-50 transition-opacity" />
-                <div className="relative w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-amber-400 to-yellow-600 p-0.5 shadow-[0_0_40px_rgba(245,158,11,0.2)] transition-transform group-hover:scale-105 duration-500">
-                   <div className="w-full h-full rounded-[2.3rem] bg-[#1a1b23] flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-emerald-500 blur-2xl opacity-20 group-hover:opacity-50 transition-opacity" />
+                <div className="relative w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-emerald-400 to-amber-600 p-0.5 shadow-[0_0_40px_rgba(16,185,129,0.2)] transition-transform group-hover:scale-105 duration-500">
+                   <div className="w-full h-full rounded-[2.3rem] bg-[#064e3b] flex items-center justify-center relative overflow-hidden">
                        <DynamicAvatar avatarId={topThree[0].profile_avatar_id} fallbackText={topThree[0].username} className="w-full h-full" />
-                       <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 to-transparent" />
+                       <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent" />
                        <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
                    </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-amber-500 rounded-2xl flex items-center justify-center text-white border-2 border-[#0A0B0F] shadow-xl">
+                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center text-white border-2 border-[#022c22] shadow-xl">
                   <Star className="w-5 h-5 fill-current" />
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs font-black text-amber-500 uppercase tracking-widest mb-1 italic">{topThree[0].username}</p>
+                <p className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-1 italic">{topThree[0].username}</p>
                 <p className="text-xl font-black text-white italic tracking-tighter">Rs {topThree[0].balance?.toLocaleString()}</p>
               </div>
-              <div className="w-full h-44 bg-gradient-to-b from-amber-500/10 to-amber-500/0 rounded-t-[3rem] border-x border-t border-amber-500/20 shadow-2xl flex flex-col items-center pt-6 relative overflow-hidden group/podium">
-                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
-                 <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center text-white mb-4 shadow-xl shadow-amber-500/20">
+              <div className="w-full h-44 bg-gradient-to-b from-emerald-500/10 to-emerald-500/0 rounded-t-[3rem] border-x border-t border-emerald-500/20 shadow-2xl flex flex-col items-center pt-6 relative overflow-hidden group/podium">
+                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
+                 <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white mb-4 shadow-xl shadow-emerald-500/20">
                     <span className="text-2xl font-black italic">1</span>
                  </div>
                  <div className="flex gap-2">
-                    {[...Array(5)].map((_, i) => <div key={i} className="w-1.5 h-1.5 rounded-full bg-amber-500/40" />)}
+                    {[...Array(5)].map((_, i) => <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />)}
                  </div>
               </div>
             </motion.div>
@@ -163,24 +163,24 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               className="flex flex-col items-center gap-3 flex-1 perspective-[1000px]"
             >
               <div className="relative group">
-                <div className="absolute inset-0 bg-amber-700 blur-xl opacity-0 group-hover:opacity-40 transition-opacity" />
-                <div className="relative w-18 h-18 rounded-[1.8rem] bg-[#1a1b23] border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-500">
+                <div className="absolute inset-0 bg-emerald-700 blur-xl opacity-0 group-hover:opacity-40 transition-opacity" />
+                <div className="relative w-18 h-18 rounded-[1.8rem] bg-[#064e3b] border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-500">
                   <DynamicAvatar avatarId={topThree[2].profile_avatar_id} fallbackText={topThree[2].username} className="w-full h-full" />
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-800 rounded-xl flex items-center justify-center text-white border-2 border-[#0A0B0F] shadow-lg">
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-800 rounded-xl flex items-center justify-center text-white border-2 border-[#022c22] shadow-lg">
                   <Medal className="w-4 h-4" />
                 </div>
               </div>
               <div className="text-center">
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest truncate w-24">{topThree[2].username}</p>
-                <p className="text-sm font-black text-amber-800 italic">Rs {topThree[2].balance?.toLocaleString()}</p>
+                <p className="text-sm font-black text-emerald-800 italic">Rs {topThree[2].balance?.toLocaleString()}</p>
               </div>
-              <div className="w-full h-24 bg-gradient-to-b from-[#1a1b23] to-[#0A0B0F] rounded-t-3xl border-x border-t border-white/5 shadow-inner flex flex-col items-center pt-4">
-                 <div className="w-8 h-8 rounded-full bg-amber-900/20 flex items-center justify-center text-amber-800 mb-2">
+              <div className="w-full h-24 bg-gradient-to-b from-[#064e3b] to-[#022c22] rounded-t-3xl border-x border-t border-white/5 shadow-inner flex flex-col items-center pt-4">
+                 <div className="w-8 h-8 rounded-full bg-emerald-900/20 flex items-center justify-center text-emerald-800 mb-2">
                     <span className="text-lg font-black italic">3</span>
                  </div>
                  <div className="flex gap-1">
-                    {[...Array(2)].map((_, i) => <div key={i} className="w-1 h-1 rounded-full bg-amber-900/30" />)}
+                    {[...Array(2)].map((_, i) => <div key={i} className="w-1 h-1 rounded-full bg-emerald-900/30" />)}
                  </div>
               </div>
             </motion.div>
@@ -205,12 +205,12 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                   key={user.id ? `earner-${user.id}` : `earner-idx-${i}`}
                   variants={itemVariants}
                   whileHover={{ x: 5, backgroundColor: 'rgba(255,255,255,0.03)' }}
-                  className="relative group bg-[#111218] px-4 py-4 sm:px-6 sm:py-5 rounded-[2rem] border border-white/5 flex items-center justify-between cursor-pointer transition-all duration-300 gap-3"
+                  className="relative group bg-[#022c22] px-4 py-4 sm:px-6 sm:py-5 rounded-[2rem] border border-white/5 flex items-center justify-between cursor-pointer transition-all duration-300 gap-3"
                 >
-                  <div className="absolute left-0 inset-y-6 w-1 bg-amber-500/0 group-hover:bg-amber-500 transition-all rounded-r-full" />
+                  <div className="absolute left-0 inset-y-6 w-1 bg-emerald-500/0 group-hover:bg-emerald-500 transition-all rounded-r-full" />
                   
                   <div className="flex items-center gap-3 sm:gap-6 min-w-0">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-2xl bg-white/5 flex items-center justify-center font-black text-slate-500 text-xs sm:text-sm italic border border-white/5 group-hover:border-amber-500/30 group-hover:text-amber-500 transition-all">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-2xl bg-white/5 flex items-center justify-center font-black text-slate-500 text-xs sm:text-sm italic border border-white/5 group-hover:border-emerald-500/30 group-hover:text-emerald-500 transition-all">
                        {user.rank || i + 4}
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -228,7 +228,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <p className="text-sm sm:text-lg font-black text-amber-500 italic tracking-tighter">Rs {user.balance?.toLocaleString() || 0}</p>
+                    <p className="text-sm sm:text-lg font-black text-emerald-500 italic tracking-tighter">Rs {user.balance?.toLocaleString() || 0}</p>
                     <p className="text-[7px] sm:text-[8px] font-black text-slate-600 uppercase tracking-widest leading-none">Total Earning</p>
                   </div>
                 </motion.div>

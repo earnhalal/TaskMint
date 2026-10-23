@@ -150,7 +150,7 @@ export default function PartnerToolsView({
       icon: <Wallet className="w-6 h-6" />,
       minTier: 'bronze',
       unlocked: isPartner && isBronze,
-      color: 'from-blue-600 to-indigo-700',
+      color: 'from-blue-600 to-teal-700',
       action: onGoToWithdraw,
       actionText: 'Go to Wallet'
     },
@@ -161,7 +161,7 @@ export default function PartnerToolsView({
       icon: <Ticket className="w-6 h-6" />,
       minTier: 'bronze',
       unlocked: isPartner && isBronze,
-      color: 'from-purple-600 to-pink-700',
+      color: 'from-emerald-600 to-pink-700',
       action: handleClaimTickets,
       actionText: claimStatus === 'claiming' ? 'Claiming...' : 
                   claimStatus === 'success' ? 'Claimed!' : 
@@ -174,7 +174,7 @@ export default function PartnerToolsView({
       icon: <BarChart3 className="w-6 h-6" />,
       minTier: 'silver',
       unlocked: isPartner && isSilver,
-      color: 'from-blue-500 to-indigo-600',
+      color: 'from-blue-500 to-teal-600',
       action: () => setActiveTab('analytics'),
       actionText: 'View Stats'
     },
@@ -196,7 +196,7 @@ export default function PartnerToolsView({
       icon: <Zap className="w-6 h-6" />,
       minTier: 'gold',
       unlocked: isPartner && isGold,
-      color: 'from-amber-400 to-orange-600',
+      color: 'from-emerald-400 to-orange-600',
       action: () => alert("Auto Task Extraction enabled."),
       actionText: 'Config Engine'
     }
@@ -215,14 +215,14 @@ export default function PartnerToolsView({
         </div>
       </div>
       
-      <div className="bg-[#0A0B0F] p-6 rounded-[2rem] border border-white/5 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+      <div className="bg-[#022c22] p-6 rounded-[2rem] border border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
         <div className="relative z-10 flex items-center justify-between">
           <div>
-            <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-1">Estimated Commissions</p>
+            <p className="text-teal-400 text-[10px] font-black uppercase tracking-widest mb-1">Estimated Commissions</p>
             <p className="text-2xl font-black text-white italic tracking-tight">Rs {(referralStats?.totalEarnings || 0).toLocaleString()}</p>
           </div>
-          <TrendingUp className="w-10 h-10 text-indigo-500/20" />
+          <TrendingUp className="w-10 h-10 text-teal-500/20" />
         </div>
       </div>
 
@@ -230,7 +230,7 @@ export default function PartnerToolsView({
         <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest px-1 italic">Recent Team Activity</h4>
         <div className="space-y-2">
           {referrals?.slice(0, 10).map((ref, idx) => (
-            <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between group hover:border-indigo-100 transition-colors">
+            <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between group hover:border-teal-100 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden border border-slate-100">
                    <DynamicAvatar avatarId={ref.avatarId} fallbackText={ref.name} className="w-full h-full" />
@@ -242,7 +242,7 @@ export default function PartnerToolsView({
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-black text-emerald-600 italic">Rs {ref.earnings || 0}</p>
-                <p className={`text-[8px] font-black uppercase tracking-widest ${ref.status === 'active' ? 'text-indigo-500' : 'text-slate-300'}`}>
+                <p className={`text-[8px] font-black uppercase tracking-widest ${ref.status === 'active' ? 'text-teal-500' : 'text-slate-300'}`}>
                   {ref.status || 'Inactive'}
                 </p>
               </div>
@@ -266,8 +266,8 @@ export default function PartnerToolsView({
           <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest italic">Pending Activations</h4>
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Team Priority Queue</p>
         </div>
-        <div className="bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-           <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">{pendingActivations.length} Pending</span>
+        <div className="bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
+           <span className="text-[9px] font-black text-teal-600 uppercase tracking-widest">{pendingActivations.length} Pending</span>
         </div>
       </div>
 
@@ -282,7 +282,7 @@ export default function PartnerToolsView({
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 shrink-0 border border-amber-100">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0 border border-emerald-100">
                    <Clock className="w-6 h-6" />
                 </div>
                 <div>
@@ -292,7 +292,7 @@ export default function PartnerToolsView({
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-black text-slate-900 italic">Rs {dep.amount}</p>
-                <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest">{dep.method}</p>
+                <p className="text-[8px] font-black text-teal-500 uppercase tracking-widest">{dep.method}</p>
               </div>
             </div>
 
@@ -326,7 +326,7 @@ export default function PartnerToolsView({
 
         {loadingApprovals && (
            <div className="py-12 text-center text-xs font-bold text-slate-400 flex items-center justify-center gap-3">
-              <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
               Scanning Network...
            </div>
         )}
@@ -356,10 +356,10 @@ export default function PartnerToolsView({
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Management Dashboard</p>
           </div>
         </div>
-        <div className="bg-amber-500/10 px-4 py-2 rounded-xl border border-amber-500/20">
+        <div className="bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
            <div className="flex items-center gap-2">
-             <Crown className="w-3.5 h-3.5 text-amber-500" />
-             <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{partnerTier?.toUpperCase() || 'BASIC'}</span>
+             <Crown className="w-3.5 h-3.5 text-emerald-500" />
+             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{partnerTier?.toUpperCase() || 'BASIC'}</span>
            </div>
         </div>
       </div>
@@ -407,18 +407,18 @@ export default function PartnerToolsView({
                     {tool.unlocked ? (
                       <button 
                         onClick={tool.action}
-                        className="mt-4 flex items-center gap-2 text-indigo-600 text-[10px] font-black uppercase tracking-widest group"
+                        className="mt-4 flex items-center gap-2 text-teal-600 text-[10px] font-black uppercase tracking-widest group"
                       >
                         {tool.actionText} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                       </button>
                     ) : (
                       <div className="mt-4 flex flex-col gap-2">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-1 h-1 rounded-full bg-amber-500" />
+                          <div className="w-1 h-1 rounded-full bg-emerald-500" />
                           <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Available for {tool.minTier.toUpperCase()}+</span>
                         </div>
                         <button 
-                          className="text-left text-amber-600 text-[9px] font-black uppercase tracking-widest hover:translate-x-1 transition-transform flex items-center gap-1"
+                          className="text-left text-emerald-600 text-[9px] font-black uppercase tracking-widest hover:translate-x-1 transition-transform flex items-center gap-1"
                         >
                           Show Plans to Unlock <ArrowRight className="w-2.5 h-2.5" />
                         </button>
@@ -455,11 +455,11 @@ export default function PartnerToolsView({
       </AnimatePresence>
 
       {activeTab === 'list' && (
-        <div className="mt-8 p-6 bg-[#0A0B0F] rounded-[2.5rem] border border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+        <div className="mt-8 p-6 bg-[#022c22] rounded-[2.5rem] border border-white/5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
-              <Rocket className="w-5 h-5 text-amber-500" />
+              <Rocket className="w-5 h-5 text-emerald-500" />
               <h4 className="text-white font-black italic tracking-tighter uppercase">Power Up Your Team</h4>
             </div>
             <p className="text-[11px] text-slate-400 font-bold leading-relaxed mb-6">
@@ -468,11 +468,11 @@ export default function PartnerToolsView({
             <div className="flex items-center gap-4">
               <div className="flex -space-x-3">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-[#0A0B0F] bg-slate-800 flex items-center justify-center overflow-hidden">
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-[#022c22] bg-slate-800 flex items-center justify-center overflow-hidden">
                     <DynamicAvatar avatarId="" fallbackText={`Partner ${i}`} className="w-full h-full" />
                   </div>
                 ))}
-                <div className="w-8 h-8 rounded-full border-2 border-[#0A0B0F] bg-amber-500 flex items-center justify-center text-[10px] font-black text-white">
+                <div className="w-8 h-8 rounded-full border-2 border-[#022c22] bg-emerald-500 flex items-center justify-center text-[10px] font-black text-white">
                   +12k
                 </div>
               </div>

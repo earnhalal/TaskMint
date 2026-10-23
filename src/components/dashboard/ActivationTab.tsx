@@ -123,7 +123,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
         <div>
           <h2 className="text-xl font-black text-slate-900 tracking-tight">Account Activation</h2>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-            Joining Fee: <span className="text-indigo-600">Rs {appSettings.activationFee}</span>
+            Joining Fee: <span className="text-teal-600">Rs {appSettings.activationFee}</span>
           </p>
         </div>
       </div>
@@ -134,11 +134,11 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 space-y-6"
       >
-        <div className="bg-amber-50 border-2 border-amber-100 rounded-2xl p-4 flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+        <div className="bg-emerald-50 border-2 border-emerald-100 rounded-2xl p-4 flex gap-3">
+          <AlertTriangle className="w-5 h-5 text-emerald-600 shrink-0" />
           <div className="space-y-1">
-            <p className="text-[11px] font-bold text-amber-800 leading-relaxed">
-              Neeche diye gaye number par <span className="text-amber-900 font-black text-lg">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein.
+            <p className="text-[11px] font-bold text-emerald-800 leading-relaxed">
+              Neeche diye gaye number par <span className="text-emerald-900 font-black text-lg">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein.
             </p>
           </div>
         </div>
@@ -156,7 +156,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
           <div className="bg-slate-900 rounded-2xl p-5 text-white space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-white/10">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Account Title</span>
-              <span className="text-sm font-black text-amber-400">{appSettings.paymentName}</span>
+              <span className="text-sm font-black text-emerald-400">{appSettings.paymentName}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Account Number</span>
@@ -191,7 +191,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 text-center"
         >
-          <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock className="w-8 h-8 animate-pulse" />
           </div>
           <h3 className="text-xl font-black text-slate-900 mb-2">Verification Pending</h3>
@@ -225,7 +225,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                   item.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' :
                   item.status === 'Rejected' ? 'bg-red-100 text-red-600' :
-                  'bg-amber-100 text-amber-600'
+                  'bg-emerald-100 text-emerald-600'
                 }`}>
                   {item.status === 'Approved' ? <CheckCircle2 className="w-5 h-5" /> :
                    item.status === 'Rejected' ? <XCircle className="w-5 h-5" /> :
@@ -240,7 +240,7 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
                 <p className={`text-[10px] font-black uppercase ${
                   item.status === 'Approved' ? 'text-emerald-600' :
                   item.status === 'Rejected' ? 'text-red-600' :
-                  'text-amber-600'
+                  'text-emerald-600'
                 }`}>
                   {item.status}
                 </p>

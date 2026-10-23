@@ -49,7 +49,7 @@ const PLATFORM_THEMES: Record<string, any> = {
   instagram: { 
     label: 'Instagram', 
     icon: <Instagram className="w-4 h-4" />, 
-    color: 'from-purple-600 via-pink-600 to-orange-500', 
+    color: 'from-emerald-600 via-pink-600 to-orange-500', 
     text: 'text-pink-600',
     bg: 'bg-pink-50',
     activeBg: 'bg-gradient-to-tr from-[#833AB4] via-[#F56040] to-[#FCAF45] text-white',
@@ -174,7 +174,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
           <div>
             <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none">Social Boost+</h2>
             <div className="flex items-center gap-1 mt-1">
-              <Zap className="w-3 h-3 text-amber-500 fill-amber-500" />
+              <Zap className="w-3 h-3 text-emerald-500 fill-emerald-500" />
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Premium Earnings</p>
             </div>
           </div>
@@ -193,18 +193,18 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="relative rounded-[2rem] p-6 text-white overflow-hidden mb-8 shadow-2xl shadow-indigo-500/20"
+        className="relative rounded-[2rem] p-6 text-white overflow-hidden mb-8 shadow-2xl shadow-teal-500/20"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-[#060D2D] via-[#101438] to-[#1a1c29]"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#065f46]"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/10 rounded-full -ml-12 -mb-12 blur-2xl"></div>
         
         <div className="relative z-10">
           <div className="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-md rounded-full px-3 py-1 border border-white/10 mb-4">
-            <Sparkles className="w-3 h-3 text-amber-400" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-amber-400">Exclusive Reward Wall</span>
+            <Sparkles className="w-3 h-3 text-emerald-400" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Exclusive Reward Wall</span>
           </div>
-          <h1 className="text-3xl font-black tracking-tighter mb-2">Turn Followers into <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400">Profit</span></h1>
+          <h1 className="text-3xl font-black tracking-tighter mb-2">Turn Followers into <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-orange-400">Profit</span></h1>
           <p className="text-xs text-blue-100/70 font-medium max-w-[200px]">Complete simple actions on your favorite apps and earn real cash rewards instantly.</p>
         </div>
       </motion.div>
@@ -246,7 +246,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
-            <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+            <Loader2 className="w-10 h-10 text-teal-500 animate-spin" />
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Syncing Tasks...</p>
           </div>
         ) : filteredTasks.length > 0 ? (
@@ -290,7 +290,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
                         <div className={`flex flex-col items-end gap-0.5`}>
                            <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-wider ${
                              status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
-                             status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                             status === 'pending' ? 'bg-emerald-100 text-emerald-700' :
                              'bg-red-100 text-red-700'
                            }`}>
                              {status === 'approved' ? <CheckCircle2 className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
@@ -356,8 +356,8 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
                     <div>
                       <h3 className="text-xl font-black text-slate-900 leading-tight">{selectedTask.title}</h3>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                         <Trophy className="w-3 h-3 text-amber-500 fill-amber-500" />
-                         <p className="text-xs font-bold text-amber-600">Reward Pool: Rs. {selectedTask.reward}</p>
+                         <Trophy className="w-3 h-3 text-emerald-500 fill-emerald-500" />
+                         <p className="text-xs font-bold text-emerald-600">Reward Pool: Rs. {selectedTask.reward}</p>
                       </div>
                     </div>
                   </div>

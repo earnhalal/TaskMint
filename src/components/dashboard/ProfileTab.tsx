@@ -132,18 +132,18 @@ export default function ProfileTab({
         <motion.div 
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
-          className="mb-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 shadow-sm"
+          className="mb-4 bg-gradient-to-r from-emerald-50 to-orange-50 border border-emerald-200 rounded-2xl p-4 shadow-sm"
         >
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
+            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <AlertCircle className="w-5 h-5 text-emerald-600" />
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-black text-amber-900 uppercase tracking-tighter">Complete Profile (Alert)</h4>
-              <p className="text-[11px] font-bold text-amber-700/70 mb-3">Please fill all details including Gender & Withdrawal Account to use all features.</p>
+              <h4 className="text-sm font-black text-emerald-900 uppercase tracking-tighter">Complete Profile (Alert)</h4>
+              <p className="text-[11px] font-bold text-emerald-700/70 mb-3">Please fill all details including Gender & Withdrawal Account to use all features.</p>
               <button 
                 onClick={onEditProfile}
-                className="bg-amber-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md shadow-amber-600/20 active:scale-95 transition-all"
+                className="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md shadow-emerald-600/20 active:scale-95 transition-all"
               >
                 Fix Now
               </button>
@@ -180,20 +180,20 @@ export default function ProfileTab({
         <div className={`relative rounded-[1.5rem] p-3 overflow-hidden shadow-2xl transition-all duration-700 group hover:scale-[1.02] ${
             role === 'partner' 
             ? partnerTier === 'gold'
-                ? 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-amber-500/20 shadow-amber-500/5'
+                ? 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-emerald-500/20 shadow-emerald-500/5'
                 : 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-blue-500/20 shadow-blue-500/5'
-            : 'bg-gradient-to-br from-[#1E3A8A] via-[#312E81] to-[#1E1B4B] border border-white/5 shadow-indigo-500/10'
+            : 'bg-gradient-to-br from-[#1E3A8A] via-[#312E81] to-[#1E1B4B] border border-white/5 shadow-teal-500/10'
         }`}>
             {/* Holographic Overlays */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -ml-16 -mb-16 animate-pulse" style={{ animationDelay: '1s' }} />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-teal-500/5 rounded-full blur-3xl -ml-16 -mb-16 animate-pulse" style={{ animationDelay: '1s' }} />
             
             {/* Card Content */}
             <div className="relative z-10 flex flex-col items-center">
                 <div className="w-full flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2">
                         <div className="bg-white/5 backdrop-blur-sm rounded-lg px-2 py-1 border border-white/10 flex items-center gap-1.5">
-                            <Fingerprint className="w-3 h-3 text-amber-500" />
+                            <Fingerprint className="w-3 h-3 text-emerald-500" />
                             <span className="text-[9px] font-black text-white tracking-widest">{referralCode}</span>
                         </div>
                     </div>
@@ -214,9 +214,9 @@ export default function ProfileTab({
                         <div className={`w-12 h-12 rounded-xl p-0.5 shadow-xl transition-all duration-500 ${
                             role === 'partner'
                                 ? partnerTier === 'gold'
-                                    ? 'bg-gradient-to-tr from-amber-400 via-yellow-500 to-amber-600'
-                                    : 'bg-gradient-to-tr from-blue-500 via-indigo-600 to-blue-700'
-                                : 'bg-gradient-to-tr from-indigo-500 via-purple-600 to-indigo-700'
+                                    ? 'bg-gradient-to-tr from-emerald-400 via-amber-500 to-emerald-600'
+                                    : 'bg-gradient-to-tr from-blue-500 via-teal-600 to-blue-700'
+                                : 'bg-gradient-to-tr from-teal-500 via-emerald-600 to-teal-700'
                         }`}>
                             <div className="w-full h-full rounded-[10px] overflow-hidden bg-[#0F172A] flex items-center justify-center border border-black/20">
                                 <DynamicAvatar avatarId={profileAvatarId} fallbackText={name} className="w-full h-full" />
@@ -224,7 +224,7 @@ export default function ProfileTab({
                         </div>
                         <button 
                             onClick={onEditProfile}
-                            className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded flex items-center justify-center shadow-lg text-slate-900 border border-black/5 active:scale-90 transition-all hover:bg-amber-100 hover:text-amber-600"
+                            className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded flex items-center justify-center shadow-lg text-slate-900 border border-black/5 active:scale-90 transition-all hover:bg-emerald-100 hover:text-emerald-600"
                         >
                             <PenTool className="w-2.5 h-2.5" />
                         </button>
@@ -237,7 +237,7 @@ export default function ProfileTab({
                         
                         <div className="flex flex-row items-center gap-2">
                             <p className="text-[9px] font-bold text-white/60 flex items-center gap-1">
-                                {role === 'partner' ? <Crown className="w-2.5 h-2.5 text-amber-500" /> : <Users className="w-2.5 h-2.5 text-indigo-400" />}
+                                {role === 'partner' ? <Crown className="w-2.5 h-2.5 text-emerald-500" /> : <Users className="w-2.5 h-2.5 text-teal-400" />}
                                 <span className="uppercase tracking-widest text-[#cbd5e1]">{role}</span>
                             </p>
                             <div className="h-2.5 w-px bg-white/20"></div>
@@ -271,19 +271,19 @@ export default function ProfileTab({
         </div>
         <Item icon={<History className="w-4 h-4" />} label="Digital Yield Ledger" onClick={onEarningHistoryClick} />
         {lockedBalance > 0 && (
-          <div className="p-6 bg-amber-50/20 border-t border-amber-100/30 flex justify-between items-center group">
+          <div className="p-6 bg-emerald-50/20 border-t border-emerald-100/30 flex justify-between items-center group">
               <div>
-                <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
                     <Clock className="w-3 h-3" /> Locked Distribution
                 </p>
-                <p className="text-2xl font-black text-amber-600 italic tracking-tighter">Rs {lockedBalance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</p>
-                <div className="flex items-center gap-2 mt-2 bg-amber-500/10 px-3 py-1 rounded-lg w-fit border border-amber-500/10">
-                  <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
-                  <p className="text-[9px] text-amber-600 font-black uppercase tracking-widest">Protocol Stake Active</p>
+                <p className="text-2xl font-black text-emerald-600 italic tracking-tighter">Rs {lockedBalance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</p>
+                <div className="flex items-center gap-2 mt-2 bg-emerald-500/10 px-3 py-1 rounded-lg w-fit border border-emerald-500/10">
+                  <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
+                  <p className="text-[9px] text-emerald-600 font-black uppercase tracking-widest">Protocol Stake Active</p>
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 group-hover:rotate-12 transition-transform">
-                <Shield className="w-6 h-6 text-amber-600" />
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:rotate-12 transition-transform">
+                <Shield className="w-6 h-6 text-emerald-600" />
               </div>
           </div>
         )}
@@ -293,7 +293,7 @@ export default function ProfileTab({
         <Item icon={<BarChart3 className="w-4 h-4" />} label="Top Earners Leaderboard" onClick={onLeaderboardClick} />
         {role !== 'partner' && (
           <Item 
-            icon={<Crown className="w-4 h-4 text-amber-500" />} 
+            icon={<Crown className="w-4 h-4 text-emerald-500" />} 
             label="Upgrade to Partner" 
             onClick={onPartnerUpgradeClick} 
           />
@@ -334,11 +334,11 @@ export default function ProfileTab({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className="bg-white rounded-[32px] p-6 max-w-sm w-full shadow-2xl overflow-hidden relative"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
             
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
                   <Briefcase className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-black text-slate-900 tracking-tight">Premium Jobs</h3>

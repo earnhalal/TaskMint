@@ -128,7 +128,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
       {/* Dynamic Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-[20%] right-[-10%] w-72 h-72 bg-emerald-500/5 rounded-full blur-[120px] animate-pulse-slow"></div>
-        <div className="absolute bottom-[30%] left-[-10%] w-64 h-64 bg-indigo-500/5 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '3s' }}></div>
+        <div className="absolute bottom-[30%] left-[-10%] w-64 h-64 bg-teal-500/5 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '3s' }}></div>
       </div>
 
       {/* Modern Top Header */}
@@ -146,21 +146,21 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             onClick={onEditAccount}
             className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-600 shadow-xl hover:border-emerald-500/30 transition-all group"
           >
-            <Sparkles className="w-5 h-5 text-amber-500 group-hover:animate-pulse" />
+            <Sparkles className="w-5 h-5 text-emerald-500 group-hover:animate-pulse" />
           </motion.button>
       </div>
 
       {/* Bento-Style Status Card */}
       <div className="relative z-10 group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 rounded-[36px] blur-xl opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-600 rounded-[36px] blur-xl opacity-10 group-hover:opacity-20 transition duration-1000"></div>
         
-        <div className="relative bg-[#0A0A0B] rounded-[32px] p-7 overflow-hidden border border-white/5 shadow-2xl">
+        <div className="relative bg-[#022c22] rounded-[32px] p-7 overflow-hidden border border-white/5 shadow-2xl">
            <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full -mr-24 -mt-24 blur-[80px]"></div>
            
            <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
-                    <div className={`w-1.5 h-1.5 rounded-full ${windowInfo.isOpen ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`}></div>
+                    <div className={`w-1.5 h-1.5 rounded-full ${windowInfo.isOpen ? 'bg-emerald-400 animate-ping' : 'bg-emerald-400'}`}></div>
                     <span className="text-[8px] font-black uppercase tracking-widest text-white/70">
                       {windowInfo.isOpen ? 'Network Online' : 'Network Standby'}
                     </span>
@@ -177,9 +177,9 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                   {windowInfo.nextWindowText}
                 </h3>
                 {isPartner && (
-                  <div className="flex items-center gap-1.5 bg-amber-500/10 w-fit px-2 py-0.5 rounded-lg border border-amber-500/20">
-                    <Zap className="w-2.5 h-2.5 text-amber-500 animate-pulse fill-amber-500" />
-                    <span className="text-[8px] font-black uppercase text-amber-500 tracking-wider">Instant Payout Active</span>
+                  <div className="flex items-center gap-1.5 bg-emerald-500/10 w-fit px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                    <Zap className="w-2.5 h-2.5 text-emerald-500 animate-pulse fill-emerald-500" />
+                    <span className="text-[8px] font-black uppercase text-emerald-500 tracking-wider">Instant Payout Active</span>
                   </div>
                 )}
               </div>
@@ -200,7 +200,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
-                    className={`h-full rounded-full ${progress >= 100 ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 shadow-[0_0_15px_rgba(52,211,153,0.4)]' : 'bg-gradient-to-r from-amber-400 to-orange-500'}`}
+                    className={`h-full rounded-full ${progress >= 100 ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 shadow-[0_0_15px_rgba(52,211,153,0.4)]' : 'bg-gradient-to-r from-emerald-400 to-orange-500'}`}
                   />
                 </div>
                 <div className="flex justify-between items-center px-1">
@@ -233,9 +233,9 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                   ? 'border-emerald-500 ring-4 ring-emerald-500/10 scale-105 z-10' 
                   : 'border-white/5 opacity-50 grayscale hover:opacity-100 hover:grayscale-0'
                 } ${
-                  acc.method === 'easypaisa' ? 'bg-gradient-to-br from-[#121212] via-[#0D2D1B] to-[#121212]' : 
-                  acc.method === 'jazzcash' ? 'bg-gradient-to-br from-[#121212] via-[#3D0C0C] to-[#121212]' : 
-                  'bg-gradient-to-br from-[#121212] via-[#1E1E2E] to-[#121212]'
+                  acc.method === 'easypaisa' ? 'bg-gradient-to-br from-[#022c22] via-[#0D2D1B] to-[#022c22]' : 
+                  acc.method === 'jazzcash' ? 'bg-gradient-to-br from-[#022c22] via-[#3D0C0C] to-[#022c22]' : 
+                  'bg-gradient-to-br from-[#022c22] via-[#1E1E2E] to-[#022c22]'
                 }`}
               >
                 {/* Visual Textures */}
@@ -384,7 +384,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                     whileTap={{ scale: 0.99 }}
                     onClick={handleWithdraw}
                     disabled={!selectedAccount || parseFloat(amount) < minWithdrawal || !windowInfo.isOpen}
-                    className="relative w-full h-12 bg-[#0A0A0B] disabled:bg-slate-100 disabled:cursor-not-allowed group/btn overflow-hidden rounded-[18px] transition-all shadow-lg"
+                    className="relative w-full h-12 bg-[#022c22] disabled:bg-slate-100 disabled:cursor-not-allowed group/btn overflow-hidden rounded-[18px] transition-all shadow-lg"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
                     <div className="relative z-10 flex items-center justify-center gap-2">
@@ -396,9 +396,9 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                 </motion.button>
 
                 {!windowInfo.isOpen && (
-                  <div className="mt-4 flex items-center gap-2 p-3 bg-amber-50/50 rounded-xl border border-amber-100/30">
-                    <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
-                    <p className="text-[9px] font-bold text-amber-700 uppercase tracking-tight italic">
+                  <div className="mt-4 flex items-center gap-2 p-3 bg-emerald-50/50 rounded-xl border border-emerald-100/30">
+                    <Calendar className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <p className="text-[9px] font-bold text-emerald-700 uppercase tracking-tight italic">
                       Next Update: {windowInfo.nextWindowText.split(':')[1]} tareek.
                     </p>
                   </div>
@@ -442,7 +442,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                         {item.amount}
                       </div>
                       <div className={`text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border ${
-                        item.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' : 
+                        item.status === 'PENDING' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                         (item.status === 'APPROVED' || item.status === 'COMPLETED') ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                         item.status === 'REJECTED' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-slate-50 text-slate-400 border-slate-100'
                       }`}>
@@ -469,7 +469,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center px-6 bg-[#0A0A0B]/80 backdrop-blur-md"
+            className="fixed inset-0 z-[200] flex items-center justify-center px-6 bg-[#022c22]/80 backdrop-blur-md"
           >
             <motion.div 
               initial={{ scale: 0.9, y: 30 }}
@@ -477,7 +477,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               exit={{ scale: 0.9, y: 30 }}
               className="bg-white rounded-[44px] p-10 w-full max-w-sm shadow-2xl relative border border-white/10"
             >
-              <div className="absolute top-0 left-0 w-full h-3 bg-[#0A0A0B]"></div>
+              <div className="absolute top-0 left-0 w-full h-3 bg-[#022c22]"></div>
               
               <button 
                 onClick={() => setSelectedWithdrawal(null)} 
@@ -490,7 +490,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg ${
                      selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20' :
                      selectedWithdrawal.status === 'Rejected' ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/20' :
-                     'bg-gradient-to-br from-amber-500 to-orange-600 shadow-amber-500/20'
+                     'bg-gradient-to-br from-emerald-500 to-orange-600 shadow-emerald-500/20'
                  }`}>
                     {selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? <CheckCircle2 className="w-10 h-10 text-white" /> : <AlertCircle className="w-10 h-10 text-white" />}
                  </div>
@@ -498,7 +498,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                  <div className={`mt-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block ${
                      selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
                      selectedWithdrawal.status === 'Rejected' ? 'bg-red-100 text-red-700' :
-                     'bg-amber-100 text-amber-700'
+                     'bg-emerald-100 text-emerald-700'
                  }`}>
                     {selectedWithdrawal.status || 'Pending'}
                  </div>
@@ -545,7 +545,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                         </div>
                         <div>
                             <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Status</p>
-                            <p className={`text-[10px] font-bold uppercase ${selectedWithdrawal.status === 'Approved' ? 'text-emerald-500' : 'text-amber-500'}`}>{selectedWithdrawal.status}</p>
+                            <p className={`text-[10px] font-bold uppercase ${selectedWithdrawal.status === 'Approved' ? 'text-emerald-500' : 'text-emerald-500'}`}>{selectedWithdrawal.status}</p>
                         </div>
                     </div>
 
@@ -567,7 +567,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
 
               <button 
                 onClick={() => setSelectedWithdrawal(null)}
-                className="w-full mt-8 p-5 bg-[#0A0A0B] text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] italic shadow-xl shadow-slate-900/10"
+                className="w-full mt-8 p-5 bg-[#022c22] text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] italic shadow-xl shadow-slate-900/10"
               >
                 Close Receipt
               </button>
@@ -583,7 +583,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center px-6 bg-[#0A0A0B]/90 backdrop-blur-xl"
+            className="fixed inset-0 z-[200] flex items-center justify-center px-6 bg-[#022c22]/90 backdrop-blur-xl"
           >
             <motion.div 
               initial={{ scale: 0.8, rotate: -5 }}
@@ -605,7 +605,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
 
               <button 
                 onClick={() => setShowSuccess(false)}
-                className="group relative w-full h-16 bg-[#0A0A0B] overflow-hidden rounded-[24px] shadow-2xl transition-all active:scale-95"
+                className="group relative w-full h-16 bg-[#022c22] overflow-hidden rounded-[24px] shadow-2xl transition-all active:scale-95"
               >
                 <div className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                 <span className="relative z-10 font-black text-white text-xs uppercase tracking-[0.2em] italic">Acknowledge</span>
