@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Star, Info, ArrowLeft, Lock, Zap, ExternalLink } from 'lucide-react';
+import { Info, ArrowLeft, Lock, Zap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface TasksTabProps {

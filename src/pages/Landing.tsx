@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Menu as MenuIcon,
@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
 import { blogPosts } from '../data/blogPosts';
 
 const faqs = [

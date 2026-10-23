@@ -1,25 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-    Youtube, 
-    Facebook, 
-    Music2, 
-    Instagram,
-    Globe,
-    MoreHorizontal,
-    Link as LinkIcon, 
-    Hash, 
-    CheckCircle2, 
-    AlertCircle,
-    ArrowRight,
-    ArrowLeft,
-    Zap,
-    ChevronRight,
-    X,
-    ShoppingCart
-} from 'lucide-react';
-import { doc, updateDoc, increment, addDoc, collection, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { Youtube, Facebook, Music2, Instagram, Globe, MoreHorizontal, Link as LinkIcon, Hash, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Zap, ChevronRight } from 'lucide-react';
+import { addDoc, collection, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface QuickPromotionsProps {

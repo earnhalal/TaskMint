@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, Star, Shield, Crown, Check, AlertCircle, Zap, Wallet } from 'lucide-react';
 import { doc, updateDoc, increment, getDoc, collection, addDoc, serverTimestamp as firestoreServerTimestamp } from 'firebase/firestore';

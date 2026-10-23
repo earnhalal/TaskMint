@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Ticket, Trophy, Users, Clock, CheckCircle2, AlertCircle, Sparkles, Star, Crown, Flame, ArrowRight, Zap, Shield, Lock } from 'lucide-react';
+import { ArrowLeft, Ticket, Trophy, Users, Clock, CheckCircle2, AlertCircle, Sparkles, Star, Crown, Flame, Zap, Shield } from 'lucide-react';
 import { collection, onSnapshot, query, where, addDoc, serverTimestamp, doc, updateDoc, increment, orderBy, limit, getDocs, getDoc } from 'firebase/firestore';
 import { db, auth, rtdb } from '../../firebase';
 import { ref, update, increment as rtdbIncrement } from 'firebase/database';

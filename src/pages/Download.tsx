@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Download, ShieldCheck, Coins, Wallet, ArrowLeft, Star, CheckCircle2, Smartphone, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

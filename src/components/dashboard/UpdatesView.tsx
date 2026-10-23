@@ -1,20 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Gamepad2, 
-  Mail, 
-  Wallet, 
-  ShieldCheck, 
-  Info,
-  ArrowRightLeft,
-  ArrowLeft,
-  Trash2,
-  CheckCircle2,
-  Clock,
-  Sparkles,
-  ChevronRight,
-  Zap
-} from 'lucide-react';
+import { Gamepad2, Mail, Wallet, ShieldCheck, Info, ArrowRightLeft, ArrowLeft, CheckCircle2, Clock, Sparkles, ChevronRight, Zap } from 'lucide-react';
 
 export interface AppUpdate {
     id: string;

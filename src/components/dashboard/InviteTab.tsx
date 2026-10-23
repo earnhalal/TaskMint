@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Network, Share2, MessageCircle, Clock, Sparkles, UsersRound } from 'lucide-react';
 import { collection, query, where, getDocs } from 'firebase/firestore';

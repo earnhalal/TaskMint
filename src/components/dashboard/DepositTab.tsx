@@ -46,13 +46,6 @@ const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
  );
 }
 
-const JazzCashIcon = ({ className }: { className?: string }) => (
- <div className={`flex items-center font-bold tracking-tighter ${className}`}>
- <span className="text-red-600">jazz</span>
- <span className="text-white">Cash</span>
- </div>
-);
-
 const EasyPaisaIcon = ({ className }: { className?: string }) => (
  <div className={`bg-emerald-500 text-white px-2 py-0.5 rounded text-sm font-bold tracking-tight ${className}`}>
  easypaisa

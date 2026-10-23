@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Crown, Check, X, ArrowLeft, Wallet, Send, AlertCircle, Clock, Ticket, Hash, ArrowRight } from 'lucide-react';
+import { Crown, Check, X, ArrowLeft, Wallet, Send, AlertCircle, Clock, Hash, ArrowRight } from 'lucide-react';
 import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 

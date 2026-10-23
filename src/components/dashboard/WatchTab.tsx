@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, ArrowRight, Bell, CheckCircle2, AlertCircle, Loader2, Lock, X, Construction, Info, Crown, Zap } from 'lucide-react';
-import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, Construction, Crown, Zap } from 'lucide-react';
+import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface WatchTabProps {

@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wallet, ArrowRight, ArrowDownCircle, Sparkles, CheckCircle2, AlertCircle, Lock, Calendar, TrendingUp, X, CreditCard, Landmark, ArrowUpRight, History, ShieldCheck, Zap } from 'lucide-react';
+import { Wallet, CheckCircle2, AlertCircle, Lock, Calendar, X, CreditCard, Landmark, ArrowUpRight, History, Zap } from 'lucide-react';
 import { useCurrency } from '../../context/CurrencyContext';
 
 interface Account {
@@ -21,16 +21,6 @@ interface WithdrawTabProps {
  manualWithdrawUnlock?: boolean;
  isPartner?: boolean;
 }
-
-const CardChip = () => (
- <div className="w-10 h-7 rounded-md relative overflow-hidden shadow-inner bg-gradient-to-br from-[#fcd34d] via-[#d97706] to-[#b45309]">
- <div className="absolute inset-0 border-[0.5px] border-[#78350f]/30">
- <div className="absolute top-1/2 left-0 w-full h-[0.5px] bg-[#78350f]/20"></div>
- <div className="absolute top-0 left-1/3 w-[0.5px] h-full bg-[#78350f]/20"></div>
- <div className="absolute top-1/2 left-1/2 w-2.5 h-3 border border-[#78350f]/20 rounded-[1px] -translate-x-1/2 -translate-y-1/2 bg-[#fbbf24]/20"></div>
- </div>
- </div>
-);
 
 export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts, manualWithdrawUnlock = false, isPartner = false }: WithdrawTabProps) {
  const { formatAmount } = useCurrency();

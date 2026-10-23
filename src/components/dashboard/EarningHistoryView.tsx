@@ -1,21 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { 
-  ArrowLeft, 
-  History, 
-  TrendingUp, 
-  PlayCircle, 
-  CheckCircle2, 
-  Sparkles, 
-  Gift, 
-  Users, 
-  Calendar,
-  Wallet,
-  Loader2,
-  Search,
-  Star
-} from 'lucide-react';
-import { collection, query, where, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import { ArrowLeft, History, TrendingUp, PlayCircle, CheckCircle2, Sparkles, Gift, Users, Calendar, Wallet, Loader2, Star } from 'lucide-react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface EarningHistoryViewProps {

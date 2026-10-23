@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles, Bot } from 'lucide-react';
+import { ChevronRight, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, Shield, LogOut, Crown, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles } from 'lucide-react';
 
 import { DynamicAvatar } from '../ui/DynamicAvatar';
 

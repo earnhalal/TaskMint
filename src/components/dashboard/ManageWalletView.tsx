@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Wallet, Lock, ShieldCheck, Plus, ChevronRight, Save, Trash2, Edit2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Wallet, Lock, ShieldCheck, Plus, ChevronRight, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';

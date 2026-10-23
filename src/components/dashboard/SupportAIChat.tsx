@@ -1,23 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Send, 
-  User, 
-  Loader2, 
-  ArrowLeft,
-  ShieldCheck,
-  Zap,
-  MoreVertical,
-  Phone,
-  Video,
-  Check,
-  CheckCheck,
-  Headphones,
-  Clock,
-  Paperclip,
-  ImageIcon,
-  X,
-  Lock
-} from 'lucide-react';
+import { Send, ArrowLeft, ShieldCheck, Zap, CheckCheck, Headphones, Clock, Paperclip, X, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from "@google/genai";
 import { doc, getDoc, updateDoc } from 'firebase/firestore';

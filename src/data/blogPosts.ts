@@ -76,19 +76,16 @@ export const blogPosts: BlogPost[] = [
   {
     id: '3',
     slug: 'taskmint-online-lottery-guide',
-    title: 'Win Big: The Ultimate Guide to TaskMint Online Lottery & Spin Wheel',
-    excerpt: 'Want to win Rs. 10,000 or more? Read our guide on how to participate in the TaskMint online lottery and daily spin wheel for massive prizes.',
+    title: 'Win Big: The Ultimate Guide to the TaskMint Online Lottery',
+    excerpt: 'Want to win Rs. 10,000 or more? Read our guide on how the TaskMint online lottery works, how tickets are priced, and how winners are paid.',
     date: 'April 10, 2026',
     author: 'TaskMint Team',
     category: 'Lottery',
     image: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-    keywords: ['online lottery', 'win money', 'spin wheel', 'online earning Pakistan'],
+    keywords: ['online lottery', 'win money', 'lottery tickets', 'online earning Pakistan'],
     content: `
       <h2>Your Chance to Win Big with Online Lottery</h2>
-      <p>TaskMint isn't just about tasks; it's also about excitement! Our <strong>online lottery</strong> and <strong>Spin & Win</strong> features offer users the chance to win life-changing amounts of money with very little effort.</p>
-      
-      <h3>Daily Spin Wheel</h3>
-      <p>Every user gets a chance to spin the wheel. Prizes range from small PKR amounts to massive multipliers and even free lottery tickets. It's the easiest <strong>online earning</strong> activity you can do every single day.</p>
+      <p>TaskMint isn't just about tasks; it's also about excitement! Our <strong>online lottery</strong> gives users the chance to win serious prize money on top of their regular task earnings.</p>
       
       <h3>How the Lottery Works</h3>
       <p>Our lottery is transparent and fair. You can purchase tickets using your earned balance. The more tickets you have, the higher your chances of winning the grand prize.</p>

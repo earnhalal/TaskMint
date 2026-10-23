@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Save, CheckCircle2 } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';

@@ -1,6 +1,5 @@
-import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Trophy, Medal, Crown, Star, TrendingUp, Users } from 'lucide-react';
+import { ArrowLeft, Trophy, Medal, Crown, Star } from 'lucide-react';
 import { DynamicAvatar } from '../ui/DynamicAvatar';
 
 interface LeaderboardViewProps {

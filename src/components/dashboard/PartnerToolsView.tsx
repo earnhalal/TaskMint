@@ -1,31 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  ArrowLeft, 
-  BarChart3, 
-  Users, 
-  ShieldCheck, 
-  Zap, 
-  Lock, 
-  Crown, 
-  Star,
-  Settings,
-  Database,
-  PieChart,
-  Target,
-  Rocket,
-  ArrowRight,
-  Wallet,
-  Ticket,
-  CheckCircle2,
-  XCircle,
-  TrendingUp,
-  Award,
-  Search,
-  Clock
-} from 'lucide-react';
+import { ArrowLeft, BarChart3, Users, Zap, Lock, Crown, Rocket, ArrowRight, Wallet, Ticket, CheckCircle2, XCircle, TrendingUp, Clock } from 'lucide-react';
 import { DynamicAvatar } from '../ui/DynamicAvatar';
-import { doc, getDoc, updateDoc, serverTimestamp, increment, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface PartnerToolsViewProps {

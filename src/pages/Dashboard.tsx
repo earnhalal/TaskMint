@@ -1,32 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Home, 
-  User, 
-  UserCircle,
-  Bell, 
-  Tv2, 
-  Rocket,
-  Zap,
-  ShieldCheck,
-  LayoutGrid,
-  ClipboardList,
-  Briefcase,
-  X,
-  Sparkles,
-  Coins,
-  Mail,
-  AlertTriangle,
-  Crown,
-  Search,
-  Layout,
-  Clock,
-  ArrowRight,
-  Users,
-  Wallet,
-  Download
-} from 'lucide-react';
+import { UserCircle, Bell, Tv2, Rocket, Zap, ShieldCheck, LayoutGrid, X, Sparkles, Coins, AlertTriangle, Wallet, Download } from 'lucide-react';
 import { 
   doc, 
   onSnapshot, 
@@ -45,18 +19,10 @@ import {
   runTransaction as runFirestoreTransaction,
   serverTimestamp as firestoreServerTimestamp 
 } from 'firebase/firestore';
-import { db, auth, rtdb } from '../firebase';
-import { ref, onValue, update, set, increment as rtdbIncrement, push, serverTimestamp, get, runTransaction as runRtdbTransaction } from 'firebase/database';
+import { db, rtdb } from '../firebase';
+import { ref, onValue, update, set, increment as rtdbIncrement, get, runTransaction as runRtdbTransaction } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
-import { 
-  sendDepositRequestMail, 
-  sendWithdrawalRequestMail, 
-  sendActivationMail, 
-  playNotificationSound,
-  sendDepositApprovedMail,
-  sendWithdrawalApprovedMail,
-  sendSystemUpdateMail
-} from '../services/notificationService';
+import { sendDepositRequestMail, sendWithdrawalRequestMail, sendActivationMail, playNotificationSound } from '../services/notificationService';
 import HomeTab from '../components/dashboard/HomeTab';
 import AnnouncementBar from '../components/dashboard/AnnouncementBar';
 import ProfileTab from '../components/dashboard/ProfileTab';
@@ -87,7 +53,6 @@ import PartnerToolsView from '../components/dashboard/PartnerToolsView';
 import { DynamicAvatar } from '../components/ui/DynamicAvatar';
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
   const [showNotification, setShowNotification] = useState(true);
@@ -102,7 +67,6 @@ export default function Dashboard() {
   const [userCountry, setUserCountry] = useState('Pakistan');
   const [profileAvatarId, setProfileAvatarId] = useState('');
   const [withdrawalAccounts, setWithdrawalAccounts] = useState<any[]>([]);
-  const [twoFactorAuth, setTwoFactorAuth] = useState(false);
   const [joiningDate, setJoiningDate] = useState('');
   const [status, setStatus] = useState('Inactive');
   const [accountStatus, setAccountStatus] = useState('inactive');
@@ -110,7 +74,6 @@ export default function Dashboard() {
   const [role, setRole] = useState('user');
   const [partnerStatus, setPartnerStatus] = useState('none');
   const [partnerTier, setPartnerTier] = useState('basic');
-  const [totalTeamEarnings, setTotalTeamEarnings] = useState(0);
   const [totalIndirectCommission, setTotalIndirectCommission] = useState(0);
   const [referralStats, setReferralStats] = useState({
     totalInvited: 0,
@@ -120,8 +83,7 @@ export default function Dashboard() {
   const [referredBy, setReferredBy] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string>('');
   const [showReferralUpdateNotify, setShowReferralUpdateNotify] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('Sana just earned <span class="font-bold">Rs 2000</span> from a Referral Bonus!');
-  const [isNotificationAnimating, setIsNotificationAnimating] = useState(true);
+  const [notificationMessage] = useState('');
   const [partnerReferrals, setPartnerReferrals] = useState<any[]>([]);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
@@ -170,7 +132,6 @@ export default function Dashboard() {
     return [...withdrawals].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   }, [withdrawals]);
   const [depositHistory, setDepositHistory] = useState<any[]>([]);
-  const [tasks, setTasks] = useState<any[]>([]);
   const [topEarners, setTopEarners] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [appSettings, setAppSettings] = useState({
@@ -185,38 +146,9 @@ export default function Dashboard() {
     manualWithdrawUnlock: false
   });
 
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!appSettings.offerExpiryTime) return;
-
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const expiry = appSettings.offerExpiryTime.toMillis ? appSettings.offerExpiryTime.toMillis() : new Date(appSettings.offerExpiryTime).getTime();
-      const distance = expiry - now;
-
-      if (distance < 0) {
-        setTimeLeft(0);
-        clearInterval(timer);
-      } else {
-        setTimeLeft(distance);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [appSettings.offerExpiryTime]);
 
   const activeAppSettings = appSettings;
 
-  const formatTime = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const isOfferActive = timeLeft !== null && timeLeft > 0;
 
   useEffect(() => {
     document.title = 'Dashboard - TaskMint';
@@ -238,12 +170,10 @@ export default function Dashboard() {
         setUserCountry(data.country || 'Pakistan');
         setProfileAvatarId(data.profile_avatar_id || '');
         setWithdrawalAccounts(data.withdrawalAccounts || []);
-        setTwoFactorAuth(data.twoFactorAuth || false);
         setJoiningDate(data.joiningDate || '');
         setRole(data.role || 'user');
         setPartnerStatus(data.partnerStatus || 'none');
         setPartnerTier(data.partnerTier || (data.role === 'partner' ? 'silver' : 'basic'));
-        setTotalTeamEarnings(data.totalTeamEarnings || 0);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.pendingIndirect !== undefined) setPendingIndirect(data.pendingIndirect);
         setReferredBy(data.referredBy || null);
@@ -402,9 +332,6 @@ export default function Dashboard() {
       setNotifications(notifyData);
     }, (error) => console.error("Notifications Error:", error));
 
-    // Listener for Referrals (from RTDB using Referral Code/Username as key)
-    let unsubscribeReferrals = () => {};
-    // Removed from here and moved to dedicated useEffect below for reactivity
 
 
     // Listener for Referral Stats (from RTDB as per new architecture)
@@ -426,12 +353,6 @@ export default function Dashboard() {
       }
     }, (error) => console.error("Referral Stats RTDB Error:", error));
 
-    const fetchTasks = async () => {
-      const tasksSnapshot = await getDocs(collection(db, 'tasks'));
-      const tasksData = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTasks(tasksData);
-    };
-    fetchTasks();
 
     const q = query(collection(db, 'users'), orderBy('balance', 'desc'), limit(10));
     const unsubscribeEarners = onSnapshot(q, (snapshot) => {
@@ -586,7 +507,6 @@ export default function Dashboard() {
 
   const [isBalanceUpdating, setIsBalanceUpdating] = useState(false);
 
-  const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
 
   const handleUpdateBalance = async (amount: number, source: string = 'system', description: string = '', transactionId?: string) => {
     if (!user || isBalanceUpdating) return false;
@@ -623,7 +543,6 @@ export default function Dashboard() {
         throw new Error("Insufficient balance or transaction failed.");
       }
 
-      setLastUpdated(Date.now());
       
       // History in Firestore
       await addDoc(collection(db, 'earning_history'), {
@@ -738,17 +657,6 @@ export default function Dashboard() {
 
     checkUnlock();
   }, [lockedBalance, referralStats.activeMembers, user]);
-
-  const handleWinLockedPrize = async (amount: number, requiredInvites: number) => {
-    if (!user) return;
-    try {
-      await updateDoc(doc(db, 'users', user.uid), {
-        lockedBalance: increment(amount)
-      });
-    } catch (error) {
-      console.error("Locked Prize Error:", error);
-    }
-  };
 
   const handleWithdraw = async (amount: number, method: string, accountName: string, accountNumber: string) => {
     if (!user) return;
@@ -874,12 +782,6 @@ export default function Dashboard() {
     
     // Send internal notification
     await sendDepositRequestMail(user.uid, amount, method);
-  };
-
-  const handleActivateAccount = async () => {
-    // This would normally be triggered by an admin approving the deposit
-    // For now, we'll provide a way to simulate activation or just show the deposit tab
-    setActiveTab('deposit');
   };
 
   const handleWithdrawRequest = (amount: number, method: string, accountName: string, accountNumber: string) => {
@@ -1175,16 +1077,16 @@ export default function Dashboard() {
     switch (activeTab) {
       case 'profile':
         return <ProfileTab 
-                 name={userName}
-                 email={userEmail}
+                        email={userEmail}
                  gender={userGender}
                  profileAvatarId={profileAvatarId}
                  status={status}
                  role={role}
                  partnerTier={partnerTier}
                  balance={balance}
+                 name={userName}
                  lockedBalance={lockedBalance}
-                 totalIndirectCommission={totalIndirectCommission}
+                        totalIndirectCommission={totalIndirectCommission}
                  accountNumber={withdrawalAccounts[0]?.number || ''}
                  accountTitle={withdrawalAccounts[0]?.title || ''}
                  joiningDate={joiningDate}
@@ -1209,8 +1111,8 @@ export default function Dashboard() {
                />;
       case 'edit_profile':
         return <EditProfileView 
+                        email={userEmail}
                  name={userName}
-                 email={userEmail}
                  phone={userPhone}
                  gender={userGender}
                  profileAvatarId={profileAvatarId}
@@ -1380,35 +1282,29 @@ export default function Dashboard() {
       // Add other tabs as needed
       default:
         return <HomeTab 
-          name={userName}
           balance={balance}
           totalEarnings={totalEarnings}
           totalIndirectCommission={totalIndirectCommission}
-          lockedBalance={lockedBalance}
           accountStatus={accountStatus}
           role={role}
-          topEarners={topEarners}
           onInviteClick={() => setActiveTab('invite')}
           onDepositClick={() => setActiveTab('deposit')}
           onWithdrawClick={() => setActiveTab('withdraw')}
           onWatchAdsClick={() => setActiveTab('watch')}
           onSupportAIClick={() => setActiveTab('support_ai')}
           onTasksClick={() => setActiveTab('tasks')}
-          onProfileClick={() => setActiveTab('profile')}
           onLotteryClick={() => setActiveTab('lottery')}
           onStreakClick={() => setActiveTab('streak')}
           onLeaderboardClick={() => setActiveTab('leaderboard')}
           onPartnerUpgradeClick={() => setActiveTab('premium')}
           onActivateClick={() => setActiveTab('activation')}
           onHistoryClick={() => setActiveTab('earning_history')}
-          onUpdatesClick={() => setActiveTab('updates')}
           onTaskWallClick={() => setActiveTab('task_wall')}
           onSocialTaskPlusClick={() => setActiveTab('social_task_plus')}
           onEasyTaskClick={() => setActiveTab('wannads')}
           onOfferWallClick={() => setActiveTab('cpalead')}
           onPartnerToolsClick={() => setActiveTab('partner_tools')}
           onUpdateBalance={handleUpdateBalance}
-          onReloadData={reloadData}
           appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}
           lastDailyCheckin={lastDailyCheckin}
