@@ -83,7 +83,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
  setIsSubmitting(true);
  try {
  // Construct WhatsApp message
- const whatsappNumber = "923338739929";
+ const whatsappNumber = (appSettings as any)?.whatsappNumber || "923338739929";
  const message = `🌟 *TASKMINT OFFICIAL* 🌟\n\n*Hi Admin!* 👋\nMera naam *${userName || 'User'}* hai. ✨\n\nMaine *Rs. ${numAmount}* Deposit karna hai via *${method}*. ✅\nYe raha mera *Payment Screenshot* as a proof. 📸\n\n*Please meri deposit request check kar dein!* 🙏🔥\n\n_Sent via TaskMint App_`;
  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
  

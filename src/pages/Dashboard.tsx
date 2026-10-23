@@ -139,6 +139,9 @@ export default function Dashboard() {
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
+    whatsappNumber: '923338739929',
+    minWithdrawal: 500,
+    withdrawalFeeRate: 5,
     referralBonusBasic: 100,
     referralBonusPartner: 150,
     indirectReferralBonus: 10,
@@ -158,9 +161,10 @@ export default function Dashboard() {
     const unsubscribe = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
-        if (data.balance !== undefined) setBalance(data.balance);
-        if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
-        if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
+        // NOTE: balance / totalEarnings / lockedBalance are led by the RTDB
+        // listener below (single source of truth). The Firestore copy is only
+        // a mirror for reports — reading it here caused the balance to
+        // flip-flop between two different values.
         setUserPin(data.pin || '');
         setSeenUpdates(data.seenUpdates || []);
         setUserName(data.username || '');
@@ -313,7 +317,13 @@ export default function Dashboard() {
       setWithdrawals(list);
     }, (error) => console.error("Withdrawals Error:", error));
 
-    // Listener for notifications
+    // Listeners for notifications (personal + admin broadcasts with userId 'all')
+    const notifStore: { own: any[]; all: any[] } = { own: [], all: [] };
+    const syncNotifications = () => {
+      const merged = [...notifStore.own, ...notifStore.all.filter(b => !notifStore.own.some(o => o.id === b.id))];
+      merged.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      setNotifications(merged);
+    };
     const qNotify = query(
       collection(db, 'notifications'), 
       where('userId', '==', user.uid)
@@ -329,8 +339,18 @@ export default function Dashboard() {
         }
       });
       
-      setNotifications(notifyData);
+      notifStore.own = notifyData;
+      syncNotifications();
     }, (error) => console.error("Notifications Error:", error));
+
+    const qNotifyAll = query(
+      collection(db, 'notifications'),
+      where('userId', '==', 'all')
+    );
+    const unsubscribeNotifyAll = onSnapshot(qNotifyAll, (snapshot) => {
+      notifStore.all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any }));
+      syncNotifications();
+    }, (error) => console.error("Broadcast Notifications Error:", error));
 
 
 
@@ -346,8 +366,6 @@ export default function Dashboard() {
         });
         
         // Priority Sync for Real-time Balance & Commission
-        if (data.balance !== undefined) setBalance(data.balance);
-        if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
       }
@@ -370,45 +388,13 @@ export default function Dashboard() {
         const data = snapshot.data();
         setAppSettings(data as any);
         
-        // Ensure activationFee is 150 and remove offerExpiryTime
-        if (data.activationFee !== 150 || data.offerExpiryTime) {
-          await setDoc(doc(db, 'app_settings', 'global'), {
-            activationFee: 150,
-            offerExpiryTime: null
-          }, { merge: true });
-
-          // Notify all users about the fee update (one-time logic)
-          const notifyKey = 'fee_update_notified_150';
-          const alreadyNotified = localStorage.getItem(notifyKey);
-          
-          if (!alreadyNotified) {
-            const usersSnapshot = await getDocs(collection(db, 'users'));
-            const batch = writeBatch(db);
-            
-            usersSnapshot.docs.forEach(userDoc => {
-              const userId = userDoc.id;
-              const notificationRef = doc(collection(db, 'notifications'));
-              batch.set(notificationRef, {
-                userId,
-                title: 'New Update: Permanent Fee Reduction 📢',
-                message: 'Good news! Joining fee ab sirf Rs. 150 kar di gayi hai. Kaam jari rakhein aur earn karein!',
-                type: 'system',
-                status: 'unread',
-                timestamp: new Date().toISOString()
-              });
-            });
-            
-            await batch.commit();
-            localStorage.setItem(notifyKey, 'true');
-            console.log("[SYSTEM_UPDATE] All users notified about the permanent 100 fee.");
-          }
-        }
       }
     });
 
     return () => {
       unsubscribe();
       unsubscribeNotify();
+      unsubscribeNotifyAll();
       unsubscribeEarners();
       unsubscribeDeposits();
       unsubscribeWithdrawals();
@@ -541,6 +527,16 @@ export default function Dashboard() {
 
       if (!success) {
         throw new Error("Insufficient balance or transaction failed.");
+      }
+
+      // Mirror into Firestore so reports / leaderboard / admin views match the RTDB ledger
+      try {
+        await setDoc(doc(db, 'users', user.uid), {
+          balance: increment(amount),
+          ...(amount > 0 ? { totalEarnings: increment(amount) } : {})
+        }, { merge: true });
+      } catch (mirrorError) {
+        console.error("Firestore balance mirror failed:", mirrorError);
       }
 
       
@@ -808,7 +804,7 @@ export default function Dashboard() {
     }
   };
 
-  const unreadUpdatesCount = notifications.filter(n => n.status === 'unread').length;
+  const unreadUpdatesCount = notifications.filter(n => n.status === 'unread' && n.userId !== 'all').length;
 
   const handleActivateUser = async (targetUserId: string, depositId?: string) => {
     try {
@@ -1023,8 +1019,6 @@ export default function Dashboard() {
       const snapshot = await getDoc(userRef);
       if (snapshot.exists()) {
         const data = snapshot.data();
-        if (data.balance !== undefined) setBalance(data.balance);
-        if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.pendingIndirect !== undefined) setPendingIndirect(data.pendingIndirect);
         console.log("[SYNC] Manually re-synced from Firestore");
@@ -1174,6 +1168,7 @@ export default function Dashboard() {
           onEditAccount={() => setActiveTab('manage_wallet')}
           accounts={withdrawalAccounts}
           manualWithdrawUnlock={manualWithdrawUnlock || appSettings.manualWithdrawUnlock}
+          appSettings={appSettings}
           isPartner={role === 'partner'}
         />;
       case 'deposit':
