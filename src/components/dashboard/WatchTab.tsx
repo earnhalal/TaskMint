@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, ArrowRight, Bell, CheckCircle2, AlertCircle, Loader2, Lock, X, Construction, Info, Crown, Zap } from 'lucide-react';
-import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, Construction, Crown, Zap } from 'lucide-react';
+import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface WatchTabProps {
@@ -465,7 +465,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           </button>
           <div>
             <h2 className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Transmission</h2>
-            <h3 className="text-lg font-black text-white italic tracking-tight truncate max-w-[120px]">{userName}</h3>
+            <h3 className="text-lg font-black text-white  tracking-tight truncate max-w-[120px]">{userName}</h3>
           </div>
         </div>
         
@@ -483,8 +483,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
           <div className="relative z-10 flex items-center justify-between">
             <div>
-              <h3 className="text-white/60 text-[9px] font-black uppercase tracking-[0.4em] mb-2">Neural Node</h3>
-              <h2 className="text-4xl font-black text-white tracking-tighter italic">Ad <span className="text-emerald-400">Nodes</span></h2>
+              <h3 className="text-white/60 text-[9px] font-black uppercase tracking-widest mb-2">Neural Node</h3>
+              <h2 className="text-4xl font-black text-white tracking-tighter ">Ad <span className="text-emerald-400">Nodes</span></h2>
             </div>
             <div className="p-4 bg-white/10 rounded-2xl border border-white/20">
               <Zap className="w-8 h-8 text-white fill-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" />
@@ -506,14 +506,14 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         )}
 
         {accountStatus.toLowerCase() !== 'active' && (
-          <div className="p-8 rounded-[2.5rem] bg-rose-500/5 border border-dashed border-rose-500/30 text-center relative overflow-hidden">
-            <h3 className="text-rose-400 text-[9px] font-black uppercase tracking-[0.4em] mb-3">Payouts Locked</h3>
+          <div className="p-8 rounded-3xl bg-rose-500/5 border border-dashed border-rose-500/30 text-center relative overflow-hidden">
+            <h3 className="text-rose-400 text-[9px] font-black uppercase tracking-widest mb-3">Payouts Locked</h3>
             <p className="text-[11px] text-rose-300/60 font-bold leading-relaxed mb-6">
               Account activation ke bagair earnings balance mein nahi ayengi. 
             </p>
             <button 
               onClick={() => navigate('/dashboard')}
-              className="w-full bg-rose-600 hover:bg-rose-700 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-xl shadow-rose-600/20"
+              className="w-full bg-rose-600 hover:bg-rose-700 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-xl shadow-none"
             >
               Verify Account
             </button>
@@ -573,7 +573,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     if (isTimeLocked) return;
                     handleWatchAd(ad);
                   }}
-                  className={`group relative bg-[#064e3b]/50 border border-white/5 rounded-[2rem] overflow-hidden transition-all duration-300 hover:border-teal-500/40 hover:shadow-2xl hover:shadow-teal-500/10 cursor-pointer ${
+                  className={`group relative bg-[#064e3b]/50 border border-white/5 rounded-[2rem] overflow-hidden transition-all duration-300 hover:border-teal-500/40 hover:shadow-2xl hover:shadow-none cursor-pointer ${
                     isLocked ? 'grayscale opacity-70' : ''
                   }`}
                 >
@@ -595,7 +595,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                          'bg-emerald-500/90 border-emerald-400 text-white'
                       }`}>
                          <Zap className="w-3 h-3 fill-current" />
-                         <span className="text-sm font-black italic">Rs {ad.reward.toFixed(1)}</span>
+                         <span className="text-sm font-black ">Rs {ad.reward.toFixed(1)}</span>
                       </div>
                     </div>
 
@@ -630,7 +630,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                   </div>
 
                   <div className="px-6 py-8">
-                     <h4 className="text-xl font-black text-white italic uppercase tracking-tight mb-2 truncate group-hover:text-teal-400 transition-colors">
+                     <h4 className="text-xl font-black text-white  uppercase tracking-tight mb-2 truncate group-hover:text-teal-400 transition-colors">
                        {ad.title}
                      </h4>
                      <div className="flex items-center gap-3">
@@ -746,7 +746,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       }}
                       className="w-16 h-16 rounded-full border-t-2 border-r-2 border-teal-500 mb-6 shadow-[0_0_30px_rgba(99,102,241,0.2)]"
                     />
-                    <p className="text-white font-black uppercase tracking-[0.4em] text-[10px] animate-pulse">Initializing Portal</p>
+                    <p className="text-white font-black uppercase tracking-widest text-[10px] animate-pulse">Initializing Portal</p>
                     <p className="text-zinc-400 text-[9px] mt-4 font-bold max-w-[200px] text-center uppercase tracking-widest">establishing secure transmission link...</p>
                   </div>
                 )}
@@ -813,7 +813,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       }}
                     />
                   ) : (
-                    <p className="text-zinc-400 text-xs text-center uppercase tracking-[0.3em]">No Signal</p>
+                    <p className="text-zinc-400 text-xs text-center uppercase tracking-widest">No Signal</p>
                   )}
                 </div>
               </div>
@@ -833,7 +833,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       <p className="text-zinc-400 font-bold text-[9px] uppercase tracking-widest mb-4">do not interrupt the neural stream</p>
                       
                       <div className="pt-4 border-t border-white/5">
-                        <p className="text-rose-500 text-[10px] font-black uppercase tracking-widest animate-pulse flex items-center justify-center gap-2 italic">
+                        <p className="text-rose-500 text-[10px] font-black uppercase tracking-widest animate-pulse flex items-center justify-center gap-2 ">
                           <AlertCircle className="w-3.5 h-3.5" />
                           Node closure results in reward loss
                         </p>
@@ -853,7 +853,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                         'bg-emerald-500/10 border-emerald-500/30'
                       }`}
                     >
-                      <p className={`text-sm font-black uppercase tracking-[0.3em] ${
+                      <p className={`text-sm font-black uppercase tracking-widest ${
                         activeAd.tier === 'gold' ? 'text-emerald-400' : 
                         activeAd.tier === 'silver' ? 'text-blue-400' :
                         'text-emerald-400'
@@ -866,10 +866,10 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       whileTap={{ scale: 0.95 }}
                       onClick={finishAdWatch}
                       disabled={isClaiming}
-                      className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden group transition-all duration-500 ${
+                      className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-widest shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden group transition-all duration-500 ${
                         activeAd.tier === 'gold' ? 'bg-gradient-to-tr from-emerald-600 to-amber-400 text-black' : 
-                        activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-600 to-teal-400 text-white shadow-blue-500/30' :
-                        'bg-teal-600 text-white shadow-teal-600/30 font-black'
+                        activeAd.tier === 'silver' ? 'bg-gradient-to-tr from-blue-600 to-teal-400 text-white shadow-none' :
+                        'bg-teal-600 text-white shadow-none font-black'
                       }`}
                     >
                       <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
@@ -903,18 +903,18 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               initial={{ opacity: 0, scale: 0.5, y: 100 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5, y: 100 }}
-              className="relative bg-[#15181D] w-full max-w-sm rounded-[3rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden text-center border-4 border-emerald-500/20"
+              className="relative bg-[#15181D] w-full max-w-sm rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden text-center border-4 border-emerald-500/20"
             >
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-teal-600"></div>
               <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
               
               <div className="relative z-10 flex flex-col items-center">
-                <div className="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-emerald-500/40 rotate-12">
+                <div className="w-24 h-24 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-white mb-6 shadow-xl shadow-none rotate-12">
                   <CheckCircle2 className="w-12 h-12" />
                 </div>
 
                 <h3 className="text-3xl font-black text-white mb-2 tracking-tight">Congratulations! 🎉</h3>
-                <p className="text-emerald-400 font-bold text-sm uppercase tracking-[0.2em] mb-6 tracking-widest italic">Dear {userName}</p>
+                <p className="text-emerald-400 font-bold text-sm uppercase tracking-widest mb-6 tracking-widest ">Dear {userName}</p>
                 
                 <div className="bg-white/5 w-full p-6 rounded-[2rem] mb-6 border border-white/5 flex flex-col items-center">
                   <div className="w-full text-left space-y-4">
@@ -939,7 +939,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
 
                 <button 
                   onClick={() => setShowSuccessPopup(null)}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-none transition-all active:scale-95"
                 >
                   Continue Journey
                 </button>
@@ -964,7 +964,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-sm bg-gradient-to-b from-[#15181D] to-black rounded-[3rem] p-8 border border-white/10 shadow-2xl overflow-hidden text-center"
+              className="relative w-full max-w-sm bg-gradient-to-b from-[#15181D] to-black rounded-3xl p-8 border border-white/10 shadow-2xl overflow-hidden text-center"
             >
               {/* Decorative Glow */}
               <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 opacity-20 blur-[60px] ${
@@ -973,12 +973,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
 
               <div className="relative z-10 flex flex-col items-center">
                 <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-2xl ${
-                  tierLockModal === 'gold' ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-blue-600 shadow-blue-600/20'
+                  tierLockModal === 'gold' ? 'bg-emerald-500 shadow-none' : 'bg-blue-600 shadow-none'
                 }`}>
                   <Crown className="w-10 h-10 text-white" />
                 </div>
 
-                <h3 className="text-2xl font-black text-white mb-2 tracking-tighter uppercase italic italic text-center">
+                <h3 className="text-2xl font-black text-white mb-2 tracking-tighter uppercase   text-center">
                   {tierLockModal === 'gold' ? 'Gold VIP' : 'Silver Partner'} Required
                 </h3>
                 
@@ -992,10 +992,10 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       setTierLockModal(null);
                       navigate('/dashboard');
                     }}
-                    className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 ${
+                    className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl transition-all active:scale-95 ${
                       tierLockModal === 'gold' 
                         ? 'bg-gradient-to-r from-emerald-600 to-amber-400 text-black' 
-                        : 'bg-gradient-to-r from-blue-600 to-teal-400 text-white shadow-blue-500/20'
+                        : 'bg-gradient-to-r from-blue-600 to-teal-400 text-white shadow-none'
                     }`}
                   >
                     Upgrade Plan Now
@@ -1028,7 +1028,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-[#15181D] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+              className="relative bg-[#15181D] w-full max-w-sm rounded-3xl p-8 shadow-2xl overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
               
@@ -1038,7 +1038,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                 </div>
                 
                 <h3 className="text-2xl font-black text-white mb-2 tracking-tight">Coming Soon!</h3>
-                <p className="text-emerald-400 font-black text-[10px] uppercase tracking-[0.2em] mb-4">Under Maintenance</p>
+                <p className="text-emerald-400 font-black text-[10px] uppercase tracking-widest mb-4">Under Maintenance</p>
                 
                 <div className="bg-white/5 p-6 rounded-3xl mb-8 w-full border border-white/5">
                   <p className="text-zinc-200 font-bold text-lg leading-relaxed mb-2">

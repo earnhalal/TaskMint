@@ -1,6 +1,5 @@
-import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Trophy, Medal, Crown, Star, TrendingUp, Users } from 'lucide-react';
+import { ArrowLeft, Trophy, Medal, Crown, Star } from 'lucide-react';
 import { DynamicAvatar } from '../ui/DynamicAvatar';
 
 interface LeaderboardViewProps {
@@ -54,12 +53,12 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h2 className="text-2xl font-black italic tracking-tighter uppercase leading-none">
+              <h2 className="text-2xl font-black  tracking-tighter uppercase leading-none">
                 Global <span className="text-emerald-500">Member</span> Rankings
               </h2>
               <div className="flex items-center gap-2 mt-1">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                 <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.3em]">Live Updates Active</p>
+                 <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Live Updates Active</p>
               </div>
             </div>
           </div>
@@ -96,11 +95,11 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               </div>
               <div className="text-center">
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest truncate w-24">{topThree[1].username}</p>
-                <p className="text-sm font-black text-slate-300 italic">Rs {topThree[1].balance?.toLocaleString()}</p>
+                <p className="text-sm font-black text-slate-300 ">Rs {topThree[1].balance?.toLocaleString()}</p>
               </div>
               <div className="w-full h-28 bg-gradient-to-b from-[#064e3b] to-[#022c22] rounded-t-3xl border-x border-t border-white/5 shadow-inner flex flex-col items-center pt-4">
                  <div className="w-8 h-8 rounded-full bg-slate-400/20 flex items-center justify-center text-zinc-500 mb-2">
-                    <span className="text-lg font-black italic">2</span>
+                    <span className="text-lg font-black ">2</span>
                  </div>
                  <div className="flex gap-1">
                     {[...Array(3)].map((_, i) => <div key={i} className="w-1 h-1 rounded-full bg-slate-400/30" />)}
@@ -127,7 +126,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                 </motion.div>
                 
                 <div className="absolute inset-0 bg-emerald-500 blur-2xl opacity-20 group-hover:opacity-50 transition-opacity" />
-                <div className="relative w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-emerald-400 to-amber-600 p-0.5 shadow-[0_0_40px_rgba(16,185,129,0.2)] transition-transform group-hover:scale-105 duration-500">
+                <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-400 to-amber-600 p-0.5 shadow-[0_0_40px_rgba(16,185,129,0.2)] transition-transform group-hover:scale-105 duration-500">
                    <div className="w-full h-full rounded-[2.3rem] bg-[#064e3b] flex items-center justify-center relative overflow-hidden">
                        <DynamicAvatar avatarId={topThree[0].profile_avatar_id} fallbackText={topThree[0].username} className="w-full h-full" />
                        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent" />
@@ -139,13 +138,13 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                 </div>
               </div>
               <div className="text-center">
-                <p className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-1 italic">{topThree[0].username}</p>
-                <p className="text-xl font-black text-white italic tracking-tighter">Rs {topThree[0].balance?.toLocaleString()}</p>
+                <p className="text-xs font-black text-emerald-500 uppercase tracking-widest mb-1 ">{topThree[0].username}</p>
+                <p className="text-xl font-black text-white  tracking-tighter">Rs {topThree[0].balance?.toLocaleString()}</p>
               </div>
               <div className="w-full h-44 bg-gradient-to-b from-emerald-500/10 to-emerald-500/0 rounded-t-[3rem] border-x border-t border-emerald-500/20 shadow-2xl flex flex-col items-center pt-6 relative overflow-hidden group/podium">
                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
-                 <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white mb-4 shadow-xl shadow-emerald-500/20">
-                    <span className="text-2xl font-black italic">1</span>
+                 <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center text-white mb-4 shadow-xl shadow-none">
+                    <span className="text-2xl font-black ">1</span>
                  </div>
                  <div className="flex gap-2">
                     {[...Array(5)].map((_, i) => <div key={i} className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />)}
@@ -173,11 +172,11 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               </div>
               <div className="text-center">
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest truncate w-24">{topThree[2].username}</p>
-                <p className="text-sm font-black text-emerald-300 italic">Rs {topThree[2].balance?.toLocaleString()}</p>
+                <p className="text-sm font-black text-emerald-300 ">Rs {topThree[2].balance?.toLocaleString()}</p>
               </div>
               <div className="w-full h-24 bg-gradient-to-b from-[#064e3b] to-[#022c22] rounded-t-3xl border-x border-t border-white/5 shadow-inner flex flex-col items-center pt-4">
                  <div className="w-8 h-8 rounded-full bg-emerald-900/20 flex items-center justify-center text-emerald-300 mb-2">
-                    <span className="text-lg font-black italic">3</span>
+                    <span className="text-lg font-black ">3</span>
                  </div>
                  <div className="flex gap-1">
                     {[...Array(2)].map((_, i) => <div key={i} className="w-1 h-1 rounded-full bg-emerald-900/30" />)}
@@ -190,7 +189,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
         {/* All Users List */}
         <div className="space-y-6">
             <div className="flex items-center gap-4 px-2">
-               <h3 className="text-sm font-black italic uppercase tracking-widest text-zinc-400">All Users</h3>
+               <h3 className="text-sm font-black  uppercase tracking-widest text-zinc-400">All Users</h3>
                <div className="h-px flex-1 bg-white/5" />
             </div>
 
@@ -210,7 +209,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                   <div className="absolute left-0 inset-y-6 w-1 bg-emerald-500/0 group-hover:bg-emerald-500 transition-all rounded-r-full" />
                   
                   <div className="flex items-center gap-3 sm:gap-6 min-w-0">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-2xl bg-white/5 flex items-center justify-center font-black text-zinc-400 text-xs sm:text-sm italic border border-white/5 group-hover:border-emerald-500/30 group-hover:text-emerald-500 transition-all">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-2xl bg-white/5 flex items-center justify-center font-black text-zinc-400 text-xs sm:text-sm  border border-white/5 group-hover:border-emerald-500/30 group-hover:text-emerald-500 transition-all">
                        {user.rank || i + 4}
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -218,17 +217,17 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                         <DynamicAvatar avatarId={user.profile_avatar_id} fallbackText={user.username} className="w-full h-full" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-black text-white text-sm sm:text-base tracking-tight uppercase italic truncate">{user.username || 'Unknown User'}</h3>
+                        <h3 className="font-black text-white text-sm sm:text-base tracking-tight uppercase  truncate">{user.username || 'Unknown User'}</h3>
                         <div className="flex items-center gap-2 mt-0.5">
                            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-emerald-500" />
-                           <span className="text-[7px] sm:text-[8px] font-black text-zinc-400 uppercase tracking-[0.2em] truncate">Verified User</span>
+                           <span className="text-[7px] sm:text-[8px] font-black text-zinc-400 uppercase tracking-widest truncate">Verified User</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <p className="text-sm sm:text-lg font-black text-emerald-500 italic tracking-tighter">Rs {user.balance?.toLocaleString() || 0}</p>
+                    <p className="text-sm sm:text-lg font-black text-emerald-500  tracking-tighter">Rs {user.balance?.toLocaleString() || 0}</p>
                     <p className="text-[7px] sm:text-[8px] font-black text-zinc-300 uppercase tracking-widest leading-none">Total Earning</p>
                   </div>
                 </motion.div>

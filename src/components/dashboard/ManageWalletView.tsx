@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Wallet, Lock, ShieldCheck, Plus, ChevronRight, Save, Trash2, Edit2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Wallet, Lock, ShieldCheck, Plus, ChevronRight, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
@@ -250,7 +250,7 @@ export default function ManageWalletView({ balance, accounts, onBack }: ManageWa
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
-              className="relative w-full max-w-md bg-[#15181D] rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl"
+              className="relative w-full max-w-md bg-[#15181D] rounded-t-[2.5rem] sm:rounded-3xl p-8 shadow-2xl"
             >
               <h3 className="text-xl font-black text-white mb-6">Add New Account</h3>
               <div className="space-y-4">
@@ -294,7 +294,7 @@ export default function ManageWalletView({ balance, accounts, onBack }: ManageWa
                 <button 
                   onClick={handleAddAccount}
                   disabled={isSaving}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold text-base mt-4 transition-all active:scale-95 shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold text-base mt-4 transition-all active:scale-95 shadow-lg shadow-none flex items-center justify-center gap-2"
                 >
                   {isSaving ? <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span> : 'Save Account'}
                 </button>
@@ -319,7 +319,7 @@ export default function ManageWalletView({ balance, accounts, onBack }: ManageWa
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
-              className="relative w-full max-w-md bg-[#15181D] rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 shadow-2xl"
+              className="relative w-full max-w-md bg-[#15181D] rounded-t-[2.5rem] sm:rounded-3xl p-8 shadow-2xl"
             >
               <h3 className="text-xl font-black text-white mb-6">Change Security PIN</h3>
               <div className="space-y-4">

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Crown, Check, X, ArrowLeft, Wallet, Send, AlertCircle, Clock, Ticket, Hash, ArrowRight } from 'lucide-react';
+import { Crown, Check, X, ArrowLeft, Wallet, Send, AlertCircle, Clock, Hash, ArrowRight } from 'lucide-react';
 import { doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 
@@ -80,7 +80,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
       >
         <div className="relative mb-8">
            <div className="absolute inset-0 bg-emerald-400 blur-2xl opacity-20 animate-pulse"></div>
-           <div className="w-24 h-24 bg-emerald-500/10 text-emerald-400 rounded-[2rem] flex items-center justify-center relative border border-emerald-500/20 shadow-xl shadow-emerald-500/10">
+           <div className="w-24 h-24 bg-emerald-500/10 text-emerald-400 rounded-[2rem] flex items-center justify-center relative border border-emerald-500/20 shadow-xl shadow-none">
               <Clock className="w-12 h-12" />
            </div>
         </div>
@@ -110,13 +110,13 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
         </button>
 
         {/* Global Elite Header */}
-        <div className="bg-[#022c22] rounded-[2.5rem] p-8 text-white shadow-2xl mb-8 relative overflow-hidden border border-white/5">
+        <div className="bg-[#022c22] rounded-3xl p-8 text-white shadow-2xl mb-8 relative overflow-hidden border border-white/5">
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-600/5 rounded-full -ml-16 -mb-16 blur-2xl"></div>
             
             <div className="relative z-10">
                 <div className="flex items-center justify-between mb-8">
-                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/40">
+                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-none">
                         <Crown className="w-8 h-8 text-white" />
                     </div>
                     <div className="text-right">
@@ -124,7 +124,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
                     </div>
                 </div>
                 
-                <h2 className="text-4xl font-black text-white mb-3 tracking-tighter italic">Partner <span className="text-emerald-500">Upgrade</span></h2>
+                <h2 className="text-4xl font-black text-white mb-3 tracking-tighter ">Partner <span className="text-emerald-500">Upgrade</span></h2>
                 <p className="text-zinc-500 text-sm font-medium leading-relaxed max-w-[80%]">The highest tier in our economy. Massive bonuses, team commission, and instant support.</p>
             </div>
         </div>
@@ -137,15 +137,15 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
                     whileHover={{ y: -5 }}
                     className="bg-[#15181D] p-5 rounded-[2rem] border border-white/5 shadow-sm flex flex-col items-center text-center group"
                 >
-                    <h4 className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1 group-hover:text-emerald-400 transition-colors">{benefit.title}</h4>
-                    <p className="text-xl font-black text-white italic tracking-tight">{benefit.value}</p>
+                    <h4 className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1 group-hover:text-emerald-400 transition-colors">{benefit.title}</h4>
+                    <p className="text-xl font-black text-white  tracking-tight">{benefit.value}</p>
                     <p className="text-[9px] text-zinc-500 font-bold mt-1 uppercase tracking-tight">{benefit.subtitle}</p>
                 </motion.div>
             ))}
         </div>
 
         {/* Feature Comparison Table - Redesigned */}
-        <div className="bg-[#15181D] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-sm mb-8">
+        <div className="bg-[#15181D] rounded-3xl overflow-hidden border border-white/5 shadow-sm mb-8">
             <div className="bg-slate-50/50 p-6 border-b border-white/5">
                 <h3 className="text-xs font-black text-white uppercase tracking-widest">Plan Comparison</h3>
             </div>
@@ -166,7 +166,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
                             </td>
                             <td className="p-5 text-center">
                                 <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
-                                    <span className="text-xs font-black text-emerald-400 italic">
+                                    <span className="text-xs font-black text-emerald-400 ">
                                         {typeof row.partner === 'boolean' ? (row.partner ? <Check className="w-3 h-3 text-emerald-400" /> : <X className="w-3 h-3 text-red-500" />) : row.partner}
                                     </span>
                                 </div>
@@ -179,7 +179,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
         </div>
 
         {/* Payment Gate - High Premium */}
-        <div className="bg-[#15181D] rounded-[3rem] p-8 border border-emerald-500/25 shadow-2xl relative overflow-hidden">
+        <div className="bg-[#15181D] rounded-3xl p-8 border border-emerald-500/25 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
             
             <div className="flex items-center gap-4 mb-8">
@@ -196,7 +196,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
                 <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 relative group">
                     <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Target Account</p>
                     <div className="flex items-center justify-between">
-                        <p className="text-2xl font-black text-white tracking-tighter italic">{appSettings.paymentNumber}</p>
+                        <p className="text-2xl font-black text-white tracking-tighter ">{appSettings.paymentNumber}</p>
                         <button 
                             onClick={() => { navigator.clipboard.writeText(appSettings.paymentNumber); alert('Copied!'); }}
                             className="bg-[#15181D] p-2.5 rounded-xl border border-white/10 shadow-sm hover:bg-white/5 transition-all active:scale-90"
@@ -217,14 +217,14 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
 
             <div className="space-y-6">
                 <div className="relative">
-                    <label className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-3 block px-1">Transaction Identity (T-ID)</label>
+                    <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-3 block px-1">Transaction Identity (T-ID)</label>
                     <div className="relative group">
                         <input 
                             type="text" 
                             value={txId}
                             onChange={(e) => setTxId(e.target.value)}
                             placeholder="ENTER 11 DIGIT CODE"
-                            className="w-full bg-white/5 border-2 border-slate-50 rounded-[1.5rem] px-6 py-5 text-base font-black italic focus:outline-none focus:border-emerald-500 focus:bg-[#15181D] transition-all tracking-widest placeholder:text-slate-300"
+                            className="w-full bg-white/5 border-2 border-slate-50 rounded-[1.5rem] px-6 py-5 text-base font-black  focus:outline-none focus:border-emerald-500 focus:bg-[#15181D] transition-all tracking-widest placeholder:text-slate-300"
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#15181D] rounded-lg flex items-center justify-center border border-white/5 shadow-sm">
                             <Hash className="w-4 h-4 text-zinc-500" />
@@ -237,7 +237,7 @@ export default function PartnerUpgradeView({ userId, userName, partnerStatus, on
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="w-full bg-emerald-600 text-white py-6 rounded-[1.5rem] font-black text-xs shadow-2xl active:scale-95 transition-all disabled:opacity-50 uppercase tracking-[0.3em] italic flex items-center justify-center gap-3"
+                    className="w-full bg-emerald-600 text-white py-6 rounded-[1.5rem] font-black text-xs shadow-2xl active:scale-95 transition-all disabled:opacity-50 uppercase tracking-widest  flex items-center justify-center gap-3"
                 >
                     {isSubmitting ? (
                         <span className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>

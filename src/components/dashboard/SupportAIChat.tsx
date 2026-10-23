@@ -1,23 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Send, 
-  User, 
-  Loader2, 
-  ArrowLeft,
-  ShieldCheck,
-  Zap,
-  MoreVertical,
-  Phone,
-  Video,
-  Check,
-  CheckCheck,
-  Headphones,
-  Clock,
-  Paperclip,
-  ImageIcon,
-  X,
-  Lock
-} from 'lucide-react';
+import { Send, ArrowLeft, ShieldCheck, Zap, CheckCheck, Headphones, Clock, Paperclip, X, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from "@google/genai";
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -339,10 +321,10 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
                  <CheckCheck className="w-8 h-8 text-teal-500" />
               </div>
               <h2 className="text-xl font-black text-white tracking-tight">Feedback Received!</h2>
-              <p className="text-zinc-500 text-sm italic">"Shukriya! Aap ki feedback hamare liye bohat important hai."</p>
+              <p className="text-zinc-500 text-sm ">"Shukriya! Aap ki feedback hamare liye bohat important hai."</p>
               <button 
                 onClick={onBack}
-                className="w-full py-4 rounded-2xl bg-teal-600 text-white font-bold shadow-lg shadow-teal-500/20 active:scale-95 transition-all"
+                className="w-full py-4 rounded-2xl bg-teal-600 text-white font-bold shadow-lg shadow-none active:scale-95 transition-all"
               >
                 Go to Home
               </button>
@@ -372,7 +354,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
               <button 
                 disabled={rating === 0}
                 onClick={() => setFeedbackSubmitted(true)}
-                className="w-full py-4 rounded-2xl bg-teal-600 text-white font-black shadow-lg shadow-teal-500/20 disabled:opacity-30 disabled:grayscale transition-all active:scale-95"
+                className="w-full py-4 rounded-2xl bg-teal-600 text-white font-black shadow-lg shadow-none disabled:opacity-30 disabled:grayscale transition-all active:scale-95"
               >
                 SUBMIT FEEDBACK
               </button>
@@ -428,12 +410,12 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
         </motion.div>
         
         <div className="relative z-10">
-           <h2 className="text-white font-black text-3xl mb-4 tracking-tighter italic uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">Live Support</h2>
+           <h2 className="text-white font-black text-3xl mb-4 tracking-tighter  uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">Live Support</h2>
            <motion.p 
              key={connectionStep}
              initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
-             className="text-teal-400 text-[11px] font-black uppercase tracking-[0.4em]"
+             className="text-teal-400 text-[11px] font-black uppercase tracking-widest"
            >
              {[
                "Securing Chat Tunnel...",
@@ -468,7 +450,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
              <h3 className="text-xs sm:text-sm font-black text-white tracking-widest uppercase truncate">{agent.name}</h3>
              <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3 h-3 text-teal-400" />
-                <p className="text-[8px] sm:text-[9px] text-teal-400/80 font-black uppercase tracking-[0.2em] truncate">Encrypted Mode</p>
+                <p className="text-[8px] sm:text-[9px] text-teal-400/80 font-black uppercase tracking-widest truncate">Encrypted Mode</p>
              </div>
           </div>
         </div>
@@ -489,7 +471,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
              <div className="bg-teal-900/20 backdrop-blur-md px-5 py-3 rounded-[1.5rem] border border-teal-500/20 text-center max-w-[90%] shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                 <div className="flex items-center justify-center gap-2 mb-2">
                    <Clock className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-                   <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em]">Live Session Active</p>
+                   <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Live Session Active</p>
                 </div>
                 <p className="text-[10px] text-teal-200/60 font-bold leading-relaxed">
                   Your chat is end-to-end encrypted. The entire chat history will be automatically wiped after 30 minutes of inactivity.
@@ -515,8 +497,8 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
             >
               <div className={`relative max-w-[80%] p-3.5 sm:p-4 pt-3 shadow-lg ${
                 msg.role === 'user'
-                ? 'bg-gradient-to-br from-[#FF3366] to-[#9933FF] text-white rounded-[1.2rem] rounded-br-[0.2rem] border border-white/10 shadow-emerald-500/30'
-                : 'bg-gradient-to-br from-[#2D3748] to-[#1A202C] text-slate-100 rounded-[1.2rem] rounded-bl-[0.2rem] border border-teal-500/30 shadow-teal-900/30'
+                ? 'bg-gradient-to-br from-[#FF3366] to-[#9933FF] text-white rounded-[1.2rem] rounded-br-[0.2rem] border border-white/10 shadow-none'
+                : 'bg-gradient-to-br from-[#2D3748] to-[#1A202C] text-slate-100 rounded-[1.2rem] rounded-bl-[0.2rem] border border-teal-500/30 shadow-none'
               }`}>
                 {msg.image && (
                   <div className="mb-3 rounded-xl overflow-hidden border border-white/20 shadow-inner">
@@ -536,7 +518,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
 
           {isLoading && (
             <div className="flex justify-start">
-               <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] px-5 py-4 rounded-[1.5rem] rounded-bl-[0.2rem] border border-teal-500/20 shadow-lg shadow-teal-900/20">
+               <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] px-5 py-4 rounded-[1.5rem] rounded-bl-[0.2rem] border border-teal-500/20 shadow-lg shadow-none">
                  <div className="flex gap-2.5">
                     <span className="w-2.5 h-2.5 bg-[#FF0080] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                     <span className="w-2.5 h-2.5 bg-[#7928CA] rounded-full animate-bounce [animation-delay:-0.15s]"></span>

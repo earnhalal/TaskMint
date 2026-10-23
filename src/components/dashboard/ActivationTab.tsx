@@ -1,20 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { 
-  X, 
-  CheckCircle2, 
-  AlertTriangle, 
-  ArrowRight, 
-  Smartphone, 
-  History, 
-  Clock, 
-  XCircle,
-  ArrowLeft,
-  Copy,
-  ExternalLink
-} from 'lucide-react';
+import { CheckCircle2, AlertTriangle, History, Clock, XCircle, ArrowLeft, Copy, ExternalLink } from 'lucide-react';
 import { rtdb, auth } from '../../firebase';
-import { ref, set, update, onValue, push } from 'firebase/database';
+import { ref, set, update, onValue } from 'firebase/database';
 
 interface ActivationTabProps {
   onBack: () => void;

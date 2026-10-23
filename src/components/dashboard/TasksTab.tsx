@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Star, Info, ArrowLeft, Lock, Zap, ExternalLink } from 'lucide-react';
+import { Info, ArrowLeft, Lock, Zap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface TasksTabProps {
@@ -46,7 +46,7 @@ export default function TasksTab({ onBack, accountStatus, onPayClick }: TasksTab
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowInfo(!showInfo)}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showInfo ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/30' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${showInfo ? 'bg-teal-500 text-white shadow-lg shadow-none' : 'bg-white/10 text-slate-300 hover:bg-white/20'}`}
           >
             <Info className="w-5 h-5" />
           </button>
@@ -107,7 +107,7 @@ export default function TasksTab({ onBack, accountStatus, onPayClick }: TasksTab
         {/* Paywall Overlay */}
         {!isApproved && (
           <div className="absolute inset-0 z-30 backdrop-blur-md bg-white/60 flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-24 h-24 bg-[#15181D] rounded-[2.5rem] shadow-2xl flex items-center justify-center mb-8 rotate-3 border border-white/5">
+            <div className="w-24 h-24 bg-[#15181D] rounded-3xl shadow-2xl flex items-center justify-center mb-8 rotate-3 border border-white/5">
               <Lock className="w-10 h-10 text-emerald-400" />
             </div>
             <h3 className="text-3xl font-black text-white mb-4 leading-tight">Unlock Premium Tasks!</h3>
@@ -116,7 +116,7 @@ export default function TasksTab({ onBack, accountStatus, onPayClick }: TasksTab
             </p>
             <button 
               onClick={onPayClick}
-              className="w-full max-w-xs bg-gradient-to-r from-emerald-500 to-emerald-700 text-white py-5 rounded-2xl font-black text-sm shadow-2xl shadow-emerald-500/40 active:scale-95 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+              className="w-full max-w-xs bg-gradient-to-r from-emerald-500 to-emerald-700 text-white py-5 rounded-2xl font-black text-sm shadow-2xl shadow-none active:scale-95 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
             >
               <Zap className="w-4 h-4" />
               Pay Now to Unlock

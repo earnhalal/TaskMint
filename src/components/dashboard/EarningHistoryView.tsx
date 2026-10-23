@@ -1,21 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { 
-  ArrowLeft, 
-  History, 
-  TrendingUp, 
-  PlayCircle, 
-  CheckCircle2, 
-  Sparkles, 
-  Gift, 
-  Users, 
-  Calendar,
-  Wallet,
-  Loader2,
-  Search,
-  Star
-} from 'lucide-react';
-import { collection, query, where, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import { ArrowLeft, History, TrendingUp, PlayCircle, CheckCircle2, Sparkles, Gift, Users, Calendar, Wallet, Loader2, Star } from 'lucide-react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface EarningHistoryViewProps {
@@ -111,11 +97,11 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
       </div>
 
       {/* Summary Card */}
-      <div className="bg-emerald-600 rounded-[2.5rem] p-8 text-white mb-6 relative overflow-hidden shadow-2xl shadow-slate-900/20 flex flex-col gap-6">
+      <div className="bg-emerald-600 rounded-3xl p-8 text-white mb-6 relative overflow-hidden shadow-2xl shadow-slate-900/20 flex flex-col gap-6">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
         <div className="relative z-10 flex flex-col sm:flex-row justify-between gap-6">
             <div>
-              <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Lifetime Rewards Earned</p>
+              <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Lifetime Rewards Earned</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-black tracking-tighter">Rs. {totalEarnings.toFixed(2)}</span>
                 <span className="text-emerald-400 text-xs font-bold flex items-center gap-1">
@@ -125,7 +111,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
             </div>
             {totalIndirectCommission > 0 && (
             <div className="pt-4 sm:pt-0 sm:pl-6 sm:border-l border-white/10">
-              <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-2">Indirect Team Income</p>
+              <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-2">Indirect Team Income</p>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-black text-emerald-400 tracking-tighter">Rs. {totalIndirectCommission.toFixed(2)}</span>
               </div>

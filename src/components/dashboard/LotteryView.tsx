@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Ticket, Trophy, Users, Clock, CheckCircle2, AlertCircle, Sparkles, Star, Crown, Flame, ArrowRight, Zap, Shield, Lock } from 'lucide-react';
+import { ArrowLeft, Ticket, Trophy, Users, Clock, CheckCircle2, AlertCircle, Sparkles, Star, Crown, Flame, Zap, Shield } from 'lucide-react';
 import { collection, onSnapshot, query, where, addDoc, serverTimestamp, doc, updateDoc, increment, orderBy, limit, getDocs, getDoc } from 'firebase/firestore';
 import { db, auth, rtdb } from '../../firebase';
 import { ref, update, increment as rtdbIncrement } from 'firebase/database';
@@ -309,7 +309,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="min-w-0">
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tighter italic flex items-center gap-2 truncate">
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tighter  flex items-center gap-2 truncate">
               Mega <span className="text-teal-400">Lottery</span> <Sparkles className="w-6 h-6 text-emerald-500 animate-pulse flex-shrink-0" />
             </h2>
             <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Global Prize Network</p>
@@ -326,7 +326,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="mb-10 relative overflow-hidden rounded-[2.5rem] bg-[#022c22] p-6 sm:p-8 shadow-2xl border border-white/5"
+        className="mb-10 relative overflow-hidden rounded-3xl bg-[#022c22] p-6 sm:p-8 shadow-2xl border border-white/5"
       >
         <div className="absolute top-0 right-0 w-80 h-80 bg-teal-600/10 rounded-full blur-3xl -mr-40 -mt-40 animate-pulse"></div>
         
@@ -335,26 +335,26 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                 <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full mb-4 text-emerald-500 text-[9px] font-black uppercase tracking-widest">
                    <Flame className="w-3 h-3 fill-current" /> High Stakes Active
                 </div>
-                <h3 className="text-3xl font-black text-white mb-3 tracking-tight italic">Fortune <span className="text-teal-400">Accelerator</span></h3>
+                <h3 className="text-3xl font-black text-white mb-3 tracking-tight ">Fortune <span className="text-teal-400">Accelerator</span></h3>
                 <p className="text-zinc-500 text-sm font-medium leading-relaxed max-w-sm mb-6">
                     Join our decentralized prize pool. Every ticket entry increases your probability of payout.
                 </p>
                 <div className="flex items-center justify-center md:justify-start gap-6">
                     <div>
                         <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Total Payouts</p>
-                        <p className="text-xl font-black text-white italic tracking-tighter">Rs 5M+</p>
+                        <p className="text-xl font-black text-white  tracking-tighter">Rs 5M+</p>
                     </div>
                     <div className="w-px h-10 bg-white/10"></div>
                     <div>
                         <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Status</p>
-                        <p className="text-xl font-black text-white italic tracking-tighter">Instant Draw</p>
+                        <p className="text-xl font-black text-white  tracking-tighter">Instant Draw</p>
                     </div>
                 </div>
             </div>
             
-            <div className="bg-white/5 backdrop-blur-xl p-6 sm:p-8 rounded-[3rem] border border-white/10 shadow-inner shrink-0 text-center w-full md:w-auto">
+            <div className="bg-white/5 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-inner shrink-0 text-center w-full md:w-auto">
                <p className="text-[9px] font-black text-teal-400 uppercase tracking-widest mb-2">Available Balance</p>
-               <p className="text-3xl sm:text-4xl font-black text-white italic tracking-tighter mb-4">Rs {balance.toLocaleString()}</p>
+               <p className="text-3xl sm:text-4xl font-black text-white  tracking-tighter mb-4">Rs {balance.toLocaleString()}</p>
                
                {freeTickets > 0 && (
                  <motion.div 
@@ -377,13 +377,13 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
       {/* Notifications */}
       <AnimatePresence>
           {errorMsg && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-red-500/10 text-red-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-red-100 shadow-lg shadow-red-500/5">
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-red-500/10 text-red-600 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-red-100 shadow-lg shadow-none">
               <AlertCircle className="w-5 h-5 shrink-0" /> {errorMsg}
             </motion.div>
           )}
 
           {showSuccess && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-emerald-500/10 text-emerald-400 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="bg-emerald-500/10 text-emerald-400 p-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-3 mb-8 border border-emerald-500/20 shadow-lg shadow-none">
               <CheckCircle2 className="w-5 h-5 shrink-0" /> Entry Encrypted & Secured
             </motion.div>
           )}
@@ -392,7 +392,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
       {/* Grid */}
       <div className="mb-16">
         <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-2">
+            <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
                 <Crown className="w-4 h-4 text-emerald-500" /> Active Operations
             </h3>
         </div>
@@ -403,11 +403,11 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
             <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Scanning Network...</p>
           </div>
         ) : lotteries.length === 0 ? (
-          <div className="bg-[#022c22] rounded-[3rem] border border-white/5 p-16 text-center shadow-inner">
+          <div className="bg-[#022c22] rounded-3xl border border-white/5 p-16 text-center shadow-inner">
             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 text-zinc-400">
               <Ticket className="w-10 h-10" />
             </div>
-            <p className="text-xl font-black text-white mb-2 italic uppercase">Zero Active Nodes</p>
+            <p className="text-xl font-black text-white mb-2  uppercase">Zero Active Nodes</p>
             <p className="text-xs text-zinc-400 font-medium">Internal systems are recalibrating. Standby for next cycle.</p>
           </div>
         ) : (
@@ -426,7 +426,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                   >
                     <div className="absolute inset-0 bg-teal-500/10 blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                     
-                    <div className="relative bg-[#022c22] rounded-[2.5rem] overflow-hidden border border-white/5 transition-all duration-500 hover:translate-y-[-8px] hover:border-teal-500/30 flex flex-col h-full">
+                    <div className="relative bg-[#022c22] rounded-3xl overflow-hidden border border-white/5 transition-all duration-500 hover:translate-y-[-8px] hover:border-teal-500/30 flex flex-col h-full">
                         <div className="absolute top-0 inset-x-0 h-1 flex">
                             <div className="flex-1 bg-emerald-500/30" />
                             <div className="flex-1 bg-teal-500/30" />
@@ -438,20 +438,20 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                                    <Crown className="w-4 h-4 text-emerald-500" />
                                 </div>
-                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest italic">Mega Pool</span>
+                                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest ">Mega Pool</span>
                             </div>
                             <div className="text-right">
                                 <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Ticket Fee</p>
                                 <div className="flex items-center justify-end gap-1">
-                                    <span className="text-sm font-black text-white italic">Rs {lottery.fee}</span>
+                                    <span className="text-sm font-black text-white ">Rs {lottery.fee}</span>
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 </div>
                             </div>
                         </div>
 
                         <div className="px-6 py-8 text-center flex-1 flex flex-col justify-center">
-                            <p className="text-[10px] font-black text-teal-400 uppercase tracking-[0.4em] mb-2 leading-none">Global Prize Fund</p>
-                            <h4 className="text-5xl font-black text-white tracking-tighter italic drop-shadow-2xl flex items-center justify-center gap-1">
+                            <p className="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-2 leading-none">Global Prize Fund</p>
+                            <h4 className="text-5xl font-black text-white tracking-tighter  drop-shadow-2xl flex items-center justify-center gap-1">
                                 <span className="text-xl text-zinc-400 not-italic mr-1">Rs</span>
                                 {lottery.prizePool.toLocaleString()}
                             </h4>
@@ -464,7 +464,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 </div>
                                 <div>
                                     <p className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">Network</p>
-                                    <p className="text-[10px] font-black text-white italic">{lottery.maxMembers} Spots</p>
+                                    <p className="text-[10px] font-black text-white ">{lottery.maxMembers} Spots</p>
                                 </div>
                             </div>
                             <div className="bg-white/5 p-3 rounded-2xl border border-white/10 flex items-center gap-3">
@@ -473,7 +473,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 </div>
                                 <div>
                                     <p className="text-[7px] font-black text-zinc-400 uppercase tracking-widest">Legal</p>
-                                    <p className="text-[10px] font-black text-emerald-400 uppercase italic">Secure</p>
+                                    <p className="text-[10px] font-black text-emerald-400 uppercase ">Secure</p>
                                 </div>
                             </div>
                         </div>
@@ -481,7 +481,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                         <div className="px-6 space-y-2 mb-8">
                             <div className="flex justify-between items-end">
                                 <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Initialization</p>
-                                <span className="text-[9px] font-black text-teal-400 italic font-mono">{Math.round(fillPercentage)}%</span>
+                                <span className="text-[9px] font-black text-teal-400  font-mono">{Math.round(fillPercentage)}%</span>
                             </div>
                             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden relative border border-white/5">
                                 <motion.div 
@@ -503,7 +503,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => handleJoin(lottery)}
                                 disabled={isJoined || lottery.currentMembers >= lottery.maxMembers}
-                                className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] italic flex items-center justify-center gap-2 transition-all duration-300 ${
+                                className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest  flex items-center justify-center gap-2 transition-all duration-300 ${
                                     isJoined 
                                     ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' 
                                     : lottery.currentMembers >= lottery.maxMembers
@@ -536,14 +536,14 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="space-y-6">
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-2">
+            <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
                 <Users className="w-4 h-4 text-blue-500" /> Recent Activity
             </h3>
-            <div className="bg-[#15181D] rounded-[2.5rem] border border-white/5 shadow-xl overflow-hidden min-h-[400px]">
+            <div className="bg-[#15181D] rounded-3xl border border-white/5 shadow-xl overflow-hidden min-h-[400px]">
                 <div className="p-2 space-y-1">
                     {recentEntries.length === 0 ? (
                         <div className="text-center py-20">
-                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest italic opacity-60">System idle. No recent activity.</p>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest  opacity-60">System idle. No recent activity.</p>
                         </div>
                     ) : (
                         recentEntries.map((entry, i) => (
@@ -562,12 +562,12 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                         />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-black text-white italic tracking-tight">{getDisplayName(entry)}</p>
+                                        <p className="text-xs font-black text-white  tracking-tight">{getDisplayName(entry)}</p>
                                         <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mt-1">Acquired Entry</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-[10px] font-black text-emerald-400 italic tracking-widest uppercase">Verified</p>
+                                    <p className="text-[10px] font-black text-emerald-400  tracking-widest uppercase">Verified</p>
                                     <p className="text-[8px] font-bold text-zinc-500 mt-0.5">{entry.timestamp?.toDate ? entry.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Pending'}</p>
                                 </div>
                             </motion.div>
@@ -578,21 +578,21 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
           </div>
 
           <div className="space-y-6">
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-2">
+            <h3 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-emerald-500" /> Hall of Fame
             </h3>
-            <div className="bg-[#022c22] rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden min-h-[400px] text-white">
+            <div className="bg-[#022c22] rounded-3xl border border-white/5 shadow-2xl overflow-hidden min-h-[400px] text-white">
                  <div className="p-2 space-y-1 relative z-10">
                     {pastWinners.length === 0 ? (
                         <div className="text-center py-20 opacity-40">
-                             <p className="text-[10px] font-bold uppercase tracking-widest italic leading-relaxed">System history is blank.<br/>The first elite winner is yet to be born.</p>
+                             <p className="text-[10px] font-bold uppercase tracking-widest  leading-relaxed">System history is blank.<br/>The first elite winner is yet to be born.</p>
                         </div>
                     ) : (
                         pastWinners.map((winner, i) => (
                             <div key={i} className="flex items-center justify-between p-6 hover:bg-white/5 transition-all rounded-[1.5rem] border border-transparent hover:border-white/5">
                                 <div className="flex items-center gap-5">
                                     <div className="relative">
-                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center border border-white/10 shadow-2xl shadow-emerald-500/20 overflow-hidden p-0.5">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center border border-white/10 shadow-2xl shadow-none overflow-hidden p-0.5">
                                             <DynamicAvatar 
                                               avatarId={winner.userAvatar} 
                                               fallbackText={getDisplayName(winner)} 
@@ -602,13 +602,13 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                         <Star className="absolute -top-2 -right-2 w-5 h-5 text-emerald-400 fill-current" />
                                     </div>
                                     <div>
-                                        <p className="text-lg font-black text-white italic tracking-tighter">{getDisplayName(winner)}</p>
-                                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mt-1 italic truncate max-w-[120px]">{winner.lotteryName}</p>
+                                        <p className="text-lg font-black text-white  tracking-tighter">{getDisplayName(winner)}</p>
+                                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mt-1  truncate max-w-[120px]">{winner.lotteryName}</p>
                                     </div>
                                 </div>
                                 <div className="text-right flex-shrink-0">
-                                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 italic">Prize Won</p>
-                                    <p className="text-2xl font-black text-white italic tracking-tighter">Rs {winner.prize.toLocaleString()}</p>
+                                    <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 ">Prize Won</p>
+                                    <p className="text-2xl font-black text-white  tracking-tighter">Rs {winner.prize.toLocaleString()}</p>
                                 </div>
                             </div>
                         ))

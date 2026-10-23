@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Network, Share2, MessageCircle, Clock, Sparkles, UsersRound } from 'lucide-react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -175,12 +175,12 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-6 shadow-xl"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-[9px] font-black uppercase tracking-widest text-emerald-400 mb-6 shadow-xl"
           >
               <Network className="w-3 h-3 text-emerald-500" /> Multi-Level Commissions
           </motion.div>
           
-          <h1 className="text-4xl sm:text-5xl font-black mb-4 leading-none tracking-tighter italic text-white uppercase">
+          <h1 className="text-4xl sm:text-5xl font-black mb-4 leading-none tracking-tighter  text-white uppercase">
             Build Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Empire</span>
           </h1>
           
@@ -203,7 +203,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             </span>
             <button 
               onClick={handleCopy}
-              className={`h-12 shrink-0 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'bg-emerald-500 text-[#022c22] shadow-lg shadow-emerald-500/20' : 'bg-[#15181D] text-[#022c22] hover:bg-white/15 shadow-lg shadow-white/10'}`}
+              className={`h-12 shrink-0 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'bg-emerald-500 text-[#022c22] shadow-lg shadow-none' : 'bg-[#15181D] text-[#022c22] hover:bg-white/15 shadow-lg shadow-white/10'}`}
             >
               {copied ? 'Copied!' : 'Copy Link'}
             </button>
@@ -237,7 +237,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             </div>
             <button 
                 onClick={onClaimIndirect}
-                className="w-full bg-emerald-500 text-[#022c22] py-4 rounded-xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
+                className="w-full bg-emerald-500 text-[#022c22] py-4 rounded-xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-none"
             >
                 Claim Now
             </button>
@@ -246,7 +246,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
 
       <div className="space-y-4">
         <div className="flex items-center justify-between px-2 mb-2">
-          <h3 className="text-lg font-black italic tracking-tighter uppercase text-white">
+          <h3 className="text-lg font-black  tracking-tighter uppercase text-white">
             Team <span className="text-emerald-400">Network</span>
           </h3>
         </div>
@@ -293,7 +293,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                   Level {lvl.replace('L', '')}
                 </span>
                 
-                <span className={`text-xl sm:text-2xl font-black italic tracking-tighter mb-2 ${styles.text}`}>
+                <span className={`text-xl sm:text-2xl font-black  tracking-tighter mb-2 ${styles.text}`}>
                   Rs {amount}
                 </span>
                 
@@ -339,7 +339,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                     {r.name ? r.name.substring(0, 1).toUpperCase() : '?'}
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-sm font-black italic tracking-tighter uppercase truncate mb-0.5 text-slate-200">
+                    <h4 className="text-sm font-black  tracking-tighter uppercase truncate mb-0.5 text-slate-200">
                       {r.name || 'Anonymous User'}
                     </h4>
                     <span className="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 text-zinc-400">
@@ -354,7 +354,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                         Approved
                       </span>
-                      <span className="text-xs font-black italic tracking-tighter text-white">
+                      <span className="text-xs font-black  tracking-tighter text-white">
                         +Rs {activeTab === 'L1' ? (r.commission || currentBonus) : activeTab === 'L2' ? 15 : 10}
                       </span>
                     </div>

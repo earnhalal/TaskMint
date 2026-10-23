@@ -1,68 +1,36 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-    UserPlus as InviteIcon, 
-    CheckSquare as CheckSquareIcon, 
-    Sparkles as SparklesIcon, 
-    Clock as EarnIcon, 
-    ArrowRight, 
-    Wallet as WalletIcon, 
-    Gift as GiftIcon, 
-    PlusCircle as PlusCircleIcon, 
-    PlayCircle as PlayCircleIcon, 
-    RefreshCw,
-    Ticket as TicketIcon,
-    Calendar as CalendarIcon,
-    Trophy,
-    CheckCircle2,
-    MessageCircle,
-    Download,
-    Lock,
-    Crown,
-    Rocket,
-    Headphones,
-    Zap,
-    Gift,
-    Clock,
-} from 'lucide-react';
+import { UserPlus as InviteIcon, CheckSquare as CheckSquareIcon, Sparkles as SparklesIcon, ArrowRight, Wallet as WalletIcon, Gift as GiftIcon, PlusCircle as PlusCircleIcon, PlayCircle as PlayCircleIcon, Ticket as TicketIcon, Calendar as CalendarIcon, Trophy, MessageCircle, Download, Lock, Crown, Rocket, Headphones, Zap, Gift, Clock } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
 import { db, auth, rtdb } from '../../firebase';
-import { doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { ref, update } from 'firebase/database';
 import { useCurrency } from '../../context/CurrencyContext';
 
 interface HomeTabProps {
-  name: string;
   balance: number;
-  lastUpdated?: number;
   totalEarnings?: number;
   totalIndirectCommission?: number;
-  lockedBalance: number;
   accountStatus: string;
   role: string;
-  topEarners: any[];
   onInviteClick: () => void;
   onDepositClick: () => void;
   onWithdrawClick: () => void;
   onWatchAdsClick: () => void;
   onSupportAIClick: () => void;
   onTasksClick: () => void;
-  onProfileClick: () => void;
   onLotteryClick: () => void;
   onStreakClick: () => void;
   onLeaderboardClick: () => void;
   onPartnerUpgradeClick: () => void;
   onActivateClick: () => void;
   onHistoryClick: () => void;
-  onUpdatesClick: () => void;
   onTaskWallClick: () => void;
   onEasyTaskClick: () => void;
   onSocialTaskPlusClick: () => void;
   onOfferWallClick: () => void;
   onPartnerToolsClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string, transactionId?: string) => Promise<boolean>;
-  onReloadData?: () => void;
   appSettings: {
     activationFee: number;
   };
@@ -111,50 +79,35 @@ const AnimatedCounter = ({ value }: { value: number }) => {
 };
 
 export default function HomeTab({ 
-  name, 
   balance, 
   totalEarnings = 0,
   totalIndirectCommission = 0,
-  lockedBalance,
   accountStatus,
   role,
-  topEarners,
   onInviteClick, 
   onDepositClick, 
   onWithdrawClick, 
   onWatchAdsClick, 
   onSupportAIClick,
   onTasksClick, 
-  onProfileClick, 
   onLotteryClick, 
   onStreakClick,
   onLeaderboardClick,
   onPartnerUpgradeClick,
   onActivateClick,
   onHistoryClick,
-  onUpdatesClick,
   onTaskWallClick,
   onEasyTaskClick,
   onSocialTaskPlusClick,
   onOfferWallClick,
   onPartnerToolsClick,
   onUpdateBalance,
-  onReloadData,
-  lastUpdated = Date.now(),
   appSettings,
   appBonusClaimed,
   lastDailyCheckin,
   unreadChatCount = 0
 }: HomeTabProps) {
   const { currency, toggleCurrency, convertAmount } = useCurrency();
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
-  };
-
-  const [avatar, setAvatar] = React.useState<string | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
   const navigate = useNavigate();
 
@@ -266,10 +219,6 @@ export default function HomeTab({
     return hoursPassed >= 24;
   }, [lastDailyCheckin]);
 
-  React.useEffect(() => {
-    setAvatar(localStorage.getItem('taskmint_avatar'));
-  }, []);
-
   return (
     <div className="space-y-5 animate-fade-in pb-28 font-sans">
       {/* Alerts */}
@@ -277,7 +226,7 @@ export default function HomeTab({
         <button
           onClick={handleClaimAppBonus}
           disabled={isClaiming}
-          className="w-full flex items-center gap-3 bg-green-500 text-[#052E12] rounded-2xl px-4 py-3.5 shadow-lg shadow-green-500/20 text-left active:scale-[0.99] transition"
+          className="w-full flex items-center gap-3 bg-green-500 text-[#052E12] rounded-2xl px-4 py-3.5 shadow-lg shadow-none text-left active:scale-[0.99] transition"
         >
           <Gift className="w-6 h-6 shrink-0" />
           <span className="flex-1">
@@ -457,7 +406,7 @@ export default function HomeTab({
       {/* Referral banner */}
       <button
         onClick={onInviteClick}
-        className="w-full flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl px-4 py-4 text-left active:scale-[0.99] transition shadow-lg shadow-green-500/20"
+        className="w-full flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl px-4 py-4 text-left active:scale-[0.99] transition shadow-lg shadow-none"
       >
         <span className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0">
           <InviteIcon className="w-5 h-5 text-white" />

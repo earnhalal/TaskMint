@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Rocket, Flame, Crown, PartyPopper, X, Bell } from 'lucide-react';
 
 const defaultAnnouncements = [
-  { text: "Omar just withdrew Rs 500", icon: <Flame className="w-3 h-3 text-orange-500" /> },
-  { text: "Ayesha earned Rs 1,200 from Spin", icon: <PartyPopper className="w-3 h-3 text-emerald-500" /> },
-  { text: "Zainab activated Silver Package", icon: <Crown className="w-3 h-3 text-emerald-500" /> },
-  { text: "Hamza just joined the Gold Tier", icon: <Rocket className="w-3 h-3 text-teal-500" /> },
-  { text: "New CPX Surveys available - High Rewards!", icon: <Flame className="w-3 h-3 text-red-500" /> },
+  { text: "New CPX surveys are live — high rewards", icon: <Flame className="w-3 h-3 text-red-500" /> },
+  { text: "Invite friends and earn Rs. 125 per activation", icon: <Rocket className="w-3 h-3 text-teal-500" /> },
+  { text: "Payouts are processed on the 1st–3rd and 16th–18th of every month", icon: <Bell className="w-3 h-3 text-emerald-500" /> },
+  { text: "Daily check-in bonus: Rs. 10 in the TaskMint app", icon: <PartyPopper className="w-3 h-3 text-emerald-500" /> },
+  { text: "Go PRO: higher ad rewards and instant partner payouts", icon: <Crown className="w-3 h-3 text-emerald-500" /> },
 ];
 
 interface AnnouncementBarProps {
@@ -47,7 +47,7 @@ export default function AnnouncementBar({ dynamicMessage, onClose }: Announcemen
             >
               <Bell className="w-3 h-3 text-emerald-500 animate-bounce" />
               <span 
-                className="text-[10px] font-black text-slate-300 uppercase tracking-widest italic truncate"
+                className="text-[10px] font-black text-slate-300 uppercase tracking-widest  truncate"
                 dangerouslySetInnerHTML={{ __html: dynamicMessage }}
               />
             </motion.div>
@@ -61,7 +61,7 @@ export default function AnnouncementBar({ dynamicMessage, onClose }: Announcemen
               className="flex items-center gap-2"
             >
               {defaultAnnouncements[index].icon}
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic truncate">
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest  truncate">
                 {defaultAnnouncements[index].text}
               </span>
             </motion.div>

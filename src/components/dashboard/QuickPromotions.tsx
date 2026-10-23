@@ -1,25 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-    Youtube, 
-    Facebook, 
-    Music2, 
-    Instagram,
-    Globe,
-    MoreHorizontal,
-    Link as LinkIcon, 
-    Hash, 
-    CheckCircle2, 
-    AlertCircle,
-    ArrowRight,
-    ArrowLeft,
-    Zap,
-    ChevronRight,
-    X,
-    ShoppingCart
-} from 'lucide-react';
-import { doc, updateDoc, increment, addDoc, collection, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { Youtube, Facebook, Music2, Instagram, Globe, MoreHorizontal, Link as LinkIcon, Hash, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft, Zap, ChevronRight } from 'lucide-react';
+import { addDoc, collection, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface QuickPromotionsProps {
@@ -36,7 +19,7 @@ const platforms = [
         color: '#FF0000',
         bgColor: 'bg-red-500/10',
         borderColor: 'border-red-100',
-        glowColor: 'shadow-red-500/20',
+        glowColor: 'shadow-none',
         themeBg: 'bg-gradient-to-br from-red-600 via-red-900 to-black',
         themeText: 'text-white',
         cardBg: 'bg-black/40 backdrop-blur-xl border-white/10',
@@ -78,7 +61,7 @@ const platforms = [
         color: '#1877F2',
         bgColor: 'bg-blue-500/10',
         borderColor: 'border-blue-100',
-        glowColor: 'shadow-blue-500/20',
+        glowColor: 'shadow-none',
         themeBg: 'bg-gradient-to-br from-blue-600 via-blue-800 to-[#0f172a]',
         themeText: 'text-white',
         cardBg: 'bg-white/10 backdrop-blur-xl border-white/10',
@@ -98,7 +81,7 @@ const platforms = [
         color: '#E4405F',
         bgColor: 'bg-pink-500/10',
         borderColor: 'border-pink-100',
-        glowColor: 'shadow-pink-500/20',
+        glowColor: 'shadow-none',
         themeBg: 'bg-gradient-to-br from-[#f09433] via-[#dc2743] to-[#bc1888]',
         themeText: 'text-white',
         cardBg: 'bg-white/10 backdrop-blur-xl border-white/20',
@@ -118,7 +101,7 @@ const platforms = [
         color: '#10B981',
         bgColor: 'bg-emerald-500/10',
         borderColor: 'border-emerald-500/20',
-        glowColor: 'shadow-emerald-500/20',
+        glowColor: 'shadow-none',
         themeBg: 'bg-gradient-to-br from-emerald-500 via-teal-700 to-[#0B0D10]',
         themeText: 'text-white',
         cardBg: 'bg-white/10 backdrop-blur-xl border-white/10',
@@ -137,7 +120,7 @@ const platforms = [
         color: '#6366F1',
         bgColor: 'bg-teal-500/10',
         borderColor: 'border-teal-100',
-        glowColor: 'shadow-teal-500/20',
+        glowColor: 'shadow-none',
         themeBg: 'bg-gradient-to-br from-teal-600 via-emerald-800 to-[#0B0D10]',
         themeText: 'text-white',
         cardBg: 'bg-white/10 backdrop-blur-xl border-white/10',

@@ -1,12 +1,11 @@
-import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { app } from '../firebase';
 import AuthView from '../components/AuthView';
 
-import { doc, setDoc, getDoc, updateDoc, increment, query, collection, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, increment, query, collection, where, getDocs } from 'firebase/firestore';
 import { db, rtdb } from '../firebase';
-import { ref, update, increment as rtdbIncrement, set } from 'firebase/database';
+import { ref, set } from 'firebase/database';
 import { sendWelcomeMail } from '../services/notificationService';
 import { maleAvatarIds, femaleAvatarIds } from '../components/ui/DynamicAvatar';
 

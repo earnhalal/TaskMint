@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
-import { ChevronRight, Star, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, FileText, MessageSquare, Info, Shield, FileCheck, LogOut, Crown, CheckCircle2, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles, Bot } from 'lucide-react';
+import { ChevronRight, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, Shield, LogOut, Crown, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles } from 'lucide-react';
 
 import { DynamicAvatar } from '../ui/DynamicAvatar';
 
@@ -141,7 +141,7 @@ export default function ProfileTab({
               <p className="text-[11px] font-bold text-emerald-700/70 mb-3">Please fill all details including Gender & Withdrawal Account to use all features.</p>
               <button 
                 onClick={onEditProfile}
-                className="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md shadow-emerald-600/20 active:scale-95 transition-all"
+                className="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md shadow-none active:scale-95 transition-all"
               >
                 Fix Now
               </button>
@@ -165,7 +165,7 @@ export default function ProfileTab({
           <div className="flex flex-col items-end gap-2">
             <button 
               onClick={onActivateClick}
-              className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-red-600/20 active:scale-95 transition-all"
+              className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-none active:scale-95 transition-all"
             >
               Pay Rs {appSettings?.activationFee || 150} to Start
             </button>
@@ -178,9 +178,9 @@ export default function ProfileTab({
         <div className={`relative rounded-[1.5rem] p-3 overflow-hidden shadow-2xl transition-all duration-700 group hover:scale-[1.02] ${
             role === 'partner' 
             ? partnerTier === 'gold'
-                ? 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-emerald-500/20 shadow-emerald-500/5'
-                : 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-blue-500/20 shadow-blue-500/5'
-            : 'bg-gradient-to-br from-[#1E3A8A] via-[#312E81] to-[#1E1B4B] border border-white/5 shadow-teal-500/10'
+                ? 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-emerald-500/20 shadow-none'
+                : 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-blue-500/20 shadow-none'
+            : 'bg-gradient-to-br from-[#1E3A8A] via-[#312E81] to-[#1E1B4B] border border-white/5 shadow-none'
         }`}>
             {/* Holographic Overlays */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse" />
@@ -229,7 +229,7 @@ export default function ProfileTab({
                     </div>
 
                     <div className="flex flex-col text-left flex-1 min-w-0">
-                        <h2 className="text-lg sm:text-xl font-black text-white italic tracking-tighter uppercase mb-0.5 drop-shadow-lg truncate">
+                        <h2 className="text-lg sm:text-xl font-black text-white  tracking-tighter uppercase mb-0.5 drop-shadow-lg truncate">
                             {name.toLowerCase()}
                         </h2>
                         
@@ -255,13 +255,13 @@ export default function ProfileTab({
         <div className="col-span-2 p-4 relative overflow-hidden group cursor-pointer" onClick={onManageWalletClick}>
             <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex justify-between items-center relative z-10 w-full mb-1">
-                  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-1.5 border border-slate-200/50 bg-white/5 px-2 py-0.5 rounded-full">
+                  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1.5 border border-slate-200/50 bg-white/5 px-2 py-0.5 rounded-full">
                     <Wallet className="w-2.5 h-2.5" /> Liquid Balance
                   </p>
                   <BarChart3 className="w-5 h-5 text-emerald-600/50" />
             </div>
             <div className="relative z-10">
-                  <p className="text-3xl font-black text-emerald-400 tracking-tighter flex items-baseline gap-1.5 italic -ml-0.5">
+                  <p className="text-3xl font-black text-emerald-400 tracking-tighter flex items-baseline gap-1.5  -ml-0.5">
                     {balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'} 
                     <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest not-italic">PKR</span>
                   </p>
@@ -271,10 +271,10 @@ export default function ProfileTab({
         {lockedBalance > 0 && (
           <div className="p-6 bg-emerald-50/20 border-t border-emerald-100/30 flex justify-between items-center group">
               <div>
-                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                     <Clock className="w-3 h-3" /> Locked Distribution
                 </p>
-                <p className="text-2xl font-black text-emerald-400 italic tracking-tighter">Rs {lockedBalance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</p>
+                <p className="text-2xl font-black text-emerald-400  tracking-tighter">Rs {lockedBalance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</p>
                 <div className="flex items-center gap-2 mt-2 bg-emerald-500/10 px-3 py-1 rounded-lg w-fit border border-emerald-500/10">
                   <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
                   <p className="text-[9px] text-emerald-400 font-black uppercase tracking-widest">Protocol Stake Active</p>
@@ -325,7 +325,7 @@ export default function ProfileTab({
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-[#15181D] rounded-[32px] p-6 max-w-sm w-full shadow-2xl overflow-hidden relative"
+            className="bg-[#15181D] rounded-3xl p-6 max-w-sm w-full shadow-2xl overflow-hidden relative"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
             
@@ -397,7 +397,7 @@ export default function ProfileTab({
               </button>
               <button 
                 onClick={handleDeleteAccount}
-                className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20"
+                className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-none"
               >
                 Delete
               </button>

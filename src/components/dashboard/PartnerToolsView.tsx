@@ -1,31 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  ArrowLeft, 
-  BarChart3, 
-  Users, 
-  ShieldCheck, 
-  Zap, 
-  Lock, 
-  Crown, 
-  Star,
-  Settings,
-  Database,
-  PieChart,
-  Target,
-  Rocket,
-  ArrowRight,
-  Wallet,
-  Ticket,
-  CheckCircle2,
-  XCircle,
-  TrendingUp,
-  Award,
-  Search,
-  Clock
-} from 'lucide-react';
+import { ArrowLeft, BarChart3, Users, Zap, Lock, Crown, Rocket, ArrowRight, Wallet, Ticket, CheckCircle2, XCircle, TrendingUp, Clock } from 'lucide-react';
 import { DynamicAvatar } from '../ui/DynamicAvatar';
-import { doc, getDoc, updateDoc, serverTimestamp, increment, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
 interface PartnerToolsViewProps {
@@ -207,11 +184,11 @@ export default function PartnerToolsView({
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-[#15181D] p-5 rounded-3xl border border-white/5 shadow-sm">
           <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Total Team</p>
-          <p className="text-2xl font-black text-white italic">{referralStats?.totalReferrals || 0}</p>
+          <p className="text-2xl font-black text-white ">{referralStats?.totalReferrals || 0}</p>
         </div>
         <div className="bg-[#15181D] p-5 rounded-3xl border border-white/5 shadow-sm">
           <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Active Team</p>
-          <p className="text-2xl font-black text-emerald-400 italic">{referralStats?.activeMembers || 0}</p>
+          <p className="text-2xl font-black text-emerald-400 ">{referralStats?.activeMembers || 0}</p>
         </div>
       </div>
       
@@ -220,14 +197,14 @@ export default function PartnerToolsView({
         <div className="relative z-10 flex items-center justify-between">
           <div>
             <p className="text-teal-400 text-[10px] font-black uppercase tracking-widest mb-1">Estimated Commissions</p>
-            <p className="text-2xl font-black text-white italic tracking-tight">Rs {(referralStats?.totalEarnings || 0).toLocaleString()}</p>
+            <p className="text-2xl font-black text-white  tracking-tight">Rs {(referralStats?.totalEarnings || 0).toLocaleString()}</p>
           </div>
           <TrendingUp className="w-10 h-10 text-teal-500/20" />
         </div>
       </div>
 
       <div className="space-y-3">
-        <h4 className="text-xs font-black text-white uppercase tracking-widest px-1 italic">Recent Team Activity</h4>
+        <h4 className="text-xs font-black text-white uppercase tracking-widest px-1 ">Recent Team Activity</h4>
         <div className="space-y-2">
           {referrals?.slice(0, 10).map((ref, idx) => (
             <div key={idx} className="bg-[#15181D] p-4 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-teal-100 transition-colors">
@@ -236,12 +213,12 @@ export default function PartnerToolsView({
                    <DynamicAvatar avatarId={ref.avatarId} fallbackText={ref.name} className="w-full h-full" />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-zinc-100 italic">{ref.name || 'Member'}</p>
+                  <p className="text-xs font-black text-zinc-100 ">{ref.name || 'Member'}</p>
                   <p className="text-[9px] font-bold text-zinc-500">Level {ref.level || 1} Referral</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black text-emerald-400 italic">Rs {ref.earnings || 0}</p>
+                <p className="text-[10px] font-black text-emerald-400 ">Rs {ref.earnings || 0}</p>
                 <p className={`text-[8px] font-black uppercase tracking-widest ${ref.status === 'active' ? 'text-teal-500' : 'text-slate-300'}`}>
                   {ref.status || 'Inactive'}
                 </p>
@@ -263,7 +240,7 @@ export default function PartnerToolsView({
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-2 px-1">
         <div>
-          <h4 className="text-xs font-black text-white uppercase tracking-widest italic">Pending Activations</h4>
+          <h4 className="text-xs font-black text-white uppercase tracking-widest ">Pending Activations</h4>
           <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Team Priority Queue</p>
         </div>
         <div className="bg-teal-500/10 px-3 py-1 rounded-full border border-teal-100">
@@ -286,12 +263,12 @@ export default function PartnerToolsView({
                    <Clock className="w-6 h-6" />
                 </div>
                 <div>
-                   <p className="text-xs font-black text-zinc-100 italic uppercase">{dep.userName || 'Member'}</p>
+                   <p className="text-xs font-black text-zinc-100  uppercase">{dep.userName || 'Member'}</p>
                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Account Activation Request</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black text-white italic">Rs {dep.amount}</p>
+                <p className="text-[10px] font-black text-white ">Rs {dep.amount}</p>
                 <p className="text-[8px] font-black text-teal-500 uppercase tracking-widest">{dep.method}</p>
               </div>
             </div>
@@ -304,7 +281,7 @@ export default function PartnerToolsView({
             <div className="grid grid-cols-2 gap-3">
                <button 
                 onClick={() => handleApprove(dep.userId, dep.id)}
-                className="bg-emerald-500 text-white rounded-2xl py-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="bg-emerald-500 text-white rounded-2xl py-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-none active:scale-95 transition-all flex items-center justify-center gap-2"
                >
                  <CheckCircle2 className="w-4 h-4" /> Approve
                </button>
@@ -320,7 +297,7 @@ export default function PartnerToolsView({
              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5 shadow-inner">
                 <Users className="w-8 h-8 text-slate-200" />
              </div>
-             <p className="text-xs font-black text-slate-300 uppercase tracking-widest italic">All clear! No pending activations.</p>
+             <p className="text-xs font-black text-slate-300 uppercase tracking-widest ">All clear! No pending activations.</p>
            </div>
         )}
 
@@ -350,7 +327,7 @@ export default function PartnerToolsView({
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-xl font-black text-white tracking-tight italic uppercase">
+            <h2 className="text-xl font-black text-white tracking-tight  uppercase">
               {activeTab === 'list' ? 'Partner Tools' : activeTab === 'analytics' ? 'Team Analytics' : 'Quick Approvals'}
             </h2>
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Management Dashboard</p>
@@ -393,7 +370,7 @@ export default function PartnerToolsView({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <h3 className={`font-black text-sm italic tracking-tight ${!tool.unlocked ? 'text-zinc-500' : 'text-zinc-100'}`}>{tool.name}</h3>
+                        <h3 className={`font-black text-sm  tracking-tight ${!tool.unlocked ? 'text-zinc-500' : 'text-zinc-100'}`}>{tool.name}</h3>
                         {!tool.unlocked && <Lock className="w-3 h-3 text-slate-300" />}
                       </div>
                       <div className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md ${
@@ -455,12 +432,12 @@ export default function PartnerToolsView({
       </AnimatePresence>
 
       {activeTab === 'list' && (
-        <div className="mt-8 p-6 bg-[#022c22] rounded-[2.5rem] border border-white/5 relative overflow-hidden">
+        <div className="mt-8 p-6 bg-[#022c22] rounded-3xl border border-white/5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
               <Rocket className="w-5 h-5 text-emerald-500" />
-              <h4 className="text-white font-black italic tracking-tighter uppercase">Power Up Your Team</h4>
+              <h4 className="text-white font-black  tracking-tighter uppercase">Power Up Your Team</h4>
             </div>
             <p className="text-[11px] text-zinc-500 font-bold leading-relaxed mb-6">
               Higher tiers unlock exclusive management tools that help you scale your referral income by 300%. Start upgrading now to access advanced automation.

@@ -1,20 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Gamepad2, 
-  Mail, 
-  Wallet, 
-  ShieldCheck, 
-  Info,
-  ArrowRightLeft,
-  ArrowLeft,
-  Trash2,
-  CheckCircle2,
-  Clock,
-  Sparkles,
-  ChevronRight,
-  Zap
-} from 'lucide-react';
+import { Gamepad2, Mail, Wallet, ShieldCheck, Info, ArrowRightLeft, ArrowLeft, CheckCircle2, Clock, Sparkles, ChevronRight, Zap } from 'lucide-react';
 
 export interface AppUpdate {
     id: string;
@@ -69,12 +55,12 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div>
-                        <h2 className="text-2xl font-black text-white tracking-tighter italic uppercase flex items-center gap-2">
+                        <h2 className="text-2xl font-black text-white tracking-tighter  uppercase flex items-center gap-2">
                              System <span className="text-teal-400">Mailbox</span>
                         </h2>
                         <div className="flex items-center gap-2 mt-1">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Secure Communication Channel</p>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Secure Communication Channel</p>
                         </div>
                     </div>
                 </div>
@@ -103,14 +89,14 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                     <div className="flex flex-col items-center justify-center h-[50vh] text-center">
                         <div className="relative mb-8 group">
                             <div className="absolute inset-0 bg-teal-500/20 rounded-full blur-[60px] animate-pulse" />
-                            <div className="relative w-28 h-28 bg-[#022c22] rounded-[2.5rem] border border-white/5 flex items-center justify-center text-zinc-200 shadow-2xl transition-all group-hover:scale-105 duration-500">
+                            <div className="relative w-28 h-28 bg-[#022c22] rounded-3xl border border-white/5 flex items-center justify-center text-zinc-200 shadow-2xl transition-all group-hover:scale-105 duration-500">
                                 <Mail className="w-12 h-12 opacity-20" />
                                 <div className="absolute -top-2 -right-2 w-10 h-10 bg-teal-600/10 rounded-2xl flex items-center justify-center border border-teal-500/20">
                                     <Zap className="w-5 h-5 text-teal-400" />
                                 </div>
                             </div>
                         </div>
-                        <h3 className="text-xl font-black text-white italic tracking-tighter uppercase mb-2">Inbox Empty</h3>
+                        <h3 className="text-xl font-black text-white  tracking-tighter uppercase mb-2">Inbox Empty</h3>
                         <p className="text-[10px] font-bold text-zinc-400 max-w-[240px] uppercase tracking-widest leading-loose">No new messages from the system. You're all caught up!</p>
                     </div>
                 ) : (
@@ -123,9 +109,9 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.05 }}
                                     onClick={() => onMarkAsRead(update.id)}
-                                    className={`group relative p-6 rounded-[2.5rem] border transition-all duration-500 cursor-pointer overflow-hidden ${
+                                    className={`group relative p-6 rounded-3xl border transition-all duration-500 cursor-pointer overflow-hidden ${
                                         update.status === 'unread' 
-                                            ? 'bg-gradient-to-r from-white/5 to-transparent border-white/10 shadow-2xl shadow-teal-500/5' 
+                                            ? 'bg-gradient-to-r from-white/5 to-transparent border-white/10 shadow-2xl shadow-none' 
                                             : 'bg-transparent border-white/5 opacity-50 grayscale hover:opacity-100 hover:grayscale-0'
                                     }`}
                                 >
@@ -137,7 +123,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                     <div className="flex gap-5 relative z-10">
                                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 ${
                                             update.status === 'unread' 
-                                                ? 'bg-teal-600 shadow-xl shadow-teal-500/20 text-white' 
+                                                ? 'bg-teal-600 shadow-xl shadow-none text-white' 
                                                 : 'bg-white/5 text-zinc-400 border border-white/5'
                                         }`}>
                                             {getIcon(update.type)}
@@ -146,7 +132,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-3 truncate">
-                                                    <h4 className="text-base font-black text-white italic tracking-tight uppercase truncate">
+                                                    <h4 className="text-base font-black text-white  tracking-tight uppercase truncate">
                                                         {update.title}
                                                     </h4>
                                                     {update.status === 'unread' && (
@@ -206,7 +192,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                             <Sparkles className="w-6 h-6" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-[10px] font-black text-white uppercase tracking-widest mb-1 italic">Pro Tip</p>
+                            <p className="text-[10px] font-black text-white uppercase tracking-widest mb-1 ">Pro Tip</p>
                             <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest leading-loose">
                                 System logs are auto-cleared after 30 days to keep your inbox clean.
                             </p>

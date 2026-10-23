@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import Loader from '../Loader';
 import { ArrowLeft, Star, Info, Lock, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -116,7 +115,7 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
         {/* Paywall Overlay */}
         {!isApproved && (
           <div className="absolute inset-0 z-30 backdrop-blur-md bg-white/60 flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-24 h-24 bg-[#15181D] rounded-[2.5rem] shadow-2xl flex items-center justify-center mb-8 -rotate-3 border border-white/5">
+            <div className="w-24 h-24 bg-[#15181D] rounded-3xl shadow-2xl flex items-center justify-center mb-8 -rotate-3 border border-white/5">
               <Lock className="w-10 h-10 text-emerald-400" />
             </div>
             <h3 className="text-3xl font-black text-white mb-4 leading-tight">Unlock Premium Surveys!</h3>
@@ -125,7 +124,7 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
             </p>
             <button 
               onClick={onPayClick}
-              className="w-full max-w-xs bg-gradient-to-r from-teal-600 to-teal-700 text-white py-5 rounded-2xl font-black text-sm shadow-2xl shadow-teal-600/40 active:scale-95 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+              className="w-full max-w-xs bg-gradient-to-r from-teal-600 to-teal-700 text-white py-5 rounded-2xl font-black text-sm shadow-2xl shadow-none active:scale-95 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
             >
               <Zap className="w-4 h-4" />
               Pay Now to Unlock

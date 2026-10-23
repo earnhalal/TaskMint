@@ -44,7 +44,7 @@ const PLATFORM_THEMES: Record<string, any> = {
     bg: 'bg-red-500/10',
     activeBg: 'bg-[#FF0000] text-white',
     cardBg: 'from-red-50 to-white',
-    glow: 'shadow-red-500/20'
+    glow: 'shadow-none'
   },
   instagram: { 
     label: 'Instagram', 
@@ -54,7 +54,7 @@ const PLATFORM_THEMES: Record<string, any> = {
     bg: 'bg-pink-500/10',
     activeBg: 'bg-gradient-to-tr from-[#833AB4] via-[#F56040] to-[#FCAF45] text-white',
     cardBg: 'from-pink-50 to-white',
-    glow: 'shadow-pink-500/20'
+    glow: 'shadow-none'
   },
   facebook: { 
     label: 'Facebook', 
@@ -64,7 +64,7 @@ const PLATFORM_THEMES: Record<string, any> = {
     bg: 'bg-blue-500/10',
     activeBg: 'bg-[#1877F2] text-white',
     cardBg: 'from-blue-50 to-white',
-    glow: 'shadow-blue-500/20'
+    glow: 'shadow-none'
   },
   telegram: { 
     label: 'Telegram', 
@@ -74,7 +74,7 @@ const PLATFORM_THEMES: Record<string, any> = {
     bg: 'bg-sky-500/10',
     activeBg: 'bg-[#24A1DE] text-white',
     cardBg: 'from-sky-50 to-white',
-    glow: 'shadow-sky-500/20'
+    glow: 'shadow-none'
   }
 };
 
@@ -193,7 +193,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
       <motion.div 
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="relative rounded-[2rem] p-6 text-white overflow-hidden mb-8 shadow-2xl shadow-teal-500/20"
+        className="relative rounded-[2rem] p-6 text-white overflow-hidden mb-8 shadow-2xl shadow-none"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#065f46]"></div>
         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse"></div>
@@ -212,7 +212,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
       {/* Platform Category Selector */}
       <div className="mb-8 relative">
         <div className="flex items-center justify-between mb-4 px-1">
-          <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Select Platform</h3>
+          <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Select Platform</h3>
           <div className="h-px flex-1 bg-white/10 ml-4"></div>
         </div>
         
@@ -322,7 +322,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#15181D] rounded-[2.5rem] border-2 border-dashed border-white/5 p-12 text-center"
+            className="bg-[#15181D] rounded-3xl border-2 border-dashed border-white/5 p-12 text-center"
           >
             <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5">
               <AlertCircle className="w-8 h-8 text-slate-300" />
@@ -341,7 +341,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="bg-[#15181D] w-full max-w-md rounded-[3rem] overflow-hidden shadow-2xl"
+              className="bg-[#15181D] w-full max-w-md rounded-3xl overflow-hidden shadow-2xl"
             >
               <div className="p-1 h-2 bg-white/10 flex justify-center items-center">
                  <div className="w-12 h-1 bg-slate-300 rounded-full"></div>
@@ -374,7 +374,7 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
                     <div className="absolute top-0 right-0 p-3 opacity-10">
                        {getPlatformIcon(selectedTask.platform, "w-12 h-12")}
                     </div>
-                    <h4 className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-3">Verification Rules</h4>
+                    <h4 className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-3">Verification Rules</h4>
                     <p className="text-sm font-bold text-zinc-200 leading-relaxed pr-6">
                       {selectedTask.instructions || "1. Link par click karein.\n2. Page subscribe/follow karein.\n3. Screen shot link ya handle yahan enter karein."}
                     </p>
@@ -427,11 +427,11 @@ export default function SocialTaskPlusView({ onBack, userName }: SocialTaskPlusV
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="bg-[#15181D] w-full max-w-xs rounded-[3rem] p-8 text-center shadow-3xl overflow-hidden relative"
+              className="bg-[#15181D] w-full max-w-xs rounded-3xl p-8 text-center shadow-3xl overflow-hidden relative"
             >
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
               
-              <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 relative shadow-lg shadow-emerald-500/20">
+              <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 relative shadow-lg shadow-none">
                 <CheckCircle2 className="w-12 h-12 text-white" />
                 <div className="absolute inset-0 bg-white/20 rounded-full animate-ping"></div>
               </div>
