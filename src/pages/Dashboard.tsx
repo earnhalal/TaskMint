@@ -23,7 +23,8 @@ import {
   Layout,
   Clock,
   ArrowRight,
-  Users
+  Users,
+  Wallet
 } from 'lucide-react';
 import { 
   doc, 
@@ -1502,47 +1503,46 @@ export default function Dashboard() {
           )}
         </AnimatePresence>
 
-        {/* Modern Polished Header */}
+        {/* App bar — logo, live balance pill, notifications, profile */}
         {activeTab !== 'support_ai' && (
-          <div className={`px-4 py-3 ${role === 'partner' ? 'bg-gradient-to-r from-[#022c22] to-[#064e3b]' : 'bg-white/80 backdrop-blur-xl'} flex items-center justify-between sticky top-0 z-40 border-b border-gray-100/20 shadow-sm transition-all duration-300`}>
-            <div className="flex items-center gap-3 cursor-pointer group relative" onClick={() => setActiveTab('home')}>
-              <div className={`relative w-9 h-9 rounded-xl ${role === 'partner' ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-emerald-600 shadow-emerald-600/30'} flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 overflow-hidden`}>
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+          <div className={`px-4 py-3 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-white border-slate-100'} flex items-center justify-between sticky top-0 z-40 border-b transition-all duration-300`}>
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('home')}>
+              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/25">
                 <Coins className="w-5 h-5" />
               </div>
-              <div className="flex flex-col -space-y-1">
-                <h1 className={`font-extrabold text-xl tracking-tight`}>
-                  <span className={role === 'partner' ? 'text-white' : 'text-slate-900'}>Task</span>
-                  <span className={role === 'partner' ? 'text-emerald-400' : 'text-emerald-600'}>Mint</span>
-                </h1>
-                              </div>
+              <span className={`font-extrabold text-lg tracking-tight ${role === 'partner' ? 'text-white' : 'text-slate-900'}`}>
+                Task<span className="text-emerald-600">Mint</span>
+              </span>
             </div>
-            <div className="flex items-center gap-3">
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setActiveTab('updates')}
-                className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group`}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveTab('withdraw')}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full border active:scale-95 transition ${role === 'partner' ? 'bg-white/5 border-white/10 text-white' : 'bg-emerald-50 border-emerald-100 text-slate-900'}`}
               >
-                <Mail className={`w-5 h-5 ${role === 'partner' ? 'text-white' : 'text-slate-600'} transition-colors group-hover:text-emerald-600`} />
+                <Wallet className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs font-black">Rs {balance.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('updates')}
+                className={`relative w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition ${role === 'partner' ? 'bg-white/5 text-white' : 'bg-slate-50 text-slate-600'}`}
+              >
+                <Bell className="w-5 h-5" />
                 {unreadUpdatesCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white shadow-lg animate-bounce">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] px-1 bg-rose-500 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-white">
                     {unreadUpdatesCount > 9 ? '9+' : unreadUpdatesCount}
                   </span>
                 )}
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              </button>
+              <button
                 onClick={() => setActiveTab('profile')}
-                className={`relative w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden ${role === 'partner' ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100'} transition-all group ${activeTab === 'profile' ? 'ring-2 ring-emerald-500 bg-emerald-50' : ''}`}
+                className="relative w-9 h-9 rounded-full flex items-center justify-center overflow-hidden bg-slate-50 active:scale-95 transition"
               >
                 {profileAvatarId ? (
                    <DynamicAvatar avatarId={profileAvatarId} fallbackText={userName} />
                 ) : (
-                   <UserCircle className={`w-6 h-6 ${role === 'partner' ? 'text-white' : (activeTab === 'profile' ? 'text-emerald-600' : 'text-slate-600')} transition-colors group-hover:text-emerald-600`} />
+                   <UserCircle className="w-6 h-6 text-slate-600" />
                 )}
-              </motion.button>
+              </button>
             </div>
           </div>
         )}
@@ -1554,48 +1554,32 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Fixed Bottom Tab Bar - Glassmorphism UI */}
+        {/* Bottom tab bar */}
         {activeTab !== 'support_ai' && (
-          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22]/90' : 'bg-white/80'} backdrop-blur-3xl px-2 pt-2 pb-4 flex items-center justify-around shadow-[0_-15px_45px_rgba(0,0,0,0.1)] border-t border-white/5 transition-colors duration-500 rounded-t-[2.5rem]`}>
-            {/* Decorative shine only for partner */}
-            {role === 'partner' && <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_3s_infinite]"></div>}
-            
+          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-white border-slate-100'} border-t px-2 pt-2 pb-4 flex items-start justify-around`}>
             {[
-              { id: 'home', icon: <LayoutGrid className="w-6 h-6" />, label: 'HOME' },
-              { id: 'watch', icon: <Tv2 className="w-6 h-6" />, label: 'WATCH' },
-              { id: 'task_wall', icon: <Rocket className="w-6 h-6" />, label: 'SURVEYS' },
-              { id: 'tasks', icon: <Zap className="w-6 h-6" />, label: 'TASKS' },
-              { id: 'premium', icon: <ShieldCheck className="w-6 h-6" />, label: 'PRO' },
-            ].map((tab) => (
-              <button 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1.5 h-14 relative transition-all duration-300 ${activeTab === tab.id ? 'text-emerald-500' : (role === 'partner' ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600')}`}
-              >
-                {activeTab === tab.id && (
-                  <motion.div 
-                    layoutId="activeTab"
-                    className={`absolute inset-0 rounded-2xl border ${role === 'partner' ? 'bg-white/5 border-white/5 shadow-inner' : 'bg-emerald-50 border-emerald-100'} -mb-4`}
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                
-                <div className={`relative z-10 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 -translate-y-1' : ''}`}>
-                  {activeTab === tab.id && role === 'partner' && (
-                    <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"></div>
-                  )}
-                  {tab.icon}
-                </div>
-                
-                <span className={`relative z-10 text-[9px] font-black uppercase tracking-[0.2em] leading-none text-center transition-all duration-300 ${activeTab === tab.id ? 'opacity-100 scale-105' : 'opacity-80'}`}>
-                  {tab.label}
-                </span>
-
-                {activeTab === tab.id && (
-                  <div className={`absolute -bottom-2 w-1.5 h-1.5 rounded-full ${role === 'partner' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,1)]' : 'bg-emerald-500'}`}></div>
-                )}
-              </button>
-            ))}
+              { id: 'home', icon: <LayoutGrid className="w-5 h-5" />, label: 'Home' },
+              { id: 'watch', icon: <Tv2 className="w-5 h-5" />, label: 'Watch' },
+              { id: 'task_wall', icon: <Rocket className="w-5 h-5" />, label: 'Surveys' },
+              { id: 'tasks', icon: <Zap className="w-5 h-5" />, label: 'Tasks' },
+              { id: 'premium', icon: <ShieldCheck className="w-5 h-5" />, label: 'PRO' },
+            ].map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="flex-1 flex flex-col items-center gap-1 active:scale-95 transition"
+                >
+                  <span className={`px-4 py-1.5 rounded-full transition ${active ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : (role === 'partner' ? 'text-slate-400' : 'text-slate-400')}`}>
+                    {tab.icon}
+                  </span>
+                  <span className={`text-[10px] font-bold leading-none ${active ? 'text-emerald-700' : (role === 'partner' ? 'text-slate-500' : 'text-slate-400')}`}>
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
 

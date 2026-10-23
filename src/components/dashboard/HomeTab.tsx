@@ -272,7 +272,7 @@ export default function HomeTab({
 
   return (
     <div className="space-y-5 animate-fade-in pb-28 font-sans">
-      {/* Compact alerts */}
+      {/* Alerts */}
       {isApp && !appBonusClaimed && (
         <button
           onClick={handleClaimAppBonus}
@@ -320,97 +320,135 @@ export default function HomeTab({
         </button>
       )}
 
-      {/* Compact balance card */}
-      <div className="bg-white rounded-3xl border border-emerald-100/80 shadow-[0_10px_35px_-15px_rgba(4,120,87,0.25)] p-5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black overflow-hidden shrink-0">
-              {avatar ? (
-                <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                name.substring(0, 1).toUpperCase()
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-extrabold text-slate-900 truncate">{name}</p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                {accountStatus === 'Active' && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
-                <span>{accountStatus === 'Active' ? 'Active Member' : 'Member'}</span>
-                {role === 'partner' && (
-                  <span className="text-emerald-600 flex items-center gap-0.5">
-                    <Crown className="w-3 h-3" /> PRO
-                  </span>
-                )}
-              </p>
-            </div>
+      {/* Wallet hero */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-[#022c22] text-white p-5 shadow-xl shadow-emerald-900/20">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+        <div className="relative">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-100/80 flex items-center gap-1.5">
+              <WalletIcon className="w-3.5 h-3.5" /> My Balance
+            </p>
+            <button
+              onClick={toggleCurrency}
+              className="text-[10px] font-black bg-white/10 border border-white/15 rounded-full px-2.5 py-1"
+            >
+              {currency}
+            </button>
           </div>
-          <button
-            onClick={toggleCurrency}
-            className="text-[11px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1.5 shrink-0"
-          >
-            {currency}
-          </button>
-        </div>
-
-        <div className="mt-4">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.18em]">Total Balance</p>
-          <p className="text-[34px] leading-9 font-black text-slate-900 tracking-tight mt-1">
+          <p className="text-4xl font-black tracking-tight mt-2">
             {currency === 'PKR' ? 'Rs. ' : '$ '}
             <AnimatedCounter value={Math.max(0, convertAmount(balance))} />
           </p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[11px] font-bold text-slate-500">
-            <span>Total Earned: {currency === 'PKR' ? 'Rs. ' : '$ '}{convertAmount(totalEarnings).toFixed(2)}</span>
-            {lockedBalance > 0 && (
-              <span className="flex items-center gap-1 text-amber-600">
-                <Lock className="w-3 h-3" /> Locked: {convertAmount(lockedBalance).toFixed(2)}
-              </span>
-            )}
-          </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <button
-            onClick={onDepositClick}
-            className="h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
-          >
-            <PlusCircleIcon className="w-4 h-4" /> Add Funds
-          </button>
-          <button
-            onClick={onWithdrawClick}
-            className="h-11 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
-          >
-            <WalletIcon className="w-4 h-4" /> Cash Out
-          </button>
+          <div className="mt-4">
+            <div className="h-2 rounded-full bg-white/15 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-white transition-all duration-700"
+                style={{ width: `${Math.min(100, Math.max(0, (balance / 100) * 100))}%` }}
+              ></div>
+            </div>
+            <p className="text-[11px] font-semibold text-emerald-100/90 mt-2">
+              {balance >= 100
+                ? 'Mubarak! Aap ka balance withdraw ke liye tayyar hai (min Rs. 100).'
+                : `Withdraw ke liye sirf Rs. ${(100 - balance).toFixed(0)} mazeed kamaein (min Rs. 100).`}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <button
+              onClick={onWithdrawClick}
+              className="h-11 rounded-xl bg-white text-emerald-800 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
+            >
+              <WalletIcon className="w-4 h-4" /> Withdraw
+            </button>
+            <button
+              onClick={onDepositClick}
+              className="h-11 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
+            >
+              <PlusCircleIcon className="w-4 h-4" /> Add Funds
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Earn — main actions */}
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-3 py-3.5 text-center">
+          <p className="text-sm font-black text-slate-900">{currency === 'PKR' ? 'Rs. ' : '$ '}{convertAmount(totalEarnings).toFixed(0)}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Total Earned</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-3 py-3.5 text-center">
+          <p className="text-sm font-black text-slate-900">{currency === 'PKR' ? 'Rs. ' : '$ '}{convertAmount(totalIndirectCommission).toFixed(0)}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Team Commission</p>
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-3 py-3.5 text-center">
+          <p className={`text-sm font-black ${accountStatus === 'Active' ? 'text-emerald-600' : 'text-rose-500'}`}>{accountStatus}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">Account Status</p>
+        </div>
+      </div>
+
+      {/* Earn money — featured list */}
       <div>
-        <h2 className="text-base font-black text-slate-900 px-1 mb-3">Kamana shuru karein</h2>
-        <div className="grid grid-cols-4 gap-2.5">
+        <div className="flex items-end justify-between px-1 mb-3">
+          <h2 className="text-base font-black text-slate-900">Earn Money</h2>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tap karke shuru karein</span>
+        </div>
+        <div className="space-y-2.5">
           {[
-            { icon: <PlayCircleIcon className="w-6 h-6" />, label: 'Watch Ads', onClick: onWatchAdsClick, bg: 'bg-rose-50 text-rose-600' },
-            { icon: <CheckSquareIcon className="w-6 h-6" />, label: 'Tasks', onClick: onTasksClick, bg: 'bg-amber-50 text-amber-600' },
-            { icon: <Rocket className="w-6 h-6" />, label: 'Surveys', onClick: onTaskWallClick, bg: 'bg-teal-50 text-teal-600' },
-            { icon: <Zap className="w-6 h-6" />, label: 'Offer Wall', onClick: onOfferWallClick, bg: 'bg-cyan-50 text-cyan-600' },
-            { icon: <SparklesIcon className="w-6 h-6" />, label: 'Easy Task', onClick: onEasyTaskClick, bg: 'bg-sky-50 text-sky-600' },
-            { icon: <MessageCircle className="w-6 h-6" />, label: 'Social+', onClick: onSocialTaskPlusClick, bg: 'bg-emerald-50 text-emerald-600' },
-            { icon: <GiftIcon className="w-6 h-6" />, label: 'Daily Gift', onClick: handleDailyCheckin, bg: 'bg-orange-50 text-orange-600' },
-            { icon: <InviteIcon className="w-6 h-6" />, label: 'Invite', onClick: onInviteClick, bg: 'bg-emerald-50 text-emerald-700' },
-          ].map((a) => (
+            { icon: <PlayCircleIcon className="w-5 h-5" />, bg: 'bg-rose-50 text-rose-600', title: 'Watch Ads', desc: 'Video ads dekhein — har ad par earning', onClick: onWatchAdsClick },
+            { icon: <Rocket className="w-5 h-5" />, bg: 'bg-teal-50 text-teal-600', title: 'Surveys', desc: 'CPX Research surveys — sab se zyada paying', onClick: onTaskWallClick },
+            { icon: <Zap className="w-5 h-5" />, bg: 'bg-cyan-50 text-cyan-600', title: 'Offer Walls', desc: 'CPA Lead aur Wannads ki offers try karein', onClick: onOfferWallClick },
+            { icon: <CheckSquareIcon className="w-5 h-5" />, bg: 'bg-amber-50 text-amber-600', title: 'Daily Tasks', desc: 'Rozana ke asaan tasks mukammal karein', onClick: onTasksClick },
+            { icon: <SparklesIcon className="w-5 h-5" />, bg: 'bg-sky-50 text-sky-600', title: 'Easy Tasks', desc: 'Chhote tasks — fori reward', onClick: onEasyTaskClick },
+            { icon: <MessageCircle className="w-5 h-5" />, bg: 'bg-emerald-50 text-emerald-600', title: 'Social Tasks', desc: 'Social media tasks par extra bonus', onClick: onSocialTaskPlusClick },
+          ].map((row) => (
             <button
-              key={a.label}
-              onClick={a.onClick}
-              className="flex flex-col items-center gap-2 py-3 rounded-2xl bg-white border border-slate-100 shadow-sm active:scale-95 transition"
+              key={row.title}
+              onClick={row.onClick}
+              className="w-full flex items-center gap-3 bg-white rounded-2xl border border-slate-100 shadow-sm px-4 py-3.5 text-left active:scale-[0.99] transition"
             >
-              <span className={`w-11 h-11 rounded-xl flex items-center justify-center ${a.bg}`}>{a.icon}</span>
-              <span className="text-[10px] font-extrabold text-slate-700 leading-none">{a.label}</span>
+              <span className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${row.bg}`}>{row.icon}</span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-extrabold text-slate-900 leading-tight">{row.title}</span>
+                <span className="block text-[11px] text-slate-500 font-semibold truncate">{row.desc}</span>
+              </span>
+              <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
             </button>
           ))}
         </div>
       </div>
 
-      {/* Compact referral banner */}
+      {/* Daily rewards */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <button
+          onClick={handleDailyCheckin}
+          className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 text-left active:scale-[0.98] transition"
+        >
+          <span className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+            <GiftIcon className="w-5 h-5" />
+          </span>
+          <p className="text-sm font-extrabold text-slate-900 mt-3 leading-tight">Daily Check-in</p>
+          <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Rozana + Rs. 10 reward</p>
+          <span className={`inline-block mt-3 text-[10px] font-black px-2.5 py-1.5 rounded-full ${isDailyClaimable ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+            {isDailyClaimable ? 'CLAIM NOW' : 'CLAIMED'}
+          </span>
+        </button>
+        <button
+          onClick={onStreakClick}
+          className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 text-left active:scale-[0.98] transition"
+        >
+          <span className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <CalendarIcon className="w-5 h-5" />
+          </span>
+          <p className="text-sm font-extrabold text-slate-900 mt-3 leading-tight">Streak Vault</p>
+          <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Rozana aa kar streak banayein</p>
+          <span className="inline-block mt-3 text-[10px] font-black px-2.5 py-1.5 rounded-full bg-slate-900 text-white">
+            OPEN VAULT
+          </span>
+        </button>
+      </div>
+
+      {/* Referral banner */}
       <button
         onClick={onInviteClick}
         className="w-full flex items-center gap-3 bg-[#022c22] rounded-2xl px-4 py-4 text-left active:scale-[0.99] transition"
@@ -419,7 +457,7 @@ export default function HomeTab({
           <InviteIcon className="w-5 h-5 text-emerald-400" />
         </span>
         <span className="flex-1">
-          <span className="block text-sm font-extrabold text-white leading-tight">Doston ko invite karein</span>
+          <span className="block text-sm font-extrabold text-white leading-tight">Doston ko invite karein — Rs. 125 / dost</span>
           <span className="block text-[11px] text-emerald-200/70 font-semibold">Har dost ke account activation par commission payein</span>
         </span>
         <ArrowRight className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -428,45 +466,40 @@ export default function HomeTab({
       {/* Promotions */}
       <QuickPromotions balance={balance} onUpdateBalance={onUpdateBalance} />
 
-      {/* More — simple list */}
+      {/* More */}
       <div>
         <h2 className="text-base font-black text-slate-900 px-1 mb-3">Mazeed</h2>
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden">
           <button onClick={onLotteryClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
-            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><TicketIcon className="w-4.5 h-4.5" /></span>
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><TicketIcon className="w-4 h-4" /></span>
             <span className="flex-1 text-sm font-bold text-slate-800">Lottery</span>
             <ArrowRight className="w-4 h-4 text-slate-300" />
           </button>
-          <button onClick={onStreakClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
-            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><CalendarIcon className="w-4.5 h-4.5" /></span>
-            <span className="flex-1 text-sm font-bold text-slate-800">Streak Vault</span>
-            <ArrowRight className="w-4 h-4 text-slate-300" />
-          </button>
           <button onClick={onLeaderboardClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
-            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Trophy className="w-4.5 h-4.5" /></span>
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Trophy className="w-4 h-4" /></span>
             <span className="flex-1 text-sm font-bold text-slate-800">Leaderboard</span>
             <ArrowRight className="w-4 h-4 text-slate-300" />
           </button>
           <button onClick={onHistoryClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
-            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Clock className="w-4.5 h-4.5" /></span>
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Clock className="w-4 h-4" /></span>
             <span className="flex-1 text-sm font-bold text-slate-800">Earning History</span>
             <ArrowRight className="w-4 h-4 text-slate-300" />
           </button>
           {role === 'partner' ? (
             <button onClick={onPartnerToolsClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
-              <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Crown className="w-4.5 h-4.5" /></span>
+              <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Crown className="w-4 h-4" /></span>
               <span className="flex-1 text-sm font-bold text-slate-800">Partner Tools</span>
               <ArrowRight className="w-4 h-4 text-slate-300" />
             </button>
           ) : (
             <button onClick={onPartnerUpgradeClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
-              <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Crown className="w-4.5 h-4.5" /></span>
+              <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Crown className="w-4 h-4" /></span>
               <span className="flex-1 text-sm font-bold text-slate-800">PRO Partner banein</span>
               <ArrowRight className="w-4 h-4 text-slate-300" />
             </button>
           )}
           <button onClick={onSupportAIClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
-            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Headphones className="w-4.5 h-4.5" /></span>
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><Headphones className="w-4 h-4" /></span>
             <span className="flex-1 text-sm font-bold text-slate-800">Live Support</span>
             {unreadChatCount > 0 && (
               <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center">{unreadChatCount}</span>
@@ -474,7 +507,7 @@ export default function HomeTab({
             <ArrowRight className="w-4 h-4 text-slate-300" />
           </button>
           <button onClick={() => window.open('https://whatsapp.com/channel/0029VbCpKTp2P59cvqS4CL2L', '_blank')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 transition">
-            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><MessageCircle className="w-4.5 h-4.5" /></span>
+            <span className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 shrink-0"><MessageCircle className="w-4 h-4" /></span>
             <span className="flex-1 text-sm font-bold text-slate-800">WhatsApp Channel</span>
             <ArrowRight className="w-4 h-4 text-slate-300" />
           </button>
