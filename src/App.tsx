@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import Landing from './pages/Landing';
 import Auth from './pages/Auth';
@@ -28,6 +28,15 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
+};
+
+// Every page must open from the top — never restore a previous scroll position.
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+  }, [pathname]);
+  return null;
 };
 
 const InviteRedirect = () => {
@@ -100,6 +109,7 @@ export default function App() {
     <AuthProvider>
       <CurrencyProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <div className="w-full max-w-full overflow-x-hidden relative min-h-screen">
             <AppContent />
           </div>

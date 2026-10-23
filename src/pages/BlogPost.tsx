@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowLeft, Calendar, User, Share2, Sparkles, Tag } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Sparkles, Tag } from 'lucide-react';
 import { blogPosts } from '../data/blogPosts';
 
 export default function BlogPost() {
@@ -21,8 +21,8 @@ export default function BlogPost() {
   if (!post) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-        <h1 className="text-4xl font-black text-slate-900 mb-4">Post Not Found</h1>
-        <button onClick={() => navigate('/blog')} className="text-blue-600 font-bold">Back to Blog</button>
+        <h1 className="text-4xl font-extrabold text-slate-900 mb-4">Post Not Found</h1>
+        <button onClick={() => navigate('/blog')} className="text-emerald-700 font-bold">Back to Blog</button>
       </div>
     );
   }
@@ -34,20 +34,17 @@ export default function BlogPost() {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <button 
             onClick={() => navigate('/blog')}
-            className="flex items-center gap-2 text-slate-600 hover:text-blue-600 font-bold transition-colors"
+            className="flex items-center gap-2 text-slate-600 hover:text-emerald-700 font-bold transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="hidden sm:inline">Back to Blog</span>
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-black text-xl tracking-tight text-slate-900">Task<span className="text-amber-500">Mint</span></span>
+            <span className="font-extrabold text-xl tracking-tight text-slate-900">Task<span className="text-emerald-600">Mint</span></span>
           </div>
-          <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
-            <Share2 className="w-5 h-5" />
-          </button>
         </div>
       </header>
 
@@ -56,15 +53,15 @@ export default function BlogPost() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="flex items-center gap-4 text-slate-400 text-xs font-black mb-6 uppercase tracking-widest">
-            <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full">{post.category}</span>
+          <div className="flex items-center gap-4 text-slate-400 text-xs font-extrabold mb-6 uppercase tracking-widest">
+            <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full">{post.category}</span>
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               {post.date}
             </div>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-8 leading-tight tracking-tighter">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 mb-8 leading-tight tracking-tighter">
             {post.title}
           </h1>
 
@@ -73,7 +70,7 @@ export default function BlogPost() {
               <User className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-black text-slate-900 text-sm uppercase tracking-wider">{post.author}</p>
+              <p className="font-extrabold text-slate-900 text-sm uppercase tracking-wider">{post.author}</p>
               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Editorial Team</p>
             </div>
           </div>
@@ -90,9 +87,9 @@ export default function BlogPost() {
           )}
 
           <article className="prose prose-slate prose-lg max-w-none 
-            prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight
+            prose-headings:font-extrabold prose-headings:text-slate-900 prose-headings:tracking-tight
             prose-p:text-slate-600 prose-p:font-medium prose-p:leading-relaxed
-            prose-strong:text-slate-900 prose-strong:font-black
+            prose-strong:text-slate-900 prose-strong:font-extrabold
             prose-li:text-slate-600 prose-li:font-medium
             prose-img:rounded-[2rem] prose-img:shadow-xl
           ">
@@ -110,14 +107,14 @@ export default function BlogPost() {
             </div>
           </div>
 
-          <div className="mt-20 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[2.5rem] p-10 text-white text-center shadow-2xl">
-            <h3 className="text-3xl font-black mb-4">Start Your Earning Journey</h3>
-            <p className="text-blue-100 mb-8 font-medium">Join 50,000+ users earning real money daily on TaskMint.</p>
+          <div className="mt-20 bg-gradient-to-br from-emerald-700 to-teal-700 rounded-[2.5rem] p-10 text-white text-center shadow-2xl">
+            <h3 className="text-3xl font-extrabold mb-4">Start Your Earning Journey</h3>
+            <p className="text-emerald-50/85 mb-8 font-medium">Join 50,000+ users earning on TaskMint. Create your account and activate it with the one-time Rs. 150 joining fee.</p>
             <button 
               onClick={() => navigate('/signup')}
-              className="bg-white text-blue-600 px-10 py-4 rounded-full font-black text-lg hover:scale-105 transition-transform shadow-xl"
+              className="bg-white text-emerald-700 px-10 py-4 rounded-full font-extrabold text-lg hover:scale-105 transition-transform shadow-xl"
             >
-              Sign Up For Free
+              Create Your Account
             </button>
           </div>
         </motion.div>
