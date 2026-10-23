@@ -11,7 +11,7 @@ export default function DownloadPage() {
     document.title = "Download TaskMint App APK | Best Online Earning App in Pakistan 2026";
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
-      metaDesc.setAttribute('content', "Download the TaskMint App APK - an online earning app in Pakistan. Earn money by watching ads, completing tasks and surveys, with JazzCash & Easypaisa withdrawals from Rs. 100.");
+      metaDesc.setAttribute('content', "Download the TaskMint App APK - an online earning app in Pakistan. Earn money by watching ads, completing tasks and surveys, with JazzCash & Easypaisa withdrawals from Rs. 500.");
     }
   }, []);
 

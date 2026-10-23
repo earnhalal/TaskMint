@@ -294,13 +294,13 @@ export default function HomeTab({
           <div className="h-2 rounded-full bg-white/10 overflow-hidden">
             <div
               className="h-full rounded-full bg-green-500 transition-all duration-700"
-              style={{ width: `${Math.min(100, Math.max(0, (balance / 100) * 100))}%` }}
+              style={{ width: `${Math.min(100, Math.max(0, (balance / 500) * 100))}%` }}
             ></div>
           </div>
           <p className="text-[11px] font-semibold text-zinc-400 mt-2">
-            {balance >= 100
-              ? 'Your balance is ready to cash out (minimum Rs. 100).'
-              : `You are Rs. ${(100 - balance).toFixed(0)} away from cashing out (minimum Rs. 100).`}
+            {balance >= 500
+              ? 'Your balance is ready to cash out (minimum Rs. 500).'
+              : `You are Rs. ${(500 - balance).toFixed(0)} away from cashing out (minimum Rs. 500).`}
           </p>
         </div>
 

@@ -139,7 +139,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
                         Earn money in your free time
                     </motion.h2>
                     <motion.p initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.1 }} className="mt-4 text-emerald-50/85 text-lg leading-relaxed">
-                        Watch ads, answer surveys and complete simple tasks — then withdraw from Rs. 100 to JazzCash or EasyPaisa.
+                        Watch ads, answer surveys and complete simple tasks — then withdraw from Rs. 500 to JazzCash or EasyPaisa.
                     </motion.p>
 
                     <div className="mt-10 space-y-3.5 max-w-sm">
@@ -158,7 +158,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
 
                 <div className="relative flex items-center gap-8 text-sm font-semibold text-emerald-50/80">
                     <span>50K+ users</span>
-                    <span>Rs. 100 min. payout</span>
+                    <span>Rs. 500 min. payout</span>
                     <span className="flex items-center gap-1.5"><ShieldCheck className="w-4.5 h-4.5" /> Secure platform</span>
                 </div>
             </aside>
@@ -290,7 +290,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
 
                                             <p className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-center gap-2 text-center text-xs font-semibold text-slate-400">
                                                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                                                Secure platform · Withdraw via JazzCash &amp; EasyPaisa · Min. payout Rs. 100
+                                                Secure platform · Withdraw via JazzCash &amp; EasyPaisa · Min. payout Rs. 500
                                             </p>
                                         </>
                                     )}
@@ -299,7 +299,7 @@ const AuthView: React.FC<AuthViewProps> = ({ onSignup, onLogin, onForgotPassword
                         </div>
                     </motion.div>
 
-                    <p className="mt-5 text-center text-xs font-medium text-slate-400 lg:hidden">50K+ users · Rs. 100 min. payout · JazzCash &amp; EasyPaisa</p>
+                    <p className="mt-5 text-center text-xs font-medium text-slate-400 lg:hidden">50K+ users · Rs. 500 min. payout · JazzCash &amp; EasyPaisa</p>
                 </div>
             </div>
         </div>

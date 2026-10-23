@@ -35,11 +35,11 @@ const faqs = [
   },
   {
     q: 'How do I withdraw my earnings?',
-    a: 'Once your wallet reaches the minimum payout of Rs. 100, you can request a withdrawal to JazzCash, EasyPaisa or your bank account from the dashboard. Add your correct account details and submit the request — that is it.',
+    a: 'Once your wallet reaches the minimum payout of Rs. 500, you can request a withdrawal to JazzCash, EasyPaisa or your bank account from the dashboard. Add your correct account details and submit the request — that is it.',
   },
   {
     q: 'What is the minimum payout on TaskMint?',
-    a: 'The minimum payout is Rs. 100, one of the lowest thresholds among online earning platforms in Pakistan, so even beginners can cash out quickly.',
+    a: 'The minimum payout is Rs. 500. Once your balance reaches it, you can request a payout to JazzCash, EasyPaisa or your bank account.',
   },
   {
     q: 'How does the referral programme work?',
@@ -104,7 +104,7 @@ export default function Landing() {
     document.title = 'TaskMint - Earn Money Online in Pakistan | Online Earning Platform';
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
-      meta.setAttribute('content', 'TaskMint is an online earning platform in Pakistan. Earn money by watching ads, taking surveys and completing simple tasks. Withdraw from Rs. 100 via JazzCash, EasyPaisa or bank transfer.');
+      meta.setAttribute('content', 'TaskMint is an online earning platform in Pakistan. Earn money by watching ads, taking surveys and completing simple tasks. Withdraw from Rs. 500 via JazzCash, EasyPaisa or bank transfer.');
     }
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
@@ -178,7 +178,7 @@ export default function Landing() {
                 Earn money online in your <span className="text-emerald-600">free time</span>
               </h1>
               <p className="mt-5 text-lg text-slate-600 leading-relaxed max-w-xl">
-                Complete simple tasks on your phone — watch video ads, answer surveys and try offers — and withdraw your balance from just Rs. 100 to JazzCash, EasyPaisa or your bank.
+                Complete simple tasks on your phone — watch video ads, answer surveys and try offers — and withdraw your balance once it reaches Rs. 500 to JazzCash, EasyPaisa or your bank.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <button onClick={() => onGetStarted('signup')} className="inline-flex justify-center items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">
@@ -190,7 +190,7 @@ export default function Landing() {
               </div>
               <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-slate-600">
                 <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> One-time joining fee Rs. 150</li>
-                <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> Minimum payout Rs. 100</li>
+                <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> Minimum payout Rs. 500</li>
                 <li className="flex items-center gap-1.5"><CheckCircleIcon className="w-4.5 h-4.5 text-emerald-600" /> JazzCash &amp; EasyPaisa</li>
               </ul>
             </motion.div>
@@ -227,7 +227,7 @@ export default function Landing() {
               {[
                 { val: '50K+', label: 'Active users' },
                 { val: 'Rs. 2.5M+', label: 'Paid out to users' },
-                { val: 'Rs. 100', label: 'Minimum payout' },
+                { val: 'Rs. 500', label: 'Minimum payout' },
                 { val: '24/7', label: 'Tasks available' },
               ].map((s) => (
                 <div key={s.label} className="text-center">
@@ -279,7 +279,7 @@ export default function Landing() {
               {[
                 { icon: Smartphone, step: 'Step 1', title: 'Create your account', text: 'Sign up with your details in under a minute, then activate your account with the one-time Rs. 150 joining fee. Your wallet and referral link are created automatically.' },
                 { icon: ClipboardList, step: 'Step 2', title: 'Complete simple tasks', text: 'Watch ads, take surveys, try offers, check in daily and spin the wheel. Every completed task adds money to your wallet.' },
-                { icon: CircleDollarSign, step: 'Step 3', title: 'Withdraw from Rs. 100', text: 'Reach Rs. 100 and cash out to JazzCash, EasyPaisa or your bank account directly from the dashboard.' },
+                { icon: CircleDollarSign, step: 'Step 3', title: 'Withdraw from Rs. 500', text: 'Reach Rs. 500 and cash out to JazzCash, EasyPaisa or your bank account directly from the dashboard.' },
               ].map((item, i) => (
                 <motion.li key={item.title} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.45, delay: i * 0.12 }} className="rounded-3xl bg-white border border-slate-100 p-8 text-center shadow-[0_4px_20px_rgba(15,23,42,0.03)]">
                   <span className="mx-auto w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/20"><item.icon className="w-7 h-7" /></span>
@@ -298,7 +298,7 @@ export default function Landing() {
             <div>
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Fast payouts, low minimum</h2>
               <p className="mt-4 text-lg text-slate-600 leading-relaxed">
-                Your money should not sit locked in an app. TaskMint lets you withdraw as soon as your balance reaches Rs. 100, using the payment methods Pakistan actually uses.
+                Your money should not sit locked in an app. TaskMint lets you withdraw as soon as your balance reaches Rs. 500, using the payment methods Pakistan actually uses.
               </p>
               <ul className="mt-7 space-y-3.5 text-[15px] font-medium text-slate-700">
                 <li className="flex gap-2.5"><CheckCircleIcon className="w-5 h-5 text-emerald-600 shrink-0" /> Withdraw directly from your dashboard — no forms or phone calls</li>
@@ -319,7 +319,7 @@ export default function Landing() {
                     <h3 className="font-bold text-lg">{m.name}</h3>
                     <p className="text-sm text-slate-600">{m.note}</p>
                   </div>
-                  <span className="ml-auto text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full whitespace-nowrap">Min Rs. 100</span>
+                  <span className="ml-auto text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full whitespace-nowrap">Min Rs. 500</span>
                 </motion.div>
               ))}
             </div>
@@ -346,7 +346,7 @@ export default function Landing() {
               <div className="mt-5 space-y-4 text-[17px] leading-relaxed text-slate-600">
                 <p>TaskMint is an online earning platform built for Pakistan. We connect users with global advertising and research partners — including CPX Research, CPA Lead, Wannads and Unity Ads — and share the revenue with the people who complete the tasks.</p>
                 <p>Instead of spending hours searching for scattered earning apps, you get one wallet, one dashboard and tasks that are available around the clock: rewarded videos, surveys, offer walls, daily check-ins and a referral programme that keeps paying as your network grows.</p>
-                <p>Whether you are a student covering pocket money or simply want a productive use for your free time, TaskMint keeps the rules simple: complete a task, earn the reward, withdraw from Rs. 100.</p>
+                <p>Whether you are a student covering pocket money or simply want a productive use for your free time, TaskMint keeps the rules simple: complete a task, earn the reward, withdraw from Rs. 500.</p>
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-4 self-start">
@@ -415,7 +415,7 @@ export default function Landing() {
         <section className="py-20 md:py-24">
           <div className="max-w-4xl mx-auto px-5 lg:px-8 text-center">
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">Your free time is worth money</h2>
-            <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">Join TaskMint today, activate your account with the one-time Rs. 150 joining fee, complete your first task in minutes, and cash out from just Rs. 100.</p>
+            <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">Join TaskMint today, activate your account with the one-time Rs. 150 joining fee, complete your first task in minutes, and cash out once you reach Rs. 500.</p>
             <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">Create Account <ArrowRight className="w-4.5 h-4.5" /></button>
           </div>
         </section>
