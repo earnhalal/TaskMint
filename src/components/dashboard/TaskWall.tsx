@@ -121,7 +121,7 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
             </div>
             <h3 className="text-3xl font-black text-slate-900 mb-4 leading-tight">Unlock Premium Surveys!</h3>
             <p className="text-base text-slate-600 font-bold mb-10 max-w-xs mx-auto">
-              In High-paying tasks ko shuru karne ke liye Rs. 100 Joining Fee jama karwayein.
+              In High-paying tasks ko shuru karne ke liye Rs. 150 Joining Fee jama karwayein.
             </p>
             <button 
               onClick={onPayClick}

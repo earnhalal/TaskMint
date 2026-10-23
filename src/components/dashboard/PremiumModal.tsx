@@ -85,7 +85,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
     {
       id: 'basic',
       name: 'BASIC MEMBER',
-      price: `Rs ${appSettings?.activationFee || 100}`,
+      price: `Rs ${appSettings?.activationFee || 150}`,
       duration: 'Lifetime Access',
       icon: <Star className="w-6 h-6" />,
       color: 'from-slate-600 to-slate-800',

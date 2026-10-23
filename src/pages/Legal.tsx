@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, ArrowLeft, Mail, MapPin, Phone } from 'lucide-react';
+import { Coins, ArrowLeft, Mail, MapPin } from 'lucide-react';
 
 export default function Legal() {
   const location = useLocation();
@@ -132,10 +132,10 @@ export default function Legal() {
           <h1 className="text-4xl font-display font-bold mb-8">Promotion & Affiliate Program</h1>
           <p className="text-lg text-slate-600 mb-6">Earn more by sharing TaskMint with your network.</p>
           
-          <div className="bg-blue-50 border border-blue-100 rounded-3xl p-8 mb-10">
-            <h2 className="text-2xl font-bold text-blue-900 mb-4 mt-0">Why Promote TaskMint?</h2>
-            <p className="text-blue-800 font-medium mb-4">TaskMint is Pakistan's most trusted online earning platform. By promoting us, you are helping others find a legitimate way to earn money online.</p>
-            <ul className="list-disc pl-6 text-blue-800 font-medium space-y-2">
+          <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-8 mb-10">
+            <h2 className="text-2xl font-bold text-emerald-900 mb-4 mt-0">Why Promote TaskMint?</h2>
+            <p className="text-emerald-800 font-medium mb-4">TaskMint is Pakistan's most trusted online earning platform. By promoting us, you are helping others find a legitimate way to earn money online.</p>
+            <ul className="list-disc pl-6 text-emerald-800 font-medium space-y-2">
               <li>Earn Rs. 125 for every successful referral.</li>
               <li>Get 10% commission on your team's earnings (Partner levels).</li>
               <li>Access to exclusive promotional materials and banners.</li>
@@ -145,7 +145,7 @@ export default function Legal() {
 
           <h2 className="text-2xl font-bold mt-8 mb-4">How to Get Started</h2>
           <ol className="list-decimal pl-6 text-slate-600 mb-4 space-y-4">
-            <li><strong>Sign Up:</strong> Create a free account on TaskMint.</li>
+            <li><strong>Sign Up:</strong> Create your account on TaskMint and activate it with the one-time Rs. 150 joining fee.</li>
             <li><strong>Get Your Link:</strong> Go to the "Partner" or "Profile" section to find your unique referral link.</li>
             <li><strong>Share:</strong> Share your link on WhatsApp, Facebook, YouTube, or with your friends and family.</li>
             <li><strong>Earn:</strong> When someone joins using your link and activates their account, you get rewarded instantly.</li>
@@ -206,7 +206,7 @@ export default function Legal() {
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Message</label>
                 <textarea rows={4} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-none" placeholder="How can we help you?"></textarea>
               </div>
-              <button className="w-full bg-emerald-500 text-white font-bold py-4 rounded-xl hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/30 hover:-translate-y-0.5">
+              <button className="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/25 hover:-translate-y-0.5">
                 Send Message
               </button>
             </form>
@@ -224,8 +224,8 @@ export default function Legal() {
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <TrendingUp className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-600/20">
+              <Coins className="w-6 h-6 text-white" />
             </div>
             <span className="font-display font-bold text-2xl tracking-tight text-slate-900">TaskMint</span>
           </Link>
@@ -242,9 +242,18 @@ export default function Legal() {
       </main>
 
       {/* Simple Footer */}
-      <footer className="py-12 px-6 border-t border-slate-200 bg-white mt-auto">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm font-medium text-slate-400">© 2026 TaskMint. All rights reserved.</p>
+      <footer className="py-12 px-6 bg-slate-950 mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
+          <nav className="flex flex-wrap justify-center gap-x-7 gap-y-3 text-sm font-semibold text-slate-400">
+            <Link to="/blog" className="hover:text-emerald-400">Blog</Link>
+            <Link to="/app-download" className="hover:text-emerald-400">Download App</Link>
+            <Link to="/privacy" className="hover:text-emerald-400">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-emerald-400">Terms of Service</Link>
+            <Link to="/refund" className="hover:text-emerald-400">Refund Policy</Link>
+            <Link to="/disclaimer" className="hover:text-emerald-400">Disclaimer</Link>
+            <Link to="/contact" className="hover:text-emerald-400">Contact</Link>
+          </nav>
+          <p className="text-xs font-medium text-slate-500">© 2026 TaskMint. All rights reserved. · support@taskmint.click</p>
         </div>
       </footer>
     </div>

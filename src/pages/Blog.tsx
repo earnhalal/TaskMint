@@ -19,16 +19,16 @@ export default function Blog() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <button 
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-slate-600 hover:text-blue-600 font-bold transition-colors"
+            className="flex items-center gap-2 text-slate-600 hover:text-emerald-700 font-bold transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Home</span>
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-black text-xl tracking-tight text-slate-900">Task<span className="text-amber-500">Mint</span> Blog</span>
+            <span className="font-extrabold text-xl tracking-tight text-slate-900">Task<span className="text-emerald-600">Mint</span> Blog</span>
           </div>
           <div className="w-24 hidden md:block"></div>
         </div>
@@ -36,7 +36,7 @@ export default function Blog() {
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Online Earning Insights</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Online Earning Insights</h1>
           <p className="text-slate-500 max-w-2xl mx-auto font-medium">
             Stay updated with the latest tips, tricks, and guides to maximize your online work earnings on TaskMint.
           </p>
@@ -60,9 +60,9 @@ export default function Blog() {
                     referrerPolicy="no-referrer"
                   />
                 ) : (
-                  <div className="text-slate-400 font-black text-4xl tracking-tighter">TM</div>
+                  <div className="text-slate-400 font-extrabold text-4xl tracking-tighter">TM</div>
                 )}
-                <div className="absolute top-4 left-4 bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                <div className="absolute top-4 left-4 bg-emerald-600 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">
                   {post.category}
                 </div>
               </div>
@@ -77,7 +77,7 @@ export default function Blog() {
                     {post.author}
                   </div>
                 </div>
-                <h2 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-blue-600 transition-colors leading-tight">
+                <h2 className="text-2xl font-extrabold text-slate-900 mb-4 group-hover:text-emerald-700 transition-colors leading-tight">
                   {post.title}
                 </h2>
                 <p className="text-slate-500 text-sm font-medium mb-6 line-clamp-3 leading-relaxed">
@@ -86,7 +86,7 @@ export default function Blog() {
                 <div className="mt-auto">
                   <button 
                     onClick={() => navigate(`/blog/${post.slug}`)}
-                    className="flex items-center gap-2 text-blue-600 font-black text-sm uppercase tracking-widest group/btn"
+                    className="flex items-center gap-2 text-emerald-700 font-extrabold text-sm uppercase tracking-widest group/btn"
                   >
                     Read Full Article 
                     <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
