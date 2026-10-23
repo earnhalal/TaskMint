@@ -205,13 +205,13 @@ export default function PartnerToolsView({
   const renderAnalytics = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Team</p>
-          <p className="text-2xl font-black text-slate-900 italic">{referralStats?.totalReferrals || 0}</p>
+        <div className="bg-[#15181D] p-5 rounded-3xl border border-white/5 shadow-sm">
+          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Total Team</p>
+          <p className="text-2xl font-black text-white italic">{referralStats?.totalReferrals || 0}</p>
         </div>
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Active Team</p>
-          <p className="text-2xl font-black text-emerald-600 italic">{referralStats?.activeMembers || 0}</p>
+        <div className="bg-[#15181D] p-5 rounded-3xl border border-white/5 shadow-sm">
+          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Active Team</p>
+          <p className="text-2xl font-black text-emerald-400 italic">{referralStats?.activeMembers || 0}</p>
         </div>
       </div>
       
@@ -227,21 +227,21 @@ export default function PartnerToolsView({
       </div>
 
       <div className="space-y-3">
-        <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest px-1 italic">Recent Team Activity</h4>
+        <h4 className="text-xs font-black text-white uppercase tracking-widest px-1 italic">Recent Team Activity</h4>
         <div className="space-y-2">
           {referrals?.slice(0, 10).map((ref, idx) => (
-            <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between group hover:border-teal-100 transition-colors">
+            <div key={idx} className="bg-[#15181D] p-4 rounded-2xl border border-white/5 flex items-center justify-between group hover:border-teal-100 transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden border border-slate-100">
+                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/5">
                    <DynamicAvatar avatarId={ref.avatarId} fallbackText={ref.name} className="w-full h-full" />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-slate-800 italic">{ref.name || 'Member'}</p>
-                  <p className="text-[9px] font-bold text-slate-400">Level {ref.level || 1} Referral</p>
+                  <p className="text-xs font-black text-zinc-100 italic">{ref.name || 'Member'}</p>
+                  <p className="text-[9px] font-bold text-zinc-500">Level {ref.level || 1} Referral</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black text-emerald-600 italic">Rs {ref.earnings || 0}</p>
+                <p className="text-[10px] font-black text-emerald-400 italic">Rs {ref.earnings || 0}</p>
                 <p className={`text-[8px] font-black uppercase tracking-widest ${ref.status === 'active' ? 'text-teal-500' : 'text-slate-300'}`}>
                   {ref.status || 'Inactive'}
                 </p>
@@ -251,7 +251,7 @@ export default function PartnerToolsView({
           {(!referrals || referrals.length === 0) && (
             <div className="py-12 text-center">
               <Users className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-              <p className="text-xs font-bold text-slate-400">No team members yet.</p>
+              <p className="text-xs font-bold text-zinc-500">No team members yet.</p>
             </div>
           )}
         </div>
@@ -263,11 +263,11 @@ export default function PartnerToolsView({
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-2 px-1">
         <div>
-          <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest italic">Pending Activations</h4>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Team Priority Queue</p>
+          <h4 className="text-xs font-black text-white uppercase tracking-widest italic">Pending Activations</h4>
+          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Team Priority Queue</p>
         </div>
-        <div className="bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
-           <span className="text-[9px] font-black text-teal-600 uppercase tracking-widest">{pendingActivations.length} Pending</span>
+        <div className="bg-teal-500/10 px-3 py-1 rounded-full border border-teal-100">
+           <span className="text-[9px] font-black text-teal-400 uppercase tracking-widest">{pendingActivations.length} Pending</span>
         </div>
       </div>
 
@@ -278,27 +278,27 @@ export default function PartnerToolsView({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm relative group hover:border-emerald-100 transition-colors"
+            className="bg-[#15181D] p-5 rounded-[2rem] border border-white/5 shadow-sm relative group hover:border-emerald-500/20 transition-colors"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0 border border-emerald-100">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0 border border-emerald-500/20">
                    <Clock className="w-6 h-6" />
                 </div>
                 <div>
-                   <p className="text-xs font-black text-slate-800 italic uppercase">{dep.userName || 'Member'}</p>
-                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Account Activation Request</p>
+                   <p className="text-xs font-black text-zinc-100 italic uppercase">{dep.userName || 'Member'}</p>
+                   <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Account Activation Request</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black text-slate-900 italic">Rs {dep.amount}</p>
+                <p className="text-[10px] font-black text-white italic">Rs {dep.amount}</p>
                 <p className="text-[8px] font-black text-teal-500 uppercase tracking-widest">{dep.method}</p>
               </div>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-4 mb-4 border border-slate-100/50">
-               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Transcription / Proof</p>
-               <p className="text-[11px] font-bold text-slate-600 break-all">{dep.transactionId || 'No Transaction ID provided'}</p>
+            <div className="bg-white/5 rounded-2xl p-4 mb-4 border border-slate-100/50">
+               <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1.5">Transcription / Proof</p>
+               <p className="text-[11px] font-bold text-zinc-300 break-all">{dep.transactionId || 'No Transaction ID provided'}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -308,7 +308,7 @@ export default function PartnerToolsView({
                >
                  <CheckCircle2 className="w-4 h-4" /> Approve
                </button>
-               <button className="bg-slate-100 text-slate-400 rounded-2xl py-3 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2">
+               <button className="bg-white/10 text-zinc-500 rounded-2xl py-3 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2">
                  <XCircle className="w-4 h-4" /> Reject
                </button>
             </div>
@@ -317,7 +317,7 @@ export default function PartnerToolsView({
 
         {pendingActivations.length === 0 && !loadingApprovals && (
            <div className="py-20 text-center">
-             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 shadow-inner">
+             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/5 shadow-inner">
                 <Users className="w-8 h-8 text-slate-200" />
              </div>
              <p className="text-xs font-black text-slate-300 uppercase tracking-widest italic">All clear! No pending activations.</p>
@@ -325,7 +325,7 @@ export default function PartnerToolsView({
         )}
 
         {loadingApprovals && (
-           <div className="py-12 text-center text-xs font-bold text-slate-400 flex items-center justify-center gap-3">
+           <div className="py-12 text-center text-xs font-bold text-zinc-500 flex items-center justify-center gap-3">
               <div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
               Scanning Network...
            </div>
@@ -345,21 +345,21 @@ export default function PartnerToolsView({
         <div className="flex items-center gap-4">
           <button 
             onClick={activeTab === 'list' ? onBack : () => setActiveTab('list')}
-            className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-600 active:scale-95 transition-all"
+            className="w-10 h-10 rounded-xl bg-[#15181D] shadow-sm flex items-center justify-center text-zinc-300 active:scale-95 transition-all"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">
+            <h2 className="text-xl font-black text-white tracking-tight italic uppercase">
               {activeTab === 'list' ? 'Partner Tools' : activeTab === 'analytics' ? 'Team Analytics' : 'Quick Approvals'}
             </h2>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Management Dashboard</p>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Management Dashboard</p>
           </div>
         </div>
         <div className="bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
            <div className="flex items-center gap-2">
              <Crown className="w-3.5 h-3.5 text-emerald-500" />
-             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{partnerTier?.toUpperCase() || 'BASIC'}</span>
+             <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{partnerTier?.toUpperCase() || 'BASIC'}</span>
            </div>
         </div>
       </div>
@@ -380,8 +380,8 @@ export default function PartnerToolsView({
                 whileTap={{ scale: 0.99 }}
                 className={`relative p-5 rounded-[2rem] border overflow-hidden transition-all ${
                   tool.unlocked 
-                    ? 'bg-white border-slate-100 shadow-xl shadow-slate-200/50' 
-                    : 'bg-white/40 border-slate-200'
+                    ? 'bg-[#15181D] border-white/5 shadow-xl shadow-slate-200/50' 
+                    : 'bg-white/40 border-white/10'
                 }`}
               >
 
@@ -393,21 +393,21 @@ export default function PartnerToolsView({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        <h3 className={`font-black text-sm italic tracking-tight ${!tool.unlocked ? 'text-slate-400' : 'text-slate-800'}`}>{tool.name}</h3>
+                        <h3 className={`font-black text-sm italic tracking-tight ${!tool.unlocked ? 'text-zinc-500' : 'text-zinc-100'}`}>{tool.name}</h3>
                         {!tool.unlocked && <Lock className="w-3 h-3 text-slate-300" />}
                       </div>
                       <div className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md ${
-                        tool.unlocked ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                        tool.unlocked ? 'bg-emerald-100 text-emerald-400' : 'bg-white/10 text-zinc-500'
                       }`}>
                         {tool.unlocked ? 'Active' : 'Locked'}
                       </div>
                     </div>
-                    <p className={`text-[10px] font-bold leading-relaxed ${!tool.unlocked ? 'text-slate-400' : 'text-slate-500'}`}>{tool.description}</p>
+                    <p className={`text-[10px] font-bold leading-relaxed ${!tool.unlocked ? 'text-zinc-500' : 'text-zinc-400'}`}>{tool.description}</p>
                     
                     {tool.unlocked ? (
                       <button 
                         onClick={tool.action}
-                        className="mt-4 flex items-center gap-2 text-teal-600 text-[10px] font-black uppercase tracking-widest group"
+                        className="mt-4 flex items-center gap-2 text-teal-400 text-[10px] font-black uppercase tracking-widest group"
                       >
                         {tool.actionText} <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                       </button>
@@ -415,10 +415,10 @@ export default function PartnerToolsView({
                       <div className="mt-4 flex flex-col gap-2">
                         <div className="flex items-center gap-1.5">
                           <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Available for {tool.minTier.toUpperCase()}+</span>
+                          <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Available for {tool.minTier.toUpperCase()}+</span>
                         </div>
                         <button 
-                          className="text-left text-emerald-600 text-[9px] font-black uppercase tracking-widest hover:translate-x-1 transition-transform flex items-center gap-1"
+                          className="text-left text-emerald-400 text-[9px] font-black uppercase tracking-widest hover:translate-x-1 transition-transform flex items-center gap-1"
                         >
                           Show Plans to Unlock <ArrowRight className="w-2.5 h-2.5" />
                         </button>
@@ -462,13 +462,13 @@ export default function PartnerToolsView({
               <Rocket className="w-5 h-5 text-emerald-500" />
               <h4 className="text-white font-black italic tracking-tighter uppercase">Power Up Your Team</h4>
             </div>
-            <p className="text-[11px] text-slate-400 font-bold leading-relaxed mb-6">
+            <p className="text-[11px] text-zinc-500 font-bold leading-relaxed mb-6">
               Higher tiers unlock exclusive management tools that help you scale your referral income by 300%. Start upgrading now to access advanced automation.
             </p>
             <div className="flex items-center gap-4">
               <div className="flex -space-x-3">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-[#022c22] bg-slate-800 flex items-center justify-center overflow-hidden">
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-[#022c22] bg-white/10 flex items-center justify-center overflow-hidden">
                     <DynamicAvatar avatarId="" fallbackText={`Partner ${i}`} className="w-full h-full" />
                   </div>
                 ))}
@@ -476,7 +476,7 @@ export default function PartnerToolsView({
                   +12k
                 </div>
               </div>
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Global Partners Active</p>
+              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Global Partners Active</p>
             </div>
           </div>
         </div>

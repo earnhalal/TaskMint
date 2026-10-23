@@ -339,7 +339,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
                  <CheckCheck className="w-8 h-8 text-teal-500" />
               </div>
               <h2 className="text-xl font-black text-white tracking-tight">Feedback Received!</h2>
-              <p className="text-slate-400 text-sm italic">"Shukriya! Aap ki feedback hamare liye bohat important hai."</p>
+              <p className="text-zinc-500 text-sm italic">"Shukriya! Aap ki feedback hamare liye bohat important hai."</p>
               <button 
                 onClick={onBack}
                 className="w-full py-4 rounded-2xl bg-teal-600 text-white font-bold shadow-lg shadow-teal-500/20 active:scale-95 transition-all"
@@ -354,7 +354,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
               </div>
               <div>
                 <h2 className="text-xl font-black text-white tracking-tight">Session Finished</h2>
-                <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Please rate your chat with {agent.name}</p>
+                <p className="text-xs font-bold text-zinc-500 mt-1 uppercase tracking-widest">Please rate your chat with {agent.name}</p>
               </div>
 
               <div className="flex justify-center gap-2">
@@ -362,7 +362,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
                    <button
                      key={star}
                      onClick={() => setRating(star)}
-                     className={`text-2xl transition-all ${rating >= star ? 'text-emerald-500 scale-110' : 'text-slate-700 hover:text-slate-500'}`}
+                     className={`text-2xl transition-all ${rating >= star ? 'text-emerald-500 scale-110' : 'text-zinc-200 hover:text-zinc-400'}`}
                    >
                      ★
                    </button>
@@ -377,7 +377,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
                 SUBMIT FEEDBACK
               </button>
 
-              <button onClick={onBack} className="text-slate-500 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors">
+              <button onClick={onBack} className="text-zinc-400 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors">
                  Skip
               </button>
             </div>
@@ -392,10 +392,10 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
      return (
        <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-[#022c22]">
           <div className="w-24 h-24 rounded-full border border-teal-500/20 flex items-center justify-center relative bg-[#0F172A] mb-8 shadow-2xl">
-             <Lock className="w-10 h-10 text-slate-500" />
+             <Lock className="w-10 h-10 text-zinc-400" />
           </div>
           <h2 className="text-white font-black text-2xl mb-4 tracking-tighter uppercase">Session Locked</h2>
-          <p className="text-slate-400 text-sm leading-relaxed max-w-xs mb-8">
+          <p className="text-zinc-500 text-sm leading-relaxed max-w-xs mb-8">
             {agent.name} abhi dusre users ke saath masroof hai. Aap <span className="text-teal-400 font-black">{remainingMins} minutes</span> baad dubara rabta kar sakte hain.
           </p>
           <button 
@@ -458,7 +458,7 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
           </button>
           
           <div className="relative shrink-0">
-            <div className="w-10 h-10 rounded-[12px] bg-slate-800 overflow-hidden border border-teal-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]">
+            <div className="w-10 h-10 rounded-[12px] bg-white/10 overflow-hidden border border-teal-500/50 shadow-[0_0_10px_rgba(99,102,241,0.3)]">
                <img src={agent.image} alt={agent.name} className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#022c22] rounded-full"></div>

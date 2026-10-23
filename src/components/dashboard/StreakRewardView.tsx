@@ -159,7 +159,7 @@ export default function StreakRewardView({ onBack, onUpdateBalance }: StreakRewa
                   relative aspect-square rounded-xl flex flex-col items-center justify-center text-xs font-bold transition-all
                   ${isCompleted ? 'bg-green-500/20 text-green-400 border border-green-500/30' : ''}
                   ${isToday ? 'bg-amber-400/10 text-amber-400 border-2 border-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.3)]' : ''}
-                  ${isLocked ? 'bg-[#022c22] text-gray-500 border border-white/5' : ''}
+                  ${isLocked ? 'bg-[#022c22] text-zinc-400 border border-white/5' : ''}
                 `}
               >
                 <span className="mb-1 opacity-80">{dayNumber}</span>
@@ -180,8 +180,8 @@ export default function StreakRewardView({ onBack, onUpdateBalance }: StreakRewa
           className={`
             w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all
             ${canClaim 
-              ? 'bg-white text-[#022c22] hover:bg-gray-100 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
-              : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              ? 'bg-[#15181D] text-[#022c22] hover:bg-white/10 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+              : 'bg-gray-700 text-zinc-500 cursor-not-allowed'
             }
           `}
         >
@@ -194,7 +194,7 @@ export default function StreakRewardView({ onBack, onUpdateBalance }: StreakRewa
             </>
           )}
         </button>
-        <p className="text-center text-xs text-gray-400 mt-3">
+        <p className="text-center text-xs text-zinc-500 mt-3">
           Check in every day to build your vault. Missing a day will NOT reset your streak, but you must complete 30 days to withdraw.
         </p>
       </div>

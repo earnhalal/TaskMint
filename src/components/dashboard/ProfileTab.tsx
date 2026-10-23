@@ -93,24 +93,24 @@ export default function ProfileTab({
 
   const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <div className="mb-6">
-      <h3 className="text-[10px] font-bold text-slate-400 tracking-wider uppercase mb-3 px-1">{title}</h3>
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <h3 className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase mb-3 px-1">{title}</h3>
+      <div className="bg-[#15181D] rounded-2xl shadow-sm border border-white/5 overflow-hidden">
         {children}
       </div>
     </div>
   );
 
   const Item = ({ icon, label, hasToggle = false, isDestructive = false, onClick }: any) => (
-    <div onClick={onClick} className="flex items-center justify-between p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors cursor-pointer">
+    <div onClick={onClick} className="flex items-center justify-between p-4 border-b border-slate-50 last:border-0 hover:bg-white/5 transition-colors cursor-pointer">
       <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDestructive ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-600'}`}>
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDestructive ? 'bg-red-500/10 text-red-500' : 'bg-white/10 text-zinc-300'}`}>
           {icon}
         </div>
-        <span className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-slate-700'}`}>{label}</span>
+        <span className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-zinc-200'}`}>{label}</span>
       </div>
       {hasToggle ? (
-        <div className="w-10 h-6 bg-slate-200 rounded-full relative">
-          <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+        <div className="w-10 h-6 bg-white/15 rounded-full relative">
+          <div className="absolute left-1 top-1 w-4 h-4 bg-[#15181D] rounded-full shadow-sm"></div>
         </div>
       ) : (
         <ChevronRight className={`w-4 h-4 ${isDestructive ? 'text-red-300' : 'text-slate-300'}`} />
@@ -130,14 +130,14 @@ export default function ProfileTab({
         <motion.div 
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
-          className="mb-4 bg-gradient-to-r from-emerald-50 to-orange-50 border border-emerald-200 rounded-2xl p-4 shadow-sm"
+          className="mb-4 bg-gradient-to-r from-emerald-50 to-orange-50 border border-emerald-500/25 rounded-2xl p-4 shadow-sm"
         >
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <AlertCircle className="w-5 h-5 text-emerald-600" />
+              <AlertCircle className="w-5 h-5 text-emerald-400" />
             </div>
             <div className="flex-1">
-              <h4 className="text-sm font-black text-emerald-900 uppercase tracking-tighter">Complete Profile (Alert)</h4>
+              <h4 className="text-sm font-black text-emerald-200 uppercase tracking-tighter">Complete Profile (Alert)</h4>
               <p className="text-[11px] font-bold text-emerald-700/70 mb-3">Please fill all details including Gender & Withdrawal Account to use all features.</p>
               <button 
                 onClick={onEditProfile}
@@ -152,7 +152,7 @@ export default function ProfileTab({
 
       {/* Activation Status Indicator - Moved from Invite Tab */}
       {status.toLowerCase() !== 'active' && (
-        <div className="mb-6 p-4 rounded-2xl flex items-center justify-between border-2 bg-red-50 border-red-100 text-red-700">
+        <div className="mb-6 p-4 rounded-2xl flex items-center justify-between border-2 bg-red-500/10 border-red-100 text-red-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-red-100">
               <AlertCircle className="w-6 h-6" />
@@ -222,7 +222,7 @@ export default function ProfileTab({
                         </div>
                         <button 
                             onClick={onEditProfile}
-                            className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded flex items-center justify-center shadow-lg text-slate-900 border border-black/5 active:scale-90 transition-all hover:bg-emerald-100 hover:text-emerald-600"
+                            className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#15181D] rounded flex items-center justify-center shadow-lg text-white border border-black/5 active:scale-90 transition-all hover:bg-emerald-100 hover:text-emerald-400"
                         >
                             <PenTool className="w-2.5 h-2.5" />
                         </button>
@@ -240,7 +240,7 @@ export default function ProfileTab({
                             </p>
                             <div className="h-2.5 w-px bg-white/20"></div>
                             <p className="text-[9px] font-bold text-white/60 flex items-center gap-1">
-                                <Clock className="w-2.5 h-2.5 text-slate-400" />
+                                <Clock className="w-2.5 h-2.5 text-zinc-500" />
                                 <span className="tracking-wide">Since {joiningDate ? (joiningDate.includes('T') ? new Date(joiningDate).toLocaleDateString([], { month: 'short', year: 'numeric' }) : joiningDate) : '2024'}</span>
                             </p>
                         </div>
@@ -255,15 +255,15 @@ export default function ProfileTab({
         <div className="col-span-2 p-4 relative overflow-hidden group cursor-pointer" onClick={onManageWalletClick}>
             <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex justify-between items-center relative z-10 w-full mb-1">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-1.5 border border-slate-200/50 bg-slate-50 px-2 py-0.5 rounded-full">
+                  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-1.5 border border-slate-200/50 bg-white/5 px-2 py-0.5 rounded-full">
                     <Wallet className="w-2.5 h-2.5" /> Liquid Balance
                   </p>
                   <BarChart3 className="w-5 h-5 text-emerald-600/50" />
             </div>
             <div className="relative z-10">
-                  <p className="text-3xl font-black text-emerald-600 tracking-tighter flex items-baseline gap-1.5 italic -ml-0.5">
+                  <p className="text-3xl font-black text-emerald-400 tracking-tighter flex items-baseline gap-1.5 italic -ml-0.5">
                     {balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'} 
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest not-italic">PKR</span>
+                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest not-italic">PKR</span>
                   </p>
             </div>
         </div>
@@ -271,17 +271,17 @@ export default function ProfileTab({
         {lockedBalance > 0 && (
           <div className="p-6 bg-emerald-50/20 border-t border-emerald-100/30 flex justify-between items-center group">
               <div>
-                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
                     <Clock className="w-3 h-3" /> Locked Distribution
                 </p>
-                <p className="text-2xl font-black text-emerald-600 italic tracking-tighter">Rs {lockedBalance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</p>
+                <p className="text-2xl font-black text-emerald-400 italic tracking-tighter">Rs {lockedBalance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}</p>
                 <div className="flex items-center gap-2 mt-2 bg-emerald-500/10 px-3 py-1 rounded-lg w-fit border border-emerald-500/10">
                   <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
-                  <p className="text-[9px] text-emerald-600 font-black uppercase tracking-widest">Protocol Stake Active</p>
+                  <p className="text-[9px] text-emerald-400 font-black uppercase tracking-widest">Protocol Stake Active</p>
                 </div>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:rotate-12 transition-transform">
-                <Shield className="w-6 h-6 text-emerald-600" />
+                <Shield className="w-6 h-6 text-emerald-400" />
               </div>
           </div>
         )}
@@ -314,7 +314,7 @@ export default function ProfileTab({
               </Section>
 
       <Section title="Support">
-        <Item icon={<Headphones className="w-4 h-4 text-blue-600" />} label="Live Support Chat" onClick={onSupportAIClick} />
+        <Item icon={<Headphones className="w-4 h-4 text-blue-400" />} label="Live Support Chat" onClick={onSupportAIClick} />
         <Item icon={<LogOut className="w-4 h-4" />} label="Log Out" isDestructive onClick={handleLogout} />
         <Item icon={<AlertCircle className="w-4 h-4" />} label="Delete Account" isDestructive onClick={() => setShowDeleteModal(true)} />
       </Section>
@@ -325,19 +325,19 @@ export default function ProfileTab({
           <motion.div 
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-white rounded-[32px] p-6 max-w-sm w-full shadow-2xl overflow-hidden relative"
+            className="bg-[#15181D] rounded-[32px] p-6 max-w-sm w-full shadow-2xl overflow-hidden relative"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
             
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-400">
                   <Briefcase className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Premium Jobs</h3>
+                <h3 className="text-xl font-black text-white tracking-tight">Premium Jobs</h3>
               </div>
-              <button onClick={() => setShowJobsModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-                <LogOut className="w-5 h-5 text-slate-400 rotate-180" />
+              <button onClick={() => setShowJobsModal(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <LogOut className="w-5 h-5 text-zinc-500 rotate-180" />
               </button>
             </div>
 
@@ -349,14 +349,14 @@ export default function ProfileTab({
                 { label: 'Data Entry', icon: <Database className="w-4 h-4" />, color: 'emerald' },
                 { label: 'Typing Expert', icon: <Keyboard className="w-4 h-4" />, color: 'amber' },
               ].map((job, idx) => (
-                <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl group opacity-60">
+                <div key={idx} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl group opacity-60">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-white shadow-sm text-slate-600`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-[#15181D] shadow-sm text-zinc-300`}>
                       {job.icon}
                     </div>
-                    <span className="text-sm font-bold text-slate-700">{job.label}</span>
+                    <span className="text-sm font-bold text-zinc-200">{job.label}</span>
                   </div>
-                  <div className="bg-slate-200 text-slate-500 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider">
+                  <div className="bg-white/15 text-zinc-400 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider">
                     COMING SOON
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export default function ProfileTab({
 
             <button 
               onClick={() => setShowJobsModal(false)}
-              className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-slate-900/20"
+              className="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl active:scale-95 transition-all shadow-lg shadow-slate-900/20"
             >
               Close
             </button>
@@ -379,19 +379,19 @@ export default function ProfileTab({
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl"
+            className="bg-[#15181D] rounded-3xl p-6 max-w-sm w-full shadow-xl"
           >
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto">
               <AlertCircle className="w-6 h-6 text-red-600" />
             </div>
-            <h3 className="text-xl font-bold text-center text-slate-900 mb-2">Delete Account?</h3>
-            <p className="text-sm text-center text-slate-500 mb-6">
+            <h3 className="text-xl font-bold text-center text-white mb-2">Delete Account?</h3>
+            <p className="text-sm text-center text-zinc-400 mb-6">
               This action is permanent and cannot be undone. All your earnings, referrals, and data will be lost forever.
             </p>
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors"
+                className="flex-1 bg-white/10 text-zinc-200 font-bold py-3 rounded-xl hover:bg-white/15 transition-colors"
               >
                 Cancel
               </button>

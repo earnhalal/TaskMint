@@ -193,7 +193,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       <div className="mb-8 rounded-[2rem] p-6 shadow-xl border relative overflow-hidden bg-[#022c22] border-white/5">
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-4 px-1">
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Your Invite Link</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Your Invite Link</label>
             <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-white/10 text-white">{referralCode}</span>
           </div>
           
@@ -203,7 +203,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             </span>
             <button 
               onClick={handleCopy}
-              className={`h-12 shrink-0 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'bg-emerald-500 text-[#022c22] shadow-lg shadow-emerald-500/20' : 'bg-white text-[#022c22] hover:bg-slate-200 shadow-lg shadow-white/10'}`}
+              className={`h-12 shrink-0 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${copied ? 'bg-emerald-500 text-[#022c22] shadow-lg shadow-emerald-500/20' : 'bg-[#15181D] text-[#022c22] hover:bg-white/15 shadow-lg shadow-white/10'}`}
             >
               {copied ? 'Copied!' : 'Copy Link'}
             </button>
@@ -231,7 +231,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
             <div className="flex items-center justify-between mb-4">
               <div className="text-white">
                   <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Legacy Indirect Commission</p>
-                  <p className="text-xs text-slate-400">Click below to claim earnings</p>
+                  <p className="text-xs text-zinc-500">Click below to claim earnings</p>
               </div>
               <p className="text-3xl font-black text-white">Rs {pendingIndirect?.toLocaleString() || 0}</p>
             </div>
@@ -289,7 +289,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                   <div className={`absolute inset-0 ${styles.bgGlow} pointer-events-none`} />
                 )}
                 
-                <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-1 ${isActive ? 'text-white' : 'text-slate-500'}`}>
+                <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-1 ${isActive ? 'text-white' : 'text-zinc-400'}`}>
                   Level {lvl.replace('L', '')}
                 </span>
                 
@@ -298,14 +298,14 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                 </span>
                 
                 <div className={`w-full text-center py-1.5 mb-2 rounded-lg bg-black/40 border border-white/5`}>
-                  <p className="text-[7.5px] sm:text-[8px] text-slate-500 uppercase tracking-widest font-bold mb-0.5">Total Earned</p>
+                  <p className="text-[7.5px] sm:text-[8px] text-zinc-400 uppercase tracking-widest font-bold mb-0.5">Total Earned</p>
                   <p className={`text-[11px] sm:text-xs font-black ${styles.text}`}>Rs {totalEarning.toLocaleString()}</p>
                 </div>
 
                 <div className={`flex items-center justify-center w-full gap-1 sm:gap-1.5 py-1 rounded-full text-[8.5px] sm:text-[9px] font-bold transition-colors ${
-                  isActive ? 'bg-white/10 text-white' : 'bg-white/5 text-slate-400 group-hover:bg-white/10'
+                  isActive ? 'bg-white/10 text-white' : 'bg-white/5 text-zinc-500 group-hover:bg-white/10'
                 }`}>
-                  <UsersRound className={`w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 ${isActive ? styles.icon : 'text-slate-500'}`} /> {count} Mem
+                  <UsersRound className={`w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0 ${isActive ? styles.icon : 'text-zinc-400'}`} /> {count} Mem
                 </div>
               </button>
             );
@@ -316,12 +316,12 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
           {loadingTree ? (
             <div className="rounded-[2rem] p-12 text-center border border-dashed bg-[#022c22] border-white/10">
               <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-20 text-emerald-500 animate-pulse" />
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Scanning Network...</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Scanning Network...</p>
             </div>
           ) : activeData.length === 0 ? (
             <div className="rounded-[2rem] p-12 text-center border border-dashed bg-[#022c22] border-white/10">
               <UsersRound className="w-10 h-10 mx-auto mb-3 opacity-20 text-white" />
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">No members in this level</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">No members in this level</p>
             </div>
           ) : (
             activeData.map((r: any, idx: number) => {
@@ -335,14 +335,14 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                 className="p-4 rounded-[1.5rem] border flex items-center justify-between group transition-all bg-[#022c22] border-white/5 hover:bg-white/5 hover:border-white/10"
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center font-black text-lg shrink-0 transition-transform group-hover:scale-105 ${isPaid ? 'bg-emerald-500 text-[#022c22]' : 'bg-[#151515] text-slate-600 border border-white/5'}`}>
+                  <div className={`w-12 h-12 rounded-[1rem] flex items-center justify-center font-black text-lg shrink-0 transition-transform group-hover:scale-105 ${isPaid ? 'bg-emerald-500 text-[#022c22]' : 'bg-[#151515] text-zinc-300 border border-white/5'}`}>
                     {r.name ? r.name.substring(0, 1).toUpperCase() : '?'}
                   </div>
                   <div className="min-w-0">
                     <h4 className="text-sm font-black italic tracking-tighter uppercase truncate mb-0.5 text-slate-200">
                       {r.name || 'Anonymous User'}
                     </h4>
-                    <span className="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 text-slate-500">
+                    <span className="text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 text-zinc-400">
                       <Clock className="w-2.5 h-2.5" /> {formatDate(r.timestamp) || 'Recent'}
                     </span>
                   </div>
@@ -359,7 +359,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                       </span>
                     </div>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-white/5 text-slate-400 border border-white/10">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-white/5 text-zinc-500 border border-white/10">
                       Pending
                     </span>
                   )}

@@ -61,7 +61,7 @@ export default function AnnouncementBar({ dynamicMessage, onClose }: Announcemen
               className="flex items-center gap-2"
             >
               {defaultAnnouncements[index].icon}
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic truncate">
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic truncate">
                 {defaultAnnouncements[index].text}
               </span>
             </motion.div>
@@ -72,7 +72,7 @@ export default function AnnouncementBar({ dynamicMessage, onClose }: Announcemen
       {onClose && (
         <button 
           onClick={onClose}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white transition-colors"
+          className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-white transition-colors"
         >
           <X className="w-3.5 h-3.5" />
         </button>

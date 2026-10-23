@@ -88,7 +88,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
       price: `Rs ${appSettings?.activationFee || 150}`,
       duration: 'Lifetime Access',
       icon: <Star className="w-6 h-6" />,
-      color: 'from-slate-600 to-slate-800',
+      color: 'from-slate-600 to-[#15181D]',
       tagline: 'Standard Earning Mode',
       adEarnings: 'Rs 5 - 10 / Daily (Min)',
       features: [
@@ -98,7 +98,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
         'Basic Support'
       ],
       buttonText: currentRole !== 'partner' ? 'Active Plan' : 'Basic Plan',
-      buttonColor: 'bg-slate-200 text-slate-500 cursor-not-allowed',
+      buttonColor: 'bg-white/15 text-zinc-400 cursor-not-allowed',
       isCurrent: currentRole !== 'partner',
       action: () => {}
     },
@@ -202,7 +202,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
           <h2 className="text-3xl font-black text-white mb-2 tracking-tighter italic uppercase">
             Partner <span className="text-emerald-500">Plans</span>
           </h2>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] max-w-xs mx-auto mb-6 opacity-60">
+          <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] max-w-xs mx-auto mb-6 opacity-60">
             More Earnings Every Day
           </p>
           
@@ -221,7 +221,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`bg-white rounded-[2.5rem] border ${plan.isPopular ? 'border-emerald-200' : 'border-slate-100'} overflow-hidden shadow-2xl shadow-slate-200/50 flex flex-col relative group`}
+              className={`bg-[#15181D] rounded-[2.5rem] border ${plan.isPopular ? 'border-emerald-500/25' : 'border-white/5'} overflow-hidden shadow-2xl shadow-slate-200/50 flex flex-col relative group`}
             >
               {plan.isCurrent && (
                 <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full z-10 uppercase tracking-widest shadow-lg shadow-emerald-500/20">
@@ -252,20 +252,20 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
 
               <div className="p-8">
                 {/* Daily Ad Earnings Section - ENHANCED */}
-                <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group-hover:bg-teal-50 transition-colors">
+                <div className="mb-8 p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group-hover:bg-teal-500/10 transition-colors">
                    <div className="flex items-center gap-3">
                       <Zap className={`w-5 h-5 ${plan.isPopular ? 'text-emerald-500' : 'text-teal-500'}`} />
                       <div>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Estimated Daily Ads Income</p>
-                        <p className={`text-sm font-black italic tracking-tight ${plan.isPopular ? 'text-emerald-600' : 'text-teal-600'}`}>{plan.adEarnings}</p>
+                        <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Estimated Daily Ads Income</p>
+                        <p className={`text-sm font-black italic tracking-tight ${plan.isPopular ? 'text-emerald-400' : 'text-teal-400'}`}>{plan.adEarnings}</p>
                       </div>
                    </div>
                 </div>
 
                 <ul className="space-y-4 mb-10">
                   {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-4 text-xs font-black text-slate-600 uppercase tracking-tight">
-                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${plan.isPopular ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                    <li key={idx} className="flex items-center gap-4 text-xs font-black text-zinc-300 uppercase tracking-tight">
+                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 ${plan.isPopular ? 'bg-emerald-100 text-emerald-400' : 'bg-white/10 text-zinc-500'}`}>
                         <Check className="w-3 h-3" strokeWidth={3} />
                       </div>
                       {feature}

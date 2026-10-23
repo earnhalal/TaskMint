@@ -84,7 +84,7 @@ const PinLockView: React.FC<PinLockViewProps> = ({ mode, onClose, onPinCorrect, 
       <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm">
         <div className="p-6 text-center border-b border-gray-700 relative">
           <h2 className="text-xl font-bold text-gray-100">{title}</h2>
-          <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-200 text-2xl">&times;</button>
+          <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-gray-200 text-2xl">&times;</button>
         </div>
         
         <div className="p-8">
@@ -107,7 +107,7 @@ const PinLockView: React.FC<PinLockViewProps> = ({ mode, onClose, onPinCorrect, 
               </button>
           </div>
           {mode === 'set' && !isConfirming && (
-             <button onClick={onSkip} className="w-full mt-6 text-sm text-gray-500 hover:text-emerald-500">
+             <button onClick={onSkip} className="w-full mt-6 text-sm text-zinc-400 hover:text-emerald-500">
                 Skip For Now
              </button>
           )}

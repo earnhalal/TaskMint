@@ -31,13 +31,13 @@ const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
     if (!status) return null;
     
     const styles: Record<string, string> = {
-        'Pending': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+        'Pending': 'bg-emerald-100 text-emerald-400 border-emerald-500/25',
         'Approved': 'bg-green-100 text-green-700 border-green-200',
         'Completed': 'bg-green-100 text-green-700 border-green-200',
         'Rejected': 'bg-red-100 text-red-700 border-red-200',
         'Failed': 'bg-red-100 text-red-700 border-red-200',
     };
-    const appliedStyle = styles[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+    const appliedStyle = styles[status] || 'bg-white/10 text-zinc-100 border-white/10';
     
     return (
         <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-md border uppercase tracking-wide ${appliedStyle}`}>
@@ -49,7 +49,7 @@ const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
 const JazzCashIcon = ({ className }: { className?: string }) => (
   <div className={`flex items-center font-bold tracking-tighter ${className}`}>
     <span className="text-red-600">jazz</span>
-    <span className="text-slate-900">Cash</span>
+    <span className="text-white">Cash</span>
   </div>
 );
 
@@ -131,7 +131,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
             <h2 className="text-4xl font-black text-white tracking-tighter mb-3 italic">
               {type === 'activation' ? 'Initiate Activation' : 'Add Cash'}
             </h2>
-            <p className="text-slate-400 text-sm max-w-sm font-medium leading-relaxed">
+            <p className="text-zinc-500 text-sm max-w-sm font-medium leading-relaxed">
               {type === 'activation' 
                 ? `Unlock full potential of the platform by paying a one-time Rs ${appSettings.activationFee} account fee.` 
                 : 'Add funds into your wallet.'}
@@ -150,11 +150,11 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left: Interactive Payment Engine */}
         <div className="lg:col-span-7 space-y-8">
-            <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100/50 relative group">
+            <div className="bg-[#15181D] p-8 rounded-[3rem] shadow-xl border border-slate-100/50 relative group">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h3 className="font-black text-slate-900 text-xl tracking-tight italic">01. Source Account</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Available Payment Channels</p>
+                        <h3 className="font-black text-white text-xl tracking-tight italic">01. Source Account</h3>
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Available Payment Channels</p>
                     </div>
                 </div>
                 
@@ -163,13 +163,13 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                          <button
                             key={methodKey}
                             onClick={() => setMethod(methodKey)}
-                            className="relative flex items-center gap-4 p-6 rounded-[2rem] border-2 transition-all duration-500 border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-500/5"
+                            className="relative flex items-center gap-4 p-6 rounded-[2rem] border-2 transition-all duration-500 border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/5"
                          >
-                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden border border-emerald-100">
+                             <div className="w-12 h-12 bg-[#15181D] rounded-2xl flex items-center justify-center shadow-inner overflow-hidden border border-emerald-500/20">
                                 {accountDetails[methodKey].icon}
                              </div>
                              <div className="text-left">
-                                <span className="font-black text-xs text-emerald-900 uppercase tracking-widest block">{methodKey}</span>
+                                <span className="font-black text-xs text-emerald-200 uppercase tracking-widest block">{methodKey}</span>
                                 <span className="text-[9px] font-bold text-emerald-600/60 uppercase">Verified Gateway</span>
                              </div>
                              <div className="absolute top-4 right-4 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg">
@@ -180,7 +180,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
 
                     {userCountry !== 'Pakistan' && (
                         <div className="relative flex items-center gap-4 p-6 rounded-[2rem] border-2 border-dashed border-teal-200 bg-teal-50/50 opacity-80 cursor-not-allowed group/usdt">
-                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-inner overflow-hidden border border-teal-100 shrink-0">
+                             <div className="w-12 h-12 bg-[#15181D] rounded-2xl flex items-center justify-center shadow-inner overflow-hidden border border-teal-100 shrink-0">
                                 <div className="bg-teal-600 text-white text-[8px] font-black p-1 rounded">USDT</div>
                              </div>
                              <div className="text-left flex-1">
@@ -200,7 +200,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                     <div className="space-y-6 relative z-10">
                         <div className="flex justify-between items-start">
                             <div>
-                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2 font-mono">ACCOUNT TITLE</p>
+                                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">ACCOUNT TITLE</p>
                                 <p className="font-black text-xl text-white tracking-tight italic">{accountDetails[method].title}</p>
                             </div>
                             <div className="p-2.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md">
@@ -209,7 +209,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                         </div>
 
                         <div className="pt-6 border-t border-white/5">
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 font-mono">ACCOUNT NUMBER</p>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-3 font-mono">ACCOUNT NUMBER</p>
                             <div className="flex items-center justify-between">
                                 <p className="text-3xl font-black text-emerald-400 tracking-tighter italic">{accountDetails[method].number}</p>
                                 <button 
@@ -224,19 +224,19 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                 </div>
             </div>
 
-            <div className="bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100/50 relative overflow-hidden">
+            <div className="bg-[#15181D] p-8 rounded-[3rem] shadow-xl border border-slate-100/50 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
-                <h3 className="font-black text-slate-900 text-xl tracking-tight italic mb-8">02. Transfer Details</h3>
+                <h3 className="font-black text-white text-xl tracking-tight italic mb-8">02. Transfer Details</h3>
 
                 <form onSubmit={handleWhatsAppClick} className="space-y-8">
                     <div className="grid grid-cols-1 gap-6">
                         <div className="space-y-3">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Volume (PKR)</label>
+                            <label className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-1">Volume (PKR)</label>
                             <input 
                               type="number" 
                               value={amount} 
                               onChange={e => setAmount(e.target.value)} 
-                              className="w-full bg-slate-50 border-2 border-slate-50 rounded-[1.5rem] px-6 py-4 font-black text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all text-xl italic tracking-tight" 
+                              className="w-full bg-white/5 border-2 border-slate-50 rounded-[1.5rem] px-6 py-4 font-black text-white focus:outline-none focus:border-emerald-500 focus:bg-[#15181D] transition-all text-xl italic tracking-tight" 
                               placeholder="0.00" 
                               required 
                             />
@@ -261,7 +261,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                       <motion.div 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`p-4 rounded-2xl border text-center text-[10px] font-black uppercase tracking-widest ${message.includes('submitted') ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'}`}
+                        className={`p-4 rounded-2xl border text-center text-[10px] font-black uppercase tracking-widest ${message.includes('submitted') ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-600 border-red-100'}`}
                       >
                         {message}
                       </motion.div>
@@ -272,7 +272,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
 
         {/* Right: Security Ledger & History */}
         <div className="lg:col-span-5 space-y-8">
-            <div className="bg-white rounded-[3rem] shadow-xl border border-slate-100/50 overflow-hidden flex flex-col min-h-[600px]">
+            <div className="bg-[#15181D] rounded-[3rem] shadow-xl border border-slate-100/50 overflow-hidden flex flex-col min-h-[600px]">
                 <div className="p-8 border-b border-slate-50 bg-[#022c22] text-white relative">
                     <div className="absolute bottom-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mb-16 blur-2xl"></div>
                     <div className="flex items-center gap-4 relative z-10">
@@ -281,7 +281,7 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                         </div>
                         <div>
                             <h2 className="text-xl font-black text-white tracking-tighter italic">Ledger History</h2>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest opacity-60">Real-time status updates</p>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest opacity-60">Real-time status updates</p>
                         </div>
                     </div>
                 </div>
@@ -294,31 +294,31 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: i * 0.05 }}
                                 key={tx.id || i} 
-                                className="group bg-slate-50/50 p-5 rounded-[1.75rem] border border-slate-100 hover:border-emerald-200 hover:bg-white hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-500 flex justify-between items-center"
+                                className="group bg-slate-50/50 p-5 rounded-[1.75rem] border border-white/5 hover:border-emerald-500/25 hover:bg-[#15181D] hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-500 flex justify-between items-center"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-[1.15rem] bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-all shadow-sm">
+                                    <div className="w-12 h-12 rounded-[1.15rem] bg-[#15181D] border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-emerald-500 transition-all shadow-sm">
                                         <Wallet className="w-5 h-5" />
                                     </div>
                                     <div className="max-w-[120px] sm:max-w-none">
-                                        <p className="font-black text-slate-900 text-xs tracking-tight truncate uppercase italic">{tx.description}</p>
-                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                        <p className="font-black text-white text-xs tracking-tight truncate uppercase italic">{tx.description}</p>
+                                        <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
                                             {new Date(tx.date).toLocaleDateString([], { month: 'short', day: 'numeric' })} @ {new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                     <p className="font-black text-base text-slate-900 tracking-tighter mb-1">+ {tx.amount.toLocaleString()} <span className="text-[8px] text-slate-400 font-bold">PKR</span></p>
+                                     <p className="font-black text-base text-white tracking-tighter mb-1">+ {tx.amount.toLocaleString()} <span className="text-[8px] text-zinc-500 font-bold">PKR</span></p>
                                      <StatusBadge status={tx.status} />
                                 </div>
                             </motion.div>
                         ))
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full text-slate-300 py-12">
-                            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6">
                                 <Wallet className="w-12 h-12 opacity-10" />
                             </div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ledger is empty</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Ledger is empty</p>
                         </div>
                     )}
                 </div>

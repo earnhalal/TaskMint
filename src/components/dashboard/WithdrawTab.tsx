@@ -138,13 +138,13 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
               <p className="text-[9px] font-black text-emerald-600/60 uppercase tracking-[0.4em]">Withdrawal Protocol</p>
             </div>
-            <h2 className="font-black text-3xl text-slate-900 tracking-tighter leading-none italic uppercase">Cash Flow</h2>
+            <h2 className="font-black text-3xl text-white tracking-tighter leading-none italic uppercase">Cash Flow</h2>
           </div>
           <motion.button 
             whileHover={{ scale: 1.05, rotate: 90 }}
             whileTap={{ scale: 0.95 }}
             onClick={onEditAccount}
-            className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-600 shadow-xl hover:border-emerald-500/30 transition-all group"
+            className="w-12 h-12 rounded-2xl bg-[#15181D] border border-white/5 flex items-center justify-center text-zinc-300 shadow-xl hover:border-emerald-500/30 transition-all group"
           >
             <Sparkles className="w-5 h-5 text-emerald-500 group-hover:animate-pulse" />
           </motion.button>
@@ -217,7 +217,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
       {/* Destination Selection */}
       <div className="relative z-10 space-y-4">
         <div className="flex items-center justify-between px-1">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Select Destination</p>
+          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Select Destination</p>
           <span className="text-[9px] font-bold text-slate-300 italic">{accounts.length} Accounts Connected</span>
         </div>
 
@@ -288,14 +288,14 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
             <motion.div 
               whileHover={{ scale: 1.02 }}
               onClick={onEditAccount}
-              className="w-full aspect-[1.6/1] rounded-[28px] border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center gap-4 text-slate-400 group cursor-pointer transition-all"
+              className="w-full aspect-[1.6/1] rounded-[28px] border-2 border-dashed border-white/10 bg-slate-50/50 flex flex-col items-center justify-center gap-4 text-zinc-500 group cursor-pointer transition-all"
             >
-              <div className="w-16 h-16 rounded-[22px] bg-white shadow-xl border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 rounded-[22px] bg-[#15181D] shadow-xl border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <CreditCard className="w-7 h-7 text-emerald-500" />
               </div>
               <div className="text-center space-y-1">
-                <p className="font-black text-slate-900 uppercase tracking-tighter italic">Register Node</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Add Payout Method</p>
+                <p className="font-black text-white uppercase tracking-tighter italic">Register Node</p>
+                <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Add Payout Method</p>
               </div>
             </motion.div>
           )}
@@ -304,21 +304,21 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
 
       {/* Futuristic Amount Engine - Compact Version */}
       <div className="relative z-10 px-1">
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl relative overflow-hidden group/input">
+        <div className="bg-[#15181D] rounded-[32px] border border-white/5 shadow-xl relative overflow-hidden group/input">
             {!isCardExpanded ? (
                <motion.button 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onClick={() => setIsCardExpanded(true)}
-                className="w-full p-8 flex items-center justify-between group hover:bg-slate-50 transition-all font-black"
+                className="w-full p-8 flex items-center justify-between group hover:bg-white/5 transition-all font-black"
                >
                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-600">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-400">
                       <Zap className="w-6 h-6 fill-emerald-500" />
                     </div>
                     <div className="text-left">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Status</p>
-                      <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic">Enter Amount</h4>
+                      <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-1">Status</p>
+                      <h4 className="text-xl font-black text-white tracking-tighter uppercase italic">Enter Amount</h4>
                     </div>
                  </div>
                  <ArrowRight className="w-6 h-6 text-slate-200 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
@@ -331,7 +331,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
              >
                 <button 
                   onClick={() => setIsCardExpanded(false)}
-                  className="absolute top-4 right-4 p-2 hover:bg-slate-100 rounded-full text-slate-300 transition-all"
+                  className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-slate-300 transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -339,32 +339,32 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                 <div className="absolute top-0 right-12 w-24 h-24 bg-emerald-500/5 rounded-full blur-3xl -mr-12 -mt-12"></div>
                 
                 <div className="flex items-center justify-between mb-4">
-                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Order Amount</label>
+                   <label className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em]">Order Amount</label>
                    {parseFloat(amount) > 0 && (
-                     <span className="text-[8px] font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md tracking-tighter">Verified</span>
+                     <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md tracking-tighter">Verified</span>
                    )}
                 </div>
                 
-                <div className="relative flex items-center mb-6 bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                    <span className="text-slate-500 font-black text-sm italic mr-3 uppercase">RS</span>
+                <div className="relative flex items-center mb-6 bg-white/5 p-6 rounded-3xl border border-white/5">
+                    <span className="text-zinc-400 font-black text-sm italic mr-3 uppercase">RS</span>
                     <input
                         type="number"
                         value={amount}
                         onChange={(e) => { setAmount(e.target.value); setError(''); }}
                         placeholder="0.00"
-                        className="w-full bg-transparent rounded-none text-slate-900 font-black text-3xl focus:outline-none placeholder:text-slate-300 tracking-tighter"
+                        className="w-full bg-transparent rounded-none text-white font-black text-3xl focus:outline-none placeholder:text-slate-300 tracking-tighter"
                     />
                 </div>
 
                 {/* Fee Calculation Section */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
                    <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">5% Fee</p>
+                      <p className="text-[7px] font-black text-zinc-500 uppercase tracking-widest leading-none">5% Fee</p>
                       <p className="text-xs font-black text-red-600 italic">Rs {(parseFloat(amount) * 0.05 || 0).toFixed(0)}</p>
                    </div>
                    <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest leading-none">You'll Get</p>
-                      <p className="text-xs font-black text-emerald-600 italic">Rs {(parseFloat(amount) * 0.95 || 0).toFixed(0)}</p>
+                      <p className="text-[7px] font-black text-zinc-500 uppercase tracking-widest leading-none">You'll Get</p>
+                      <p className="text-xs font-black text-emerald-400 italic">Rs {(parseFloat(amount) * 0.95 || 0).toFixed(0)}</p>
                    </div>
                 </div>
 
@@ -372,7 +372,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                   <motion.div 
                     initial={{ opacity: 0, y: -5 }} 
                     animate={{ opacity: 1, y: 0 }} 
-                    className="flex items-center gap-2 text-red-600 mb-4 bg-red-50 p-3 rounded-xl border border-red-100"
+                    className="flex items-center gap-2 text-red-600 mb-4 bg-red-500/10 p-3 rounded-xl border border-red-100"
                   >
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span className="text-[10px] font-black uppercase tracking-tight leading-tight">{error}</span>
@@ -384,21 +384,21 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                     whileTap={{ scale: 0.99 }}
                     onClick={handleWithdraw}
                     disabled={!selectedAccount || parseFloat(amount) < minWithdrawal || !windowInfo.isOpen}
-                    className="relative w-full h-12 bg-[#022c22] disabled:bg-slate-100 disabled:cursor-not-allowed group/btn overflow-hidden rounded-[18px] transition-all shadow-lg"
+                    className="relative w-full h-12 bg-[#022c22] disabled:bg-white/10 disabled:cursor-not-allowed group/btn overflow-hidden rounded-[18px] transition-all shadow-lg"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
                     <div className="relative z-10 flex items-center justify-center gap-2">
-                      <span className="text-xs font-black text-white group-disabled:text-slate-400 uppercase tracking-[0.15em] italic">
+                      <span className="text-xs font-black text-white group-disabled:text-zinc-500 uppercase tracking-[0.15em] italic">
                         {windowInfo.isOpen ? 'Execute Payout' : 'Window Locked'}
                       </span>
-                      {windowInfo.isOpen ? <ArrowUpRight className="w-4 h-4 text-emerald-400 group-hover/btn:text-white" /> : <Lock className="w-3.5 h-3.5 text-slate-400" />}
+                      {windowInfo.isOpen ? <ArrowUpRight className="w-4 h-4 text-emerald-400 group-hover/btn:text-white" /> : <Lock className="w-3.5 h-3.5 text-zinc-500" />}
                     </div>
                 </motion.button>
 
                 {!windowInfo.isOpen && (
                   <div className="mt-4 flex items-center gap-2 p-3 bg-emerald-50/50 rounded-xl border border-emerald-100/30">
-                    <Calendar className="w-3 h-3 text-emerald-600 shrink-0" />
-                    <p className="text-[9px] font-bold text-emerald-700 uppercase tracking-tight italic">
+                    <Calendar className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight italic">
                       Next Update: {windowInfo.nextWindowText.split(':')[1]} tareek.
                     </p>
                   </div>
@@ -411,10 +411,10 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
         <div className="pt-10">
             <div className="flex items-center justify-between mb-8 px-2">
               <div className="flex items-center gap-2">
-                <History className="w-5 h-5 text-slate-400" />
-                <h3 className="font-black text-2xl text-slate-900 tracking-tighter italic uppercase">History</h3>
+                <History className="w-5 h-5 text-zinc-500" />
+                <h3 className="font-black text-2xl text-white tracking-tighter italic uppercase">History</h3>
               </div>
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest border border-slate-100 px-3 py-1 rounded-full">Feed</span>
+              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest border border-white/5 px-3 py-1 rounded-full">Feed</span>
             </div>
             
             <div className="space-y-3">
@@ -425,37 +425,37 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.05 }}
                   onClick={() => setSelectedWithdrawal(item.raw)}
-                  className="group bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md hover:border-emerald-500/10 transition-all cursor-pointer relative overflow-hidden h-16"
+                  className="group bg-[#15181D] p-4 rounded-2xl border border-white/5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-emerald-500/10 transition-all cursor-pointer relative overflow-hidden h-16"
                 >
                   <div className="flex items-center gap-4 relative z-10">
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center shrink-0 border border-slate-100 group-hover:text-emerald-500 group-hover:bg-emerald-50 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 text-zinc-500 flex items-center justify-center shrink-0 border border-white/5 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-all">
                         <History className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="font-black text-slate-900 text-[11px] uppercase italic tracking-tight leading-none mb-1">{item.title}</h4>
-                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-none">{item.subtitle}</p>
+                        <h4 className="font-black text-white text-[11px] uppercase italic tracking-tight leading-none mb-1">{item.title}</h4>
+                        <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest leading-none">{item.subtitle}</p>
                         <p className="text-[8px] font-black uppercase text-red-500 tracking-wider mt-1">View Receipt</p>
                       </div>
                   </div>
                   <div className="text-right relative z-10">
-                      <div className="font-black text-sm text-slate-900 italic tracking-tighter leading-none mb-1">
+                      <div className="font-black text-sm text-white italic tracking-tighter leading-none mb-1">
                         {item.amount}
                       </div>
                       <div className={`text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border ${
-                        item.status === 'PENDING' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                        (item.status === 'APPROVED' || item.status === 'COMPLETED') ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                        item.status === 'REJECTED' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-slate-50 text-slate-400 border-slate-100'
+                        item.status === 'PENDING' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                        (item.status === 'APPROVED' || item.status === 'COMPLETED') ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                        item.status === 'REJECTED' ? 'bg-red-500/10 text-red-600 border-red-100' : 'bg-white/5 text-zinc-500 border-white/5'
                       }`}>
                         {item.status}
                       </div>
                   </div>
                 </motion.div>
             )) : (
-              <div className="text-center py-16 bg-slate-50 rounded-[40px] border border-dashed border-slate-200">
-                <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <div className="text-center py-16 bg-white/5 rounded-[40px] border border-dashed border-white/10">
+                <div className="w-14 h-14 bg-[#15181D] rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
                   <History className="w-6 h-6 text-slate-200" />
                 </div>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">No History</p>
+                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">No History</p>
               </div>
             )}
             </div>
@@ -475,13 +475,13 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               initial={{ scale: 0.9, y: 30 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 30 }}
-              className="bg-white rounded-[44px] p-10 w-full max-w-sm shadow-2xl relative border border-white/10"
+              className="bg-[#15181D] rounded-[44px] p-10 w-full max-w-sm shadow-2xl relative border border-white/10"
             >
               <div className="absolute top-0 left-0 w-full h-3 bg-[#022c22]"></div>
               
               <button 
                 onClick={() => setSelectedWithdrawal(null)} 
-                className="absolute top-8 right-8 p-2 bg-slate-50 border border-slate-100 rounded-full text-slate-400 hover:text-red-500 transition-colors"
+                className="absolute top-8 right-8 p-2 bg-white/5 border border-white/5 rounded-full text-zinc-500 hover:text-red-500 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -494,15 +494,15 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
                  }`}>
                     {selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? <CheckCircle2 className="w-10 h-10 text-white" /> : <AlertCircle className="w-10 h-10 text-white" />}
                  </div>
-                 <h3 className="text-2xl font-black text-slate-900 italic uppercase tracking-tighter">Payment Receipt</h3>
+                 <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Payment Receipt</h3>
                  <div className={`mt-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block ${
-                     selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-emerald-100 text-emerald-700' :
+                     selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-emerald-100 text-emerald-400' :
                      selectedWithdrawal.status === 'Rejected' ? 'bg-red-100 text-red-700' :
-                     'bg-emerald-100 text-emerald-700'
+                     'bg-emerald-100 text-emerald-400'
                  }`}>
                     {selectedWithdrawal.status || 'Pending'}
                  </div>
-                 <p className="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-widest">Sent by TaskMint Official</p>
+                 <p className="text-[10px] font-bold text-zinc-400 mt-2 uppercase tracking-widest">Sent by TaskMint Official</p>
               </div>
               
               {/* Receipt Body - Premium Dark Theme */}
@@ -561,7 +561,7 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               </div>
               
               <div className="text-center mt-6">
-                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em]">Withdrawal by TaskMint Official Pakistan</p>
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Withdrawal by TaskMint Official Pakistan</p>
               </div>
 
 
@@ -589,17 +589,17 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
               initial={{ scale: 0.8, rotate: -5 }}
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0.8, rotate: 5 }}
-              className="bg-white rounded-[50px] p-10 w-full max-w-sm text-center shadow-2xl relative overflow-hidden"
+              className="bg-[#15181D] rounded-[50px] p-10 w-full max-w-sm text-center shadow-2xl relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600"></div>
               
-              <div className="w-24 h-24 bg-emerald-50 rounded-[30px] flex items-center justify-center mx-auto mb-8 relative">
+              <div className="w-24 h-24 bg-emerald-500/10 rounded-[30px] flex items-center justify-center mx-auto mb-8 relative">
                 <div className="absolute inset-0 bg-emerald-500/20 rounded-[30px] animate-ping opacity-30"></div>
                 <Zap className="w-12 h-12 text-emerald-500 fill-emerald-500 relative z-10" />
               </div>
 
-              <h3 className="text-3xl font-black text-slate-900 mb-3 italic tracking-tighter leading-none uppercase">Execution Successful</h3>
-              <p className="text-xs text-slate-400 font-bold mb-10 leading-relaxed uppercase tracking-tight">
+              <h3 className="text-3xl font-black text-white mb-3 italic tracking-tighter leading-none uppercase">Execution Successful</h3>
+              <p className="text-xs text-zinc-500 font-bold mb-10 leading-relaxed uppercase tracking-tight">
                 Payout request initiated. Your money will be sent within <span className="text-emerald-500">24 hours</span>.
               </p>
 

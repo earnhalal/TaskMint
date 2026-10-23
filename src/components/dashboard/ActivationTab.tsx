@@ -116,14 +116,14 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
       <div className="flex items-center gap-4 mb-2">
         <button 
           onClick={onBack}
-          className="p-2 bg-white rounded-xl shadow-sm hover:bg-slate-50 transition-colors"
+          className="p-2 bg-[#15181D] rounded-xl shadow-sm hover:bg-white/5 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
+          <ArrowLeft className="w-5 h-5 text-zinc-300" />
         </button>
         <div>
-          <h2 className="text-xl font-black text-slate-900 tracking-tight">Account Activation</h2>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-            Joining Fee: <span className="text-teal-600">Rs {appSettings.activationFee}</span>
+          <h2 className="text-xl font-black text-white tracking-tight">Account Activation</h2>
+          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
+            Joining Fee: <span className="text-teal-400">Rs {appSettings.activationFee}</span>
           </p>
         </div>
       </div>
@@ -132,13 +132,13 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 space-y-6"
+        className="bg-[#15181D] rounded-[2rem] p-6 shadow-sm border border-white/5 space-y-6"
       >
-        <div className="bg-emerald-50 border-2 border-emerald-100 rounded-2xl p-4 flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-emerald-600 shrink-0" />
+        <div className="bg-emerald-500/10 border-2 border-emerald-500/20 rounded-2xl p-4 flex gap-3">
+          <AlertTriangle className="w-5 h-5 text-emerald-400 shrink-0" />
           <div className="space-y-1">
-            <p className="text-[11px] font-bold text-emerald-800 leading-relaxed">
-              Neeche diye gaye number par <span className="text-emerald-900 font-black text-lg">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein.
+            <p className="text-[11px] font-bold text-emerald-300 leading-relaxed">
+              Neeche diye gaye number par <span className="text-emerald-200 font-black text-lg">Rs {appSettings.activationFee}</span> send karein aur button daba kar WhatsApp par screenshot bhej dein.
             </p>
           </div>
         </div>
@@ -146,20 +146,20 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
           <div className="grid grid-cols-1 gap-3">
             <button
               onClick={() => setMethod('EasyPaisa')}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 border-emerald-500 bg-emerald-50`}
+              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 border-emerald-500 bg-emerald-500/10`}
             >
               <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-black text-[10px]">EP</div>
               <span className="text-xs font-bold">EasyPaisa</span>
             </button>
           </div>
 
-          <div className="bg-slate-900 rounded-2xl p-5 text-white space-y-4">
+          <div className="bg-emerald-600 rounded-2xl p-5 text-white space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-white/10">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Account Title</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase">Account Title</span>
               <span className="text-sm font-black text-emerald-400">{appSettings.paymentName}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Account Number</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase">Account Number</span>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-black tracking-wider">{appSettings.paymentNumber}</span>
                 <button onClick={() => copyToClipboard(appSettings.paymentNumber)} className="p-1.5 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
@@ -189,23 +189,23 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 text-center"
+          className="bg-[#15181D] rounded-[2rem] p-8 shadow-sm border border-white/5 text-center"
         >
-          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-emerald-100 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock className="w-8 h-8 animate-pulse" />
           </div>
-          <h3 className="text-xl font-black text-slate-900 mb-2">Verification Pending</h3>
-          <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-[200px] mx-auto mb-6">
-            Your request is being verified. This usually takes <span className="text-slate-900 font-bold">1-6 hours</span>.
+          <h3 className="text-xl font-black text-white mb-2">Verification Pending</h3>
+          <p className="text-xs text-zinc-400 font-medium leading-relaxed max-w-[200px] mx-auto mb-6">
+            Your request is being verified. This usually takes <span className="text-white font-bold">1-6 hours</span>.
           </p>
-          <div className="bg-slate-50 rounded-2xl p-4 text-left space-y-2">
+          <div className="bg-white/5 rounded-2xl p-4 text-left space-y-2">
             <div className="flex justify-between text-[10px] font-bold">
-              <span className="text-slate-400 uppercase">TID</span>
-              <span className="text-slate-900">{activeRequest.transactionId}</span>
+              <span className="text-zinc-500 uppercase">TID</span>
+              <span className="text-white">{activeRequest.transactionId}</span>
             </div>
             <div className="flex justify-between text-[10px] font-bold">
-              <span className="text-slate-400 uppercase">Method</span>
-              <span className="text-slate-900">{activeRequest.method}</span>
+              <span className="text-zinc-500 uppercase">Method</span>
+              <span className="text-white">{activeRequest.method}</span>
             </div>
           </div>
         </motion.div>
@@ -214,42 +214,42 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
       {/* History Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 px-1">
-          <History className="w-4 h-4 text-slate-400" />
-          <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">Activation History</h3>
+          <History className="w-4 h-4 text-zinc-500" />
+          <h3 className="text-sm font-black text-white uppercase tracking-tight">Activation History</h3>
         </div>
 
         <div className="space-y-3">
           {history.length > 0 ? history.map((item) => (
-            <div key={item.id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between">
+            <div key={item.id} className="bg-[#15181D] rounded-2xl p-4 shadow-sm border border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                  item.status === 'Approved' ? 'bg-emerald-100 text-emerald-600' :
+                  item.status === 'Approved' ? 'bg-emerald-100 text-emerald-400' :
                   item.status === 'Rejected' ? 'bg-red-100 text-red-600' :
-                  'bg-emerald-100 text-emerald-600'
+                  'bg-emerald-100 text-emerald-400'
                 }`}>
                   {item.status === 'Approved' ? <CheckCircle2 className="w-5 h-5" /> :
                    item.status === 'Rejected' ? <XCircle className="w-5 h-5" /> :
                    <Clock className="w-5 h-5" />}
                 </div>
                 <div>
-                  <p className="text-xs font-black text-slate-900">Rs {item.amount}</p>
-                  <p className="text-[9px] text-slate-400 font-bold">{new Date(item.date).toLocaleDateString()}</p>
+                  <p className="text-xs font-black text-white">Rs {item.amount}</p>
+                  <p className="text-[9px] text-zinc-500 font-bold">{new Date(item.date).toLocaleDateString()}</p>
                 </div>
               </div>
               <div className="text-right">
                 <p className={`text-[10px] font-black uppercase ${
-                  item.status === 'Approved' ? 'text-emerald-600' :
+                  item.status === 'Approved' ? 'text-emerald-400' :
                   item.status === 'Rejected' ? 'text-red-600' :
-                  'text-emerald-600'
+                  'text-emerald-400'
                 }`}>
                   {item.status}
                 </p>
-                <p className="text-[9px] text-slate-400 font-bold">TID: {item.transactionId}</p>
+                <p className="text-[9px] text-zinc-500 font-bold">TID: {item.transactionId}</p>
               </div>
             </div>
           )) : (
-            <div className="bg-white rounded-2xl p-8 text-center border border-dashed border-slate-200">
-              <p className="text-xs text-slate-400 font-bold">No history found.</p>
+            <div className="bg-[#15181D] rounded-2xl p-8 text-center border border-dashed border-white/10">
+              <p className="text-xs text-zinc-500 font-bold">No history found.</p>
             </div>
           )}
         </div>

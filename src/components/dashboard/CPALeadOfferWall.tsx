@@ -13,10 +13,10 @@ const CPALeadOfferWall = () => {
   return (
     <div className="space-y-4 animate-fade-in pb-24 font-sans">
       <div className="px-4">
-        <h2 className="text-xl font-black text-slate-900 tracking-tighter uppercase mb-2">Offer Wall</h2>
-        <p className="text-xs font-bold text-slate-500 mb-6">Complete tasks to earn rewards.</p>
+        <h2 className="text-xl font-black text-white tracking-tighter uppercase mb-2">Offer Wall</h2>
+        <p className="text-xs font-bold text-zinc-400 mb-6">Complete tasks to earn rewards.</p>
       </div>
-      <div className="w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
+      <div className="w-full rounded-3xl overflow-hidden shadow-2xl border border-white/10">
         <iframe 
           sandbox="allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation allow-popups-to-escape-sandbox" 
           src={offerWallUrl} 

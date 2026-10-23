@@ -59,7 +59,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               </h2>
               <div className="flex items-center gap-2 mt-1">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Live Updates Active</p>
+                 <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.3em]">Live Updates Active</p>
               </div>
             </div>
           </div>
@@ -99,7 +99,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                 <p className="text-sm font-black text-slate-300 italic">Rs {topThree[1].balance?.toLocaleString()}</p>
               </div>
               <div className="w-full h-28 bg-gradient-to-b from-[#064e3b] to-[#022c22] rounded-t-3xl border-x border-t border-white/5 shadow-inner flex flex-col items-center pt-4">
-                 <div className="w-8 h-8 rounded-full bg-slate-400/20 flex items-center justify-center text-slate-400 mb-2">
+                 <div className="w-8 h-8 rounded-full bg-slate-400/20 flex items-center justify-center text-zinc-500 mb-2">
                     <span className="text-lg font-black italic">2</span>
                  </div>
                  <div className="flex gap-1">
@@ -173,10 +173,10 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               </div>
               <div className="text-center">
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest truncate w-24">{topThree[2].username}</p>
-                <p className="text-sm font-black text-emerald-800 italic">Rs {topThree[2].balance?.toLocaleString()}</p>
+                <p className="text-sm font-black text-emerald-300 italic">Rs {topThree[2].balance?.toLocaleString()}</p>
               </div>
               <div className="w-full h-24 bg-gradient-to-b from-[#064e3b] to-[#022c22] rounded-t-3xl border-x border-t border-white/5 shadow-inner flex flex-col items-center pt-4">
-                 <div className="w-8 h-8 rounded-full bg-emerald-900/20 flex items-center justify-center text-emerald-800 mb-2">
+                 <div className="w-8 h-8 rounded-full bg-emerald-900/20 flex items-center justify-center text-emerald-300 mb-2">
                     <span className="text-lg font-black italic">3</span>
                  </div>
                  <div className="flex gap-1">
@@ -190,7 +190,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
         {/* All Users List */}
         <div className="space-y-6">
             <div className="flex items-center gap-4 px-2">
-               <h3 className="text-sm font-black italic uppercase tracking-widest text-slate-500">All Users</h3>
+               <h3 className="text-sm font-black italic uppercase tracking-widest text-zinc-400">All Users</h3>
                <div className="h-px flex-1 bg-white/5" />
             </div>
 
@@ -210,7 +210,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                   <div className="absolute left-0 inset-y-6 w-1 bg-emerald-500/0 group-hover:bg-emerald-500 transition-all rounded-r-full" />
                   
                   <div className="flex items-center gap-3 sm:gap-6 min-w-0">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-2xl bg-white/5 flex items-center justify-center font-black text-slate-500 text-xs sm:text-sm italic border border-white/5 group-hover:border-emerald-500/30 group-hover:text-emerald-500 transition-all">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-2xl bg-white/5 flex items-center justify-center font-black text-zinc-400 text-xs sm:text-sm italic border border-white/5 group-hover:border-emerald-500/30 group-hover:text-emerald-500 transition-all">
                        {user.rank || i + 4}
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -221,7 +221,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                         <h3 className="font-black text-white text-sm sm:text-base tracking-tight uppercase italic truncate">{user.username || 'Unknown User'}</h3>
                         <div className="flex items-center gap-2 mt-0.5">
                            <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-emerald-500" />
-                           <span className="text-[7px] sm:text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] truncate">Verified User</span>
+                           <span className="text-[7px] sm:text-[8px] font-black text-zinc-400 uppercase tracking-[0.2em] truncate">Verified User</span>
                         </div>
                       </div>
                     </div>
@@ -229,7 +229,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
 
                   <div className="text-right flex-shrink-0">
                     <p className="text-sm sm:text-lg font-black text-emerald-500 italic tracking-tighter">Rs {user.balance?.toLocaleString() || 0}</p>
-                    <p className="text-[7px] sm:text-[8px] font-black text-slate-600 uppercase tracking-widest leading-none">Total Earning</p>
+                    <p className="text-[7px] sm:text-[8px] font-black text-zinc-300 uppercase tracking-widest leading-none">Total Earning</p>
                   </div>
                 </motion.div>
               ))}

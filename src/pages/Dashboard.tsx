@@ -1143,17 +1143,17 @@ export default function Dashboard() {
           <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6">
             <AlertTriangle className="w-10 h-10" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+          <h2 className="text-2xl font-bold text-white mb-2">
             {currentAccountStatus === 'pending' ? 'Activation Pending' : 'Account Inactive'}
           </h2>
-          <p className="text-slate-500 mb-8 max-w-xs">
+          <p className="text-zinc-400 mb-8 max-w-xs">
             {currentAccountStatus === 'pending' 
               ? 'Your activation request is being verified by the admin. Please wait 1-6 hours.' 
               : `You need to activate your account by paying the Rs ${appSettings.activationFee} joining fee to access earning features.`}
           </p>
           <button 
             onClick={() => setActiveTab('invite')}
-            className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold shadow-xl active:scale-95 transition-all"
+            className="bg-emerald-600 text-white px-8 py-4 rounded-2xl font-bold shadow-xl active:scale-95 transition-all"
           >
             Go to Activation Page
           </button>
@@ -1407,11 +1407,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex justify-center items-center p-0 sm:p-6 font-sans overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-[#050607] flex justify-center items-center p-0 sm:p-6 font-sans overflow-x-hidden w-full max-w-full">
       {!isProfileLoaded && (
-        <div className="absolute inset-0 z-[200] bg-white flex flex-col items-center justify-center">
-          <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
-          <p className="text-xs font-extrabold text-slate-900 uppercase tracking-widest animate-pulse">Loading Member Profile...</p>
+        <div className="absolute inset-0 z-[200] bg-[#15181D] flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-white/10 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+          <p className="text-xs font-extrabold text-white uppercase tracking-widest animate-pulse">Loading Member Profile...</p>
         </div>
       )}
       {/* Referral Update Notification */}
@@ -1422,27 +1422,27 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden"
+              className="bg-[#15181D] rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden"
             >
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-amber-600"></div>
               
-              <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="w-10 h-10 text-emerald-500" />
               </div>
 
-              <h3 className="text-2xl font-black text-slate-900 mb-4 leading-tight">Link Update!</h3>
-              <p className="text-sm text-slate-500 font-medium mb-8 leading-relaxed">
+              <h3 className="text-2xl font-black text-white mb-4 leading-tight">Link Update!</h3>
+              <p className="text-sm text-zinc-400 font-medium mb-8 leading-relaxed">
                 Aapka naya referral link update ho gaya hai, mazeed security ke liye ab isay istemal karein.
               </p>
 
-              <div className="bg-slate-50 rounded-2xl p-4 mb-8 border border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">New Referral Code</p>
-                <p className="text-lg font-black text-slate-900 font-mono tracking-wider">{referralCode}</p>
+              <div className="bg-white/5 rounded-2xl p-4 mb-8 border border-white/5">
+                <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1">New Referral Code</p>
+                <p className="text-lg font-black text-white font-mono tracking-wider">{referralCode}</p>
               </div>
 
               <button 
                 onClick={() => setShowReferralUpdateNotify(false)}
-                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all"
+                className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all"
               >
                 Samajh Gaya!
               </button>
@@ -1459,19 +1459,19 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100"
+              className="bg-[#15181D] rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-white/5"
             >
-              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 mx-auto">
                 <AlertTriangle className="w-8 h-8 text-red-500" />
               </div>
-              <h3 className="text-2xl font-bold text-center text-slate-900 mb-3 font-urdu">خوش آمدید! آپ کا اکاؤنٹ ابھی فعال (Active) نہیں ہے۔</h3>
-              <p className="text-base text-center text-slate-600 mb-6 font-urdu leading-relaxed">
+              <h3 className="text-2xl font-bold text-center text-white mb-3 font-urdu">خوش آمدید! آپ کا اکاؤنٹ ابھی فعال (Active) نہیں ہے۔</h3>
+              <p className="text-base text-center text-zinc-300 mb-6 font-urdu leading-relaxed">
                 ارننگ شروع کرنے کے لیے آپ کو ایک بار جوائننگ فیس جمع کروانی ہوگی۔ نیچے دیے گئے بٹن پر کلک کریں اور فیس جمع کروا کر واٹس ایپ پر اسکرین شاٹ بھیجیں۔ اکاؤنٹ جلد ہی ایکٹیو کر دیا جائے گا۔
               </p>
               <div className="flex gap-3">
                 <button 
                   onClick={() => setShowInactiveModal(false)}
-                  className="flex-1 bg-slate-100 text-slate-700 font-bold py-3.5 rounded-xl hover:bg-slate-200 transition-colors font-urdu"
+                  className="flex-1 bg-white/10 text-zinc-200 font-bold py-3.5 rounded-xl hover:bg-white/15 transition-colors font-urdu"
                 >
                   بند کریں
                 </button>
@@ -1491,7 +1491,7 @@ export default function Dashboard() {
       </AnimatePresence>
 
       {/* Mobile App Container */}
-      <div className={`w-full ${activeTab === 'watch' ? 'max-w-full' : 'sm:max-w-[440px]'} ${role === 'partner' ? 'bg-emerald-50' : 'bg-slate-50'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-slate-900`}>
+      <div className={`w-full ${activeTab === 'watch' ? 'max-w-full' : 'sm:max-w-[440px]'} ${role === 'partner' ? 'bg-[#0A0C0A]' : 'bg-[#0B0D10]'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-zinc-800`}>
         
         {/* Top Notification Bar & Announcements */}
         <AnimatePresence>
@@ -1505,26 +1505,26 @@ export default function Dashboard() {
 
         {/* App bar — logo, live balance pill, notifications, profile */}
         {activeTab !== 'support_ai' && (
-          <div className={`px-4 py-3 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-white border-slate-100'} flex items-center justify-between sticky top-0 z-40 border-b transition-all duration-300`}>
+          <div className={`px-4 py-3 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-[#15181D] border-white/5'} flex items-center justify-between sticky top-0 z-40 border-b transition-all duration-300`}>
             <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('home')}>
               <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/25">
                 <Coins className="w-5 h-5" />
               </div>
-              <span className={`font-extrabold text-lg tracking-tight ${role === 'partner' ? 'text-white' : 'text-slate-900'}`}>
-                Task<span className="text-emerald-600">Mint</span>
+              <span className={`font-extrabold text-lg tracking-tight ${role === 'partner' ? 'text-white' : 'text-white'}`}>
+                Task<span className="text-emerald-400">Mint</span>
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveTab('withdraw')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-full border active:scale-95 transition ${role === 'partner' ? 'bg-white/5 border-white/10 text-white' : 'bg-emerald-50 border-emerald-100 text-slate-900'}`}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full border active:scale-95 transition ${role === 'partner' ? 'bg-white/5 border-white/10 text-white' : 'bg-emerald-500/10 border-emerald-500/20 text-white'}`}
               >
-                <Wallet className="w-4 h-4 text-emerald-600" />
+                <Wallet className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs font-black">Rs {balance.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </button>
               <button
                 onClick={() => setActiveTab('updates')}
-                className={`relative w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition ${role === 'partner' ? 'bg-white/5 text-white' : 'bg-slate-50 text-slate-600'}`}
+                className={`relative w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition ${role === 'partner' ? 'bg-white/5 text-white' : 'bg-white/5 text-zinc-300'}`}
               >
                 <Bell className="w-5 h-5" />
                 {unreadUpdatesCount > 0 && (
@@ -1535,12 +1535,12 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setActiveTab('profile')}
-                className="relative w-9 h-9 rounded-full flex items-center justify-center overflow-hidden bg-slate-50 active:scale-95 transition"
+                className="relative w-9 h-9 rounded-full flex items-center justify-center overflow-hidden bg-white/5 active:scale-95 transition"
               >
                 {profileAvatarId ? (
                    <DynamicAvatar avatarId={profileAvatarId} fallbackText={userName} />
                 ) : (
-                   <UserCircle className="w-6 h-6 text-slate-600" />
+                   <UserCircle className="w-6 h-6 text-zinc-300" />
                 )}
               </button>
             </div>
@@ -1548,7 +1548,7 @@ export default function Dashboard() {
         )}
 
         {/* Scrollable Content */}
-        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-4 pt-4'} hide-scrollbar ${role === 'partner' ? 'bg-[#022c22]' : 'bg-slate-50'}`}>
+        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-4 pt-4'} hide-scrollbar ${role === 'partner' ? 'bg-[#0A0C0A]' : 'bg-[#0B0D10]'}`}>
           <div className={`${['watch', 'support_ai'].includes(activeTab) ? 'max-w-full h-full' : 'max-w-2xl mx-auto pb-28'}`}>
             {renderTabContent()}
           </div>
@@ -1556,7 +1556,7 @@ export default function Dashboard() {
 
         {/* Bottom tab bar */}
         {activeTab !== 'support_ai' && (
-          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-white border-slate-100'} border-t px-2 pt-2 pb-4 flex items-start justify-around`}>
+          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-[#15181D] border-white/5'} border-t px-2 pt-2 pb-4 flex items-start justify-around`}>
             {[
               { id: 'home', icon: <LayoutGrid className="w-5 h-5" />, label: 'Home' },
               { id: 'watch', icon: <Tv2 className="w-5 h-5" />, label: 'Watch' },
@@ -1571,10 +1571,10 @@ export default function Dashboard() {
                   onClick={() => setActiveTab(tab.id)}
                   className="flex-1 flex flex-col items-center gap-1 active:scale-95 transition"
                 >
-                  <span className={`px-4 py-1.5 rounded-full transition ${active ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : (role === 'partner' ? 'text-slate-400' : 'text-slate-400')}`}>
+                  <span className={`px-4 py-1.5 rounded-full transition ${active ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : (role === 'partner' ? 'text-zinc-500' : 'text-zinc-500')}`}>
                     {tab.icon}
                   </span>
-                  <span className={`text-[10px] font-bold leading-none ${active ? 'text-emerald-700' : (role === 'partner' ? 'text-slate-500' : 'text-slate-400')}`}>
+                  <span className={`text-[10px] font-bold leading-none ${active ? 'text-emerald-400' : (role === 'partner' ? 'text-zinc-400' : 'text-zinc-500')}`}>
                     {tab.label}
                   </span>
                 </button>

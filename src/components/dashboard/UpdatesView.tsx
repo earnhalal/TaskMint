@@ -40,7 +40,7 @@ const getIcon = (type: string) => {
     case 'deposit': return <Wallet className="w-5 h-5 text-blue-500" />;
     case 'withdrawal': return <ArrowRightLeft className="w-5 h-5 text-emerald-500" />;
     case 'verification': return <Mail className="w-5 h-5 text-red-500" />;
-    default: return <Info className="w-5 h-5 text-slate-500" />;
+    default: return <Info className="w-5 h-5 text-zinc-400" />;
   }
 };
 
@@ -74,7 +74,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                         </h2>
                         <div className="flex items-center gap-2 mt-1">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Secure Communication Channel</p>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Secure Communication Channel</p>
                         </div>
                     </div>
                 </div>
@@ -92,7 +92,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                     </button>
                 ) : (
                     <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Inbox Clear</span>
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Inbox Clear</span>
                     </div>
                 )}
             </div>
@@ -103,7 +103,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                     <div className="flex flex-col items-center justify-center h-[50vh] text-center">
                         <div className="relative mb-8 group">
                             <div className="absolute inset-0 bg-teal-500/20 rounded-full blur-[60px] animate-pulse" />
-                            <div className="relative w-28 h-28 bg-[#022c22] rounded-[2.5rem] border border-white/5 flex items-center justify-center text-slate-700 shadow-2xl transition-all group-hover:scale-105 duration-500">
+                            <div className="relative w-28 h-28 bg-[#022c22] rounded-[2.5rem] border border-white/5 flex items-center justify-center text-zinc-200 shadow-2xl transition-all group-hover:scale-105 duration-500">
                                 <Mail className="w-12 h-12 opacity-20" />
                                 <div className="absolute -top-2 -right-2 w-10 h-10 bg-teal-600/10 rounded-2xl flex items-center justify-center border border-teal-500/20">
                                     <Zap className="w-5 h-5 text-teal-400" />
@@ -111,7 +111,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                             </div>
                         </div>
                         <h3 className="text-xl font-black text-white italic tracking-tighter uppercase mb-2">Inbox Empty</h3>
-                        <p className="text-[10px] font-bold text-slate-500 max-w-[240px] uppercase tracking-widest leading-loose">No new messages from the system. You're all caught up!</p>
+                        <p className="text-[10px] font-bold text-zinc-400 max-w-[240px] uppercase tracking-widest leading-loose">No new messages from the system. You're all caught up!</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -138,7 +138,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 ${
                                             update.status === 'unread' 
                                                 ? 'bg-teal-600 shadow-xl shadow-teal-500/20 text-white' 
-                                                : 'bg-white/5 text-slate-500 border border-white/5'
+                                                : 'bg-white/5 text-zinc-400 border border-white/5'
                                         }`}>
                                             {getIcon(update.type)}
                                         </div>
@@ -156,14 +156,14 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-500 bg-white/5 px-3 py-1 rounded-full border border-white/5 shrink-0">
+                                                <div className="flex items-center gap-1.5 text-[9px] font-black text-zinc-400 bg-white/5 px-3 py-1 rounded-full border border-white/5 shrink-0">
                                                     <Clock className="w-3 h-3" />
                                                     {new Date(update.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </div>
                                             </div>
                                             
                                             <p className={`text-xs leading-relaxed mb-5 ${
-                                                update.status === 'unread' ? 'text-slate-300 font-medium' : 'text-slate-500'
+                                                update.status === 'unread' ? 'text-slate-300 font-medium' : 'text-zinc-400'
                                             }`}>
                                                 {update.message}
                                             </p>
@@ -177,9 +177,9 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                                                             update.type === 'deposit' ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.5)]' :
                                                             'bg-slate-400'
                                                         }`} />
-                                                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{update.type}</span>
+                                                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">{update.type}</span>
                                                     </div>
-                                                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">
+                                                    <span className="text-[8px] font-black text-zinc-300 uppercase tracking-widest">
                                                         {new Date(update.timestamp).toLocaleDateString()}
                                                     </span>
                                                 </div>
@@ -207,7 +207,7 @@ const UpdatesView: React.FC<UpdatesViewProps> = ({ updates, onMarkAsRead, onMark
                         </div>
                         <div className="flex-1">
                             <p className="text-[10px] font-black text-white uppercase tracking-widest mb-1 italic">Pro Tip</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest leading-loose">
+                            <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest leading-loose">
                                 System logs are auto-cleared after 30 days to keep your inbox clean.
                             </p>
                         </div>
