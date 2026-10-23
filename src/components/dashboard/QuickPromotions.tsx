@@ -245,6 +245,9 @@ export default function QuickPromotions({ balance, onUpdateBalance }: QuickPromo
                 title: title,
                 description: description,
                 quantity: quantity,
+                totalLimit: quantity,
+                unitPrice: selectedService.price,
+                serviceId: selectedService.id,
                 price: totalPrice,
                 status: 'pending',
                 timestamp: serverTimestamp()
