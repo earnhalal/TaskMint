@@ -4,617 +4,419 @@ import { Wallet, ArrowRight, ArrowDownCircle, Sparkles, CheckCircle2, AlertCircl
 import { useCurrency } from '../../context/CurrencyContext';
 
 interface Account {
-  id: string;
-  title: string;
-  number: string;
-  method: string;
+ id: string;
+ title: string;
+ number: string;
+ method: string;
 }
 
 interface WithdrawTabProps {
-  balance: number;
-  history: any[];
-  onWithdraw: (amount: number, method: string, accountName: string, accountNumber: string) => void;
-  hasPin: boolean;
-  onSetupPin: () => void;
-  onEditAccount: () => void;
-  accounts: Account[];
-  manualWithdrawUnlock?: boolean;
-  isPartner?: boolean;
+ balance: number;
+ history: any[];
+ onWithdraw: (amount: number, method: string, accountName: string, accountNumber: string) => void;
+ hasPin: boolean;
+ onSetupPin: () => void;
+ onEditAccount: () => void;
+ accounts: Account[];
+ manualWithdrawUnlock?: boolean;
+ isPartner?: boolean;
 }
 
 const CardChip = () => (
-    <div className="w-10 h-7 rounded-md relative overflow-hidden shadow-inner bg-gradient-to-br from-[#fcd34d] via-[#d97706] to-[#b45309]">
-        <div className="absolute inset-0 border-[0.5px] border-[#78350f]/30">
-            <div className="absolute top-1/2 left-0 w-full h-[0.5px] bg-[#78350f]/20"></div>
-            <div className="absolute top-0 left-1/3 w-[0.5px] h-full bg-[#78350f]/20"></div>
-            <div className="absolute top-1/2 left-1/2 w-2.5 h-3 border border-[#78350f]/20 rounded-[1px] -translate-x-1/2 -translate-y-1/2 bg-[#fbbf24]/20"></div>
-        </div>
-    </div>
+ <div className="w-10 h-7 rounded-md relative overflow-hidden shadow-inner bg-gradient-to-br from-[#fcd34d] via-[#d97706] to-[#b45309]">
+ <div className="absolute inset-0 border-[0.5px] border-[#78350f]/30">
+ <div className="absolute top-1/2 left-0 w-full h-[0.5px] bg-[#78350f]/20"></div>
+ <div className="absolute top-0 left-1/3 w-[0.5px] h-full bg-[#78350f]/20"></div>
+ <div className="absolute top-1/2 left-1/2 w-2.5 h-3 border border-[#78350f]/20 rounded-[1px] -translate-x-1/2 -translate-y-1/2 bg-[#fbbf24]/20"></div>
+ </div>
+ </div>
 );
 
 export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts, manualWithdrawUnlock = false, isPartner = false }: WithdrawTabProps) {
-  const { formatAmount } = useCurrency();
-  const [amount, setAmount] = useState('');
-  const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
-  const [error, setError] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [isCardExpanded, setIsCardExpanded] = useState(true); // Default to open for mobile app feel
+ const { formatAmount } = useCurrency();
+ const [amount, setAmount] = useState('');
+ const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
+ const [error, setError] = useState('');
+ const [showSuccess, setShowSuccess] = useState(false);
+ const [isCardExpanded, setIsCardExpanded] = useState(true); // Default to open for mobile app feel
 
-  const minWithdrawal = 500;
+ const minWithdrawal = 500;
 
-  const windowInfo = useMemo(() => {
-    const now = new Date();
-    const day = now.getDate();
-    const month = now.getMonth();
-    const year = now.getFullYear();
+ const windowInfo = useMemo(() => {
+ const now = new Date();
+ const day = now.getDate();
+ const month = now.getMonth();
+ const year = now.getFullYear();
 
-    const isWindow1 = day >= 1 && day <= 3;
-    const isWindow2 = day >= 16 && day <= 18;
-    const isOpen = isWindow1 || isWindow2 || manualWithdrawUnlock || isPartner;
+ const isWindow1 = day >= 1 && day <= 3;
+ const isWindow2 = day >= 16 && day <= 18;
+ const isOpen = isWindow1 || isWindow2 || manualWithdrawUnlock || isPartner;
 
-    let nextWindowText = "";
-    if (manualWithdrawUnlock) {
-      nextWindowText = "Admin Access Granted";
-    } else if (isPartner) {
-      nextWindowText = "Instant Partner Access Active";
-    } else if (day <= 3) {
-      nextWindowText = "Window: 1st - 3rd " + now.toLocaleString('default', { month: 'short' });
-    } else if (day <= 18) {
-      nextWindowText = "Window: 16th - 18th " + now.toLocaleString('default', { month: 'short' });
-    } else {
-      const nextMonth = new Date(year, month + 1, 1);
-      nextWindowText = "Window: 1st - 3rd " + nextMonth.toLocaleString('default', { month: 'short' });
-    }
+ let nextWindowText = "";
+ if (manualWithdrawUnlock) {
+ nextWindowText = "Admin Access Granted";
+ } else if (isPartner) {
+ nextWindowText = "Instant Partner Access Active";
+ } else if (day <= 3) {
+ nextWindowText = "Window: 1st - 3rd " + now.toLocaleString('default', { month: 'short' });
+ } else if (day <= 18) {
+ nextWindowText = "Window: 16th - 18th " + now.toLocaleString('default', { month: 'short' });
+ } else {
+ const nextMonth = new Date(year, month + 1, 1);
+ nextWindowText = "Window: 1st - 3rd " + nextMonth.toLocaleString('default', { month: 'short' });
+ }
 
-    return { isOpen, nextWindowText };
-  }, [manualWithdrawUnlock, isPartner]);
+ return { isOpen, nextWindowText };
+ }, [manualWithdrawUnlock, isPartner]);
 
-  const selectedAccount = accounts.find(a => a.id === selectedAccountId);
+ const selectedAccount = accounts.find(a => a.id === selectedAccountId);
 
-  const handleWithdraw = () => {
-    if (!windowInfo.isOpen) {
-      setError('Withdrawal window is currenty locked.');
-      return;
-    }
-    if (!selectedAccount) {
-      setError('Please select a destination account');
-      return;
-    }
-    const val = parseFloat(amount);
-    if (isNaN(val) || val < minWithdrawal) {
-      setError(`Minimum withdrawal is Rs. ${minWithdrawal}`);
-      return;
-    }
-    if (val > balance) {
-      setError('Insufficient Reserve Balance');
-      return;
-    }
-    onWithdraw(val, selectedAccount.method, selectedAccount.title, selectedAccount.number);
-    setAmount('');
-    setError('');
-    setShowSuccess(true);
-  };
+ const handleWithdraw = () => {
+ if (!windowInfo.isOpen) {
+ setError('Withdrawal window is currenty locked.');
+ return;
+ }
+ if (!selectedAccount) {
+ setError('Please select a destination account');
+ return;
+ }
+ const val = parseFloat(amount);
+ if (isNaN(val) || val < minWithdrawal) {
+ setError(`Minimum withdrawal is Rs. ${minWithdrawal}`);
+ return;
+ }
+ if (val > balance) {
+ setError('Insufficient Reserve Balance');
+ return;
+ }
+ onWithdraw(val, selectedAccount.method, selectedAccount.title, selectedAccount.number);
+ setAmount('');
+ setError('');
+ setShowSuccess(true);
+ };
 
-  const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
+ const [selectedWithdrawal, setSelectedWithdrawal] = useState<any>(null);
 
-  const displayHistory = history.map(h => {
-      const dateVal = h.approvedAt 
-        ? (h.approvedAt.toDate ? h.approvedAt.toDate() : new Date(h.approvedAt))
-        : (h.timestamp 
-          ? (h.timestamp.toDate ? h.timestamp.toDate() : new Date(h.timestamp))
-          : (h.date ? new Date(h.date) : new Date()));
+ const displayHistory = history.map(h => {
+ const dateVal = h.approvedAt 
+ ? (h.approvedAt.toDate ? h.approvedAt.toDate() : new Date(h.approvedAt))
+ : (h.timestamp 
+ ? (h.timestamp.toDate ? h.timestamp.toDate() : new Date(h.timestamp))
+ : (h.date ? new Date(h.date) : new Date()));
 
-      return {
-        id: h.id,
-        title: `${h.method} Payout`,
-        subtitle: h.status.toLowerCase() === 'approved' && h.approvedAt 
-          ? `Cleared: ${dateVal.toLocaleDateString()}` 
-          : `Requested: ${dateVal.toLocaleDateString()}`,
-        amount: `Rs. ${h.amount}`,
-        status: h.status.toUpperCase(),
-        type: 'withdraw',
-        raw: h
-      };
-    });
+ return {
+ id: h.id,
+ title: `${h.method} Payout`,
+ subtitle: h.status.toLowerCase() === 'approved' && h.approvedAt 
+ ? `Cleared: ${dateVal.toLocaleDateString()}` 
+ : `Requested: ${dateVal.toLocaleDateString()}`,
+ amount: `Rs. ${h.amount}`,
+ status: h.status.toUpperCase(),
+ type: 'withdraw',
+ raw: h
+ };
+ });
 
-  const progress = Math.min((balance / minWithdrawal) * 100, 100);
+ const progress = Math.min((balance / minWithdrawal) * 100, 100);
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="pb-32 space-y-8 px-4 pt-6 max-w-lg mx-auto"
-    >
-      {/* Dynamic Background Elements */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[20%] right-[-10%] w-72 h-72 bg-emerald-500/5 rounded-full blur-[120px] animate-pulse-slow"></div>
-        <div className="absolute bottom-[30%] left-[-10%] w-64 h-64 bg-teal-500/5 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '3s' }}></div>
-      </div>
+ return (
+ <motion.div
+ initial={{ opacity: 0 }}
+ animate={{ opacity: 1 }}
+ className="pb-28 space-y-5"
+ >
+ {/* Header */}
+ <div className="flex items-start justify-between px-1">
+ <div>
+ <h2 className="text-2xl font-black text-white tracking-tight">Withdraw</h2>
+ <p className="text-xs font-semibold text-zinc-400 mt-1">Cash out to JazzCash, EasyPaisa or your bank.</p>
+ </div>
+ <button
+ onClick={onEditAccount}
+ className="flex items-center gap-1.5 text-[11px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-full active:scale-95 transition shrink-0"
+ >
+ <CreditCard className="w-3.5 h-3.5" /> Accounts
+ </button>
+ </div>
 
-      {/* Modern Top Header */}
-      <div className="relative z-10 flex items-center justify-between px-1">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
-              <p className="text-[9px] font-black text-emerald-600/60 uppercase tracking-[0.4em]">Withdrawal Protocol</p>
-            </div>
-            <h2 className="font-black text-3xl text-white tracking-tighter leading-none italic uppercase">Cash Flow</h2>
-          </div>
-          <motion.button 
-            whileHover={{ scale: 1.05, rotate: 90 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onEditAccount}
-            className="w-12 h-12 rounded-2xl bg-[#15181D] border border-white/5 flex items-center justify-center text-zinc-300 shadow-xl hover:border-emerald-500/30 transition-all group"
-          >
-            <Sparkles className="w-5 h-5 text-emerald-500 group-hover:animate-pulse" />
-          </motion.button>
-      </div>
+ {/* Balance + window status */}
+ <div className="bg-[#15181D] border border-white/5 rounded-3xl p-5">
+ <div className="flex items-center justify-between">
+ <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.18em]">Available Balance</p>
+ <span className={`flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-full border ${windowInfo.isOpen ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-amber-500/10 text-amber-300 border-amber-500/20'}`}>
+ <span className={`w-1.5 h-1.5 rounded-full ${windowInfo.isOpen ? 'bg-green-400' : 'bg-amber-300'}`}></span>
+ {windowInfo.isOpen ? 'WINDOW OPEN' : 'WINDOW CLOSED'}
+ </span>
+ </div>
+ <p className="text-4xl font-black text-white tracking-tight mt-2">Rs. {balance.toLocaleString()}</p>
+ <div className="mt-4">
+ <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+ <motion.div
+ initial={{ width: 0 }}
+ animate={{ width: `${progress}%` }}
+ className="h-full rounded-full bg-green-500"
+ />
+ </div>
+ <div className="flex items-center justify-between mt-2">
+ <p className="text-[11px] font-semibold text-zinc-400">
+ {progress >= 100 ? 'Minimum withdrawal reached.' : `Rs. ${minWithdrawal - balance} more to reach the Rs. ${minWithdrawal} minimum.`}
+ </p>
+ <p className="text-[11px] font-black text-zinc-500">{Math.floor(progress)}%</p>
+ </div>
+ </div>
+ <div className="flex items-center gap-2 mt-4 bg-white/5 border border-white/5 rounded-xl px-3.5 py-3">
+ <Calendar className="w-4 h-4 text-emerald-400 shrink-0" />
+ <p className="text-[11px] font-bold text-zinc-300">
+ {windowInfo.isOpen ? `Payouts are being processed — ${windowInfo.nextWindowText}.` : `Next payout window: ${windowInfo.nextWindowText}. Withdrawals open on the 1st–3rd and 16th–18th of each month.`}
+ </p>
+ </div>
+ {isPartner && (
+ <p className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-3">
+ <Zap className="w-3.5 h-3.5" /> Instant partner payouts are active on your account.
+ </p>
+ )}
+ </div>
 
-      {/* Bento-Style Status Card */}
-      <div className="relative z-10 group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-600 rounded-[36px] blur-xl opacity-10 group-hover:opacity-20 transition duration-1000"></div>
-        
-        <div className="relative bg-[#022c22] rounded-[32px] p-7 overflow-hidden border border-white/5 shadow-2xl">
-           <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full -mr-24 -mt-24 blur-[80px]"></div>
-           
-           <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
-                    <div className={`w-1.5 h-1.5 rounded-full ${windowInfo.isOpen ? 'bg-emerald-400 animate-ping' : 'bg-emerald-400'}`}></div>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-white/70">
-                      {windowInfo.isOpen ? 'Network Online' : 'Network Standby'}
-                    </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-[10px] uppercase tracking-wider">
-                    <Zap className="w-3 h-3 fill-emerald-400" />
-                    24h Payouts
-                </div>
-              </div>
+ {/* Destination account */}
+ <div>
+ <div className="flex items-center justify-between px-1 mb-3">
+ <h3 className="text-sm font-black text-white">Payout Account</h3>
+ <span className="text-[11px] font-bold text-zinc-500">{accounts.length} saved</span>
+ </div>
+ <div className="space-y-2.5">
+ {accounts.length > 0 ? accounts.map((acc) => (
+ <button
+ key={acc.id}
+ onClick={() => setSelectedAccountId(acc.id)}
+ className={`w-full flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-left transition active:scale-[0.99] ${selectedAccountId === acc.id ? 'bg-emerald-500/10 border-emerald-500/40' : 'bg-[#15181D] border-white/5'}`}
+ >
+ <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${acc.method === 'easypaisa' ? 'bg-emerald-500/15 text-emerald-400' : acc.method === 'jazzcash' ? 'bg-red-500/15 text-red-400' : 'bg-white/5 text-zinc-300'}`}>
+ {acc.method === 'bank' ? <Landmark className="w-5 h-5" /> : <Wallet className="w-5 h-5" />}
+ </span>
+ <span className="flex-1 min-w-0">
+ <span className="block text-sm font-extrabold text-white leading-tight truncate">{acc.title}</span>
+ <span className="block text-[11px] text-zinc-400 font-semibold capitalize">{acc.method} · {acc.number}</span>
+ </span>
+ {selectedAccountId === acc.id && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />}
+ </button>
+ )) : (
+ <button
+ onClick={onEditAccount}
+ className="w-full flex items-center gap-3 rounded-2xl border border-dashed border-white/15 bg-white/5 px-4 py-5 text-left active:scale-[0.99] transition"
+ >
+ <span className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+ <CreditCard className="w-5 h-5 text-emerald-400" />
+ </span>
+ <span>
+ <span className="block text-sm font-extrabold text-white leading-tight">No payout account added</span>
+ <span className="block text-[11px] text-zinc-400 font-semibold">Tap to add your JazzCash, EasyPaisa or bank account</span>
+ </span>
+ </button>
+ )}
+ </div>
+ </div>
 
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">{windowInfo.isOpen ? 'Transfer Available' : 'Upcoming Window'}</p>
-                <h3 className="text-2xl font-black text-white italic uppercase tracking-tight">
-                  {windowInfo.nextWindowText}
-                </h3>
-                {isPartner && (
-                  <div className="flex items-center gap-1.5 bg-emerald-500/10 w-fit px-2 py-0.5 rounded-lg border border-emerald-500/20">
-                    <Zap className="w-2.5 h-2.5 text-emerald-500 animate-pulse fill-emerald-500" />
-                    <span className="text-[8px] font-black uppercase text-emerald-500 tracking-wider">Instant Payout Active</span>
-                  </div>
-                )}
-              </div>
+ {/* Amount */}
+ <div className="bg-[#15181D] border border-white/5 rounded-3xl p-5">
+ <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.18em]">Amount (PKR)</label>
+ <div className="flex items-center gap-2 mt-2 bg-white/5 border border-white/10 rounded-2xl px-4 focus-within:border-emerald-500/50 transition">
+ <span className="text-sm font-black text-zinc-400">Rs.</span>
+ <input
+ type="number"
+ value={amount}
+ onChange={(e) => { setAmount(e.target.value); setError(''); }}
+ placeholder="0"
+ className="w-full bg-transparent py-4 font-black text-white text-xl focus:outline-none placeholder:text-zinc-600"
+ />
+ </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-1">
-                  <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">Net Reserves</p>
-                  <p className="text-xl font-black text-white italic">Rs {balance.toLocaleString()}</p>
-                </div>
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 space-y-1">
-                  <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em]">Minimum Cap</p>
-                  <p className="text-xl font-black text-white italic">Rs {minWithdrawal}</p>
-                </div>
-              </div>
+ <div className="grid grid-cols-2 gap-2.5 mt-3">
+ <div className="bg-white/5 border border-white/5 rounded-xl px-3 py-2.5 text-center">
+ <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Fee (5%)</p>
+ <p className="text-sm font-black text-red-400 mt-0.5">Rs. {(parseFloat(amount) * 0.05 || 0).toFixed(0)}</p>
+ </div>
+ <div className="bg-white/5 border border-white/5 rounded-xl px-3 py-2.5 text-center">
+ <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">You Receive</p>
+ <p className="text-sm font-black text-emerald-400 mt-0.5">Rs. {(parseFloat(amount) * 0.95 || 0).toFixed(0)}</p>
+ </div>
+ </div>
 
-              <div className="space-y-3">
-                <div className="h-2.5 bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5 backdrop-blur-sm">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    className={`h-full rounded-full ${progress >= 100 ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-500 shadow-[0_0_15px_rgba(52,211,153,0.4)]' : 'bg-gradient-to-r from-emerald-400 to-orange-500'}`}
-                  />
-                </div>
-                <div className="flex justify-between items-center px-1">
-                   <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest italic leading-none">
-                     {progress >= 100 ? 'Threshold Reached' : `Rs ${minWithdrawal - balance} to unlock`}
-                   </p>
-                   <p className="text-[8px] font-black text-white/70 uppercase tracking-[0.2em]">{Math.floor(progress)}% AUTH</p>
-                </div>
-              </div>
-           </div>
-        </div>
-      </div>
+ {error && (
+ <div className="flex items-center gap-2 mt-3 bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-3">
+ <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+ <span className="text-[11px] font-bold text-red-300">{error}</span>
+ </div>
+ )}
 
-      {/* Destination Selection */}
-      <div className="relative z-10 space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Select Destination</p>
-          <span className="text-[9px] font-bold text-slate-300 italic">{accounts.length} Accounts Connected</span>
-        </div>
+ <button
+ onClick={handleWithdraw}
+ disabled={!selectedAccount || parseFloat(amount) < minWithdrawal || !windowInfo.isOpen}
+ className="w-full h-12 mt-4 bg-green-500 hover:bg-green-400 disabled:bg-white/10 disabled:text-zinc-500 text-black font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition"
+ >
+ {windowInfo.isOpen ? <>Request Withdrawal <ArrowUpRight className="w-4 h-4" /></> : <><Lock className="w-4 h-4" /> Window Closed</>}
+ </button>
+ <p className="text-[11px] font-semibold text-zinc-500 text-center mt-3">Approved withdrawals are paid within 24 hours.</p>
+ </div>
 
-        <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar snap-x">
-          {accounts.length > 0 ? (
-            accounts.map((acc) => (
-              <motion.div 
-                key={acc.id}
-                onClick={() => setSelectedAccountId(acc.id)}
-                whileTap={{ scale: 0.98 }}
-                className={`relative min-w-[300px] aspect-[1.6/1] rounded-[28px] p-7 shadow-2xl overflow-hidden cursor-pointer transition-all snap-center border-2 ${
-                  selectedAccountId === acc.id 
-                  ? 'border-emerald-500 ring-4 ring-emerald-500/10 scale-105 z-10' 
-                  : 'border-white/5 opacity-50 grayscale hover:opacity-100 hover:grayscale-0'
-                } ${
-                  acc.method === 'easypaisa' ? 'bg-gradient-to-br from-[#022c22] via-[#0D2D1B] to-[#022c22]' : 
-                  acc.method === 'jazzcash' ? 'bg-gradient-to-br from-[#022c22] via-[#3D0C0C] to-[#022c22]' : 
-                  'bg-gradient-to-br from-[#022c22] via-[#1E1E2E] to-[#022c22]'
-                }`}
-              >
-                {/* Visual Textures */}
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]"></div>
-                <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-[60px] -mr-20 -mt-20"></div>
-                
-                <div className="relative z-10 h-full flex flex-col justify-between">
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-col">
-                      <span className="font-black text-xl italic tracking-tighter text-white/90">TRANSACT</span>
-                      <div className="flex items-center gap-1.5">
-                        <div className={`w-1 h-1 rounded-full ${acc.method === 'easypaisa' ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
-                        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40">{acc.method}</span>
-                      </div>
-                    </div>
-                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                       {acc.method === 'easypaisa' ? <ShieldCheck className="w-5 h-5 text-emerald-500" /> : <ShieldCheck className="w-5 h-5 text-red-500" />}
-                    </div>
-                  </div>
+ {/* History */}
+ <div>
+ <div className="flex items-center gap-2 px-1 mb-3">
+ <History className="w-4 h-4 text-zinc-500" />
+ <h3 className="text-sm font-black text-white">Withdrawal History</h3>
+ </div>
+ <div className="space-y-2.5">
+ {displayHistory.length > 0 ? displayHistory.slice(0, 8).map((item, i) => (
+ <button
+ key={item.id ? `withdraw-${item.id}` : `withdraw-idx-${i}`}
+ onClick={() => setSelectedWithdrawal(item.raw)}
+ className="w-full flex items-center justify-between gap-3 bg-[#15181D] border border-white/5 rounded-2xl px-4 py-3.5 text-left active:scale-[0.99] transition"
+ >
+ <div className="flex items-center gap-3 min-w-0">
+ <span className="w-9 h-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-400 shrink-0">
+ <History className="w-4 h-4" />
+ </span>
+ <div className="min-w-0">
+ <p className="text-xs font-bold text-white truncate">{item.title}</p>
+ <p className="text-[10px] text-zinc-500 font-semibold">{item.subtitle} · Tap for receipt</p>
+ </div>
+ </div>
+ <div className="text-right shrink-0">
+ <p className="text-sm font-black text-white">{item.amount}</p>
+ <span className={`inline-block text-[9px] font-black px-2 py-0.5 rounded-md border mt-0.5 ${
+ item.status === 'PENDING' ? 'bg-amber-500/10 text-amber-300 border-amber-500/20' :
+ (item.status === 'APPROVED' || item.status === 'COMPLETED') ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+ item.status === 'REJECTED' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-white/5 text-zinc-400 border-white/10'
+ }`}>
+ {item.status}
+ </span>
+ </div>
+ </button>
+ )) : (
+ <div className="text-center py-10 bg-[#15181D] rounded-3xl border border-dashed border-white/10">
+ <History className="w-7 h-7 text-zinc-600 mx-auto mb-2" />
+ <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">No withdrawals yet</p>
+ </div>
+ )}
+ </div>
+ </div>
 
-                  <div className="space-y-1">
-                    <p className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em]">Account Number</p>
-                    <p className="text-xl font-mono font-black text-white tracking-[0.1em]">
-                      {acc.number}
-                    </p>
-                  </div>
+ {/* Receipt modal */}
+ <AnimatePresence>
+ {selectedWithdrawal && (
+ <motion.div
+ initial={{ opacity: 0 }}
+ animate={{ opacity: 1 }}
+ exit={{ opacity: 0 }}
+ className="fixed inset-0 z-[200] flex items-center justify-center px-5 bg-black/80 backdrop-blur-sm"
+ >
+ <motion.div
+ initial={{ scale: 0.92, y: 24 }}
+ animate={{ scale: 1, y: 0 }}
+ exit={{ scale: 0.92, y: 24 }}
+ className="bg-[#15181D] rounded-3xl p-6 w-full max-w-sm relative border border-white/10 max-h-[88vh] overflow-y-auto"
+ >
+ <button
+ onClick={() => setSelectedWithdrawal(null)}
+ className="absolute top-4 right-4 p-2 bg-white/5 border border-white/10 rounded-full text-zinc-400"
+ >
+ <X className="w-4 h-4" />
+ </button>
 
-                  <div className="flex justify-between items-end border-t border-white/5 pt-4">
-                        <div className="flex flex-col">
-                          <p className="text-[7px] font-black text-white/30 uppercase tracking-widest mb-0.5">Account Label</p>
-                          <p className="text-[11px] font-black text-white uppercase tracking-wider italic truncate max-w-[150px]">{acc.title}</p>
-                        </div>
-                    <div className="text-right">
-                       <CardChip />
-                    </div>
-                  </div>
-                </div>
+ <div className="text-center mb-6">
+ <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 ${
+ selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-emerald-500/15 text-emerald-400' :
+ selectedWithdrawal.status === 'Rejected' ? 'bg-red-500/15 text-red-400' : 'bg-amber-500/15 text-amber-300'
+ }`}>
+ {selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? <CheckCircle2 className="w-8 h-8" /> : <AlertCircle className="w-8 h-8" />}
+ </div>
+ <h3 className="text-xl font-black text-white">Payment Receipt</h3>
+ <span className={`mt-2 inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+ selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400' :
+ selectedWithdrawal.status === 'Rejected' ? 'bg-red-500/10 text-red-400' : 'bg-amber-500/10 text-amber-300'
+ }`}>
+ {selectedWithdrawal.status || 'Pending'}
+ </span>
+ </div>
 
-                {selectedAccountId === acc.id && (
-                  <motion.div 
-                    layoutId="acc-check"
-                    className="absolute top-4 right-4 bg-emerald-500 text-white w-5 h-5 rounded-full flex items-center justify-center shadow-lg"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </motion.div>
-                )}
-              </motion.div>
-            ))
-          ) : (
-            <motion.div 
-              whileHover={{ scale: 1.02 }}
-              onClick={onEditAccount}
-              className="w-full aspect-[1.6/1] rounded-[28px] border-2 border-dashed border-white/10 bg-slate-50/50 flex flex-col items-center justify-center gap-4 text-zinc-500 group cursor-pointer transition-all"
-            >
-              <div className="w-16 h-16 rounded-[22px] bg-[#15181D] shadow-xl border border-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <CreditCard className="w-7 h-7 text-emerald-500" />
-              </div>
-              <div className="text-center space-y-1">
-                <p className="font-black text-white uppercase tracking-tighter italic">Register Node</p>
-                <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Add Payout Method</p>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </div>
+ <div className="bg-[#0B0D10] rounded-2xl border border-white/5 p-4 space-y-4">
+ <div className="flex justify-between items-start border-b border-white/5 pb-3">
+ <div>
+ <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Transaction ID</p>
+ <p className="text-[11px] font-mono font-semibold text-white">{selectedWithdrawal.id?.substring(0, 12).toUpperCase() || 'TXN-PENDING'}</p>
+ </div>
+ <div className="text-right">
+ <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Date</p>
+ <p className="text-[11px] font-semibold text-white">{selectedWithdrawal.date ? new Date(selectedWithdrawal.date).toLocaleDateString() : (selectedWithdrawal.timestamp ? new Date(selectedWithdrawal.timestamp?.toDate ? selectedWithdrawal.timestamp.toDate() : selectedWithdrawal.timestamp).toLocaleDateString() : 'N/A')}</p>
+ </div>
+ </div>
+ <div className="text-center py-1">
+ <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Amount</p>
+ <p className="text-3xl font-black text-emerald-400 tracking-tight">{formatAmount(selectedWithdrawal.amount)}</p>
+ </div>
+ <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-white/5 pt-3">
+ <div>
+ <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Name</p>
+ <p className="text-[11px] font-semibold text-white truncate">{selectedWithdrawal.accountName || selectedWithdrawal.username || 'N/A'}</p>
+ </div>
+ <div>
+ <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Method</p>
+ <p className="text-[11px] font-semibold text-white uppercase">{selectedWithdrawal.method}</p>
+ </div>
+ <div>
+ <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Account Number</p>
+ <p className="text-[11px] font-mono font-semibold text-emerald-400">{selectedWithdrawal.accountNumber || 'N/A'}</p>
+ </div>
+ <div>
+ <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Status</p>
+ <p className="text-[11px] font-bold text-white uppercase">{selectedWithdrawal.status}</p>
+ </div>
+ </div>
+ </div>
 
-      {/* Futuristic Amount Engine - Compact Version */}
-      <div className="relative z-10 px-1">
-        <div className="bg-[#15181D] rounded-[32px] border border-white/5 shadow-xl relative overflow-hidden group/input">
-            {!isCardExpanded ? (
-               <motion.button 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                onClick={() => setIsCardExpanded(true)}
-                className="w-full p-8 flex items-center justify-between group hover:bg-white/5 transition-all font-black"
-               >
-                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-400">
-                      <Zap className="w-6 h-6 fill-emerald-500" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-1">Status</p>
-                      <h4 className="text-xl font-black text-white tracking-tighter uppercase italic">Enter Amount</h4>
-                    </div>
-                 </div>
-                 <ArrowRight className="w-6 h-6 text-slate-200 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
-               </motion.button>
-            ) : (
-             <motion.div 
-               initial={{ height: 0, opacity: 0 }}
-               animate={{ height: 'auto', opacity: 1 }}
-               className="p-6 relative"
-             >
-                <button 
-                  onClick={() => setIsCardExpanded(false)}
-                  className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-slate-300 transition-all"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+ <button
+ onClick={() => setSelectedWithdrawal(null)}
+ className="w-full mt-5 h-12 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-xs uppercase tracking-wider active:scale-[0.98] transition"
+ >
+ Close
+ </button>
+ </motion.div>
+ </motion.div>
+ )}
+ </AnimatePresence>
 
-                <div className="absolute top-0 right-12 w-24 h-24 bg-emerald-500/5 rounded-full blur-3xl -mr-12 -mt-12"></div>
-                
-                <div className="flex items-center justify-between mb-4">
-                   <label className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em]">Order Amount</label>
-                   {parseFloat(amount) > 0 && (
-                     <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md tracking-tighter">Verified</span>
-                   )}
-                </div>
-                
-                <div className="relative flex items-center mb-6 bg-white/5 p-6 rounded-3xl border border-white/5">
-                    <span className="text-zinc-400 font-black text-sm italic mr-3 uppercase">RS</span>
-                    <input
-                        type="number"
-                        value={amount}
-                        onChange={(e) => { setAmount(e.target.value); setError(''); }}
-                        placeholder="0.00"
-                        className="w-full bg-transparent rounded-none text-white font-black text-3xl focus:outline-none placeholder:text-slate-300 tracking-tighter"
-                    />
-                </div>
+ {/* Success modal */}
+ <AnimatePresence>
+ {showSuccess && (
+ <motion.div
+ initial={{ opacity: 0 }}
+ animate={{ opacity: 1 }}
+ exit={{ opacity: 0 }}
+ className="fixed inset-0 z-[200] flex items-center justify-center px-5 bg-black/80 backdrop-blur-sm"
+ >
+ <motion.div
+ initial={{ scale: 0.9, y: 20 }}
+ animate={{ scale: 1, y: 0 }}
+ exit={{ scale: 0.9, y: 20 }}
+ className="bg-[#15181D] rounded-3xl p-7 w-full max-w-sm text-center border border-white/10"
+ >
+ <div className="w-16 h-16 bg-emerald-500/15 rounded-full flex items-center justify-center mx-auto mb-4">
+ <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+ </div>
+ <h3 className="text-xl font-black text-white mb-2">Request Submitted</h3>
+ <p className="text-xs font-semibold text-zinc-400 mb-6 leading-relaxed">
+ Your withdrawal request has been received. Payment is sent within <span className="text-emerald-400 font-bold">24 hours</span> after approval.
+ </p>
+ <button
+ onClick={() => setShowSuccess(false)}
+ className="w-full h-12 bg-green-500 hover:bg-green-400 text-black rounded-xl font-black text-xs uppercase tracking-wider active:scale-[0.98] transition"
+ >
+ Done
+ </button>
+ </motion.div>
+ </motion.div>
+ )}
+ </AnimatePresence>
+ </motion.div>
 
-                {/* Fee Calculation Section */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                   <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                      <p className="text-[7px] font-black text-zinc-500 uppercase tracking-widest leading-none">5% Fee</p>
-                      <p className="text-xs font-black text-red-600 italic">Rs {(parseFloat(amount) * 0.05 || 0).toFixed(0)}</p>
-                   </div>
-                   <div className="bg-slate-50/50 py-2.5 rounded-2xl border border-slate-100/50 flex flex-col items-center">
-                      <p className="text-[7px] font-black text-zinc-500 uppercase tracking-widest leading-none">You'll Get</p>
-                      <p className="text-xs font-black text-emerald-400 italic">Rs {(parseFloat(amount) * 0.95 || 0).toFixed(0)}</p>
-                   </div>
-                </div>
-
-                {error && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -5 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    className="flex items-center gap-2 text-red-600 mb-4 bg-red-500/10 p-3 rounded-xl border border-red-100"
-                  >
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span className="text-[10px] font-black uppercase tracking-tight leading-tight">{error}</span>
-                  </motion.div>
-                )}
-                
-                <motion.button 
-                    whileHover={{ scale: 1.01, y: -1 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={handleWithdraw}
-                    disabled={!selectedAccount || parseFloat(amount) < minWithdrawal || !windowInfo.isOpen}
-                    className="relative w-full h-12 bg-[#022c22] disabled:bg-white/10 disabled:cursor-not-allowed group/btn overflow-hidden rounded-[18px] transition-all shadow-lg"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-500 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
-                    <div className="relative z-10 flex items-center justify-center gap-2">
-                      <span className="text-xs font-black text-white group-disabled:text-zinc-500 uppercase tracking-[0.15em] italic">
-                        {windowInfo.isOpen ? 'Execute Payout' : 'Window Locked'}
-                      </span>
-                      {windowInfo.isOpen ? <ArrowUpRight className="w-4 h-4 text-emerald-400 group-hover/btn:text-white" /> : <Lock className="w-3.5 h-3.5 text-zinc-500" />}
-                    </div>
-                </motion.button>
-
-                {!windowInfo.isOpen && (
-                  <div className="mt-4 flex items-center gap-2 p-3 bg-emerald-50/50 rounded-xl border border-emerald-100/30">
-                    <Calendar className="w-3 h-3 text-emerald-400 shrink-0" />
-                    <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-tight italic">
-                      Next Update: {windowInfo.nextWindowText.split(':')[1]} tareek.
-                    </p>
-                  </div>
-                )}
-             </motion.div>
-            )}
-        </div>
-
-        {/* Action History Feed */}
-        <div className="pt-10">
-            <div className="flex items-center justify-between mb-8 px-2">
-              <div className="flex items-center gap-2">
-                <History className="w-5 h-5 text-zinc-500" />
-                <h3 className="font-black text-2xl text-white tracking-tighter italic uppercase">History</h3>
-              </div>
-              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest border border-white/5 px-3 py-1 rounded-full">Feed</span>
-            </div>
-            
-            <div className="space-y-3">
-            {displayHistory.length > 0 ? displayHistory.slice(0, 8).map((item, i) => (
-                <motion.div 
-                  key={item.id ? `withdraw-${item.id}` : `withdraw-idx-${i}`} 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.05 }}
-                  onClick={() => setSelectedWithdrawal(item.raw)}
-                  className="group bg-[#15181D] p-4 rounded-2xl border border-white/5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-emerald-500/10 transition-all cursor-pointer relative overflow-hidden h-16"
-                >
-                  <div className="flex items-center gap-4 relative z-10">
-                      <div className="w-10 h-10 rounded-xl bg-white/5 text-zinc-500 flex items-center justify-center shrink-0 border border-white/5 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-all">
-                        <History className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h4 className="font-black text-white text-[11px] uppercase italic tracking-tight leading-none mb-1">{item.title}</h4>
-                        <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest leading-none">{item.subtitle}</p>
-                        <p className="text-[8px] font-black uppercase text-red-500 tracking-wider mt-1">View Receipt</p>
-                      </div>
-                  </div>
-                  <div className="text-right relative z-10">
-                      <div className="font-black text-sm text-white italic tracking-tighter leading-none mb-1">
-                        {item.amount}
-                      </div>
-                      <div className={`text-[7px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border ${
-                        item.status === 'PENDING' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                        (item.status === 'APPROVED' || item.status === 'COMPLETED') ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                        item.status === 'REJECTED' ? 'bg-red-500/10 text-red-600 border-red-100' : 'bg-white/5 text-zinc-500 border-white/5'
-                      }`}>
-                        {item.status}
-                      </div>
-                  </div>
-                </motion.div>
-            )) : (
-              <div className="text-center py-16 bg-white/5 rounded-[40px] border border-dashed border-white/10">
-                <div className="w-14 h-14 bg-[#15181D] rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                  <History className="w-6 h-6 text-slate-200" />
-                </div>
-                <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">No History</p>
-              </div>
-            )}
-            </div>
-        </div>
-      </div>
-
-      {/* Futuristic Receipt Modal */}
-      <AnimatePresence>
-        {selectedWithdrawal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center px-6 bg-[#022c22]/80 backdrop-blur-md"
-          >
-            <motion.div 
-              initial={{ scale: 0.9, y: 30 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 30 }}
-              className="bg-[#15181D] rounded-[44px] p-10 w-full max-w-sm shadow-2xl relative border border-white/10"
-            >
-              <div className="absolute top-0 left-0 w-full h-3 bg-[#022c22]"></div>
-              
-              <button 
-                onClick={() => setSelectedWithdrawal(null)} 
-                className="absolute top-8 right-8 p-2 bg-white/5 border border-white/5 rounded-full text-zinc-500 hover:text-red-500 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              
-              <div className="text-center mb-8">
-                 <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg ${
-                     selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20' :
-                     selectedWithdrawal.status === 'Rejected' ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/20' :
-                     'bg-gradient-to-br from-emerald-500 to-orange-600 shadow-emerald-500/20'
-                 }`}>
-                    {selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? <CheckCircle2 className="w-10 h-10 text-white" /> : <AlertCircle className="w-10 h-10 text-white" />}
-                 </div>
-                 <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter">Payment Receipt</h3>
-                 <div className={`mt-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block ${
-                     selectedWithdrawal.status === 'Approved' || selectedWithdrawal.status === 'Completed' ? 'bg-emerald-100 text-emerald-400' :
-                     selectedWithdrawal.status === 'Rejected' ? 'bg-red-100 text-red-700' :
-                     'bg-emerald-100 text-emerald-400'
-                 }`}>
-                    {selectedWithdrawal.status || 'Pending'}
-                 </div>
-                 <p className="text-[10px] font-bold text-zinc-400 mt-2 uppercase tracking-widest">Sent by TaskMint Official</p>
-              </div>
-              
-              {/* Receipt Body - Premium Dark Theme */}
-              <div className="bg-gradient-to-b from-[#18181b] to-[#09090b] p-6 rounded-3xl border border-white/10 shadow-inner relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-[60px]"></div>
-                
-                {/* Transaction Data */}
-                <div className="space-y-4 relative z-10">
-                    {/* Header Section */}
-                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                        <div>
-                            <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">TXN ID</p>
-                            <p className="text-[10px] font-mono font-medium text-white tracking-wider">{selectedWithdrawal.id?.substring(0, 12).toUpperCase() || 'TXN-PENDING'}</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Date</p>
-                            <p className="text-[10px] font-semibold text-white">{selectedWithdrawal.date ? new Date(selectedWithdrawal.date).toLocaleDateString() : 'N/A'}</p>
-                        </div>
-                    </div>
-
-                    {/* Amount Highlight - Center Stage */}
-                    <div className="text-center py-2">
-                        <p className="text-[9px] font-bold text-white/40 uppercase tracking-[0.3em] mb-1">Total Received</p>
-                        <p className="text-3xl font-black text-emerald-400 italic tracking-tighter">{formatAmount(selectedWithdrawal.amount)}</p>
-                    </div>
-
-                    {/* Detailed Grid */}
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-white/5 pt-4">
-                        <div>
-                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Username</p>
-                            <p className="text-[10px] font-semibold text-white tracking-wide truncate">{selectedWithdrawal.username || 'N/A'}</p>
-                        </div>
-                        <div>
-                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Ref ID</p>
-                            <p className="text-[10px] font-semibold text-white tracking-wide">{selectedWithdrawal.referralId || 'N/A'}</p>
-                        </div>
-                        <div>
-                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Method</p>
-                            <p className="text-[10px] font-semibold text-white uppercase">{selectedWithdrawal.method}</p>
-                        </div>
-                        <div>
-                            <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Status</p>
-                            <p className={`text-[10px] font-bold uppercase ${selectedWithdrawal.status === 'Approved' ? 'text-emerald-500' : 'text-emerald-500'}`}>{selectedWithdrawal.status}</p>
-                        </div>
-                    </div>
-
-                    {/* Payment Details */}
-                    <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
-                        <p className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Account Info</p>
-                        <div className="flex justify-between items-center">
-                            <p className="text-[10px] font-semibold text-white">{selectedWithdrawal.accountName || selectedWithdrawal.username || 'N/A'}</p>
-                            <p className="text-[10px] font-mono text-emerald-400">{selectedWithdrawal.accountNumber || 'N/A'}</p>
-                        </div>
-                    </div>
-                </div>
-              </div>
-              
-              <div className="text-center mt-6">
-                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Withdrawal by TaskMint Official Pakistan</p>
-              </div>
-
-
-              <button 
-                onClick={() => setSelectedWithdrawal(null)}
-                className="w-full mt-8 p-5 bg-[#022c22] text-white rounded-3xl font-black text-xs uppercase tracking-[0.2em] italic shadow-xl shadow-slate-900/10"
-              >
-                Close Receipt
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Enhanced Success Modal */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center px-6 bg-[#022c22]/90 backdrop-blur-xl"
-          >
-            <motion.div 
-              initial={{ scale: 0.8, rotate: -5 }}
-              animate={{ scale: 1, rotate: 0 }}
-              exit={{ scale: 0.8, rotate: 5 }}
-              className="bg-[#15181D] rounded-[50px] p-10 w-full max-w-sm text-center shadow-2xl relative overflow-hidden"
-            >
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600"></div>
-              
-              <div className="w-24 h-24 bg-emerald-500/10 rounded-[30px] flex items-center justify-center mx-auto mb-8 relative">
-                <div className="absolute inset-0 bg-emerald-500/20 rounded-[30px] animate-ping opacity-30"></div>
-                <Zap className="w-12 h-12 text-emerald-500 fill-emerald-500 relative z-10" />
-              </div>
-
-              <h3 className="text-3xl font-black text-white mb-3 italic tracking-tighter leading-none uppercase">Execution Successful</h3>
-              <p className="text-xs text-zinc-500 font-bold mb-10 leading-relaxed uppercase tracking-tight">
-                Payout request initiated. Your money will be sent within <span className="text-emerald-500">24 hours</span>.
-              </p>
-
-              <button 
-                onClick={() => setShowSuccess(false)}
-                className="group relative w-full h-16 bg-[#022c22] overflow-hidden rounded-[24px] shadow-2xl transition-all active:scale-95"
-              >
-                <div className="absolute inset-0 bg-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-                <span className="relative z-10 font-black text-white text-xs uppercase tracking-[0.2em] italic">Acknowledge</span>
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
+ );
 }
-

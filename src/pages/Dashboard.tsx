@@ -24,7 +24,8 @@ import {
   Clock,
   ArrowRight,
   Users,
-  Wallet
+  Wallet,
+  Download
 } from 'lucide-react';
 import { 
   doc, 
@@ -1131,6 +1132,16 @@ export default function Dashboard() {
     }
   };
 
+  const [installDismissed, setInstallDismissed] = useState(() => {
+    try { return localStorage.getItem('tm_install_banner_dismissed') === '1'; } catch { return false; }
+  });
+  const isAppEnv = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const ua = (navigator.userAgent || '').toLowerCase();
+    return ua.includes('wv') || ua.includes('appcreator24') || !!(window as any).AppCreator24 ||
+      window.matchMedia('(display-mode: standalone)').matches;
+  }, []);
+
   const renderTabContent = () => {
     // Restriction logic
     const currentAccountStatus = accountStatus.toLowerCase();
@@ -1544,6 +1555,32 @@ export default function Dashboard() {
                 )}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* App install banner — website only (not inside the APK) */}
+        {activeTab === 'home' && !isAppEnv && !installDismissed && (
+          <div className="mx-4 mt-3 flex items-center gap-3 bg-[#15181D] border border-emerald-500/25 rounded-2xl px-3.5 py-3 relative z-30">
+            <span className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
+              <Download className="w-4.5 h-4.5 w-[18px] h-[18px] text-emerald-400" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-extrabold text-white leading-tight">Install the TaskMint App</p>
+              <p className="text-[10px] font-semibold text-zinc-400 leading-tight mt-0.5">Get a Rs. 100 bonus + Rs. 10 daily reward, only in the app.</p>
+            </div>
+            <button
+              onClick={() => { window.location.href = '/app-download'; }}
+              className="bg-green-500 hover:bg-green-400 text-black text-[10px] font-black px-3 py-2 rounded-lg active:scale-95 transition shrink-0"
+            >
+              INSTALL
+            </button>
+            <button
+              onClick={() => { setInstallDismissed(true); try { localStorage.setItem('tm_install_banner_dismissed', '1'); } catch {} }}
+              className="text-zinc-500 hover:text-zinc-300 shrink-0 p-1"
+              aria-label="Dismiss"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
 
