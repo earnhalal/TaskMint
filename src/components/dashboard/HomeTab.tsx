@@ -33,6 +33,7 @@ interface HomeTabProps {
   onUpdateBalance: (amount: number, source?: string, description?: string, transactionId?: string) => Promise<boolean>;
   appSettings: {
     activationFee: number;
+    minWithdrawal?: number;
   };
   appBonusClaimed: boolean;
   lastDailyCheckin: any;
@@ -294,13 +295,13 @@ export default function HomeTab({
           <div className="h-2 rounded-full bg-white/10 overflow-hidden">
             <div
               className="h-full rounded-full bg-green-500 transition-all duration-700"
-              style={{ width: `${Math.min(100, Math.max(0, (balance / 500) * 100))}%` }}
+              style={{ width: `${Math.min(100, Math.max(0, (balance / (appSettings.minWithdrawal ?? 500)) * 100))}%` }}
             ></div>
           </div>
           <p className="text-[11px] font-semibold text-zinc-400 mt-2">
-            {balance >= 500
-              ? 'Your balance is ready to cash out (minimum Rs. 500).'
-              : `You are Rs. ${(500 - balance).toFixed(0)} away from cashing out (minimum Rs. 500).`}
+            {balance >= (appSettings.minWithdrawal ?? 500)
+              ? `Your balance is ready to cash out (minimum Rs. ${appSettings.minWithdrawal ?? 500}).`
+              : `You are Rs. ${((appSettings.minWithdrawal ?? 500) - balance).toFixed(0)} away from cashing out (minimum Rs. ${appSettings.minWithdrawal ?? 500}).`}
           </p>
         </div>
 
@@ -331,8 +332,8 @@ export default function HomeTab({
           <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Team Earnings</p>
         </div>
         <div className="bg-[#15181D] rounded-2xl border border-white/5 px-3 py-3.5 text-center">
-          <p className={`text-sm font-black flex items-center justify-center gap-1.5 ${accountStatus === 'Active' ? 'text-green-400' : 'text-rose-400'}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${accountStatus === 'Active' ? 'bg-green-400' : 'bg-rose-400'}`}></span>
+          <p className={`text-sm font-black flex items-center justify-center gap-1.5 ${accountStatus?.toLowerCase() === 'active' ? 'text-green-400' : 'text-rose-400'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${accountStatus?.toLowerCase() === 'active' ? 'bg-green-400' : 'bg-rose-400'}`}></span>
             {accountStatus}
           </p>
           <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Account</p>

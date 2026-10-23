@@ -20,9 +20,10 @@ interface WithdrawTabProps {
  accounts: Account[];
  manualWithdrawUnlock?: boolean;
  isPartner?: boolean;
+ appSettings?: any;
 }
 
-export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts, manualWithdrawUnlock = false, isPartner = false }: WithdrawTabProps) {
+export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSetupPin, onEditAccount, accounts, manualWithdrawUnlock = false, isPartner = false, appSettings }: WithdrawTabProps) {
  const { formatAmount } = useCurrency();
  const [amount, setAmount] = useState('');
  const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
@@ -30,7 +31,8 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
  const [showSuccess, setShowSuccess] = useState(false);
  const [isCardExpanded, setIsCardExpanded] = useState(true); // Default to open for mobile app feel
 
- const minWithdrawal = 500;
+ const minWithdrawal = appSettings?.minWithdrawal ?? 500;
+ const feeRate = (appSettings?.withdrawalFeeRate ?? 5) / 100;
 
  const windowInfo = useMemo(() => {
  const now = new Date();
@@ -222,12 +224,12 @@ export default function WithdrawTab({ balance, history, onWithdraw, hasPin, onSe
 
  <div className="grid grid-cols-2 gap-2.5 mt-3">
  <div className="bg-white/5 border border-white/5 rounded-xl px-3 py-2.5 text-center">
- <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Fee (5%)</p>
- <p className="text-sm font-black text-red-400 mt-0.5">Rs. {(parseFloat(amount) * 0.05 || 0).toFixed(0)}</p>
+ <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Fee ({appSettings?.withdrawalFeeRate ?? 5}%)</p>
+ <p className="text-sm font-black text-red-400 mt-0.5">Rs. {(parseFloat(amount) * feeRate || 0).toFixed(0)}</p>
  </div>
  <div className="bg-white/5 border border-white/5 rounded-xl px-3 py-2.5 text-center">
  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">You Receive</p>
- <p className="text-sm font-black text-emerald-400 mt-0.5">Rs. {(parseFloat(amount) * 0.95 || 0).toFixed(0)}</p>
+ <p className="text-sm font-black text-emerald-400 mt-0.5">Rs. {(parseFloat(amount) * (1 - feeRate) || 0).toFixed(0)}</p>
  </div>
  </div>
 
