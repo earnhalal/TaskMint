@@ -20,7 +20,7 @@ import { useSEO } from '../hooks/useSEO';
 const APK_URL = 'https://github.com/earnhalal/TaskMint/releases/latest/download/TaskMint.apk';
 
 const INFO_ITEMS = [
-  { label: 'Version', value: '1.9' },
+  { label: 'Version', value: '1.10' },
   { label: 'Size', value: 'About 10 MB' },
   { label: 'Requires Android', value: '7.0 and up' },
   { label: 'Category', value: 'Finance / Earning' },
@@ -196,7 +196,7 @@ export default function DownloadPage() {
 
             <h3 className="text-base font-black text-slate-900 mt-8 mb-4">What's new</h3>
             <p className="text-slate-600 font-medium text-[15px] leading-relaxed">
-              Version 1.9 — the signed release build of the TaskMint Android app. The app now
+              Version 1.10 — the signed release build of the TaskMint Android app. The app now
               notifies you in the dashboard whenever a newer version is available, so you always
               have the latest TaskMint dashboard, tasks, video ads, wallet and referral system.
               This download button always serves the latest published version.

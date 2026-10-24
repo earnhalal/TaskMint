@@ -51,8 +51,53 @@ export interface StartIoAdsConfig {
   startioDailyLimit: number;
 }
 
+/** Reward ladder by plan tier — one ladder for both networks. */
+export interface TierRewardConfig {
+  /** Rs. per completed rewarded ad for members with no package. */
+  rewardBasic: number;
+  /** Rs. per completed rewarded ad for Bronze package holders. */
+  rewardBronze: number;
+  /** Rs. per completed rewarded ad for Silver package holders. */
+  rewardSilver: number;
+  /** Rs. per completed rewarded ad for Gold package holders. */
+  rewardGold: number;
+}
+
 /** The full ads configuration: every network, one document. */
-export type AdsConfig = UnityAdsConfig & StartIoAdsConfig;
+export type AdsConfig = UnityAdsConfig & StartIoAdsConfig & TierRewardConfig;
+
+export type PlanTier = 'basic' | 'bronze' | 'silver' | 'gold';
+
+/** The tier that decides a user's ad reward rate. */
+export function effectivePlanTier(role: string, partnerTier: string): PlanTier {
+  const t = (partnerTier || '').toLowerCase();
+  if (t === 'bronze' || t === 'silver' || t === 'gold') return t;
+  // Partners approved before tiers were stored were granted Silver.
+  if ((role || '').toLowerCase() === 'partner') return 'silver';
+  return 'basic';
+}
+
+/**
+ * The Rs. rate for one completed rewarded view for this user's tier.
+ * A tier rate of 0 means "not set" and falls back down the ladder to
+ * the basic tier rate, then to the network's own legacy reward field —
+ * so a partially filled ladder can never zero out a reward.
+ */
+export function resolveAdReward(
+  config: AdsConfig,
+  network: 'unity' | 'startio',
+  tier: PlanTier,
+): number {
+  const ladder: Record<PlanTier, number> = {
+    basic: config.rewardBasic,
+    bronze: config.rewardBronze,
+    silver: config.rewardSilver,
+    gold: config.rewardGold,
+  };
+  if (ladder[tier] > 0) return ladder[tier];
+  if (config.rewardBasic > 0) return config.rewardBasic;
+  return network === 'unity' ? config.unityRewardAmount : config.startioRewardAmount;
+}
 
 export const DEFAULT_REWARDED_PLACEMENT_ID = 'Rewarded_Android';
 export const DEFAULT_INTERSTITIAL_PLACEMENT_ID = 'Interstitial_Android';
@@ -116,8 +161,26 @@ function toStartIoConfig(data: Record<string, any> | undefined): StartIoAdsConfi
   };
 }
 
+export const TIER_REWARD_DEFAULTS: TierRewardConfig = {
+  rewardBasic: 0,
+  rewardBronze: 0,
+  rewardSilver: 0,
+  rewardGold: 0,
+};
+
+function toTierRewardConfig(data: Record<string, any> | undefined): TierRewardConfig {
+  const d = data || {};
+  const num = (v: any) => (typeof v === 'number' && Number.isFinite(v) ? Math.max(0, v) : 0);
+  return {
+    rewardBasic: num(d.rewardBasic),
+    rewardBronze: num(d.rewardBronze),
+    rewardSilver: num(d.rewardSilver),
+    rewardGold: num(d.rewardGold),
+  };
+}
+
 function toAdsConfig(data: Record<string, any> | undefined): AdsConfig {
-  return { ...toConfig(data), ...toStartIoConfig(data) };
+  return { ...toConfig(data), ...toStartIoConfig(data), ...toTierRewardConfig(data) };
 }
 
 let cachedConfig: AdsConfig | null = null;
@@ -143,6 +206,21 @@ async function readRtdbConfig(): Promise<AdsConfig | null> {
     console.warn('Ads settings (RTDB) could not be loaded:', error);
     return null;
   }
+}
+
+/** Per-field ladder merge: RTDB rate wins when set, else Firestore's. */
+function mergeTierLadder(
+  fromFirestore: AdsConfig | null,
+  fromRtdb: AdsConfig | null,
+): TierRewardConfig {
+  const pick = (key: keyof TierRewardConfig) =>
+    (fromRtdb && fromRtdb[key] > 0 ? fromRtdb[key] : fromFirestore ? fromFirestore[key] : 0) || 0;
+  return {
+    rewardBasic: pick('rewardBasic'),
+    rewardBronze: pick('rewardBronze'),
+    rewardSilver: pick('rewardSilver'),
+    rewardGold: pick('rewardGold'),
+  };
 }
 
 /**
@@ -178,7 +256,7 @@ export async function getAdsConfig(): Promise<AdsConfig> {
         : fromFirestore || fromRtdb;
 
       if (!unitySource && !startioSource) {
-        cachedConfig = { ...UNITY_CONFIG_DEFAULTS, ...STARTIO_CONFIG_DEFAULTS };
+        cachedConfig = { ...UNITY_CONFIG_DEFAULTS, ...STARTIO_CONFIG_DEFAULTS, ...TIER_REWARD_DEFAULTS };
         return cachedConfig;
       }
       cachedConfig = {
@@ -186,6 +264,9 @@ export async function getAdsConfig(): Promise<AdsConfig> {
         ...(unitySource ? toConfig(unitySource as any) : {}),
         ...STARTIO_CONFIG_DEFAULTS,
         ...(startioSource ? toStartIoConfig(startioSource as any) : {}),
+        // Tier ladder: per field, the RTDB mirror wins when it sets
+        // the rate; Firestore fills any rate RTDB leaves unset.
+        ...mergeTierLadder(fromFirestore, fromRtdb),
       };
       return cachedConfig;
     })();

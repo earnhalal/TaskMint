@@ -110,10 +110,10 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
  icon: <Zap className="w-6 h-6" />,
  color: 'from-emerald-600 to-emerald-800',
  tagline: 'Starter Partner Mode',
- adEarnings: 'Rs 30 - 60 / Daily',
+ adEarnings: 'Up to Rs 20 / Daily from Ads',
  features: [
  `Rs ${appSettings?.referralBonusPartner || 125} per Invite`,
- '3.00 Reward per Bronze Ad',
+ 'Rs 0.40 per Ad — Bronze Rate',
  '1 Free monthly ticket',
  'Instant Payout Enabled'
  ],
@@ -134,10 +134,10 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
  icon: <Shield className="w-6 h-6" />,
  color: 'from-teal-600 to-blue-700',
  tagline: 'Business Pro Partner',
- adEarnings: 'Rs 125 - 250 / Daily',
+ adEarnings: 'Up to Rs 25 / Daily from Ads',
  features: [
  `Rs ${appSettings?.referralBonusPartner || 125} per Invite`,
- '25.00 Reward per VIP Ad',
+ 'Rs 0.50 per Ad — Silver Rate',
  '2 Free monthly tickets',
  'Team Management Tools',
  'Priority Admin Support'
@@ -159,10 +159,10 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
  icon: <Crown className="w-6 h-6" />,
  color: 'from-emerald-500 to-orange-600',
  tagline: 'Maximum Revenue Mode',
- adEarnings: 'Rs 300 - 600 / Daily',
+ adEarnings: 'Up to Rs 30 / Daily from Ads',
  features: [
  `Rs ${appSettings?.referralBonusPartner || 125} per Instant Invite`,
- '60.00 Reward per Elite Ad',
+ 'Rs 0.60 per Ad — Gold Rate',
  '5 Free monthly tickets',
  'Full Partner Analytics',
  'VIP WhatsApp Group Access'
