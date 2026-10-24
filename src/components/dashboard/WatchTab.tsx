@@ -137,7 +137,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const unityLimitReached =
     !!unityConfig && unityConfig.unityDailyLimit > 0 && unityTodayCount >= unityConfig.unityDailyLimit;
 
-  const handleWatchUnityAd = async () => {
+  const handleWatchUnityAd = async (slotIndex?: number) => {
     if (isUnityBusy || !unityConfig || !auth.currentUser) return;
     if (unityLimitReached) {
       setMessage({ type: 'error', text: 'You have reached today\'s Unity ad limit. Please try again tomorrow.' });
@@ -165,6 +165,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           );
           if (credited) {
             setUnityTodayCount((prev) => prev + 1);
+            if (slotIndex !== undefined) advanceSequence(slotIndex);
             setShowSuccessPopup({
               amount: unityConfig.unityRewardAmount,
               adTitle: 'Unity Rewarded Ad',
@@ -236,7 +237,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const startioLimitReached =
     !!startioConfig && startioConfig.startioDailyLimit > 0 && startioTodayCount >= startioConfig.startioDailyLimit;
 
-  const handleWatchStartIoAd = async () => {
+  const handleWatchStartIoAd = async (slotIndex?: number) => {
     if (isStartioBusy || !startioConfig || !auth.currentUser) return;
     if (startioLimitReached) {
       setMessage({ type: 'error', text: 'You have reached today\'s Start.io ad limit. Please try again tomorrow.' });
@@ -263,6 +264,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           );
           if (credited) {
             setStartioTodayCount((prev) => prev + 1);
+            if (slotIndex !== undefined) advanceSequence(slotIndex);
             setShowSuccessPopup({
               amount: startioConfig.startioRewardAmount,
               adTitle: 'Start.io Rewarded Ad',
@@ -288,6 +290,100 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     } finally {
       setIsStartioBusy(false);
     }
+  };
+
+  // --- Reward-ad sequence (owner's spec) --------------------------------
+  // The Watch page offers a daily playlist: every Unity slot (per the
+  // panel daily limit), then every Start.io slot. Only ONE slot is open
+  // at a time. Watching it fully (reward credited) locks it with a
+  // 1-minute timer; when the timer ends, the next slot unlocks. Progress
+  // is kept per user per day in localStorage; the per-network daily caps
+  // are still enforced server-side from earning_history, so the pacing
+  // can never pay more than the panel limits.
+  const SEQ_COOLDOWN_MS = 60_000;
+  interface SeqState { date: string; nextIndex: number; lockUntil: number }
+  const [seq, setSeq] = useState<SeqState | null>(null);
+  const [seqNow, setSeqNow] = useState(Date.now());
+
+  const todayKey = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  };
+  const seqStorageKey = () =>
+    auth.currentUser ? `taskmint_ad_sequence_${auth.currentUser.uid}` : null;
+
+  useEffect(() => {
+    const key = seqStorageKey();
+    if (!key) return;
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw) as SeqState;
+        if (parsed && parsed.date === todayKey()) {
+          setSeq(parsed);
+          return;
+        }
+      }
+    } catch { /* corrupted storage — start fresh */ }
+    setSeq({ date: todayKey(), nextIndex: 0, lockUntil: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Server truth floor: if today's credited counts say the user is
+  // further along than the stored progress (e.g. fresh install), catch up.
+  useEffect(() => {
+    if (!seq) return;
+    const floor = unityTodayCount + startioTodayCount;
+    if (floor > seq.nextIndex) {
+      setSeq((prev) => (prev ? { ...prev, nextIndex: Math.max(prev.nextIndex, floor) } : prev));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unityTodayCount, startioTodayCount]);
+
+  useEffect(() => {
+    const key = seqStorageKey();
+    if (!key || !seq) return;
+    try { localStorage.setItem(key, JSON.stringify(seq)); } catch { /* private mode */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seq]);
+
+  // 1-second ticker so the cooldown countdown is smooth.
+  useEffect(() => {
+    const t = setInterval(() => setSeqNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const advanceSequence = (watchedIndex: number) => {
+    setSeq((prev) => {
+      const base = prev && prev.date === todayKey() ? prev : { date: todayKey(), nextIndex: 0, lockUntil: 0 };
+      if (watchedIndex !== base.nextIndex) return base;
+      return { date: base.date, nextIndex: base.nextIndex + 1, lockUntil: Date.now() + SEQ_COOLDOWN_MS };
+    });
+  };
+
+  type AdSlot = { network: 'unity' | 'startio'; number: number; reward: number };
+  const adSlots = useMemo<AdSlot[]>(() => {
+    if (!Capacitor.isNativePlatform()) return [];
+    const slots: AdSlot[] = [];
+    if (unityConfig && isUnityConfigured(unityConfig)) {
+      const n = unityConfig.unityDailyLimit > 0 ? unityConfig.unityDailyLimit : 25;
+      for (let i = 1; i <= n; i++) slots.push({ network: 'unity', number: i, reward: unityConfig.unityRewardAmount });
+    }
+    if (startioConfig && isStartIoConfigured(startioConfig)) {
+      const n = startioConfig.startioDailyLimit > 0 ? startioConfig.startioDailyLimit : 25;
+      for (let i = 1; i <= n; i++) slots.push({ network: 'startio', number: i, reward: startioConfig.startioRewardAmount });
+    }
+    return slots;
+  }, [unityConfig, startioConfig]);
+
+  const seqLockActive = !!seq && seq.lockUntil > seqNow;
+  const seqCooldownLeft = seqLockActive ? Math.ceil((seq!.lockUntil - seqNow) / 1000) : 0;
+  const seqNextIndex = seq ? seq.nextIndex : 0;
+  const seqCompletedThrough = seqLockActive ? seqNextIndex - 1 : seqNextIndex;
+
+  const handleWatchSlot = (slot: AdSlot, index: number) => {
+    if (slot.network === 'unity') void handleWatchUnityAd(index);
+    else void handleWatchStartIoAd(index);
   };
 
   // YouTube-like view formatter
@@ -577,9 +673,9 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             per-ad reward, and how many partner videos are available. */}
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
-            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">Unity Ads Today</p>
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">Ads Watched Today</p>
             <p className="text-lg font-black text-white tracking-tight">
-              {unityConfig && unityConfig.unityDailyLimit > 0 ? `${unityTodayCount}/${unityConfig.unityDailyLimit}` : unityTodayCount}
+              {unityTodayCount + startioTodayCount}/{adSlots.length || (unityTodayCount + startioTodayCount)}
             </p>
           </div>
           <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
@@ -622,216 +718,142 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           </div>
         )}
 
-        {/* Unity Rewarded Ad — native app only, configured from the admin
-            panel (app_settings/ads). Player-style hero card: a 16:9 stage
-            with a play affordance, a LIVE/TEST badge straight from the
-            config, and today's progress. Renders only when Unity is
-            enabled with a game ID; never appears on the plain web build. */}
-        {Capacitor.isNativePlatform() && unityConfig && isUnityConfigured(unityConfig) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative rounded-[2rem] overflow-hidden bg-zinc-950 border border-white/10 shadow-2xl"
-          >
-            {/* Player stage */}
-            <div className="relative aspect-video w-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black overflow-hidden">
-              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
-              <div className="absolute -bottom-24 -left-16 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl" />
-
-              {/* Top bar: network + live/test badge */}
-              <div className="absolute top-0 inset-x-0 p-4 flex items-center justify-between">
-                <span className="px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
-                  Unity Ads
-                </span>
-                {unityConfig.unityTestMode ? (
-                  <span className="px-2.5 py-1 rounded-lg bg-amber-500/90 text-[8px] font-black uppercase tracking-widest text-black">
-                    Test Ad
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-600 text-[8px] font-black uppercase tracking-widest text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    Live
-                  </span>
-                )}
-              </div>
-
-              {/* Center play affordance */}
-              <button
-                onClick={handleWatchUnityAd}
-                disabled={isUnityBusy || unityLimitReached}
-                className="absolute inset-0 w-full h-full flex flex-col items-center justify-center gap-3 group disabled:cursor-not-allowed"
-                aria-label="Watch Unity ad"
-              >
-                <span className="w-[4.5rem] h-[4.5rem] rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.25)] transition-transform group-hover:scale-105 group-active:scale-95">
-                  {isUnityBusy ? (
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                  ) : (
-                    <PlayCircle className="w-9 h-9" />
-                  )}
-                </span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/80">
-                  {isUnityBusy ? 'Loading Ad...' : unityLimitReached ? 'Daily Limit Reached' : 'Tap to Play'}
-                </span>
-              </button>
-
-              {/* Bottom player bar */}
-              <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/85 to-transparent flex items-end justify-between pointer-events-none">
-                <div className="flex items-center gap-2 text-zinc-300">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">~30 sec</span>
-                </div>
-                <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white shadow-lg flex items-center gap-1.5">
-                  <Zap className="w-3 h-3 fill-current" />
-                  <span className="text-xs font-black">+ Rs. {unityConfig.unityRewardAmount}</span>
-                </div>
-              </div>
+        {/* Reward Ads playlist — the daily sequence (owner's spec).
+            Unity slots first, then Start.io slots; one slot open at a
+            time; a watched slot locks with a 1-minute timer, then the
+            next slot unlocks. Native app only (SDK ads). */}
+        {Capacitor.isNativePlatform() && adSlots.length > 0 && seq && (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xl font-black text-white tracking-tight">Reward Ads</h3>
+              <p className="text-[11px] text-zinc-500 font-bold mt-1">
+                Watch the open ad to unlock the next one. Each fully watched ad pays instantly.
+              </p>
             </div>
 
-            {/* Meta + progress */}
-            <div className="p-5 md:p-6 space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h4 className="text-lg font-black text-white tracking-tight">Watch Ad &amp; Earn</h4>
-                  <p className="text-[11px] text-zinc-400 font-bold leading-relaxed mt-0.5">
-                    Watch the full ad to earn your reward instantly.
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Watched Today</p>
-                  <p className="text-sm font-black text-white">
-                    {unityConfig.unityDailyLimit > 0 ? `${unityTodayCount} / ${unityConfig.unityDailyLimit}` : unityTodayCount}
-                  </p>
-                </div>
+            {seqNextIndex >= adSlots.length && !seqLockActive ? (
+              <div className="rounded-[2rem] bg-emerald-500/10 border border-emerald-500/30 p-6 text-center">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
+                <p className="text-white font-black">All ads completed for today</p>
+                <p className="text-[11px] text-zinc-400 font-bold mt-1">Come back tomorrow for a fresh set of {adSlots.length} ads.</p>
               </div>
-              {unityConfig.unityDailyLimit > 0 && (
-                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-emerald-500 transition-all duration-500"
-                    style={{ width: `${Math.min(100, (unityTodayCount / unityConfig.unityDailyLimit) * 100)}%` }}
-                  />
-                </div>
-              )}
-              <button
-                onClick={handleWatchUnityAd}
-                disabled={isUnityBusy || unityLimitReached}
-                className="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
-              >
-                {isUnityBusy ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Loading Ad...</>
-                ) : unityLimitReached ? (
-                  <><Clock className="w-4 h-4" /> Come Back Tomorrow</>
-                ) : (
-                  <><PlayCircle className="w-4 h-4" /> Watch Ad — Earn Rs. {unityConfig.unityRewardAmount}</>
-                )}
-              </button>
-            </div>
-          </motion.div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {adSlots.map((slot, i) => {
+                  const isCompleted = i < seqCompletedThrough;
+                  const isCooling = seqLockActive && i === seqCompletedThrough && seqNextIndex > 0 && i === seqNextIndex - 1 && seqCompletedThrough >= 0 && i < seqNextIndex;
+                  const isCurrent = !seqLockActive && i === seqNextIndex;
+                  const isWaitingUnlock = seqLockActive && i === seqNextIndex;
+                  const isLocked = i > seqNextIndex || isWaitingUnlock;
+                  const cfg = slot.network === 'unity' ? unityConfig : startioConfig;
+                  const testMode = slot.network === 'unity' ? unityConfig?.unityTestMode : startioConfig?.startioTestMode;
+                  const busy = slot.network === 'unity' ? isUnityBusy : isStartioBusy;
+                  const mm = Math.floor(seqCooldownLeft / 60);
+                  const ss = String(seqCooldownLeft % 60).padStart(2, '0');
+                  return (
+                    <div
+                      key={`${slot.network}-${slot.number}`}
+                      className={`relative rounded-[1.75rem] overflow-hidden bg-zinc-900/80 border shadow-xl ${
+                        isCurrent ? 'border-emerald-500/60 ring-1 ring-emerald-500/40' : 'border-white/10'
+                      } ${isCompleted || isCooling ? 'opacity-75' : ''}`}
+                    >
+                      {/* Player stage */}
+                      <div className="relative aspect-video w-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black overflow-hidden">
+                        <span className="absolute -bottom-5 -left-1 text-[6rem] leading-none font-black text-white/5 select-none">
+                          {slot.number}
+                        </span>
+                        <div className="absolute top-0 inset-x-0 p-3 flex items-center justify-between">
+                          <span className="px-2 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
+                            {slot.network === 'unity' ? 'Unity Ads' : 'Start.io'}
+                          </span>
+                          {testMode ? (
+                            <span className="px-2 py-1 rounded-lg bg-amber-500/90 text-[8px] font-black uppercase tracking-widest text-black">Test Ad</span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-600 text-[8px] font-black uppercase tracking-widest text-white">
+                              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                          {isCompleted ? (
+                            <>
+                              <span className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                                <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                              </span>
+                              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Completed</span>
+                            </>
+                          ) : isCooling || isWaitingUnlock ? (
+                            <>
+                              <span className="w-12 h-12 rounded-full bg-white/5 border border-white/15 flex items-center justify-center">
+                                <Lock className="w-5 h-5 text-zinc-300" />
+                              </span>
+                              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                                {isCooling ? 'Next ad unlocks in' : 'Unlocks in'} {mm}:{ss}
+                              </span>
+                            </>
+                          ) : isCurrent ? (
+                            <button
+                              onClick={() => handleWatchSlot(slot, i)}
+                              disabled={busy}
+                              className="flex flex-col items-center gap-2 group disabled:cursor-not-allowed"
+                              aria-label={`Watch ${slot.network === 'unity' ? 'Unity' : 'Start.io'} ad ${slot.number}`}
+                            >
+                              <span className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-transform group-hover:scale-105 group-active:scale-95">
+                                {busy ? <Loader2 className="w-6 h-6 animate-spin" /> : <PlayCircle className="w-7 h-7" />}
+                              </span>
+                              <span className="text-[9px] font-black uppercase tracking-widest text-white/80">
+                                {busy ? 'Loading Ad...' : 'Tap to Play'}
+                              </span>
+                            </button>
+                          ) : (
+                            <>
+                              <span className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                                <Lock className="w-5 h-5 text-zinc-500" />
+                              </span>
+                              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Locked</span>
+                            </>
+                          )}
+                        </div>
+
+                        <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/85 to-transparent flex items-end justify-between pointer-events-none">
+                          <span className="flex items-center gap-1.5 text-zinc-300 text-[9px] font-black uppercase tracking-widest">
+                            <Clock className="w-3 h-3" /> ~30 sec
+                          </span>
+                          <span className="px-2.5 py-1 rounded-lg bg-emerald-500 text-white flex items-center gap-1">
+                            <Zap className="w-3 h-3 fill-current" />
+                            <span className="text-[10px] font-black">+ Rs. {slot.reward}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Meta */}
+                      <div className="px-4 py-3.5 flex items-center justify-between gap-3">
+                        <div>
+                          <h4 className="text-sm font-black text-white tracking-tight">
+                            {slot.network === 'unity' ? 'Unity' : 'Start.io'} Ad #{slot.number}
+                          </h4>
+                          <p className="text-[10px] text-zinc-500 font-bold">
+                            {isCompleted ? 'Reward earned' : isCooling ? 'Watched — cooling down' : isCurrent ? 'Ready to watch' : isWaitingUnlock ? 'Next in line' : 'Watch the previous ad first'}
+                          </p>
+                        </div>
+                        {isCurrent && (
+                          <button
+                            onClick={() => handleWatchSlot(slot, i)}
+                            disabled={busy}
+                            className="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+                          >
+                            {busy ? 'Loading...' : `Watch • Rs. ${slot.reward}`}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
-
-        {/* Start.io Rewarded Ad — native app only, same panel config.
-            Same player-style hero as the Unity card; renders only when
-            Start.io is enabled with an App ID. */}
-        {Capacitor.isNativePlatform() && startioConfig && isStartIoConfigured(startioConfig) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative rounded-[2rem] overflow-hidden bg-zinc-950 border border-white/10 shadow-2xl"
-          >
-            {/* Player stage */}
-            <div className="relative aspect-video w-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black overflow-hidden">
-              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
-              <div className="absolute -bottom-24 -left-16 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl" />
-
-              {/* Top bar: network + live/test badge */}
-              <div className="absolute top-0 inset-x-0 p-4 flex items-center justify-between">
-                <span className="px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
-                  Unity Ads
-                </span>
-                {startioConfig.startioTestMode ? (
-                  <span className="px-2.5 py-1 rounded-lg bg-amber-500/90 text-[8px] font-black uppercase tracking-widest text-black">
-                    Test Ad
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-600 text-[8px] font-black uppercase tracking-widest text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    Live
-                  </span>
-                )}
-              </div>
-
-              {/* Center play affordance */}
-              <button
-                onClick={handleWatchStartIoAd}
-                disabled={isStartioBusy || startioLimitReached}
-                className="absolute inset-0 w-full h-full flex flex-col items-center justify-center gap-3 group disabled:cursor-not-allowed"
-                aria-label="Watch Start.io ad"
-              >
-                <span className="w-[4.5rem] h-[4.5rem] rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.25)] transition-transform group-hover:scale-105 group-active:scale-95">
-                  {isStartioBusy ? (
-                    <Loader2 className="w-8 h-8 animate-spin" />
-                  ) : (
-                    <PlayCircle className="w-9 h-9" />
-                  )}
-                </span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/80">
-                  {isStartioBusy ? 'Loading Ad...' : startioLimitReached ? 'Daily Limit Reached' : 'Tap to Play'}
-                </span>
-              </button>
-
-              {/* Bottom player bar */}
-              <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/85 to-transparent flex items-end justify-between pointer-events-none">
-                <div className="flex items-center gap-2 text-zinc-300">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">~30 sec</span>
-                </div>
-                <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white shadow-lg flex items-center gap-1.5">
-                  <Zap className="w-3 h-3 fill-current" />
-                  <span className="text-xs font-black">+ Rs. {startioConfig.startioRewardAmount}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Meta + progress */}
-            <div className="p-5 md:p-6 space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h4 className="text-lg font-black text-white tracking-tight">Watch Ad &amp; Earn</h4>
-                  <p className="text-[11px] text-zinc-400 font-bold leading-relaxed mt-0.5">
-                    Watch the full ad to earn your reward instantly.
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Watched Today</p>
-                  <p className="text-sm font-black text-white">
-                    {startioConfig.startioDailyLimit > 0 ? `${startioTodayCount} / ${startioConfig.startioDailyLimit}` : startioTodayCount}
-                  </p>
-                </div>
-              </div>
-              {startioConfig.startioDailyLimit > 0 && (
-                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-emerald-500 transition-all duration-500"
-                    style={{ width: `${Math.min(100, (startioTodayCount / startioConfig.startioDailyLimit) * 100)}%` }}
-                  />
-                </div>
-              )}
-              <button
-                onClick={handleWatchStartIoAd}
-                disabled={isStartioBusy || startioLimitReached}
-                className="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
-              >
-                {isStartioBusy ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Loading Ad...</>
-                ) : startioLimitReached ? (
-                  <><Clock className="w-4 h-4" /> Come Back Tomorrow</>
-                ) : (
-                  <><PlayCircle className="w-4 h-4" /> Watch Ad — Earn Rs. {startioConfig.startioRewardAmount}</>
-                )}
-              </button>
-            </div>
-          </motion.div>
-        )}
-
 
         {/* Partner Videos */}
         <div>
