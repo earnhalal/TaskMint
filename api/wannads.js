@@ -1,76 +1,128 @@
 import admin from 'firebase-admin';
 import crypto from 'crypto';
 
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.applicationDefault(), // Assumes Vercel environment variables
-    });
+// Wannads postback (Vercel serverless).
+//
+// Wannads calls this URL server-to-server when an offer completes or is
+// reversed: user_id, amount, status ("credited"/"1" = pay, otherwise a
+// reversal), trans_id, sig = md5(user_id + trans_id + amount + secret).
+// Credits go to the REAL ledger (RTDB users/{uid}/balance, atomically)
+// and are mirrored to Firestore + earning_history. Duplicate deliveries
+// of the same trans_id + status are ignored via RTDB postback_log.
+//
+// Admin credentials: FIREBASE_SERVICE_ACCOUNT_KEY (JSON) on Vercel,
+// falling back to Application Default Credentials. The Wannads secret
+// is WANNADS_SECRET on Vercel.
+
+function initAdmin() {
+  if (admin.apps.length) return;
+  const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  const options = {
+    databaseURL:
+      'https://earnapp-f8d27-default-rtdb.asia-southeast1.firebasedatabase.app/',
+  };
+  if (key) {
+    options.credential = admin.credential.cert(JSON.parse(key));
+  } else {
+    options.credential = admin.credential.applicationDefault();
+  }
+  admin.initializeApp(options);
 }
 
-const db = admin.firestore();
-
 export default async function handler(req, res) {
-    if (req.method !== 'GET' && req.method !== 'POST') {
-        return res.status(405).send('Method Not Allowed');
-    }
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
 
-    const { user_id, amount, status, trans_id, sig } = req.method === 'GET' ? req.query : req.body;
-    
-    // Detect Wannads Dashboard Test Ping
-    // The test tool often leaves user_id empty or sets it to the literal string "{subId}"
-    if (!user_id || user_id === '{subId}' || user_id === '') {
-        console.log("Detected Wannads dashboard test ping. Returning OK to validate URL.");
-        res.setHeader('Content-Type', 'text/plain');
-        return res.status(200).send("OK");
-    }
+  const p = req.method === 'GET' ? req.query : { ...req.query, ...req.body };
+  const { user_id, amount, status, trans_id, sig } = p;
 
-    const secret = process.env.WANNADS_SECRET;
-    if (!secret) {
-        return res.status(500).send('Configuration Error');
-    }
+  // Wannads dashboard test ping — never credits.
+  if (!user_id || user_id === '{subId}' || user_id === '') {
+    res.setHeader('Content-Type', 'text/plain');
+    return res.status(200).send('OK');
+  }
 
-    const dataToHash = `${user_id}${trans_id}${amount}${secret}`;
-    const calculatedSignature = crypto.createHash("md5").update(dataToHash).digest("hex");
+  const secret = process.env.WANNADS_SECRET;
+  if (!secret) {
+    return res.status(500).send('Configuration Error');
+  }
 
-    if (sig !== calculatedSignature) {
-        return res.status(403).send(`ERROR: Invalid Signature. Expected MD5 of user_id+trans_id+amount+secret. Got sig: ${sig}, but we calculated: ${calculatedSignature}. Hash string (without secret): ${user_id}${trans_id}${amount}`);
-    }
+  const dataToHash = `${user_id}${trans_id}${amount}${secret}`;
+  const calculatedSignature = crypto
+    .createHash('md5')
+    .update(dataToHash)
+    .digest('hex');
 
-    const amountLocal = parseFloat(amount);
-    
-    if (isNaN(amountLocal) || !user_id) {
-        return res.status(400).send('Invalid parameters');
-    }
+  if (sig !== calculatedSignature) {
+    res.setHeader('Content-Type', 'text/plain');
+    return res
+      .status(403)
+      .send('ERROR: Invalid Signature. Expected MD5 of user_id+trans_id+amount+secret.');
+  }
 
-    try {
-        const userRef = db.collection("users").doc(user_id);
-        const transRef = db.collection("earning_history").doc();
-        
-        await db.runTransaction(async (transaction) => {
-            const userDoc = await transaction.get(userRef);
-            if (!userDoc.exists) throw new Error("User not found");
+  const amountLocal = parseFloat(amount);
+  if (isNaN(amountLocal) || !user_id) {
+    res.setHeader('Content-Type', 'text/plain');
+    return res.status(400).send('Invalid parameters');
+  }
 
-            const increment = status === "credited" || status === "1" ? amountLocal : -Math.abs(amountLocal);
-            
-            transaction.update(userRef, {
-                balance: admin.firestore.FieldValue.increment(increment),
-                totalEarnings: admin.firestore.FieldValue.increment(increment)
-            });
+  // "credited"/"1" pays; anything else is a reversal of the same amount.
+  const increment =
+    status === 'credited' || status === '1'
+      ? Math.abs(amountLocal)
+      : -Math.abs(amountLocal);
 
-            transaction.set(transRef, {
-                userId: user_id,
-                amount: increment,
-                type: increment < 0 ? 'expense' : 'earning',
-                source: 'wannads',
-                description: `Wannads Offer (${trans_id})`,
-                timestamp: admin.firestore.FieldValue.serverTimestamp()
-            });
-        });
-        
+  try {
+    initAdmin();
+    const rtdb = admin.database();
+    const firestore = admin.firestore();
+
+    // Dedupe per trans_id + direction: a repeated credit (or a repeated
+    // reversal) is processed once; a genuine reversal after a credit
+    // still goes through because its direction differs.
+    if (trans_id) {
+      const claimRef = rtdb.ref(
+        `postback_log/wannads/${trans_id}_${increment >= 0 ? 'credit' : 'debit'}`,
+      );
+      const claim = await claimRef.transaction((current) => {
+        if (current) return; // abort — already processed
+        return { userId: user_id, amount: increment, at: Date.now() };
+      });
+      if (!claim.committed) {
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send('OK');
-    } catch (error) {
-        return res.status(500).send('Error');
+      }
     }
+
+    // 1) RTDB — the real ledger (atomic increments).
+    await rtdb.ref(`users/${user_id}`).update({
+      balance: admin.database.ServerValue.increment(increment),
+      totalEarnings: admin.database.ServerValue.increment(increment),
+    });
+
+    // 2) Firestore mirror + earning history.
+    const userRef = firestore.collection('users').doc(user_id);
+    const userSnap = await userRef.get();
+    if (!userSnap.exists) throw new Error('User not found');
+    await userRef.update({
+      balance: admin.firestore.FieldValue.increment(increment),
+      totalEarnings: admin.firestore.FieldValue.increment(increment),
+    });
+    await firestore.collection('earning_history').add({
+      userId: user_id,
+      amount: increment,
+      type: increment < 0 ? 'expense' : 'earning',
+      source: 'wannads',
+      description: `Wannads Offer (${trans_id})`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.setHeader('Content-Type', 'text/plain');
+    return res.status(200).send('OK');
+  } catch (error) {
+    console.error('Wannads postback error:', error);
+    res.setHeader('Content-Type', 'text/plain');
+    return res.status(500).send('Error');
+  }
 }
