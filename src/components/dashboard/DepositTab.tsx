@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import PaymentQrCard from '../PaymentQrCard';
 import { motion } from 'motion/react';
 import { ClipboardList, CheckCircle2, Copy, Wallet, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -170,6 +171,10 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
  <p className="text-[11px] font-semibold text-zinc-500 mt-3">USDT (Binance) deposits for international users — coming soon.</p>
  )}
  </div>
+
+ {/* EasyPaisa QR — scanned with the EasyPaisa app; for activation
+     deposits the caption pins the exact joining fee */}
+ <PaymentQrCard amount={type === 'activation' ? appSettings.activationFee : undefined} />
 
  {/* Step 2 — amount + submit */}
  <div className="bg-[#15181D] border border-white/5 rounded-3xl p-5">

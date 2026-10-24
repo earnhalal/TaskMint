@@ -386,7 +386,9 @@ export default function Dashboard() {
     const unsubscribeSettings = onSnapshot(doc(db, 'app_settings', 'global'), async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
-        setAppSettings(data as any);
+        // Merge over the built-in defaults so a settings document that is
+        // missing a field can never blank it out in the app.
+        setAppSettings(prev => ({ ...prev, ...(data as any) }));
         
       }
     });

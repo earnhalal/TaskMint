@@ -4,6 +4,8 @@ import { CheckCircle2, AlertTriangle, History, Clock, XCircle, ArrowLeft, Copy, 
 import { rtdb, auth } from '../../firebase';
 import { ref, set, update, onValue } from 'firebase/database';
 
+import PaymentQrCard from '../PaymentQrCard';
+
 interface ActivationTabProps {
   onBack: () => void;
   appSettings: {
@@ -156,6 +158,9 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
               </div>
             </div>
           </div>
+
+          {/* EasyPaisa QR — fixed at the joining fee */}
+          <PaymentQrCard amount={appSettings.activationFee} />
 
           <div className="space-y-4">
             <button
