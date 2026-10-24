@@ -165,12 +165,17 @@ export async function getAdsConfig(): Promise<AdsConfig> {
       const fromFirestore = await readFirestoreConfig();
       const fromRtdb = await readRtdbConfig();
 
-      const unitySource = isUnityConfigured(fromFirestore || UNITY_CONFIG_DEFAULTS)
-        ? fromFirestore
-        : fromRtdb || fromFirestore;
-      const startioSource = isStartIoConfigured(fromFirestore || STARTIO_CONFIG_DEFAULTS)
-        ? fromFirestore
-        : fromRtdb || fromFirestore;
+      // The RTDB mirror is the complete, current copy (both networks,
+      // deliberately maintained); the Firestore document is a partial,
+      // stale Unity-era copy whose panel saves are also failing while
+      // the Firestore quota is exhausted. So per network, RTDB wins
+      // when it configures that network; Firestore fills the gaps.
+      const unitySource = isUnityConfigured(fromRtdb || UNITY_CONFIG_DEFAULTS)
+        ? fromRtdb
+        : fromFirestore || fromRtdb;
+      const startioSource = isStartIoConfigured(fromRtdb || STARTIO_CONFIG_DEFAULTS)
+        ? fromRtdb
+        : fromFirestore || fromRtdb;
 
       if (!unitySource && !startioSource) {
         cachedConfig = { ...UNITY_CONFIG_DEFAULTS, ...STARTIO_CONFIG_DEFAULTS };
