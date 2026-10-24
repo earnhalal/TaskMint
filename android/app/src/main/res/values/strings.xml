@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TaskMint</string>
+    <string name="title_activity_main">TaskMint</string>
+    <string name="package_name">click.taskmint.app</string>
+    <string name="custom_url_scheme">click.taskmint.app</string>
+</resources>
