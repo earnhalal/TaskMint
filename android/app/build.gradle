@@ -7,8 +7,8 @@ android {
         applicationId "click.taskmint.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
-        versionName "1.4"
+        versionCode 6
+        versionName "1.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -69,6 +69,8 @@ dependencies {
     // supplied at runtime from the admin panel config; nothing is
     // hardcoded in native code.
     implementation 'com.unity3d.ads:unity-ads:4.12.2'
+    // Start.io (StartApp) InApp SDK — rewarded ads (services/startIoAds.ts)
+    implementation 'com.startapp:inapp-sdk:5.4.0'
 }
 
 apply from: 'capacitor.build.gradle'

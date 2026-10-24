@@ -5,11 +5,15 @@ import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCirc
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { db, auth } from '../../firebase';
-import { getUnityAdsConfig, isUnityConfigured, type UnityAdsConfig } from '../../services/adsSettings';
+import { getAdsConfig, isUnityConfigured, isStartIoConfigured, type AdsConfig } from '../../services/adsSettings';
 import { showUnityRewarded } from '../../services/unityAds';
+import { showStartIoRewarded } from '../../services/startIoAds';
 
 /** earning_history source used for Unity rewarded ads (credits + daily cap). */
 const UNITY_AD_SOURCE = 'unity_ad';
+
+/** earning_history source used for Start.io rewarded ads (credits + daily cap). */
+const STARTIO_AD_SOURCE = 'startio_ad';
 
 interface WatchTabProps {
   onBack: () => void;
@@ -82,7 +86,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const navigate = useNavigate();
 
   // --- Unity rewarded ads (native app only, admin-panel configured) -----
-  const [unityConfig, setUnityConfig] = useState<UnityAdsConfig | null>(null);
+  const [unityConfig, setUnityConfig] = useState<AdsConfig | null>(null);
   const [unityTodayCount, setUnityTodayCount] = useState(0);
   const [isUnityBusy, setIsUnityBusy] = useState(false);
 
@@ -115,7 +119,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     if (!Capacitor.isNativePlatform() || !auth.currentUser) return;
     let cancelled = false;
     (async () => {
-      const config = await getUnityAdsConfig();
+      const config = await getAdsConfig();
       if (cancelled) return;
       setUnityConfig(config);
       if (isUnityConfigured(config) && auth.currentUser) {
@@ -185,6 +189,104 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       }
     } finally {
       setIsUnityBusy(false);
+    }
+  };
+
+  // --- Start.io rewarded ads (native app only, same panel config) ------
+  const [startioConfig, setStartioConfig] = useState<AdsConfig | null>(null);
+  const [startioTodayCount, setStartioTodayCount] = useState(0);
+  const [isStartioBusy, setIsStartioBusy] = useState(false);
+
+  const countStartioToday = async (uid: string): Promise<number> => {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const snap = await getDocs(
+      query(collection(db, 'earning_history'), where('userId', '==', uid))
+    );
+    let count = 0;
+    snap.forEach((d) => {
+      const data = d.data();
+      if (data.source !== STARTIO_AD_SOURCE) return;
+      const ts = data.timestamp;
+      const ms = ts?.toMillis ? ts.toMillis() : ts ? new Date(ts).getTime() : 0;
+      if (ms >= startOfDay.getTime()) count++;
+    });
+    return count;
+  };
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform() || !auth.currentUser) return;
+    let cancelled = false;
+    (async () => {
+      const config = await getAdsConfig();
+      if (cancelled) return;
+      setStartioConfig(config);
+      if (isStartIoConfigured(config) && auth.currentUser) {
+        try {
+          const count = await countStartioToday(auth.currentUser.uid);
+          if (!cancelled) setStartioTodayCount(count);
+        } catch (error) {
+          console.error('Error counting Start.io ads:', error);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const startioLimitReached =
+    !!startioConfig && startioConfig.startioDailyLimit > 0 && startioTodayCount >= startioConfig.startioDailyLimit;
+
+  const handleWatchStartIoAd = async () => {
+    if (isStartioBusy || !startioConfig || !auth.currentUser) return;
+    if (startioLimitReached) {
+      setMessage({ type: 'error', text: 'You have reached today\'s Start.io ad limit. Please try again tomorrow.' });
+      return;
+    }
+    if (startioConfig.startioRewardAmount <= 0) {
+      setMessage({ type: 'error', text: 'The Start.io ad reward is not configured yet. Please try again later.' });
+      return;
+    }
+
+    setIsStartioBusy(true);
+    setMessage(null);
+    try {
+      const result = await showStartIoRewarded(startioConfig);
+      if (result.status === 'COMPLETED') {
+        // Credit only on a fully completed view — same balance path as the
+        // other networks (source "startio_ad").
+        const isUserActive = accountStatus.toLowerCase() === 'active';
+        if (isUserActive) {
+          const credited = await onUpdateBalance(
+            startioConfig.startioRewardAmount,
+            STARTIO_AD_SOURCE,
+            'Watched Start.io rewarded ad'
+          );
+          if (credited) {
+            setStartioTodayCount((prev) => prev + 1);
+            setShowSuccessPopup({
+              amount: startioConfig.startioRewardAmount,
+              adTitle: 'Start.io Rewarded Ad',
+              timestamp: new Date().toLocaleString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            });
+          } else {
+            setMessage({ type: 'error', text: 'The ad was completed but the reward could not be added. Please try again.' });
+          }
+        } else {
+          setMessage({ type: 'error', text: 'Your account is not active, so the reward was not added to your balance.' });
+        }
+      } else if (result.status === 'SKIPPED') {
+        setMessage({ type: 'error', text: 'Ad closed early — watch the full ad to earn the reward.' });
+      } else {
+        setMessage({ type: 'error', text: result.reason });
+      }
+    } finally {
+      setIsStartioBusy(false);
     }
   };
 
@@ -625,6 +727,111 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             </div>
           </motion.div>
         )}
+
+        {/* Start.io Rewarded Ad — native app only, same panel config.
+            Same player-style hero as the Unity card; renders only when
+            Start.io is enabled with an App ID. */}
+        {Capacitor.isNativePlatform() && startioConfig && isStartIoConfigured(startioConfig) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative rounded-[2rem] overflow-hidden bg-zinc-950 border border-white/10 shadow-2xl"
+          >
+            {/* Player stage */}
+            <div className="relative aspect-video w-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
+              <div className="absolute -bottom-24 -left-16 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl" />
+
+              {/* Top bar: network + live/test badge */}
+              <div className="absolute top-0 inset-x-0 p-4 flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
+                  Unity Ads
+                </span>
+                {startioConfig.startioTestMode ? (
+                  <span className="px-2.5 py-1 rounded-lg bg-amber-500/90 text-[8px] font-black uppercase tracking-widest text-black">
+                    Test Ad
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-600 text-[8px] font-black uppercase tracking-widest text-white">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    Live
+                  </span>
+                )}
+              </div>
+
+              {/* Center play affordance */}
+              <button
+                onClick={handleWatchStartIoAd}
+                disabled={isStartioBusy || startioLimitReached}
+                className="absolute inset-0 w-full h-full flex flex-col items-center justify-center gap-3 group disabled:cursor-not-allowed"
+                aria-label="Watch Start.io ad"
+              >
+                <span className="w-[4.5rem] h-[4.5rem] rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.25)] transition-transform group-hover:scale-105 group-active:scale-95">
+                  {isStartioBusy ? (
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                  ) : (
+                    <PlayCircle className="w-9 h-9" />
+                  )}
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/80">
+                  {isStartioBusy ? 'Loading Ad...' : startioLimitReached ? 'Daily Limit Reached' : 'Tap to Play'}
+                </span>
+              </button>
+
+              {/* Bottom player bar */}
+              <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/85 to-transparent flex items-end justify-between pointer-events-none">
+                <div className="flex items-center gap-2 text-zinc-300">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">~30 sec</span>
+                </div>
+                <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white shadow-lg flex items-center gap-1.5">
+                  <Zap className="w-3 h-3 fill-current" />
+                  <span className="text-xs font-black">+ Rs. {startioConfig.startioRewardAmount}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Meta + progress */}
+            <div className="p-5 md:p-6 space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h4 className="text-lg font-black text-white tracking-tight">Watch Ad &amp; Earn</h4>
+                  <p className="text-[11px] text-zinc-400 font-bold leading-relaxed mt-0.5">
+                    Watch the full ad to earn your reward instantly.
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Watched Today</p>
+                  <p className="text-sm font-black text-white">
+                    {startioConfig.startioDailyLimit > 0 ? `${startioTodayCount} / ${startioConfig.startioDailyLimit}` : startioTodayCount}
+                  </p>
+                </div>
+              </div>
+              {startioConfig.startioDailyLimit > 0 && (
+                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                    style={{ width: `${Math.min(100, (startioTodayCount / startioConfig.startioDailyLimit) * 100)}%` }}
+                  />
+                </div>
+              )}
+              <button
+                onClick={handleWatchStartIoAd}
+                disabled={isStartioBusy || startioLimitReached}
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
+              >
+                {isStartioBusy ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Loading Ad...</>
+                ) : startioLimitReached ? (
+                  <><Clock className="w-4 h-4" /> Come Back Tomorrow</>
+                ) : (
+                  <><PlayCircle className="w-4 h-4" /> Watch Ad — Earn Rs. {startioConfig.startioRewardAmount}</>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
 
         {/* Partner Videos */}
         <div>

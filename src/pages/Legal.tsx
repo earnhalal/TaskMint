@@ -77,6 +77,7 @@ export default function Legal() {
 
           <h2 className="text-2xl font-bold mt-8 mb-4">5. Third Party Privacy Policies</h2>
           <p className="text-slate-600 mb-4">TaskMint's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party ad servers for more detailed information. It may include their practices and instructions about how to opt-out of certain options.</p>
+          <p className="text-slate-600 mb-4">Inside the TaskMint Android app, rewarded video ads are provided by <strong>Unity Ads</strong> (Unity Technologies — <a href="https://unity.com/legal/privacy-policy" className="text-emerald-600 hover:underline">privacy policy</a>) and <strong>Start.io</strong> (Start.io Inc. — <a href="https://www.start.io/policy/privacy-policy/" className="text-emerald-600 hover:underline">privacy policy</a>). These providers may collect device and advertising identifiers to serve and measure ads, as described in their own policies.</p>
 
           <h2 className="text-2xl font-bold mt-8 mb-4">6. Data Security and Deletion</h2>
           <p className="text-slate-600 mb-4">We implement a variety of security measures to maintain the safety of your personal information. You have the right to request the deletion of your personal data. You can permanently delete your account and associated data directly from the "Profile" section of your dashboard.</p>

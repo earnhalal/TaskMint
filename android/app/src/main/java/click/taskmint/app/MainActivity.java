@@ -11,6 +11,7 @@ public class MainActivity extends BridgeActivity {
         // generated from npm packages), so the Unity Ads bridge is registered
         // explicitly before the bridge starts.
         registerPlugin(UnityAdsBridge.class);
+        registerPlugin(StartIoAdsBridge.class);
         super.onCreate(savedInstanceState);
     }
 }
