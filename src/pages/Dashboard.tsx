@@ -366,6 +366,12 @@ export default function Dashboard() {
         });
         
         // Priority Sync for Real-time Balance & Commission
+        // (balance/totalEarnings are led by RTDB — the Firestore listener
+        // deliberately skips them. These two setters were missing, which
+        // left the displayed balance stuck at its initial value even
+        // though the RTDB ledger itself was always correct.)
+        if (data.balance !== undefined) setBalance(data.balance);
+        if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
       }
