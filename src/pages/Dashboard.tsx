@@ -1244,7 +1244,8 @@ export default function Dashboard() {
       case 'streak':
         return <StreakRewardView 
           onBack={() => setActiveTab('home')} 
-          onUpdateBalance={handleUpdateBalance} 
+          onUpdateBalance={handleUpdateBalance}
+          accountStatus={accountStatus}
         />;
       case 'withdraw':
         return <WithdrawTab 
