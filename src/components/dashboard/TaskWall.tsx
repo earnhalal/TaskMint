@@ -120,14 +120,14 @@ export default function TaskWall({ onBack, accountStatus, onPayClick }: TaskWall
             </div>
             <h3 className="text-3xl font-black text-white mb-4 leading-tight">Unlock Premium Surveys!</h3>
             <p className="text-base text-zinc-300 font-bold mb-10 max-w-xs mx-auto">
-              In High-paying tasks ko shuru karne ke liye Rs. 150 Joining Fee jama karwayein.
+              Activate your account with the one-time Rs. 150 joining fee to unlock these high-paying surveys.
             </p>
             <button 
               onClick={onPayClick}
               className="w-full max-w-xs bg-gradient-to-r from-teal-600 to-teal-700 text-white py-5 rounded-2xl font-black text-sm shadow-2xl shadow-none active:scale-95 transition-all uppercase tracking-widest flex items-center justify-center gap-2"
             >
               <Zap className="w-4 h-4" />
-              Pay Now to Unlock
+              Activate Now
             </button>
           </div>
         )}

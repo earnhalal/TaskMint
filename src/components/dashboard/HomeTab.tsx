@@ -162,9 +162,18 @@ export default function HomeTab({
     }
   };
 
+  // Daily Bonus: weighted random Rs. 1–10 (mostly under Rs. 5), once per 24h.
+  const rollDailyBonus = () => {
+    const table: Array<[number, number]> = [[1, 26], [2, 24], [3, 20], [4, 12], [5, 8], [6, 4], [7, 3], [8, 1.5], [9, 1], [10, 0.5]];
+    const total = table.reduce((sum, [, w]) => sum + w, 0);
+    let r = Math.random() * total;
+    for (const [value, w] of table) { r -= w; if (r <= 0) return value; }
+    return 1;
+  };
+
   const handleDailyCheckin = async () => {
     if (!isApp) {
-      alert("Ye reward sirf TaskMint App par milta hai. Bonus lene ke liye App download karein!");
+      alert("This reward is available in the TaskMint app only. Download the app to claim your Daily Bonus!");
       navigate('/app-download');
       return;
     }
@@ -179,7 +188,7 @@ export default function HomeTab({
       
       if (hoursPassed < 24) {
         const remainingHours = Math.ceil(24 - hoursPassed);
-        alert(`Aap pehle hi aaj ka reward claim kar chuke hain. Agla reward ${remainingHours} ghantay baad milega.`);
+        alert(`You have already claimed today's Daily Bonus. The next one will be available in about ${remainingHours} hour(s).`);
         return;
       }
     }
@@ -193,13 +202,17 @@ export default function HomeTab({
         lastDailyCheckin: serverTimestamp()
       }, { merge: true });
       
-      // 2. Use the centralized balance update logic
-      await onUpdateBalance(10, 'daily_reward', 'Daily Attendance Reward');
-
-      alert("Mubarak ho! Rs. 10 Daily Reward aapke wallet mein add kar diya gaya hai. Agla reward 24 ghante baad milega.");
+      // 2. Credit the (weighted random) bonus via the centralized logic
+      const bonusAmount = rollDailyBonus();
+      const credited = await onUpdateBalance(bonusAmount, 'daily_reward', 'Daily Bonus');
+      if (credited) {
+        alert(`Congratulations! Your Daily Bonus of Rs. ${bonusAmount} has been added to your wallet. The next bonus will be available in 24 hours.`);
+      } else {
+        alert("The bonus could not be added to your wallet. Please try again.");
+      }
     } catch (error) {
       console.error("Error daily checkin:", error);
-      alert("Reward claim karne mein masla hua. Error: " + (error instanceof Error ? error.message : String(error)));
+      alert("Something went wrong while claiming the bonus. Please try again.");
     } finally {
       setIsClaiming(false);
     }
@@ -340,7 +353,7 @@ export default function HomeTab({
             <GiftIcon className="w-5 h-5" />
           </span>
           <p className="text-sm font-extrabold text-white mt-3 leading-tight">Daily Bonus</p>
-          <p className="text-[11px] text-zinc-400 font-semibold mt-0.5">Claim Rs. 10 every day</p>
+          <p className="text-[11px] text-zinc-400 font-semibold mt-0.5">Win Rs. 1–10 every 24 hours</p>
           <button
             onClick={handleDailyCheckin}
             className={`mt-3 text-[10px] font-black px-3 py-2 rounded-full transition active:scale-95 ${isDailyClaimable ? 'bg-green-500 text-black' : 'bg-white/10 text-zinc-500'}`}
@@ -355,8 +368,8 @@ export default function HomeTab({
           <span className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
             <CalendarIcon className="w-5 h-5" />
           </span>
-          <p className="text-sm font-extrabold text-white mt-3 leading-tight">Streak Vault</p>
-          <p className="text-[11px] text-zinc-400 font-semibold mt-0.5">Visit daily, grow your streak</p>
+          <p className="text-sm font-extrabold text-white mt-3 leading-tight">Streak Rewards</p>
+          <p className="text-[11px] text-zinc-400 font-semibold mt-0.5">Watch an ad, claim daily</p>
           <span className="inline-block mt-3 text-[10px] font-black px-3 py-2 rounded-full bg-white/10 text-white">
             OPEN VAULT
           </span>
@@ -373,8 +386,8 @@ export default function HomeTab({
           {[
             { icon: <PlayCircleIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-rose-500/10 text-rose-400', title: 'Watch Ads', desc: 'Watch short video ads and earn for every view.', tag: 'POPULAR', tagClass: 'text-rose-300 bg-rose-500/10', onClick: onWatchAdsClick },
             { icon: <Rocket className="w-5 h-5" strokeWidth={2} />, bg: 'bg-teal-500/10 text-teal-400', title: 'Surveys', desc: 'Complete CPX Research surveys — the highest-paying offers.', tag: 'HIGH PAYING', tagClass: 'text-amber-300 bg-amber-500/10', onClick: onTaskWallClick },
-            { icon: <Zap className="w-5 h-5" strokeWidth={2} />, bg: 'bg-cyan-500/10 text-cyan-400', title: 'Offer Walls', desc: 'Try apps and offers from CPA Lead and Wannads.', tag: '', tagClass: '', onClick: onOfferWallClick },
-            { icon: <CheckSquareIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-amber-500/10 text-amber-400', title: 'Daily Tasks', desc: 'Simple tasks refreshed every day.', tag: '', tagClass: '', onClick: onTasksClick },
+            { icon: <Zap className="w-5 h-5" strokeWidth={2} />, bg: 'bg-cyan-500/10 text-cyan-400', title: 'Offer Walls', desc: 'More apps and offers from Wannads.', tag: '', tagClass: '', onClick: onOfferWallClick },
+            { icon: <Rocket className="w-5 h-5" strokeWidth={2} />, bg: 'bg-cyan-500/10 text-cyan-400', title: 'Earn Zone', desc: 'Install apps & complete offers — top payouts.', tag: 'HIGH PAYING', tagClass: 'text-amber-300 bg-amber-500/10', onClick: onTasksClick },
             { icon: <SparklesIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-sky-500/10 text-sky-400', title: 'Easy Tasks', desc: 'Quick micro-tasks with instant rewards.', tag: '', tagClass: '', onClick: onEasyTaskClick },
             { icon: <MessageCircle className="w-5 h-5" strokeWidth={2} />, bg: 'bg-emerald-500/10 text-emerald-400', title: 'Social Tasks', desc: 'Earn bonuses for social media actions.', tag: '', tagClass: '', onClick: onSocialTaskPlusClick },
           ].map((row) => (

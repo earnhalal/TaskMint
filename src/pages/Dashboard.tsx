@@ -1244,7 +1244,8 @@ export default function Dashboard() {
       case 'streak':
         return <StreakRewardView 
           onBack={() => setActiveTab('home')} 
-          onUpdateBalance={handleUpdateBalance} 
+          onUpdateBalance={handleUpdateBalance}
+          accountStatus={accountStatus}
         />;
       case 'withdraw':
         return <WithdrawTab 
@@ -1602,7 +1603,7 @@ export default function Dashboard() {
               { id: 'home', icon: <LayoutGrid className="w-5 h-5" strokeWidth={2} />, label: 'Home' },
               { id: 'watch', icon: <Tv2 className="w-5 h-5" strokeWidth={2} />, label: 'Watch' },
               { id: 'task_wall', icon: <Rocket className="w-5 h-5" strokeWidth={2} />, label: 'Surveys' },
-              { id: 'tasks', icon: <Zap className="w-5 h-5" strokeWidth={2} />, label: 'Tasks' },
+              { id: 'tasks', icon: <Zap className="w-5 h-5" strokeWidth={2} />, label: 'Earn Zone' },
               { id: 'premium', icon: <ShieldCheck className="w-5 h-5" strokeWidth={2} />, label: 'PRO' },
             ].map((tab) => {
               const active = activeTab === tab.id;
