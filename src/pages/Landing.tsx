@@ -32,23 +32,23 @@ import { blogPosts } from '../data/blogPosts';
 const faqs = [
   {
     q: 'Is there a joining fee on TaskMint?',
-    a: 'Creating an account is free, and to activate the earning features you pay a one-time joining fee of Rs. 150. After activation you earn by completing tasks such as watching video ads, answering surveys, trying offers, daily check-ins and the spin wheel.',
+    a: 'Yes. Creating an account is free, but to activate the earning features you pay a one-time activation fee of Rs. 150. Once your account is active, you can earn by completing tasks, watching video ads and inviting friends.',
   },
   {
     q: 'How do I withdraw my earnings?',
-    a: 'Once your wallet reaches the minimum payout of Rs. 500, you can request a withdrawal to JazzCash, EasyPaisa or your bank account from the dashboard. Add your correct account details and submit the request — that is it.',
+    a: 'Once your wallet balance reaches Rs. 500, you can request a withdrawal to your EasyPaisa or JazzCash account from the dashboard. A 5% fee applies to each withdrawal, and payouts are processed in two monthly windows: the 1st to 3rd and the 16th to 18th.',
   },
   {
     q: 'What is the minimum payout on TaskMint?',
-    a: 'The minimum payout is Rs. 500. Once your balance reaches it, you can request a payout to JazzCash, EasyPaisa or your bank account.',
+    a: 'The minimum payout is Rs. 500. Once your balance reaches Rs. 500, you can request a withdrawal to EasyPaisa or JazzCash. A 5% withdrawal fee applies, and requests are paid out during the monthly payout windows (1st to 3rd and 16th to 18th).',
   },
   {
     q: 'How does the referral programme work?',
-    a: 'Share your personal referral link with friends. When a friend joins TaskMint through your link and becomes an active user, you earn a referral bonus of up to Rs. 125 per active referral, credited to your wallet.',
+    a: 'Share your personal referral link with friends. When a friend joins TaskMint through your link and becomes an active user, you earn a referral bonus credited to your wallet: Rs. 100 as a basic user, or up to Rs. 125 if you have a package (partner) plan.',
   },
   {
     q: 'Which tasks pay the most?',
-    a: 'Surveys and offer walls from partners such as CPX Research, CPA Lead and Wannads usually pay the highest rewards. Video ads and daily check-ins are quicker tasks that add up steadily every day.',
+    a: 'Rewards vary from task to task and are always shown before you start. Social tasks and watching video ads are the regular ways to earn, and completing tasks consistently adds up over time. Booster and partner plans can increase your earning potential, but earnings always depend on the tasks you complete — there is no guaranteed income.',
   },
   {
     q: 'Is there a TaskMint mobile app?',
