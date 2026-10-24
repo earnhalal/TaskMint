@@ -1,7 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import PaymentQrCard from '../PaymentQrCard';
 import { motion } from 'motion/react';
-import { ClipboardList, CheckCircle2, Copy, Wallet, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ClipboardList, CheckCircle2, Copy, Wallet, ArrowRight, ShieldCheck, Camera, Upload, MessageCircle } from 'lucide-react';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
+import { sha256Hex, compressImage } from '../../utils/proofImage';
 
 type DepositMethod = 'EasyPaisa';
 
@@ -15,7 +18,7 @@ interface Transaction {
 }
 
 interface DepositTabProps {
- onDeposit: (amount: number, method: DepositMethod, transactionId: string, type?: 'activation' | 'regular') => Promise<void>;
+ onDeposit: (amount: number, method: DepositMethod, transactionId: string, type?: 'activation' | 'regular', proof?: { proofMethod: 'upload' | 'whatsapp'; screenshotHash?: string }) => Promise<string | void>;
  transactions: Transaction[];
  userCountry?: string;
  initialType?: 'activation' | 'regular';
@@ -26,6 +29,7 @@ interface DepositTabProps {
  referralBonusBasic?: number;
  };
  userName: string;
+ onOpenVerification?: (depositId: string) => void;
 }
 
 const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
@@ -53,12 +57,27 @@ const EasyPaisaIcon = ({ className }: { className?: string }) => (
  </div>
 );
 
-export default function DepositTab({ onDeposit, transactions, userCountry = 'Pakistan', initialType = 'regular', appSettings, userName }: DepositTabProps) {
+export default function DepositTab({ onDeposit, transactions, userCountry = 'Pakistan', initialType = 'regular', appSettings, userName, onOpenVerification }: DepositTabProps) {
  const [type, setType] = useState<'activation' | 'regular'>(initialType);
  const [amount, setAmount] = useState(initialType === 'activation' ? appSettings.activationFee.toString() : '');
  const [method, setMethod] = useState<DepositMethod>('EasyPaisa');
  const [message, setMessage] = useState('');
  const [isSubmitting, setIsSubmitting] = useState(false);
+ const [proofMethod, setProofMethod] = useState<'upload' | 'whatsapp'>('upload');
+ const [proofDataUrl, setProofDataUrl] = useState<string | null>(null);
+ const [proofHash, setProofHash] = useState('');
+
+ const handleProofFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+ const file = e.target.files?.[0];
+ if (!file) return;
+ try {
+ const [hash, dataUrl] = await Promise.all([sha256Hex(file), compressImage(file)]);
+ setProofHash(hash);
+ setProofDataUrl(dataUrl);
+ } catch {
+ setMessage('Could not read that image. Please try another screenshot.');
+ }
+ };
  
  const depositHistory = useMemo(() => {
  return transactions
@@ -79,6 +98,31 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
  }
  if (type === 'activation' && numAmount !== appSettings.activationFee) {
  setMessage(`Activation fee must be exactly Rs ${appSettings.activationFee}.`);
+ return;
+ }
+ if (proofMethod === 'upload') {
+ if (!proofDataUrl) {
+ setMessage('Please upload your payment screenshot first.');
+ return;
+ }
+ setIsSubmitting(true);
+ try {
+ const depId = await onDeposit(numAmount, method, 'In-app upload', type, { proofMethod: 'upload', screenshotHash: proofHash });
+ if (depId) {
+ await setDoc(doc(db, 'deposits', depId, 'proof', 'image'), {
+ userId: auth.currentUser?.uid || '',
+ data: proofDataUrl,
+ createdAt: serverTimestamp()
+ });
+ setMessage('Screenshot submitted — verification started.');
+ onOpenVerification?.(depId);
+ }
+ } catch (error: any) {
+ console.error('[DEPOSIT_UPLOAD_FAILURE]', error);
+ setMessage(error.message || 'Upload failed. Please try again.');
+ } finally {
+ setIsSubmitting(false);
+ }
  return;
  }
  setIsSubmitting(true);
@@ -181,6 +225,42 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.18em] mb-4">Step 2 — Enter amount &amp; confirm</p>
  <form onSubmit={handleWhatsAppClick} className="space-y-4">
  <div>
+ <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.18em]">Payment Proof</label>
+ <div className="grid grid-cols-2 gap-2 mt-2">
+ <button
+ type="button"
+ onClick={() => setProofMethod('upload')}
+ className={`text-left rounded-2xl border px-3.5 py-3 transition ${proofMethod === 'upload' ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-white/5 border-white/10 hover:border-white/25'}`}
+ >
+ <span className="flex items-center gap-1.5 text-xs font-black text-white"><Upload className="w-3.5 h-3.5 text-emerald-400" /> Upload Screenshot</span>
+ <span className="inline-block mt-1.5 text-[8px] font-black uppercase tracking-widest text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">Fast</span>
+ <span className="block text-[10px] font-semibold text-zinc-400 mt-1.5 leading-snug">Auto verification — about 2 minutes</span>
+ </button>
+ <button
+ type="button"
+ onClick={() => setProofMethod('whatsapp')}
+ className={`text-left rounded-2xl border px-3.5 py-3 transition ${proofMethod === 'whatsapp' ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-white/5 border-white/10 hover:border-white/25'}`}
+ >
+ <span className="flex items-center gap-1.5 text-xs font-black text-white"><MessageCircle className="w-3.5 h-3.5 text-emerald-400" /> WhatsApp</span>
+ <span className="inline-block mt-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-300 bg-white/10 border border-white/15 px-1.5 py-0.5 rounded">Manual</span>
+ <span className="block text-[10px] font-semibold text-zinc-400 mt-1.5 leading-snug">Send proof on WhatsApp instead</span>
+ </button>
+ </div>
+ {proofMethod === 'upload' && (
+ <label className="mt-3 flex flex-col items-center justify-center gap-2 bg-white/5 border border-dashed border-white/15 rounded-2xl px-4 py-5 cursor-pointer hover:border-emerald-500/50 transition">
+ {proofDataUrl ? (
+ <img src={proofDataUrl} alt="Payment screenshot preview" className="max-h-44 rounded-lg" />
+ ) : (
+ <>
+ <Camera className="w-6 h-6 text-zinc-500" />
+ <span className="text-[11px] font-bold text-zinc-400">Tap to upload payment screenshot</span>
+ </>
+ )}
+ <input type="file" accept="image/*" className="hidden" onChange={handleProofFile} />
+ </label>
+ )}
+ </div>
+ <div>
  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.18em]">Amount (PKR)</label>
  <div className="flex items-center gap-2 mt-2 bg-white/5 border border-white/10 rounded-2xl px-4 focus-within:border-emerald-500/50 transition">
  <span className="text-sm font-black text-zinc-400">Rs.</span>
@@ -205,12 +285,16 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
  >
  {isSubmitting ? (
  <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></span>
+ ) : proofMethod === 'upload' ? (
+ <>Submit &amp; Track Verification <ArrowRight className="w-4 h-4" /></>
  ) : (
  <>Submit &amp; Send Proof on WhatsApp <ArrowRight className="w-4 h-4" /></>
  )}
  </button>
  <p className="text-[11px] font-semibold text-zinc-500 text-center leading-relaxed">
- After submitting, WhatsApp opens — send your payment screenshot there. Your deposit is credited after admin verification.
+ {proofMethod === 'upload'
+ ? 'After submitting, the verification chat opens — our agent confirms your payment there, usually within about 2 minutes.'
+ : 'After submitting, WhatsApp opens — send your payment screenshot there. Your deposit is credited after manual verification.'}
  </p>
 
  {message && (
@@ -250,6 +334,11 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
  <div className="text-right shrink-0">
  <p className="text-sm font-black text-white">+ Rs. {tx.amount.toLocaleString()}</p>
  <StatusBadge status={tx.status} />
+ {(tx as any).proofMethod === 'upload' && onOpenVerification && (
+ <button onClick={() => onOpenVerification(tx.id)} className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded-lg">
+ <MessageCircle className="w-3 h-3" /> Verification
+ </button>
+ )}
  </div>
  </div>
  ))
