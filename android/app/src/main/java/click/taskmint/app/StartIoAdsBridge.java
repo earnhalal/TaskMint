@@ -113,8 +113,15 @@ public class StartIoAdsBridge extends Plugin {
                     new AdEventListener() {
                         @Override
                         public void onReceiveAd(Ad ad) {
-                            adShowing = true;
-                            ((StartAppAd) ad).showAd();
+                            // Show on the UI thread explicitly: if this
+                            // callback ever arrives on a background thread,
+                            // showAd() can open a frozen ad activity whose
+                            // video never starts (owner report 2026-10-25:
+                            // "load hota phr atak jta ha").
+                            activity.runOnUiThread(() -> {
+                                adShowing = true;
+                                ((StartAppAd) ad).showAd();
+                            });
                         }
 
                         @Override
@@ -138,6 +145,19 @@ public class StartIoAdsBridge extends Plugin {
                 }
             }
         });
+    }
+
+    /**
+     * Clears a stuck pending show (called by the TS layer when its show
+     * timeout fires). Without this, one frozen ad activity would poison
+     * every later attempt in the session with "already in progress".
+     */
+    @PluginMethod
+    public void resetPending(final PluginCall call) {
+        pendingShowCall = null;
+        adShowing = false;
+        videoCompleted = false;
+        call.resolve();
     }
 
     @Override

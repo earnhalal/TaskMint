@@ -22,6 +22,7 @@ import type { StartIoAdsConfig } from './adsSettings';
 interface StartIoAdsBridgePlugin {
   initialize(options: { appId: string; testMode: boolean }): Promise<void>;
   showRewarded(): Promise<{ state: string }>;
+  resetPending(): Promise<void>;
 }
 
 const StartIoAdsBridge = registerPlugin<StartIoAdsBridgePlugin>('StartIoAdsBridge');
@@ -35,7 +36,7 @@ export type StartIoRewardedResult =
   | { status: 'UNAVAILABLE'; reason: string };
 
 const INIT_TIMEOUT_MS = 20_000;
-const SHOW_TIMEOUT_MS = 180_000;
+const SHOW_TIMEOUT_MS = 120_000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -119,11 +120,18 @@ export async function showStartIoRewarded(
       };
     }
 
-    const { state } = await withTimeout(
-      StartIoAdsBridge.showRewarded(),
-      SHOW_TIMEOUT_MS,
-      'Start.io ad show',
-    );
+    let state: string;
+    try {
+      ({ state } = await withTimeout(
+        StartIoAdsBridge.showRewarded(),
+        SHOW_TIMEOUT_MS,
+        'Start.io ad show',
+      ));
+    } catch (showError) {
+      // Un-poison the native side so the next attempt can proceed.
+      try { await StartIoAdsBridge.resetPending(); } catch {}
+      throw showError;
+    }
     return state === 'COMPLETED'
       ? { status: 'COMPLETED' }
       : { status: 'SKIPPED' };
