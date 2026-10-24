@@ -13,7 +13,7 @@ import { Capacitor } from '@capacitor/core';
  *   silently returns `null` so the app UI is never disturbed.
  */
 
-export const APP_VERSION = '1.5';
+export const APP_VERSION = '1.6';
 
 const LATEST_RELEASE_API =
   'https://api.github.com/repos/earnhalal/TaskMint/releases/latest';

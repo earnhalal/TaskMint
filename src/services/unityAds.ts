@@ -114,6 +114,35 @@ export async function initUnityAds(config: UnityAdsConfig): Promise<boolean> {
 }
 
 /**
+ * Interstitial flow for page transitions (owner's spec: an ad is shown
+ * when the user opens another section of the app). Best-effort and
+ * reward-free by design: resolves true when an ad was shown, false when
+ * unavailable — callers must never block navigation on it.
+ */
+export async function showUnityInterstitial(
+  config: UnityAdsConfig,
+): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  if (!config.unityEnabled || !config.unityGameId) return false;
+  const placementId =
+    config.unityInterstitialPlacementId || 'Interstitial_Android';
+  try {
+    const ready = await initUnityAds(config);
+    if (!ready) return false;
+    await withTimeout(
+      UnityAdsBridge.load({ placementId }),
+      LOAD_TIMEOUT_MS,
+      'Unity interstitial load',
+    );
+    await UnityAdsBridge.show({ placementId });
+    return true;
+  } catch (error) {
+    console.warn('Unity interstitial failed:', error);
+    return false;
+  }
+}
+
+/**
  * Full rewarded flow: initialise (once) → load → show.
  *
  * Resolves with a UnityRewardedResult and never throws, so the UI layer
