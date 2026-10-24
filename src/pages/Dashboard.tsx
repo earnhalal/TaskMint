@@ -25,6 +25,7 @@ import PaymentVerificationChat from '../components/dashboard/PaymentVerification
 import { ref, onValue, update, set, increment as rtdbIncrement, get, runTransaction as runRtdbTransaction } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { sendDepositRequestMail, sendWithdrawalRequestMail, sendActivationMail, playNotificationSound } from '../services/notificationService';
+import { checkForUpdate, type UpdateInfo } from '../services/appUpdate';
 import HomeTab from '../components/dashboard/HomeTab';
 import AnnouncementBar from '../components/dashboard/AnnouncementBar';
 import ProfileTab from '../components/dashboard/ProfileTab';
@@ -1062,6 +1063,21 @@ export default function Dashboard() {
       window.matchMedia('(display-mode: standalone)').matches;
   }, []);
 
+  // In-app update prompt — native app only (checkForUpdate is a no-op on
+  // web). Dismissing remembers the version so it does not nag again for
+  // that same version.
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
+  const [updateDismissedVersion, setUpdateDismissedVersion] = useState(() => {
+    try { return localStorage.getItem('tm_update_dismissed_version') || ''; } catch { return ''; }
+  });
+  useEffect(() => {
+    let cancelled = false;
+    checkForUpdate().then((info) => { if (!cancelled) setUpdateInfo(info); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+  const showUpdateBanner = !!updateInfo && Capacitor.isNativePlatform() &&
+    updateInfo.latestVersion !== updateDismissedVersion;
+
   const renderTabContent = () => {
     // Restriction logic
     const currentAccountStatus = accountStatus.toLowerCase();
@@ -1502,6 +1518,32 @@ export default function Dashboard() {
               onClick={() => { setInstallDismissed(true); try { localStorage.setItem('tm_install_banner_dismissed', '1'); } catch {} }}
               className="text-zinc-500 hover:text-zinc-300 shrink-0 p-1"
               aria-label="Dismiss"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* App update banner — native app only, shown when a newer release exists */}
+        {activeTab === 'home' && showUpdateBanner && updateInfo && (
+          <div className="mx-4 mt-3 flex items-center gap-3 bg-[#15181D] border border-sky-500/25 rounded-2xl px-3.5 py-3 relative z-30">
+            <span className="w-9 h-9 rounded-xl bg-sky-500/15 flex items-center justify-center shrink-0">
+              <Sparkles className="w-[18px] h-[18px] text-sky-400" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-extrabold text-white leading-tight">Update available</p>
+              <p className="text-[10px] font-semibold text-zinc-400 leading-tight mt-0.5">TaskMint v{updateInfo.latestVersion} is ready. Update for the latest features and fixes.</p>
+            </div>
+            <button
+              onClick={() => { window.open(updateInfo.downloadUrl, '_blank'); }}
+              className="bg-sky-500 hover:bg-sky-400 text-black text-[10px] font-black px-3 py-2 rounded-lg active:scale-95 transition shrink-0"
+            >
+              UPDATE NOW
+            </button>
+            <button
+              onClick={() => { setUpdateDismissedVersion(updateInfo.latestVersion); try { localStorage.setItem('tm_update_dismissed_version', updateInfo.latestVersion); } catch {} }}
+              className="text-zinc-500 hover:text-zinc-300 shrink-0 p-1"
+              aria-label="Dismiss update"
             >
               <X className="w-3.5 h-3.5" />
             </button>
