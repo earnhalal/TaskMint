@@ -52,6 +52,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
   const getSourceIcon = (source: string) => {
     switch (source) {
       case 'ad_watch': return <PlayCircle className="w-5 h-5 text-red-500" />;
+      case 'unity_ad': return <PlayCircle className="w-5 h-5 text-zinc-100" />;
       case 'task': return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
       case 'spin': return <Sparkles className="w-5 h-5 text-emerald-500" />;
       case 'lottery': return <Gift className="w-5 h-5 text-emerald-500" />;
@@ -122,7 +123,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
 
       {/* Filters */}
       <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar mb-4">
-        {['all', 'ad_watch', 'task', 'lottery', 'invite_commission', 'indirect_invite_commission', 'app_bonus', 'daily_reward'].map((f) => (
+        {['all', 'ad_watch', 'unity_ad', 'task', 'lottery', 'invite_commission', 'indirect_invite_commission', 'app_bonus', 'daily_reward'].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}

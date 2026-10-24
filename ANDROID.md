@@ -7,7 +7,7 @@ website and the app — there is no separate app code to maintain.
 - **App ID:** `click.taskmint.app`
 - **App name:** TaskMint
 - **Config:** `capacitor.config.ts` (web build output: `dist`)
-- **Current version:** 1.1 (versionCode 2) — the single source of truth for
+- **Current version:** 1.2 (versionCode 3) — the single source of truth for
   the JS side is `APP_VERSION` in `src/services/appUpdate.ts`; keep it in
   sync with `versionName` in `android/app/build.gradle`.
 
@@ -106,6 +106,65 @@ AdMob is initialised in the native app only (`src/services/admob.ts`) and is
 a no-op on the website. The app currently uses **Google's test AdMob App ID**
 and test ad units only — no real ads are shown, and no ad is placed in the
 watch-earn / reward flow.
+
+## Unity Ads (rewarded)
+
+Unity rewarded ads run **only inside the native app** and are controlled
+entirely from the admin panel — no Unity account detail is hardcoded in
+the app, so changing the game ID, placements, reward or limits never
+needs a new APK release.
+
+### How it is built
+
+- **Native bridge:** the Unity Ads SDK
+  (`com.unity3d.ads:unity-ads:4.12.2` in `android/app/build.gradle`) is
+  wrapped by a small in-house Capacitor plugin,
+  `android/app/src/main/java/click/taskmint/app/UnityAdsBridge.java`
+  (`@CapacitorPlugin(name = "UnityAdsBridge")`, registered explicitly in
+  `MainActivity.onCreate`). It exposes `initialize`, `load`, `isReady`
+  and `show`. `show` resolves only with the completion state from
+  `onUnityAdsShowComplete` (`COMPLETED` / `SKIPPED`) and rejects on any
+  show failure.
+- **TS service:** `src/services/unityAds.ts` runs the
+  initialise → load → show flow with timeouts and returns a result union
+  (`COMPLETED` / `SKIPPED` / `UNAVAILABLE`). It never throws to the UI.
+- **Config:** `src/services/adsSettings.ts` reads the Firestore document
+  `app_settings/ads` once per app session (cached) with safe defaults —
+  a missing document means Unity stays disabled.
+- **Watch tab:** when the config is enabled, a "Unity Rewarded Ad" card
+  appears at the top of the Watch tab (native builds only). On
+  `COMPLETED` the user is credited through the exact same balance path
+  as the video ads (`onUpdateBalance(amount, 'unity_ad', …)` — RTDB
+  ledger transaction, Firestore mirror, and an `earning_history` record
+  with source `unity_ad`). `SKIPPED` and failures never pay.
+
+### Panel config contract — `app_settings/ads`
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `unityEnabled` | boolean | Master switch for Unity ads. |
+| `unityGameId` | string | Unity Ads game ID (Android project). Empty = hidden. |
+| `unityRewardedPlacementId` | string | Rewarded placement / ad unit ID. Default when empty: `Rewarded_Android`. |
+| `unityInterstitialPlacementId` | string | Stored for future use; not wired yet. Default: `Interstitial_Android`. |
+| `unityTestMode` | boolean | Serve Unity test ads while setting up. |
+| `unityRewardAmount` | number | Rs. credited per completed rewarded view. |
+| `unityDailyLimit` | number | Max rewarded views per user per day; `0` = unlimited. Counted from today's `earning_history` records with source `unity_ad` (userId query + client-side filter, the same no-composite-index pattern as Earning History). |
+
+### Owner's steps in the Unity Dashboard
+
+1. Sign in at **Unity Cloud / Unity Ads** with the TaskMint Unity account
+   and select the Android game project for TaskMint (create one if it
+   does not exist yet: **Monetization → Unity Ads**, platform Android,
+   package `click.taskmint.app`).
+2. Copy the project's **Game ID** and paste it into the admin panel's ads
+   settings (`unityGameId`).
+3. Under **Monetization → Ad units**, make sure a **Rewarded** ad unit
+   exists for Android. Its placement ID goes into the panel as
+   `unityRewardedPlacementId` — if the panel field is left empty the app
+   uses Unity's default name `Rewarded_Android`.
+4. Set the reward amount and daily limit in the panel, keep
+   `unityTestMode` ON while testing on a real device, and turn it OFF
+   for production traffic. Enable `unityEnabled` when ready.
 
 ## Still needed from the owner
 
