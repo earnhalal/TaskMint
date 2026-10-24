@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
@@ -21,7 +21,19 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const db = getFirestore(app);
+const db = (() => {
+  try {
+    // Persistent local cache: repeat visits serve listener snapshots
+    // from disk, and Firestore only bills for documents that changed
+    // since the last visit — this keeps the free daily read quota
+    // from draining on full re-reads every time the app opens.
+    return initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    });
+  } catch {
+    return getFirestore(app);
+  }
+})();
 const auth = getAuth(app);
 const rtdb = getDatabase(app);
 
