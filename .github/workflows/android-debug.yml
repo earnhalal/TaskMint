@@ -1,12 +1,14 @@
-name: Android Debug APK
+name: Android APK
 
-# Builds a debug APK of the Capacitor Android app and uploads it as a
-# workflow artifact. The APK is debug-signed only — not for release.
+# Builds the release-signed TaskMint APK and uploads it as a workflow
+# artifact. Signing uses the repository secrets RELEASE_KEYSTORE_BASE64
+# (base64 of the PKCS12 release keystore), RELEASE_KEYSTORE_PASSWORD and
+# RELEASE_KEY_ALIAS. Secret values are never printed to the log.
 on:
   workflow_dispatch:
   push:
     branches:
-      - feature/capacitor-android
+      - feature/release-signing-and-update
 
 jobs:
   build:
@@ -51,16 +53,38 @@ jobs:
         with:
           gradle-version: '8.14.3'
 
-      # The Gradle wrapper JAR is generated here (it is not stored in git).
-      - name: Generate the Gradle wrapper and build the debug APK
+      # Decode the release keystore from the repository secret into the
+      # workspace. The secret value itself is masked by GitHub and is
+      # never printed.
+      - name: Decode the release keystore
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > android/release.p12
+
+      # The Gradle wrapper JAR is generated here (it is not stored in git),
+      # then the signed release APK is built. The keystore uses a single
+      # password for both the store and the key.
+      - name: Generate the Gradle wrapper and build the release APK
         working-directory: android
+        env:
+          TM_KEYSTORE_FILE: ${{ github.workspace }}/android/release.p12
+          TM_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          TM_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          TM_KEY_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
         run: |
           gradle wrapper --gradle-version 8.14.3
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
-      - name: Upload the debug APK
+      # Prints the signing certificate fingerprint into the build log so
+      # every release build can be matched to the TaskMint release key.
+      - name: Verify the APK signature
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$APKSIGNER" verify --print-certs android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Upload the release APK
         uses: actions/upload-artifact@v4
         with:
-          name: taskmint-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: taskmint-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
