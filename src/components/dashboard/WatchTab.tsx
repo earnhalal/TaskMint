@@ -227,6 +227,11 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         const fetchedAds: VideoAd[] = [];
         adsSnap.forEach((doc) => {
           const data = doc.data();
+          // Script ads (e.g. the old HilltopAds player) were removed by the
+          // owner's order: the Watch tab shows direct videos and the Unity
+          // rewarded card only. A script-only entry (scriptUrl but no
+          // videoUrl) never renders.
+          if (data.scriptUrl && !data.videoUrl) return;
           if (data.status !== 'inactive') {
             let title = data.title || `Video Ad`;
             let tier = data.tier || 'basic';
@@ -278,128 +283,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           }
         });
 
-        // Ensure Bronze, Silver and Gold ads exist
-        const hasBronze = fetchedAds.some(a => a.tier === 'bronze');
-        const hasSilver = fetchedAds.some(a => a.tier === 'silver');
-        const hasGold = fetchedAds.some(a => a.tier === 'gold');
-
-        if (!hasBronze || !hasSilver || !hasGold) {
-          const extraAds: VideoAd[] = [];
-          
-          if (!hasBronze) {
-            for (let i = 1; i <= 5; i++) {
-              const adId = `ad_bronze_new_${i}`;
-              const adData = {
-                title: `Bronze Starter Task #${i}`,
-                reward: 3.00,
-                limit: 1,
-                status: 'active',
-                scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
-                duration: 60,
-                views: Math.floor(Math.random() * 1000) + 5000,
-                tier: 'bronze' as const
-              };
-              await setDoc(doc(db, 'video_ads', adId), adData);
-              extraAds.push({ id: adId, ...adData });
-            }
-          }
-
-          if (!hasSilver) {
-            for (let i = 1; i <= 5; i++) {
-              const adId = `ad_silver_new_${i}`;
-              const adData = {
-                title: `Silver Executive Task #${i}`,
-                reward: 25.00,
-                limit: 1,
-                status: 'active',
-                scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
-                duration: 60,
-                views: Math.floor(Math.random() * 1000) + 2000,
-                tier: 'silver' as const
-              };
-              await setDoc(doc(db, 'video_ads', adId), adData);
-              extraAds.push({ id: adId, ...adData });
-            }
-          }
-
-          if (!hasGold) {
-            for (let i = 1; i <= 5; i++) {
-              const adId = `ad_gold_new_${i}`;
-              const adData = {
-                title: `Gold VIP Special #${i}`,
-                reward: 60.00,
-                limit: 1,
-                status: 'active',
-                scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
-                duration: 60,
-                views: Math.floor(Math.random() * 1000) + 2000,
-                tier: 'gold' as const
-              };
-              await setDoc(doc(db, 'video_ads', adId), adData);
-              extraAds.push({ id: adId, ...adData });
-            }
-          }
-          fetchedAds.push(...extraAds);
-        }
-        
         setVideoAds(fetchedAds);
-
-        // Seeding mechanism: ONLY if the list is completely empty (failsafe)
-        if (fetchedAds.length === 0) {
-          const newAds: VideoAd[] = [];
-          
-          // 1. Basic Ads (Standard Daily)
-          for (let i = 1; i <= 10; i++) {
-            const adId = `ad_basic_${i}`;
-            const adData = {
-              title: `TaskMint Daily Reward #${i}`,
-              reward: 1.00, // 1 Rs per user request
-              limit: 1,
-              status: 'active',
-              scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
-              duration: 60,
-              views: Math.floor(Math.random() * 8000) + 2000,
-              tier: 'basic' as const
-            };
-            await setDoc(doc(db, 'video_ads', adId), adData);
-            newAds.push({ id: adId, ...adData });
-          }
-
-          // 2. Silver Ads (5 ads)
-          for (let i = 1; i <= 5; i++) {
-            const adId = `ad_silver_${i}`;
-            const adData = {
-              title: `Silver Premium Ad #${i}`,
-              reward: 10.00, 
-              limit: 1,
-              status: 'active',
-              scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
-              duration: 60,
-              views: Math.floor(Math.random() * 15000) + 8000,
-              tier: 'silver' as const
-            };
-            await setDoc(doc(db, 'video_ads', adId), adData);
-            newAds.push({ id: adId, ...adData });
-          }
-
-          // 3. Gold Ads (5 ads)
-          for (let i = 1; i <= 5; i++) {
-            const adId = `ad_gold_${i}`;
-            const adData = {
-              title: `Gold VIP Exclusive #${i}`,
-              reward: 15.00,
-              limit: 1,
-              status: 'active',
-              scriptUrl: "//superbjudgment.com/bxXEV.skdpG/l_0dYcWkcu/LeTmN9yuCZeU/lbkuPlTfYb3pMkTPUm3GMRzoUVt_NQjAcyxyNSTkcyz-NQgh",
-              duration: 60,
-              views: Math.floor(Math.random() * 25000) + 15000,
-              tier: 'gold' as const
-            };
-            await setDoc(doc(db, 'video_ads', adId), adData);
-            newAds.push({ id: adId, ...adData });
-          }
-          setVideoAds(newAds);
-        }
 
         // Fetch user ad stats
         const statsRef = doc(db, 'user_ad_locks', auth.currentUser.uid);
@@ -957,57 +841,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                         onLoadedData={() => setAdLoaded(true)}
                       />
                     )
-                  ) : activeAd.scriptUrl ? (
-                    <iframe
-                      title="Ad Player"
-                      srcDoc={`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                          <meta charset="utf-8">
-                          <meta name="viewport" content="width=device-width, initial-scale=1">
-                          <style>
-                            body { margin: 0; padding: 0; background: #000; color: #fff; height: 100vh; overflow: hidden; font-family: -apple-system, sans-serif; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;}
-                            #banner-container { width: 100%; text-align: center; margin-bottom: 10px; }
-                          </style>
-                        </head>
-                        <body>
-                          <div id="banner-container">
-                            <script>
-                            (function(ljf){
-                            var d = document,
-                                s = d.createElement('script'),
-                                l = d.scripts[d.scripts.length - 1];
-                            s.settings = ljf || {};
-                            s.src = "//superbjudgment.com/bJXYVSs.dtGbl/0cYiWucZ/_e/mc9tumZjU/lUkXP/TGYf5PNJzVUK4GNpTQcqtFNljPkp3tNJTQgY2NMuQG";
-                            s.async = true;
-                            s.referrerPolicy = 'no-referrer-when-downgrade';
-                            l.parentNode.insertBefore(s, l);
-                            })({})
-                            </script>
-                          </div>
-                          <script>
-                            (function(wzuuy){
-                              var d = document,
-                                  s = d.createElement('script'),
-                                  l = d.scripts[d.scripts.length - 1];
-                              s.settings = wzuuy || {};
-                              s.src = "${activeAd.scriptUrl.startsWith('//') ? 'https:' + activeAd.scriptUrl : activeAd.scriptUrl.startsWith('http') ? activeAd.scriptUrl : 'https://' + activeAd.scriptUrl}";
-                              s.async = true;
-                              s.referrerPolicy = 'no-referrer-when-downgrade';
-                              l.parentNode.insertBefore(s, l);
-                            })({});
-                          </script>
-                        </body>
-                        </html>
-                      `}
-                      className="w-full h-full border-none relative z-10"
-                      sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-forms allow-top-navigation-by-user-activation"
-                      onLoad={() => {
-                        // We give it a moment to actually show stuff or let script start
-                        setTimeout(() => setAdLoaded(true), 3000);
-                      }}
-                    />
                   ) : (
                     <p className="text-zinc-400 text-xs text-center uppercase tracking-widest">No Signal</p>
                   )}
