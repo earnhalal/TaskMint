@@ -8,7 +8,7 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.startapp.sdk.adsbase.Ad;
-import com.startapp.sdk.adsbase.AdRequest;
+import com.startapp.sdk.adsbase.model.AdPreferences;
 import com.startapp.sdk.adsbase.StartAppAd;
 import com.startapp.sdk.adsbase.StartAppSDK;
 import com.startapp.sdk.adsbase.VideoListener;
@@ -108,8 +108,8 @@ public class StartIoAdsBridge extends Plugin {
                     }
                 });
                 rewardedAd.loadAd(
-                    StartAppAd.AdMode.REWARDED,
-                    new AdRequest(),
+                    StartAppAd.AdMode.REWARDED_VIDEO,
+                    new AdPreferences(),
                     new AdEventListener() {
                         @Override
                         public void onReceiveAd(Ad ad) {
