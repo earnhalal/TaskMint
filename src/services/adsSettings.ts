@@ -38,6 +38,22 @@ export interface UnityAdsConfig {
   unityDailyLimit: number;
 }
 
+export interface StartIoAdsConfig {
+  /** Master switch from the admin panel. */
+  startioEnabled: boolean;
+  /** Start.io App ID for this app (numeric ID from the Start.io portal). */
+  startioAppId: string;
+  /** Start.io test mode (test ads while the owner sets things up). */
+  startioTestMode: boolean;
+  /** Rs. credited to the user for one completed rewarded view. */
+  startioRewardAmount: number;
+  /** Max rewarded views per user per day. 0 = unlimited. */
+  startioDailyLimit: number;
+}
+
+/** The full ads configuration: every network, one document. */
+export type AdsConfig = UnityAdsConfig & StartIoAdsConfig;
+
 export const DEFAULT_REWARDED_PLACEMENT_ID = 'Rewarded_Android';
 export const DEFAULT_INTERSTITIAL_PLACEMENT_ID = 'Interstitial_Android';
 
@@ -74,25 +90,55 @@ function toConfig(data: Record<string, any> | undefined): UnityAdsConfig {
   };
 }
 
-let cachedConfig: UnityAdsConfig | null = null;
-let inflight: Promise<UnityAdsConfig> | null = null;
+export const STARTIO_CONFIG_DEFAULTS: StartIoAdsConfig = {
+  startioEnabled: false,
+  startioAppId: '',
+  startioTestMode: false,
+  startioRewardAmount: 0,
+  startioDailyLimit: 0,
+};
 
-async function readFirestoreConfig(): Promise<UnityAdsConfig | null> {
+function toStartIoConfig(data: Record<string, any> | undefined): StartIoAdsConfig {
+  const d = data || {};
+  const str = (v: any, fallback: string) =>
+    typeof v === 'string' && v.trim() ? v.trim() : fallback;
+  const num = (v: any, fallback: number) =>
+    typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+  return {
+    startioEnabled: d.startioEnabled === true,
+    startioAppId:
+      typeof d.startioAppId === 'number'
+        ? String(d.startioAppId)
+        : str(d.startioAppId, ''),
+    startioTestMode: d.startioTestMode === true,
+    startioRewardAmount: Math.max(0, num(d.startioRewardAmount, 0)),
+    startioDailyLimit: Math.max(0, Math.floor(num(d.startioDailyLimit, 0))),
+  };
+}
+
+function toAdsConfig(data: Record<string, any> | undefined): AdsConfig {
+  return { ...toConfig(data), ...toStartIoConfig(data) };
+}
+
+let cachedConfig: AdsConfig | null = null;
+let inflight: Promise<AdsConfig> | null = null;
+
+async function readFirestoreConfig(): Promise<AdsConfig | null> {
   try {
     const snap = await getDoc(doc(db, 'app_settings', 'ads'));
     if (!snap.exists()) return null;
-    return toConfig(snap.data() as Record<string, any>);
+    return toAdsConfig(snap.data() as Record<string, any>);
   } catch (error) {
     console.warn('Ads settings (Firestore) could not be loaded:', error);
     return null;
   }
 }
 
-async function readRtdbConfig(): Promise<UnityAdsConfig | null> {
+async function readRtdbConfig(): Promise<AdsConfig | null> {
   try {
     const snap = await get(ref(rtdb, 'app_settings/ads'));
     if (!snap.exists()) return null;
-    return toConfig(snap.val() as Record<string, any>);
+    return toAdsConfig(snap.val() as Record<string, any>);
   } catch (error) {
     console.warn('Ads settings (RTDB) could not be loaded:', error);
     return null;
@@ -106,29 +152,47 @@ async function readRtdbConfig(): Promise<UnityAdsConfig | null> {
  * unreadable, or does not enable Unity. Never throws — total failure
  * falls back to defaults (everything disabled).
  */
-export async function getUnityAdsConfig(): Promise<UnityAdsConfig> {
+export async function getAdsConfig(): Promise<AdsConfig> {
   if (cachedConfig) return cachedConfig;
   if (!inflight) {
     inflight = (async () => {
       const fromFirestore = await readFirestoreConfig();
-      if (fromFirestore && isUnityConfigured(fromFirestore)) {
+      if (
+        fromFirestore &&
+        (isUnityConfigured(fromFirestore) || isStartIoConfigured(fromFirestore))
+      ) {
         cachedConfig = fromFirestore;
         return cachedConfig;
       }
       const fromRtdb = await readRtdbConfig();
-      if (fromRtdb && isUnityConfigured(fromRtdb)) {
+      if (
+        fromRtdb &&
+        (isUnityConfigured(fromRtdb) || isStartIoConfigured(fromRtdb))
+      ) {
         cachedConfig = fromRtdb;
         return cachedConfig;
       }
       cachedConfig =
-        fromFirestore || fromRtdb || { ...UNITY_CONFIG_DEFAULTS };
+        fromFirestore ||
+        fromRtdb ||
+        { ...UNITY_CONFIG_DEFAULTS, ...STARTIO_CONFIG_DEFAULTS };
       return cachedConfig;
     })();
   }
   return inflight;
 }
 
+/** Backwards-compatible name — the full config includes the Unity fields. */
+export async function getUnityAdsConfig(): Promise<AdsConfig> {
+  return getAdsConfig();
+}
+
 /** True when Unity rewarded ads should be offered at all. */
 export function isUnityConfigured(config: UnityAdsConfig): boolean {
   return config.unityEnabled && config.unityGameId.trim().length > 0;
+}
+
+/** True when Start.io rewarded ads should be offered at all. */
+export function isStartIoConfigured(config: StartIoAdsConfig): boolean {
+  return config.startioEnabled && config.startioAppId.trim().length > 0;
 }
