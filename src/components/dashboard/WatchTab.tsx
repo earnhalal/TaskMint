@@ -27,6 +27,26 @@ interface VideoAd {
   tier?: 'basic' | 'bronze' | 'silver' | 'gold';
 }
 
+// --- Direct video helpers -------------------------------------------------
+// Direct ads carry a plain video link (videoUrl) instead of a network
+// script. YouTube links play in an embed iframe; direct file links
+// (MP4/WebM) play in a native <video> element.
+function getYouTubeId(url?: string): string | null {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+
+function getYouTubeEmbedUrl(url?: string): string | null {
+  const id = getYouTubeId(url);
+  return id ? `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1` : null;
+}
+
+function getVideoThumbnail(ad: VideoAd): string {
+  const ytId = getYouTubeId(ad.videoUrl);
+  return ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : `https://picsum.photos/seed/${ad.id}/800/500`;
+}
+
 export default function WatchTab({ onBack, balance, onUpdateBalance, accountStatus, role, partnerTier }: WatchTabProps) {
   const [adStats, setAdStats] = useState<Record<string, any>>({});
   const [videoAds, setVideoAds] = useState<VideoAd[]>([]);
@@ -97,15 +117,16 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           const data = doc.data();
           if (data.status !== 'inactive') {
             let title = data.title || `Video Ad`;
-            let reward = data.reward || 0.20;
             let tier = data.tier || 'basic';
+            // Honour the reward set in the admin panel (reward / rewardAmount);
+            // fall back to the standard tier price only when neither is set.
+            let reward = data.reward || data.rewardAmount || (tier === 'gold' ? 15.00 : tier === 'silver' ? 10.00 : tier === 'bronze' ? 3.00 : 1.00);
             let finalViews = data.views || 0;
 
             // FORCE VIEWS UPDATE: No matter what's in DB, we force high/low ranges
             if (tier === 'basic') {
               title = title.replace(/premium/gi, '').replace(/hilltopads/gi, 'TaskMint').trim();
               if (!title) title = `Daily Ad #${doc.id.split('_').pop()}`;
-              reward = 1.00;
               
               // Realistic basic views (10k to 25k)
               if (finalViews < 10000 || finalViews > 30000) {
@@ -113,20 +134,17 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                 setDoc(doc.ref, { views: finalViews, title, reward, tier: 'basic' }, { merge: true });
               }
             } else if (tier === 'bronze') {
-                reward = 3.00;
                 if (!title) title = `Bronze Node #${doc.id.split('_').pop()}`;
                 if (finalViews < 5000 || finalViews > 10000) {
                     finalViews = Math.floor(Math.random() * 5000) + 5000;
                     setDoc(doc.ref, { views: finalViews, title, reward, tier: 'bronze' }, { merge: true });
                 }
             } else if (tier === 'silver') {
-                reward = 10.00;
                 if (finalViews < 2000 || finalViews > 4500) {
                     finalViews = Math.floor(Math.random() * 2500) + 2000;
                     setDoc(doc.ref, { views: finalViews, reward }, { merge: true });
                 }
             } else if (tier === 'gold') {
-                reward = 15.00;
                 if (finalViews < 1500 || finalViews > 3500) {
                     finalViews = Math.floor(Math.random() * 2000) + 1500;
                     setDoc(doc.ref, { views: finalViews, reward }, { merge: true });
@@ -402,8 +420,10 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     setTotalTime(60);
     setAdLoaded(false);
 
-    // Initial load check
-    if (!ad.scriptUrl) {
+    // Initial load check: only an ad with neither a network script nor a
+    // direct video skips the loading state. Direct videos mark themselves
+    // loaded when the player is ready (embed load / video can-play).
+    if (!ad.scriptUrl && !ad.videoUrl) {
       setAdLoaded(true);
     }
   };
@@ -579,7 +599,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                 >
                   <div className="relative aspect-[16/10] w-full overflow-hidden">
                     <img 
-                      src={`https://picsum.photos/seed/${ad.id}/800/500`}
+                      src={getVideoThumbnail(ad)}
                       alt={ad.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
@@ -760,7 +780,28 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     'border-teal-500'
                   }`} />
                   
-                  {activeAd.scriptUrl ? (
+                  {activeAd.videoUrl ? (
+                    getYouTubeEmbedUrl(activeAd.videoUrl) ? (
+                      <iframe
+                        title="Video Ad"
+                        src={getYouTubeEmbedUrl(activeAd.videoUrl) as string}
+                        className="w-full h-full border-none relative z-10"
+                        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        onLoad={() => { setTimeout(() => setAdLoaded(true), 1000); }}
+                      />
+                    ) : (
+                      <video
+                        src={activeAd.videoUrl}
+                        className="w-full h-full relative z-10 bg-black"
+                        controls
+                        autoPlay
+                        playsInline
+                        onCanPlay={() => setAdLoaded(true)}
+                        onLoadedData={() => setAdLoaded(true)}
+                      />
+                    )
+                  ) : activeAd.scriptUrl ? (
                     <iframe
                       title="Ad Player"
                       srcDoc={`
