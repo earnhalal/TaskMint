@@ -866,10 +866,8 @@ export default function Dashboard() {
           if (l1) {
             let l1BonusAmount = activeAppSettings.referralBonusBasic || 100;
             if (l1.data.role === 'partner') {
-               if (l1.data.partnerTier === 'gold') l1BonusAmount = 200;
-               else if (l1.data.partnerTier === 'silver') l1BonusAmount = activeAppSettings.referralBonusPartner || 125;
-               else if (l1.data.partnerTier === 'bronze') l1BonusAmount = 130;
-               else l1BonusAmount = activeAppSettings.referralBonusPartner || 125;
+               // Flat rate (owner decision 2026-10-24): every partner tier earns referralBonusPartner.
+               l1BonusAmount = activeAppSettings.referralBonusPartner || 125;
             }
 
             // L1 Updates
