@@ -1139,7 +1139,12 @@ export default function Dashboard() {
                  gender={userGender}
                  profileAvatarId={profileAvatarId}
                  profilePhoto={profilePhoto}
+                 role={role}
+                 partnerStatus={partnerStatus}
+                 partnerTier={partnerTier}
                  onBack={() => setActiveTab('profile')} 
+                 onViewProPlans={() => setActiveTab('premium')}
+                 onViewPartnerProgram={() => setActiveTab('partner_upgrade')}
                />;
       case 'manage_wallet':
         return <ManageWalletView 
