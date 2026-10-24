@@ -92,7 +92,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
  tagline: 'Standard Earning Mode',
  adEarnings: 'Rs 5 - 10 / Daily (Min)',
  features: [
- 'Rs 100 per Invite',
+ `Rs ${appSettings?.referralBonusBasic || 100} per Invite`,
  '1.00 Reward per Ad Watch',
  'Standard Daily Tasks',
  'Basic Support'
@@ -112,7 +112,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
  tagline: 'Starter Partner Mode',
  adEarnings: 'Rs 30 - 60 / Daily',
  features: [
- 'Rs 130 per Invite',
+ `Rs ${appSettings?.referralBonusPartner || 125} per Invite`,
  '3.00 Reward per Bronze Ad',
  '1 Free monthly ticket',
  'Instant Payout Enabled'
@@ -161,7 +161,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
  tagline: 'Maximum Revenue Mode',
  adEarnings: 'Rs 300 - 600 / Daily',
  features: [
- 'Rs 200 per Instant Invite',
+ `Rs ${appSettings?.referralBonusPartner || 125} per Instant Invite`,
  '60.00 Reward per Elite Ad',
  '5 Free monthly tickets',
  'Full Partner Analytics',
