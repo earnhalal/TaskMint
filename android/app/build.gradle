@@ -7,8 +7,8 @@ android {
         applicationId "click.taskmint.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,10 +16,34 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Release signing is opt-in: it activates only when a keystore is
+    // supplied via Gradle project properties or environment variables
+    // (TM_KEYSTORE_FILE etc.), e.g. by CI from repository secrets.
+    // Without them, release builds stay unsigned and local builds work
+    // exactly as before. The TaskMint release keystore is PKCS12 and uses
+    // a single password for both the store and the key.
+    signingConfigs {
+        release {
+            if (project.hasProperty('TM_KEYSTORE_FILE') || System.getenv('TM_KEYSTORE_FILE')) {
+                def tmStoreFile = project.findProperty('TM_KEYSTORE_FILE') ?: System.getenv('TM_KEYSTORE_FILE')
+                def tmStorePassword = project.findProperty('TM_KEYSTORE_PASSWORD') ?: System.getenv('TM_KEYSTORE_PASSWORD')
+                def tmKeyAlias = project.findProperty('TM_KEY_ALIAS') ?: System.getenv('TM_KEY_ALIAS')
+                def tmKeyPassword = project.findProperty('TM_KEY_PASSWORD') ?: System.getenv('TM_KEY_PASSWORD') ?: tmStorePassword
+                storeFile file(tmStoreFile)
+                storePassword tmStorePassword
+                keyAlias tmKeyAlias
+                keyPassword tmKeyPassword
+                storeType 'PKCS12'
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (project.hasProperty('TM_KEYSTORE_FILE') || System.getenv('TM_KEYSTORE_FILE')) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
