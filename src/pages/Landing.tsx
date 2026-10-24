@@ -142,7 +142,7 @@ export default function Landing() {
 
           <div className="hidden md:flex items-center gap-3">
             <button onClick={() => onGetStarted('login')} className="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-emerald-700 transition-colors">Log In</button>
-            <button onClick={() => onGetStarted('signup')} className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-colors">Create Account</button>
+            <button onClick={() => onGetStarted('signup')} className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 active:scale-[0.98] transition">Create Account</button>
           </div>
 
           <button onClick={() => setMobileMenu(!mobileMenu)} className="md:hidden p-2 text-slate-800" aria-label="Menu">
@@ -159,7 +159,7 @@ export default function Landing() {
             <button onClick={() => scrollTo('faq')} className="text-left py-2.5">FAQ</button>
             <div className="grid grid-cols-2 gap-3 pt-3 pb-2">
               <button onClick={() => onGetStarted('login')} className="py-3 rounded-xl border border-slate-200 font-bold">Log In</button>
-              <button onClick={() => onGetStarted('signup')} className="py-3 rounded-xl bg-emerald-600 text-white font-bold">Sign Up</button>
+              <button onClick={() => onGetStarted('signup')} className="py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 active:scale-[0.98] transition">Sign Up</button>
             </div>
           </div>
         )}
@@ -181,7 +181,7 @@ export default function Landing() {
                 Complete simple tasks on your phone — watch video ads, answer surveys and try offers — and withdraw your balance once it reaches Rs. 500 to JazzCash, EasyPaisa or your bank.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <button onClick={() => onGetStarted('signup')} className="inline-flex justify-center items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">
+                <button onClick={() => onGetStarted('signup')} className="inline-flex justify-center items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 active:scale-[0.98] transition">
                   Start Earning <ArrowRight className="w-4.5 h-4.5" />
                 </button>
                 <button onClick={() => scrollTo('how-it-works')} className="inline-flex justify-center items-center gap-2 px-7 py-3.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:border-emerald-200 hover:text-emerald-700 transition-colors">
@@ -215,7 +215,7 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-                <button onClick={() => onGetStarted('signup')} className="mt-7 w-full py-3.5 rounded-xl bg-emerald-500 font-bold text-white hover:bg-emerald-400 transition-colors">Withdraw to JazzCash</button>
+                <button onClick={() => onGetStarted('signup')} className="mt-7 w-full py-3.5 rounded-xl bg-emerald-500 font-bold text-white hover:bg-emerald-400 active:scale-[0.98] transition">Withdraw to JazzCash</button>
                 <p className="mt-3 text-center text-xs text-white/40">Sample wallet preview — your earnings depend on tasks completed.</p>
               </div>
             </motion.div>
@@ -225,8 +225,8 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto px-5 lg:px-8 mt-16 md:mt-20">
             <dl className="grid grid-cols-2 lg:grid-cols-4 gap-6 rounded-3xl border border-slate-100 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.04)] px-6 py-8">
               {[
-                { val: '50K+', label: 'Active users' },
-                { val: 'Rs. 2.5M+', label: 'Paid out to users' },
+                { val: '3K+', label: 'Registered users' },
+                { val: 'Rs. 150', label: 'One-time joining fee' },
                 { val: 'Rs. 500', label: 'Minimum payout' },
                 { val: '24/7', label: 'Tasks available' },
               ].map((s) => (
@@ -305,7 +305,7 @@ export default function Landing() {
                 <li className="flex gap-2.5"><CheckCircleIcon className="w-5 h-5 text-emerald-600 shrink-0" /> Full transaction history inside your wallet</li>
                 <li className="flex gap-2.5"><Clock3 className="w-5 h-5 text-emerald-600 shrink-0" /> Requests are processed in order, every day</li>
               </ul>
-              <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">Create Account <ArrowRight className="w-4.5 h-4.5" /></button>
+              <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 active:scale-[0.98] transition">Create Account <ArrowRight className="w-4.5 h-4.5" /></button>
             </div>
             <div className="grid gap-4">
               {[
@@ -378,8 +378,8 @@ export default function Landing() {
             </div>
             <div className="mt-10 grid md:grid-cols-3 gap-5">
               {latestPosts.map((post, i) => (
-                <motion.article key={post.id} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.45, delay: i * 0.1 }} className="rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-[0_4px_20px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-shadow cursor-pointer" onClick={() => navigate(`/blog/${post.slug}`)}>
-                  <img src={post.image} alt={post.title} className="w-full h-44 object-cover" loading="lazy" />
+                <motion.article key={post.id} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.45, delay: i * 0.1 }} className="group rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-[0_4px_20px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-shadow cursor-pointer" onClick={() => navigate(`/blog/${post.slug}`)}>
+                  <img src={post.image} alt={post.title} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                   <div className="p-6">
                     <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">{post.category}</span>
                     <h3 className="mt-3.5 font-bold text-lg leading-snug">{post.title}</h3>
@@ -416,7 +416,7 @@ export default function Landing() {
           <div className="max-w-4xl mx-auto px-5 lg:px-8 text-center">
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight">Your free time is worth money</h2>
             <p className="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">Join TaskMint today, activate your account with the one-time Rs. 150 joining fee, complete your first task in minutes, and cash out once you reach Rs. 500.</p>
-            <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 transition-colors">Create Account <ArrowRight className="w-4.5 h-4.5" /></button>
+            <button onClick={() => onGetStarted('signup')} className="mt-9 inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 active:scale-[0.98] transition">Create Account <ArrowRight className="w-4.5 h-4.5" /></button>
           </div>
         </section>
       </main>

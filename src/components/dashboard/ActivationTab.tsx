@@ -75,6 +75,21 @@ export default function ActivationTab({ onBack, appSettings, userName, onOpenVer
       // RTDB joining queue (same destination as the WhatsApp flow)
       await set(ref(rtdb, `activation_requests/${auth.currentUser.uid}/latest_request`), data);
       await set(ref(rtdb, `pending_requests/${auth.currentUser.uid}`), { ...data, requestId: 'latest_request' });
+
+      // RTDB failover record for the verification chat — written after
+      // the full pending_requests overwrite above so it survives it.
+      // The 24/7 agent mirrors its chat replies into RTDB from this
+      // queue if the Firestore quota is ever exhausted. Best-effort.
+      try {
+        await set(ref(rtdb, `pending_requests/${auth.currentUser.uid}/proof/${depositId}`), {
+          amount: appSettings.activationFee,
+          type: 'activation',
+          userName: userName,
+          date: data.date,
+          screenshotHash: proofHash,
+          at: Date.now()
+        });
+      } catch (e) { /* failover record only — never break activation */ }
       const statusRef = ref(rtdb, `users/${auth.currentUser.uid}`);
       await update(statusRef, { status: 'pending' });
 

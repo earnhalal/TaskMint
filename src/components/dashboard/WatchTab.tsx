@@ -100,7 +100,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
     const isParam = window.location.search.includes('isApp=true') || window.location.search.includes('app=true');
     
-    console.log("[WATCH_APP_DETECTION]", { ua, isWebView, isAC24, isStandalone, isParam });
     
     return isWebView || isAC24 || isStandalone || isParam;
   }, []);
@@ -234,7 +233,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
 
         // Seeding mechanism: ONLY if the list is completely empty (failsafe)
         if (fetchedAds.length === 0) {
-          console.log("No ads found in DB. Seeding tier-based ads...");
           const newAds: VideoAd[] = [];
           
           // 1. Basic Ads (Standard Daily)
@@ -433,7 +431,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     if (activeAd && !adLoaded) {
       const fallback = setTimeout(() => {
         setAdLoaded(true);
-        console.log("Fallback ad load triggered");
       }, 8000); // 8 second max wait for script load
       return () => clearTimeout(fallback);
     }
@@ -848,7 +845,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       className="w-full h-full border-none relative z-10"
                       sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-forms allow-top-navigation-by-user-activation"
                       onLoad={() => {
-                        console.log("Ad Player Iframe Loaded");
                         // We give it a moment to actually show stuff or let script start
                         setTimeout(() => setAdLoaded(true), 3000);
                       }}
