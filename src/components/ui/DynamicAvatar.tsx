@@ -1,14 +1,30 @@
 import React from 'react';
+import { AVATARS_3D } from '../../assets/avatars3d';
 
 export type AvatarId = 
   | 'm1' | 'm2' | 'm3' | 'm4' | 'm5' | 'm6' | 'm7' | 'm8' | 'm9' | 'm10'
-  | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8' | 'f9' | 'f10';
+  | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8' | 'f9' | 'f10'
+  | 'a1' | 'a2' | 'a3' | 'a4';
 
 interface DynamicAvatarProps {
-  avatarId?: string | null; // e.g. "m1"
+  avatarId?: string | null; // e.g. "m1" or "a1"
+  photo?: string; // user-uploaded profile photo (data URL) — wins over avatarId
   className?: string;
   fallbackText?: string;
+  // 'flat' renders the classic SVG set even for legacy ids (used by the
+  // avatar picker grid); 'auto' upgrades legacy ids to the 3D pack.
+  variant?: 'auto' | 'flat';
 }
+
+// Legacy ids upgrade automatically to the 3D pack:
+// odd male -> a1, even male -> a2, odd female -> a3, even female -> a4.
+const legacy3dId = (id: string): string | undefined => {
+  const match = /^([mf])(\d+)$/.exec(id);
+  if (!match) return undefined;
+  const n = parseInt(match[2], 10);
+  if (match[1] === 'm') return n % 2 === 1 ? 'a1' : 'a2';
+  return n % 2 === 1 ? 'a3' : 'a4';
+};
 
 export const maleAvatarIds = ['m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8', 'm9', 'm10'];
 export const femaleAvatarIds = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10'];
@@ -247,7 +263,22 @@ const AvatarSvgs: Record<string, React.FC<{className?: string}>> = {
   )
 };
 
-export const DynamicAvatar: React.FC<DynamicAvatarProps> = ({ avatarId, className = "", fallbackText }) => {
+export const DynamicAvatar: React.FC<DynamicAvatarProps> = ({ avatarId, photo, className = "", fallbackText, variant = 'auto' }) => {
+  // An uploaded profile photo always wins over any preset avatar.
+  if (photo) {
+    return <img src={photo} alt="" className={`w-full h-full object-cover rounded-full ${className}`} />;
+  }
+
+  // 3D pack: direct id, or a legacy flat id upgraded via the parity mapping.
+  if (avatarId) {
+    const direct3d = AVATARS_3D[avatarId];
+    const upgraded3d = variant === 'auto' ? AVATARS_3D[legacy3dId(avatarId) ?? ''] : undefined;
+    const image3d = direct3d || upgraded3d;
+    if (image3d) {
+      return <img src={image3d} alt="" className={`w-full h-full object-cover rounded-full ${className}`} />;
+    }
+  }
+
   const AvatarIcon = avatarId ? AvatarSvgs[avatarId] : null;
 
   if (AvatarIcon) {

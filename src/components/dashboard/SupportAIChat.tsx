@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, ArrowLeft, ShieldCheck, Zap, CheckCheck, Headphones, Clock, Paperclip, X, Lock } from 'lucide-react';
+import { Send, ArrowLeft, ShieldCheck, Zap, CheckCheck, Headphones, Clock, Paperclip, X, Lock, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from "@google/genai";
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -344,9 +344,10 @@ Balance: Rs. ${balance?.toLocaleString('en-PK', { minimumFractionDigits: 2, maxi
                    <button
                      key={star}
                      onClick={() => setRating(star)}
-                     className={`text-2xl transition-all ${rating >= star ? 'text-emerald-500 scale-110' : 'text-zinc-200 hover:text-zinc-400'}`}
+                     aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                     className={`transition-all ${rating >= star ? 'text-emerald-500 scale-110' : 'text-zinc-200 hover:text-zinc-400'}`}
                    >
-                     ★
+                     <Star className="w-7 h-7" strokeWidth={2} fill={rating >= star ? 'currentColor' : 'none'} />
                    </button>
                  ))}
               </div>
