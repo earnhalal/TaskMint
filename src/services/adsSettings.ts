@@ -1,5 +1,6 @@
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { get, ref } from 'firebase/database';
+import { db, rtdb } from '../firebase';
 
 /**
  * Admin-panel-driven ads configuration.
@@ -9,6 +10,12 @@ import { db } from '../firebase';
  * once per app session (the result is cached) and hands the rest of the
  * app a fully-defaulted config — a missing document or missing fields can
  * never break the app; they simply leave features disabled.
+ *
+ * Fallback: the same settings are mirrored in the Realtime Database at
+ * `app_settings/ads`. If the Firestore document is missing, unreadable
+ * (for example during a Firestore quota outage), or does not enable
+ * Unity with a game ID, the RTDB copy is used instead — RTDB has no
+ * daily read quota, so ads stay live even when Firestore is down.
  *
  * Nothing here is specific to one network's account: the Unity game ID,
  * placement IDs, reward and limits all come from the panel document.
@@ -70,24 +77,51 @@ function toConfig(data: Record<string, any> | undefined): UnityAdsConfig {
 let cachedConfig: UnityAdsConfig | null = null;
 let inflight: Promise<UnityAdsConfig> | null = null;
 
+async function readFirestoreConfig(): Promise<UnityAdsConfig | null> {
+  try {
+    const snap = await getDoc(doc(db, 'app_settings', 'ads'));
+    if (!snap.exists()) return null;
+    return toConfig(snap.data() as Record<string, any>);
+  } catch (error) {
+    console.warn('Ads settings (Firestore) could not be loaded:', error);
+    return null;
+  }
+}
+
+async function readRtdbConfig(): Promise<UnityAdsConfig | null> {
+  try {
+    const snap = await get(ref(rtdb, 'app_settings/ads'));
+    if (!snap.exists()) return null;
+    return toConfig(snap.val() as Record<string, any>);
+  } catch (error) {
+    console.warn('Ads settings (RTDB) could not be loaded:', error);
+    return null;
+  }
+}
+
 /**
- * Returns the session-cached ads config, reading `app_settings/ads` from
- * Firestore on first use. Never throws — failures fall back to defaults
- * (everything disabled).
+ * Returns the session-cached ads config. The Firestore document
+ * `app_settings/ads` is the primary source; the RTDB mirror at
+ * `app_settings/ads` is used whenever the Firestore copy is missing,
+ * unreadable, or does not enable Unity. Never throws — total failure
+ * falls back to defaults (everything disabled).
  */
 export async function getUnityAdsConfig(): Promise<UnityAdsConfig> {
   if (cachedConfig) return cachedConfig;
   if (!inflight) {
     inflight = (async () => {
-      try {
-        const snap = await getDoc(doc(db, 'app_settings', 'ads'));
-        cachedConfig = toConfig(
-          snap.exists() ? (snap.data() as Record<string, any>) : undefined,
-        );
-      } catch (error) {
-        console.warn('Ads settings could not be loaded:', error);
-        cachedConfig = { ...UNITY_CONFIG_DEFAULTS };
+      const fromFirestore = await readFirestoreConfig();
+      if (fromFirestore && isUnityConfigured(fromFirestore)) {
+        cachedConfig = fromFirestore;
+        return cachedConfig;
       }
+      const fromRtdb = await readRtdbConfig();
+      if (fromRtdb && isUnityConfigured(fromRtdb)) {
+        cachedConfig = fromRtdb;
+        return cachedConfig;
+      }
+      cachedConfig =
+        fromFirestore || fromRtdb || { ...UNITY_CONFIG_DEFAULTS };
       return cachedConfig;
     })();
   }
