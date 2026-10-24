@@ -3,13 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, Calendar, User, ArrowRight, Sparkles } from 'lucide-react';
 import { blogPosts } from '../data/blogPosts';
+import { useSEO } from '../hooks/useSEO';
 
 export default function Blog() {
   const navigate = useNavigate();
 
+  useSEO({
+    title: 'TaskMint Blog - Online Earning Tips & Guides for Pakistan',
+    description: 'Read TaskMint guides on earning money online in Pakistan: watching ads, completing tasks and surveys, EasyPaisa and JazzCash withdrawals, referral earnings and staying safe from scams.',
+    canonical: 'https://www.taskmint.click/blog',
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = 'TaskMint Blog - Online Earning Tips & Guides';
   }, []);
 
   return (

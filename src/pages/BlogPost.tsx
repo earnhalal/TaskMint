@@ -3,19 +3,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft, Calendar, User, Sparkles, Tag } from 'lucide-react';
 import { blogPosts } from '../data/blogPosts';
+import { useSEO } from '../hooks/useSEO';
 
 export default function BlogPost() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const post = blogPosts.find(p => p.slug === slug);
 
+  useSEO({
+    title: post ? `${post.title} | TaskMint Blog` : 'Post Not Found | TaskMint Blog',
+    description: post?.excerpt,
+    canonical: post ? `https://www.taskmint.click/blog/${post.slug}` : undefined,
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (post) {
-      document.title = `${post.title} | TaskMint Blog`;
-      const meta = document.querySelector('meta[name="description"]');
-      if (meta) meta.setAttribute('content', post.excerpt);
-    }
   }, [post]);
 
   if (!post) {

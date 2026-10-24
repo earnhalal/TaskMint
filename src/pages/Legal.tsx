@@ -1,9 +1,43 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Coins, ArrowLeft, Mail, MapPin } from 'lucide-react';
+import { useSEO } from '../hooks/useSEO';
+
+const SEO_BY_PATH: Record<string, { title: string; description: string }> = {
+  '/privacy': {
+    title: 'Privacy Policy | TaskMint',
+    description: 'Read the TaskMint Privacy Policy: what information we collect, how we use it, and how we protect your data on our online earning platform in Pakistan.',
+  },
+  '/terms': {
+    title: 'Terms of Service | TaskMint',
+    description: 'Read the TaskMint Terms of Service for using our online earning platform in Pakistan, including account, task, activation and withdrawal rules.',
+  },
+  '/refund': {
+    title: 'Refund Policy | TaskMint',
+    description: 'Read the TaskMint Refund Policy to understand when the one-time activation fee can be refunded on our online earning platform.',
+  },
+  '/disclaimer': {
+    title: 'Earnings Disclaimer | TaskMint',
+    description: 'Read the TaskMint earnings disclaimer: earnings from online tasks vary with effort and task availability, and no income is guaranteed.',
+  },
+  '/promotion': {
+    title: 'Promotion Programme | TaskMint',
+    description: 'Learn about the TaskMint promotion programme: promote TaskMint, grow your team and earn referral bonuses of up to Rs. 125 per active referral.',
+  },
+  '/contact': {
+    title: 'Contact Us | TaskMint',
+    description: 'Contact the TaskMint support team for help with your account, activation, tasks or withdrawals on our online earning platform in Pakistan.',
+  },
+};
 
 export default function Legal() {
   const location = useLocation();
   const path = location.pathname;
+
+  const seo = SEO_BY_PATH[path] ?? {
+    title: 'TaskMint | Earn Money Online in Pakistan',
+    description: 'TaskMint is an online earning platform in Pakistan. Earn money by completing tasks, watching video ads and inviting friends, with withdrawals via EasyPaisa and JazzCash.',
+  };
+  useSEO({ title: seo.title, description: seo.description, canonical: `https://www.taskmint.click${path}` });
 
   const renderContent = () => {
     if (path === '/privacy') {
