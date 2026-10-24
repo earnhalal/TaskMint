@@ -126,6 +126,7 @@ export default function Dashboard() {
   }, [activeTab]);
 
   const [balance, setBalance] = useState(0);
+  const [coinBalance, setCoinBalance] = useState(0);
   const [pendingIndirect, setPendingIndirect] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
   const [lockedBalance, setLockedBalance] = useState(0);
@@ -372,6 +373,7 @@ export default function Dashboard() {
         // left the displayed balance stuck at its initial value even
         // though the RTDB ledger itself was always correct.)
         if (data.balance !== undefined) setBalance(data.balance);
+        if (data.coinBalance !== undefined) setCoinBalance(data.coinBalance);
         if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
@@ -577,6 +579,108 @@ export default function Dashboard() {
       return false;
     } finally {
       setIsBalanceUpdating(false);
+    }
+  };
+
+  /**
+   * Credit Gold Coins for a completed ad view (owner's coin economy,
+   * 2026-10-25): ads pay COINS into users/{uid}/coinBalance — display
+   * unit 100 coins = Rs. 1 — and the user converts coins to rupees.
+   * The earning_history entry records amount 0 + the coin count, so
+   * rupee totals stay exact; team commission still runs on the rupee
+   * value, exactly as when ads paid rupees directly.
+   */
+  const handleCreditCoins = async (coins: number, source: string = 'ad_watch', description: string = '') => {
+    if (!user || coins <= 0) return false;
+    try {
+      const coinRef = ref(rtdb, `users/${user.uid}/coinBalance`);
+      const tx = await runRtdbTransaction(coinRef, (current) => {
+        const cur = typeof current === 'number' ? current : 0;
+        return cur + Math.floor(coins);
+      });
+      if (!tx.committed) return false;
+      try {
+        await setDoc(doc(db, 'users', user.uid), { coinBalance: increment(Math.floor(coins)) }, { merge: true });
+      } catch {}
+      try {
+        await addDoc(collection(db, 'earning_history'), {
+          userId: user.uid,
+          amount: 0,
+          coins: Math.floor(coins),
+          type: 'earning',
+          source,
+          description: description || `Earned from ${source.replace('_', ' ')}`,
+          timestamp: firestoreServerTimestamp(),
+          transactionId: null,
+        });
+      } catch {}
+      const rsValue = Math.floor(coins) / 100;
+      if (rsValue > 0 && referredBy) {
+        void handleCommissionUpdate(rsValue, source);
+      }
+      return true;
+    } catch (error) {
+      console.error('Error crediting coins:', error);
+      return false;
+    }
+  };
+
+  /**
+   * Convert Gold Coins → rupees into the main balance (min 100 coins).
+   * Coins are transacted down first (aborts if insufficient); the rupee
+   * credit then lands on balance + totalEarnings with a coin_convert
+   * history entry. No team commission here — the earning was already
+   * commissioned when the coins were credited.
+   */
+  const handleConvertCoins = async (coins: number) => {
+    if (!user) return false;
+    const wholeCoins = Math.floor(coins);
+    if (wholeCoins < 100) return false;
+    const rsAmount = wholeCoins / 100;
+    try {
+      const coinRef = ref(rtdb, `users/${user.uid}/coinBalance`);
+      const tx = await runRtdbTransaction(coinRef, (current) => {
+        const cur = typeof current === 'number' ? current : 0;
+        if (cur < wholeCoins) return; // abort — insufficient coins
+        return cur - wholeCoins;
+      });
+      if (!tx.committed) return false;
+
+      const balanceRef = ref(rtdb, `users/${user.uid}/balance`);
+      const balTx = await runRtdbTransaction(balanceRef, (current) => {
+        const cur = typeof current === 'number' ? current : 0;
+        return cur + rsAmount;
+      });
+      if (!balTx.committed) {
+        // Refund the coins — the rupee side did not land.
+        await runRtdbTransaction(coinRef, (current) => (typeof current === 'number' ? current : 0) + wholeCoins);
+        return false;
+      }
+      const userRtdbRef = ref(rtdb, `users/${user.uid}`);
+      await update(userRtdbRef, { totalEarnings: rtdbIncrement(rsAmount), lastUpdatedAt: Date.now() });
+      try {
+        await setDoc(doc(db, 'users', user.uid), {
+          coinBalance: increment(-wholeCoins),
+          balance: increment(rsAmount),
+          totalEarnings: increment(rsAmount),
+        }, { merge: true });
+      } catch {}
+      try {
+        await addDoc(collection(db, 'earning_history'), {
+          userId: user.uid,
+          amount: rsAmount,
+          coins: -wholeCoins,
+          type: 'earning',
+          source: 'coin_convert',
+          description: `Converted ${wholeCoins} Gold Coins to balance`,
+          timestamp: firestoreServerTimestamp(),
+          transactionId: null,
+        });
+      } catch {}
+      return true;
+    } catch (error) {
+      console.error('Error converting coins:', error);
+      return false;
     }
   };
 
@@ -1289,10 +1393,12 @@ export default function Dashboard() {
           onSkip={() => setActiveTab('withdraw')}
         />;
       case 'watch':
-        return <WatchTab 
+        return <WatchTab
           onBack={() => setActiveTab('home')}
           balance={balance}
-          onUpdateBalance={handleUpdateBalance}
+          coinBalance={coinBalance}
+          onCreditCoins={handleCreditCoins}
+          onConvertCoins={handleConvertCoins}
           accountStatus={accountStatus}
           role={role}
           partnerTier={partnerTier}

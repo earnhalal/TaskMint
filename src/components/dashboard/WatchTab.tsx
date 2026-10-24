@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, Construction, Crown, Zap, Eye } from 'lucide-react';
+import { PlayCircle, Clock, Sparkles, Coins, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, Construction, Crown, Zap, Eye } from 'lucide-react';
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { db, auth } from '../../firebase';
 import { getAdsConfig, isUnityConfigured, isStartIoConfigured, resolveAdReward, effectivePlanTier, type AdsConfig } from '../../services/adsSettings';
+import { rsToCoins, coinsCount, coinsLabel, coinsToRs, MIN_CONVERT_COINS } from '../../utils/coins';
 import { showUnityRewarded } from '../../services/unityAds';
 import { showStartIoRewarded } from '../../services/startIoAds';
 
@@ -18,7 +19,9 @@ const STARTIO_AD_SOURCE = 'startio_ad';
 interface WatchTabProps {
   onBack: () => void;
   balance: number;
-  onUpdateBalance: (amount: number, source?: string, description?: string) => Promise<boolean>;
+  coinBalance: number;
+  onCreditCoins: (coins: number, source?: string, description?: string) => Promise<boolean>;
+  onConvertCoins: (coins: number) => Promise<boolean>;
   accountStatus: string;
   role: string;
   partnerTier: string;
@@ -57,7 +60,7 @@ function getVideoThumbnail(ad: VideoAd): string | null {
   return ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
 }
 
-export default function WatchTab({ onBack, balance, onUpdateBalance, accountStatus, role, partnerTier }: WatchTabProps) {
+export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, onConvertCoins, accountStatus, role, partnerTier }: WatchTabProps) {
   // Ad reward rates follow the member's plan tier (owner's ladder:
   // basic < bronze < silver < gold), resolved from the ads config.
   const myTier = effectivePlanTier(role, partnerTier);
@@ -68,21 +71,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [now, setNow] = useState(Date.now());
-  const [tickerMessage, setTickerMessage] = useState<string>("");
-
-  // Payout Ticker Logic
-  useEffect(() => {
-    const names = ["Ahmed", "Sana", "Zia", "Ali", "Fatima", "Hassan", "Kiran", "Faizan", "Mehak"];
-    const amounts = [750, 1200, 450, 2000, 1500, 300, 100];
-    const updateTicker = () => {
-      const name = names[Math.floor(Math.random() * names.length)];
-      const amount = amounts[Math.floor(Math.random() * amounts.length)];
-      setTickerMessage(`${name} just earned Rs. ${amount} from Video Ads!`);
-    };
-    updateTicker();
-    const interval = setInterval(updateTicker, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const [userName, setUserName] = useState<string>('User');
   const [tierLockModal, setTierLockModal] = useState<'silver' | 'gold' | null>(null);
@@ -140,6 +128,30 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const unityLimitReached =
     !!unityConfig && unityConfig.unityDailyLimit > 0 && unityTodayCount >= unityConfig.unityDailyLimit;
 
+  const handleConvertCoins = async () => {
+    const coins = Math.floor(Number(convertInput));
+    if (!coins || coins < MIN_CONVERT_COINS) {
+      setMessage({ type: 'error', text: `You need at least ${MIN_CONVERT_COINS} Gold Coins to convert (100 Coins = Rs. 1).` });
+      return;
+    }
+    if (coins > Math.floor(coinBalance)) {
+      setMessage({ type: 'error', text: 'You do not have that many coins.' });
+      return;
+    }
+    setIsConverting(true);
+    try {
+      const ok = await onConvertCoins(coins);
+      if (ok) {
+        setConvertInput('');
+        setMessage({ type: 'success', text: `${coins.toLocaleString()} Gold Coins converted — Rs. ${coinsToRs(coins).toFixed(2)} has been added to your main balance.` });
+      } else {
+        setMessage({ type: 'error', text: 'The conversion could not be completed. Please try again shortly.' });
+      }
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
   const handleWatchUnityAd = async (slotIndex?: number) => {
     if (isUnityBusy || !unityConfig || !auth.currentUser) return;
     if (unityLimitReached) {
@@ -162,8 +174,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         // record with source "unity_ad").
         const isUserActive = accountStatus.toLowerCase() === 'active';
         if (isUserActive) {
-          const credited = await onUpdateBalance(
-            unityReward,
+          const credited = await onCreditCoins(
+            rsToCoins(unityReward),
             UNITY_AD_SOURCE,
             'Watched Unity rewarded ad'
           );
@@ -171,7 +183,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             setUnityTodayCount((prev) => prev + 1);
             if (slotIndex !== undefined) advanceSequence(slotIndex);
             setShowSuccessPopup({
-              amount: unityReward,
+              amount: rsToCoins(unityReward),
               adTitle: 'Unity Rewarded Ad',
               timestamp: new Date().toLocaleString('en-US', {
                 day: 'numeric',
@@ -262,8 +274,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         // other networks (source "startio_ad").
         const isUserActive = accountStatus.toLowerCase() === 'active';
         if (isUserActive) {
-          const credited = await onUpdateBalance(
-            startioReward,
+          const credited = await onCreditCoins(
+            rsToCoins(startioReward),
             STARTIO_AD_SOURCE,
             'Watched Start.io rewarded ad'
           );
@@ -271,7 +283,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             setStartioTodayCount((prev) => prev + 1);
             if (slotIndex !== undefined) advanceSequence(slotIndex);
             setShowSuccessPopup({
-              amount: startioReward,
+              amount: rsToCoins(startioReward),
               adTitle: 'Start.io Rewarded Ad',
               timestamp: new Date().toLocaleString('en-US', {
                 day: 'numeric',
@@ -496,6 +508,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const [totalTime, setTotalTime] = useState(60);
   const [adLoaded, setAdLoaded] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
+  const [convertInput, setConvertInput] = useState('');
+  const [isConverting, setIsConverting] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState<{ 
     amount: number;
     adTitle: string;
@@ -540,7 +554,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       const rewardAmount = isUserActive ? activeAd.reward : 0;
       
       if (isUserActive) {
-        await onUpdateBalance(rewardAmount, 'ad_watch', `Watched ${activeAd.title}`);
+        await onCreditCoins(rsToCoins(rewardAmount), 'ad_watch', `Watched ${activeAd.title}`);
       }
 
       setAdStats(prev => ({ ...prev, [activeAd.id]: new Date() }));
@@ -551,8 +565,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       setIsWatching(null);
       
       // Show Success Popup with details
-      setShowSuccessPopup({ 
-        amount: rewardAmount,
+      setShowSuccessPopup({
+        amount: rsToCoins(rewardAmount),
         adTitle: adTitle,
         timestamp: new Date().toLocaleString('en-US', { 
           day: 'numeric', 
@@ -640,12 +654,12 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         <div className="absolute bottom-[-20%] right-[-10%] w-full h-[80%] bg-gradient-to-tl from-emerald-500/10 via-transparent to-transparent blur-[140px] rounded-full" />
       </div>
 
-      {/* Payout Ticker */}
+      {/* Info bar */}
       <div className="relative z-[110] bg-teal-600/10 backdrop-blur-md border-b border-white/5 h-8 flex items-center overflow-hidden w-full">
         <div className="flex items-center gap-4 px-6 animate-marquee whitespace-nowrap">
            <Zap className="w-2.5 h-2.5 text-teal-400" />
            <p className="text-[10px] font-black uppercase tracking-widest text-teal-200/60">
-             {tickerMessage || "Connecting to Neural Node..."}
+             Watch ads — earn Gold Coins on every completed view • 100 Gold Coins = Rs. 1
            </p>
         </div>
       </div>
@@ -667,8 +681,11 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         
         <div className="flex flex-col items-end">
            <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-2xl flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
-             <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-             <span className="text-sm font-black text-emerald-400 tracking-tighter">Rs. {balance.toLocaleString()}</span>
+             <Coins className="w-4 h-4 text-emerald-400" />
+             <span className="flex flex-col leading-none">
+               <span className="text-sm font-black text-amber-400 tracking-tighter">{Math.floor(coinBalance).toLocaleString()} Gold Coins</span>
+               <span className="text-[8px] font-bold text-amber-500/70 mt-0.5">= Rs. {coinsToRs(coinBalance).toFixed(2)} in coins</span>
+             </span>
            </div>
         </div>
       </div>
@@ -685,14 +702,55 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           </div>
           <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
             <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">Reward / Ad</p>
-            <p className="text-lg font-black text-emerald-400 tracking-tight">
-              {unityConfig ? `Rs. ${resolveAdReward(unityConfig, 'unity', myTier)}` : '—'}
+            <p className="text-lg font-black text-amber-400 tracking-tight">
+              {unityConfig ? `${rsToCoins(resolveAdReward(unityConfig, 'unity', myTier))} Gold Coins` : '—'}
+              <span className="block text-[9px] font-bold text-zinc-500 tracking-normal mt-0.5">
+                per completed ad
+              </span>
             </p>
           </div>
           <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
             <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">Videos</p>
             <p className="text-lg font-black text-white tracking-tight">{videoAds.length}</p>
           </div>
+        </div>
+
+        {/* Convert Gold Coins to main balance (owner's coin economy) */}
+        <div className="rounded-[2rem] bg-gradient-to-br from-amber-500/15 to-yellow-500/5 border border-amber-400/20 p-5">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p className="text-[9px] font-black uppercase tracking-widest text-amber-300/80">Your Gold Coins</p>
+              <p className="text-2xl font-black text-amber-300 tracking-tight">{Math.floor(coinBalance).toLocaleString()} <span className="text-xs">Gold Coins</span></p>
+              <p className="text-[10px] font-bold text-zinc-400 mt-0.5">= Rs. {coinsToRs(coinBalance).toFixed(2)} • Main balance: Rs. {balance.toFixed(2)} • 100 Gold Coins = Rs. 1</p>
+            </div>
+            <Coins className="w-9 h-9 text-amber-400" />
+          </div>
+          <div className="flex gap-2 mt-4">
+            <input
+              type="number"
+              min={MIN_CONVERT_COINS}
+              value={convertInput}
+              onChange={(e) => setConvertInput(e.target.value)}
+              placeholder={`Coins to convert (min ${MIN_CONVERT_COINS})`}
+              className="flex-1 min-w-0 bg-black/40 border border-white/10 rounded-xl px-3 py-2.5 text-sm font-bold text-white placeholder:text-zinc-600 focus:outline-none focus:border-amber-400/50"
+            />
+            <button
+              onClick={() => setConvertInput(String(Math.floor(coinBalance)))}
+              className="px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-zinc-300 active:scale-95 transition-all"
+            >
+              Max
+            </button>
+            <button
+              onClick={handleConvertCoins}
+              disabled={isConverting || Math.floor(coinBalance) < MIN_CONVERT_COINS}
+              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-amber-500 text-black text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+            >
+              {isConverting ? 'Converting...' : 'Convert'}
+            </button>
+          </div>
+          {Math.floor(coinBalance) < MIN_CONVERT_COINS && (
+            <p className="text-[10px] font-bold text-zinc-500 mt-2">You need at least {MIN_CONVERT_COINS} Gold Coins to convert — keep watching ads to collect more.</p>
+          )}
         </div>
 
         {message && (
@@ -773,7 +831,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                             </span>
                             <span className="px-2.5 py-1 rounded-lg bg-emerald-500 text-white flex items-center gap-1">
                               <Zap className="w-3 h-3 fill-current" />
-                              <span className="text-[10px] font-black">+ Rs. {slot.reward}</span>
+                              <span className="text-[10px] font-black">+ {rsToCoins(slot.reward)} Gold Coins</span>
                             </span>
                           </div>
                         </div>
@@ -873,7 +931,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                           </span>
                           <span className="px-2.5 py-1 rounded-lg bg-emerald-500 text-white flex items-center gap-1">
                             <Zap className="w-3 h-3 fill-current" />
-                            <span className="text-[10px] font-black">+ Rs. {slot.reward}</span>
+                            <span className="text-[10px] font-black">+ {rsToCoins(slot.reward)} Gold Coins</span>
                           </span>
                         </div>
                       </div>
@@ -894,7 +952,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                             disabled={busy}
                             className="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
                           >
-                            {busy ? 'Loading...' : `Watch • Rs. ${slot.reward}`}
+                            {busy ? 'Loading...' : `Watch • ${rsToCoins(slot.reward)} Gold Coins`}
                           </button>
                         )}
                       </div>
@@ -1038,7 +1096,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                          'bg-emerald-500/90 border-emerald-400 text-white'
                       }`}>
                          <Zap className="w-3 h-3 fill-current" />
-                         <span className="text-sm font-black ">Rs {ad.reward.toFixed(1)}</span>
+                         <span className="text-sm font-black ">{rsToCoins(ad.reward)} Gold Coins</span>
                       </div>
                     </div>
 
@@ -1298,7 +1356,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                       ) : (
                         <Sparkles className={`w-5 h-5 ${activeAd.tier === 'gold' ? 'text-black' : 'text-emerald-300'}`} />
                       )}
-                      {isClaiming ? 'Extracting...' : `Harvest Reward (Rs. ${activeAd.reward})`}
+                      {isClaiming ? 'Extracting...' : `Harvest Reward (${rsToCoins(activeAd.reward)} Gold Coins)`}
                     </motion.button>
                   </div>
                 )}
@@ -1344,7 +1402,10 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-zinc-500">
                       <span>Harvested</span>
-                      <span className="text-emerald-400 font-black">Rs. {showSuccessPopup.amount.toFixed(2)}</span>
+                      <span className="text-amber-400 font-black flex flex-col items-end leading-none">
+                        <span>{showSuccessPopup.amount.toLocaleString()} Gold Coins</span>
+                        <span className="text-[8px] text-zinc-500 mt-1">100 Gold Coins = Rs. 1</span>
+                      </span>
                     </div>
                     <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-zinc-500">
                       <span>Cycle Date</span>

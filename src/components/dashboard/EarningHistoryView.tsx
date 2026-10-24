@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, History, TrendingUp, PlayCircle, CheckCircle2, Sparkles, Gift, Users, Calendar, Wallet, Loader2, Star, Flame } from 'lucide-react';
+import { ArrowLeft, History, TrendingUp, PlayCircle, CheckCircle2, Sparkles, Gift, Users, Calendar, Wallet, Loader2, Star, Flame, Coins } from 'lucide-react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '../../firebase';
 
@@ -64,6 +64,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
         return <Users className="w-5 h-5 text-blue-500" />;
       case 'app_bonus': return <Wallet className="w-5 h-5 text-rose-500" />;
       case 'daily_reward': return <Calendar className="w-5 h-5 text-teal-500" />;
+      case 'coin_convert': return <Coins className="w-5 h-5 text-amber-400" />;
       case 'commission': return <TrendingUp className="w-5 h-5 text-orange-500" />;
       case 'partner_upgrade': return <Star className="w-5 h-5 text-teal-500" />;
       case 'withdrawal': return <Wallet className="w-5 h-5 text-emerald-500" />;
@@ -169,7 +170,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
               </div>
               <div className="text-right">
                 <span className={`font-black text-sm ${(item.type === 'expense' || item.amount < 0) ? 'text-red-500' : 'text-emerald-400'}`}>
-                  {(item.type === 'expense' || item.amount < 0) ? '-' : '+'}Rs. {Math.abs(item.amount).toFixed(2)}
+                  {(item as any).coins && item.amount === 0 ? `+${Math.abs((item as any).coins).toLocaleString()} Gold Coins` : `${(item.type === 'expense' || item.amount < 0) ? '-' : '+'}Rs. ${Math.abs(item.amount).toFixed(2)}`}
                 </span>
                 <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-0.5">
                   {getSourceLabel(item.source)}
