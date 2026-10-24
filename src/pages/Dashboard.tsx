@@ -117,32 +117,7 @@ export default function Dashboard() {
   const [partnerReferrals, setPartnerReferrals] = useState<any[]>([]);
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-  const [chatExpiry, setChatExpiry] = useState<number | null>(null);
-  const [persistedAgent, setPersistedAgent] = useState<any>(null);
   const [unreadChatCount, setUnreadChatCount] = useState(0);
-
-  // Check for chat expiry (30 minutes)
-  useEffect(() => {
-    if (chatExpiry && Date.now() > chatExpiry) {
-      setChatMessages([]);
-      setChatExpiry(null);
-      setPersistedAgent(null);
-    }
-  }, [activeTab, chatExpiry]);
-
-  const handleUpdateChatMessages = (messages: any[]) => {
-    setChatMessages(messages);
-    setChatExpiry(Date.now() + 30 * 60 * 1000); // 30 minutes from now
-
-    // If new message from model and we are not in support tab, increment unread count
-    if (messages.length > 0) {
-      const lastMsg = messages[messages.length - 1];
-      if (lastMsg.role === 'model' && activeTab !== 'support_ai') {
-        setUnreadChatCount(prev => prev + 1);
-      }
-    }
-  };
 
   useEffect(() => {
     if (activeTab === 'support_ai') {
@@ -1328,10 +1303,6 @@ export default function Dashboard() {
           userName={userName}
           accountStatus={accountStatus}
           balance={balance}
-          persistedMessages={chatMessages}
-          onUpdateMessages={handleUpdateChatMessages}
-          persistedAgent={persistedAgent}
-          onAgentAssigned={(a) => setPersistedAgent(a)}
         />;
       case 'tasks':
         if (accountStatus.toLowerCase() !== 'active') {
