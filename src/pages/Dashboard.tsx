@@ -20,6 +20,7 @@ import {
   serverTimestamp as firestoreServerTimestamp 
 } from 'firebase/firestore';
 import { db, rtdb } from '../firebase';
+import PaymentVerificationChat from '../components/dashboard/PaymentVerificationChat';
 import { ref, onValue, update, set, increment as rtdbIncrement, get, runTransaction as runRtdbTransaction } from 'firebase/database';
 import { useAuth } from '../context/AuthContext';
 import { sendDepositRequestMail, sendWithdrawalRequestMail, sendActivationMail, playNotificationSound } from '../services/notificationService';
@@ -740,7 +741,9 @@ export default function Dashboard() {
     }
   };
 
-  const handleDeposit = async (amount: number, method: string, transactionId: string, type: 'activation' | 'regular' = 'regular') => {
+  const [verifyDepositId, setVerifyDepositId] = useState<string | null>(null);
+
+  const handleDeposit = async (amount: number, method: string, transactionId: string, type: 'activation' | 'regular' = 'regular', proof?: { proofMethod: 'upload' | 'whatsapp'; screenshotHash?: string }) => {
     if (!user) return;
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -756,10 +759,19 @@ export default function Dashboard() {
       date: new Date().toISOString(),
       status: 'Pending',
       type,
-      description: type === 'activation' ? 'Account Activation Fee' : `${method} Deposit`
+      description: type === 'activation' ? 'Account Activation Fee' : `${method} Deposit`,
+      ...(proof?.proofMethod === 'upload'
+        ? { proofMethod: 'upload', screenshotHash: proof.screenshotHash || '', hasProof: true }
+        : { proofMethod: 'whatsapp' })
     };
 
     if (type === 'activation') {
+      // Screenshot-upload requests also get a Firestore record — the
+      // proof image and the verification chat hang off it, and the
+      // admin panel can review the screenshot there.
+      if (proof?.proofMethod === 'upload') {
+        await setDoc(doc(db, 'deposits', depositId), newTx);
+      }
       // Save to RTDB pending_requests (Zero Firestore)
       const pendingRef = ref(rtdb, `pending_requests/${user.uid}`);
       await set(pendingRef, {
@@ -771,8 +783,10 @@ export default function Dashboard() {
       const userStatusRef = ref(rtdb, `users/${user.uid}`);
       await update(userStatusRef, { status: 'pending' });
       
-      alert("Activation request submitted! Your account will be activated once the payment is verified.");
-      setActiveTab('home');
+      if (proof?.proofMethod !== 'upload') {
+        alert("Activation request submitted! Your account will be activated once the payment is verified.");
+        setActiveTab('home');
+      }
     } else {
       // Regular deposit still goes to Firestore
       await setDoc(doc(db, 'deposits', depositId), newTx);
@@ -780,6 +794,7 @@ export default function Dashboard() {
     
     // Send internal notification
     await sendDepositRequestMail(user.uid, amount, method);
+    return depositId;
   };
 
   const handleWithdrawRequest = (amount: number, method: string, accountName: string, accountNumber: string) => {
@@ -1070,6 +1085,9 @@ export default function Dashboard() {
       );
     }
 
+    if (verifyDepositId) {
+      return <PaymentVerificationChat depositId={verifyDepositId} whatsappNumber={appSettings.whatsappNumber} onBack={() => setVerifyDepositId(null)} />;
+    }
     switch (activeTab) {
       case 'profile':
         return <ProfileTab 
@@ -1175,7 +1193,7 @@ export default function Dashboard() {
         />;
       case 'deposit':
         if (accountStatus.toLowerCase() !== 'active') {
-          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} />;
+          return <ActivationTab onBack={() => setActiveTab('home')} appSettings={activeAppSettings} userName={userName} onOpenVerification={(id) => setVerifyDepositId(id)} />;
         }
         return <DepositTab
           onDeposit={handleDeposit}
@@ -1184,6 +1202,7 @@ export default function Dashboard() {
           appSettings={activeAppSettings}
           userCountry={userCountry}
           userName={userName}
+          onOpenVerification={(id) => setVerifyDepositId(id)}
         />;
       case 'updates':
         return <UpdatesView 

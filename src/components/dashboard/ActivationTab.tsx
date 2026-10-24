@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { CheckCircle2, AlertTriangle, History, Clock, XCircle, ArrowLeft, Copy, ExternalLink } from 'lucide-react';
-import { rtdb, auth } from '../../firebase';
+import { CheckCircle2, AlertTriangle, History, Clock, XCircle, ArrowLeft, Copy, ExternalLink, Camera, Upload, MessageCircle } from 'lucide-react';
+import { rtdb, auth, db } from '../../firebase';
 import { ref, set, update, onValue } from 'firebase/database';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { sha256Hex, compressImage } from '../../utils/proofImage';
 
 import PaymentQrCard from '../PaymentQrCard';
 
@@ -14,10 +16,80 @@ interface ActivationTabProps {
     paymentName: string;
   };
   userName: string;
+  onOpenVerification?: (depositId: string) => void;
 }
 
-export default function ActivationTab({ onBack, appSettings, userName }: ActivationTabProps) {
+export default function ActivationTab({ onBack, appSettings, userName, onOpenVerification }: ActivationTabProps) {
   const [transactionId, setTransactionId] = useState('');
+  const [proofMethod, setProofMethod] = useState<'upload' | 'whatsapp'>('upload');
+  const [proofDataUrl, setProofDataUrl] = useState<string | null>(null);
+  const [proofHash, setProofHash] = useState('');
+
+  const handleProofFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const [hash, dataUrl] = await Promise.all([sha256Hex(file), compressImage(file)]);
+      setProofHash(hash);
+      setProofDataUrl(dataUrl);
+    } catch {
+      alert('Could not read that image. Please try another screenshot.');
+    }
+  };
+
+  const handleUploadSubmit = async () => {
+    if (!auth.currentUser) return;
+    if (!proofDataUrl) {
+      alert('Please upload your payment screenshot first.');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const depositId = `dep-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const data = {
+        id: depositId,
+        userId: auth.currentUser.uid,
+        userName: userName,
+        amount: appSettings.activationFee,
+        method,
+        transactionId: 'In-app upload',
+        date: new Date().toISOString(),
+        status: 'Pending',
+        type: 'activation',
+        description: 'Account Activation Fee',
+        timestamp: Date.now(),
+        proofMethod: 'upload',
+        screenshotHash: proofHash,
+        hasProof: true
+      };
+
+      // Firestore deposit record — the proof image and the verification
+      // chat hang off it, and the admin panel reviews the screenshot there.
+      await setDoc(doc(db, 'deposits', depositId), data);
+      await setDoc(doc(db, 'deposits', depositId, 'proof', 'image'), {
+        userId: auth.currentUser.uid,
+        data: proofDataUrl,
+        createdAt: serverTimestamp()
+      });
+
+      // RTDB joining queue (same destination as the WhatsApp flow)
+      await set(ref(rtdb, `activation_requests/${auth.currentUser.uid}/latest_request`), data);
+      await set(ref(rtdb, `pending_requests/${auth.currentUser.uid}`), { ...data, requestId: 'latest_request' });
+      const statusRef = ref(rtdb, `users/${auth.currentUser.uid}`);
+      await update(statusRef, { status: 'pending' });
+
+      if (onOpenVerification) {
+        onOpenVerification(depositId);
+      } else {
+        alert('Screenshot submitted! Your payment is being verified.');
+      }
+    } catch (error) {
+      console.error('Activation upload error:', error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const [method, setMethod] = useState<'EasyPaisa'>('EasyPaisa');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
@@ -162,14 +234,53 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
           {/* EasyPaisa QR — fixed at the joining fee */}
           <PaymentQrCard amount={appSettings.activationFee} />
 
+          {/* Payment proof method */}
+          <div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setProofMethod('upload')}
+                className={`text-left rounded-2xl border px-3.5 py-3 transition ${proofMethod === 'upload' ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-white/5 border-white/10 hover:border-white/25'}`}
+              >
+                <span className="flex items-center gap-1.5 text-xs font-black text-white"><Upload className="w-3.5 h-3.5 text-emerald-400" /> Upload Screenshot</span>
+                <span className="inline-block mt-1.5 text-[8px] font-black uppercase tracking-widest text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">Fast</span>
+                <span className="block text-[10px] font-semibold text-zinc-400 mt-1.5 leading-snug">Auto verification — about 2 minutes</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setProofMethod('whatsapp')}
+                className={`text-left rounded-2xl border px-3.5 py-3 transition ${proofMethod === 'whatsapp' ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-white/5 border-white/10 hover:border-white/25'}`}
+              >
+                <span className="flex items-center gap-1.5 text-xs font-black text-white"><MessageCircle className="w-3.5 h-3.5 text-emerald-400" /> WhatsApp</span>
+                <span className="inline-block mt-1.5 text-[8px] font-black uppercase tracking-widest text-zinc-300 bg-white/10 border border-white/15 px-1.5 py-0.5 rounded">Manual</span>
+                <span className="block text-[10px] font-semibold text-zinc-400 mt-1.5 leading-snug">Send proof on WhatsApp instead</span>
+              </button>
+            </div>
+            {proofMethod === 'upload' && (
+              <label className="mt-3 flex flex-col items-center justify-center gap-2 bg-white/5 border border-dashed border-white/15 rounded-2xl px-4 py-5 cursor-pointer hover:border-emerald-500/50 transition">
+                {proofDataUrl ? (
+                  <img src={proofDataUrl} alt="Payment screenshot preview" className="max-h-44 rounded-lg" />
+                ) : (
+                  <>
+                    <Camera className="w-6 h-6 text-zinc-500" />
+                    <span className="text-[11px] font-bold text-zinc-400">Tap to upload payment screenshot</span>
+                  </>
+                )}
+                <input type="file" accept="image/*" className="hidden" onChange={handleProofFile} />
+              </label>
+            )}
+          </div>
+
           <div className="space-y-4">
             <button
-              onClick={handleWhatsAppClick}
+              onClick={proofMethod === 'upload' ? handleUploadSubmit : handleWhatsAppClick}
               disabled={isSubmitting}
               className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : proofMethod === 'upload' ? (
+                <>Submit Screenshot & Track Verification <ExternalLink className="w-5 h-5" /></>
               ) : (
                 <>Pay & Send Proof on WhatsApp <ExternalLink className="w-5 h-5" /></>
               )}
