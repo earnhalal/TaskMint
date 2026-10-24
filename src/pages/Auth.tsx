@@ -7,7 +7,7 @@ import { doc, setDoc, getDoc, updateDoc, increment, query, collection, where, ge
 import { db, rtdb } from '../firebase';
 import { ref, set } from 'firebase/database';
 import { sendWelcomeMail } from '../services/notificationService';
-import { maleAvatarIds, femaleAvatarIds } from '../components/ui/DynamicAvatar';
+import { AVATAR_3D_IDS } from '../assets/avatars3d';
 
 const auth = getAuth(app);
 
@@ -33,9 +33,8 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const user = userCredential.user;
       
-      // Pick random avatar
-      const allAvatars = [...maleAvatarIds, ...femaleAvatarIds];
-      const randomAvatarId = allAvatars[Math.floor(Math.random() * allAvatars.length)];
+      // Pick a random avatar from the 3D pack (gender is not collected at signup)
+      const randomAvatarId = AVATAR_3D_IDS[Math.floor(Math.random() * AVATAR_3D_IDS.length)];
 
       // Generate unique referral code for the new user
       const phoneSuffix = data.phone.slice(-3) || Math.floor(100 + Math.random() * 900).toString();

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserCircle, Bell, Tv2, Rocket, Zap, ShieldCheck, LayoutGrid, X, Sparkles, Coins, AlertTriangle, Wallet, Download } from 'lucide-react';
+import { UserCircle, Bell, Tv2, Rocket, Zap, ShieldCheck, LayoutGrid, X, Sparkles, AlertTriangle, Wallet, Download } from 'lucide-react';
 import { 
   doc, 
   onSnapshot, 
@@ -67,6 +67,7 @@ export default function Dashboard() {
   const [userGender, setUserGender] = useState('');
   const [userCountry, setUserCountry] = useState('Pakistan');
   const [profileAvatarId, setProfileAvatarId] = useState('');
+  const [profilePhoto, setProfilePhoto] = useState('');
   const [withdrawalAccounts, setWithdrawalAccounts] = useState<any[]>([]);
   const [joiningDate, setJoiningDate] = useState('');
   const [status, setStatus] = useState('Inactive');
@@ -174,6 +175,7 @@ export default function Dashboard() {
         setUserGender(data.gender || '');
         setUserCountry(data.country || 'Pakistan');
         setProfileAvatarId(data.profile_avatar_id || '');
+        setProfilePhoto(data.profile_photo || '');
         setWithdrawalAccounts(data.withdrawalAccounts || []);
         setJoiningDate(data.joiningDate || '');
         setRole(data.role || 'user');
@@ -1099,6 +1101,7 @@ export default function Dashboard() {
                         email={userEmail}
                  gender={userGender}
                  profileAvatarId={profileAvatarId}
+                 profilePhoto={profilePhoto}
                  status={status}
                  role={role}
                  partnerTier={partnerTier}
@@ -1135,6 +1138,7 @@ export default function Dashboard() {
                  phone={userPhone}
                  gender={userGender}
                  profileAvatarId={profileAvatarId}
+                 profilePhoto={profilePhoto}
                  onBack={() => setActiveTab('profile')} 
                />;
       case 'manage_wallet':
@@ -1435,9 +1439,7 @@ export default function Dashboard() {
         {activeTab !== 'support_ai' && (
           <div className={`px-4 py-3 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-[#15181D] border-white/5'} flex items-center justify-between sticky top-0 z-40 border-b transition-all duration-300`}>
             <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setActiveTab('home')}>
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/25">
-                <Coins className="w-5 h-5" />
-              </div>
+              <img src="/favicon.svg" alt="TaskMint logo" className="w-9 h-9 rounded-xl shadow-md shadow-emerald-600/25" />
               <span className={`font-extrabold text-lg tracking-tight ${role === 'partner' ? 'text-white' : 'text-white'}`}>
                 Task<span className="text-emerald-400">Mint</span>
               </span>
@@ -1465,8 +1467,8 @@ export default function Dashboard() {
                 onClick={() => setActiveTab('profile')}
                 className="relative w-9 h-9 rounded-full flex items-center justify-center overflow-hidden bg-white/5 active:scale-95 transition"
               >
-                {profileAvatarId ? (
-                   <DynamicAvatar avatarId={profileAvatarId} fallbackText={userName} />
+                {profileAvatarId || profilePhoto ? (
+                   <DynamicAvatar avatarId={profileAvatarId} photo={profilePhoto} fallbackText={userName} />
                 ) : (
                    <UserCircle className="w-6 h-6 text-zinc-300" />
                 )}
@@ -1512,11 +1514,11 @@ export default function Dashboard() {
         {activeTab !== 'support_ai' && (
           <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-[#15181D] border-white/5'} border-t px-2 pt-2 pb-4 flex items-start justify-around`}>
             {[
-              { id: 'home', icon: <LayoutGrid className="w-5 h-5" />, label: 'Home' },
-              { id: 'watch', icon: <Tv2 className="w-5 h-5" />, label: 'Watch' },
-              { id: 'task_wall', icon: <Rocket className="w-5 h-5" />, label: 'Surveys' },
-              { id: 'tasks', icon: <Zap className="w-5 h-5" />, label: 'Tasks' },
-              { id: 'premium', icon: <ShieldCheck className="w-5 h-5" />, label: 'PRO' },
+              { id: 'home', icon: <LayoutGrid className="w-5 h-5" strokeWidth={2} />, label: 'Home' },
+              { id: 'watch', icon: <Tv2 className="w-5 h-5" strokeWidth={2} />, label: 'Watch' },
+              { id: 'task_wall', icon: <Rocket className="w-5 h-5" strokeWidth={2} />, label: 'Surveys' },
+              { id: 'tasks', icon: <Zap className="w-5 h-5" strokeWidth={2} />, label: 'Tasks' },
+              { id: 'premium', icon: <ShieldCheck className="w-5 h-5" strokeWidth={2} />, label: 'PRO' },
             ].map((tab) => {
               const active = activeTab === tab.id;
               return (

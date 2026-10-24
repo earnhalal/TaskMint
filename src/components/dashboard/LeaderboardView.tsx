@@ -93,7 +93,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               <div className="relative group">
                 <div className="absolute inset-0 bg-slate-400 blur-xl opacity-0 group-hover:opacity-40 transition-opacity" />
                 <div className="relative w-20 h-20 rounded-[2rem] bg-[#064e3b] border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-500">
-                  <DynamicAvatar avatarId={topThree[1].profile_avatar_id} fallbackText={topThree[1].username} className="w-full h-full" />
+                  <DynamicAvatar avatarId={topThree[1].profile_avatar_id} photo={topThree[1].profile_photo} fallbackText={topThree[1].username} className="w-full h-full" />
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0" />
                 </div>
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-slate-400 rounded-xl flex items-center justify-center text-white border-2 border-[#022c22] shadow-lg">
@@ -135,7 +135,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                 <div className="absolute inset-0 bg-emerald-500 blur-2xl opacity-20 group-hover:opacity-50 transition-opacity" />
                 <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-400 to-amber-600 p-0.5 shadow-[0_0_40px_rgba(16,185,129,0.2)] transition-transform group-hover:scale-105 duration-500">
                    <div className="w-full h-full rounded-[2.3rem] bg-[#064e3b] flex items-center justify-center relative overflow-hidden">
-                       <DynamicAvatar avatarId={topThree[0].profile_avatar_id} fallbackText={topThree[0].username} className="w-full h-full" />
+                       <DynamicAvatar avatarId={topThree[0].profile_avatar_id} photo={topThree[0].profile_photo} fallbackText={topThree[0].username} className="w-full h-full" />
                        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/10 to-transparent" />
                        <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
                    </div>
@@ -171,7 +171,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
               <div className="relative group">
                 <div className="absolute inset-0 bg-emerald-700 blur-xl opacity-0 group-hover:opacity-40 transition-opacity" />
                 <div className="relative w-18 h-18 rounded-[1.8rem] bg-[#064e3b] border border-white/10 shadow-2xl flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 duration-500">
-                  <DynamicAvatar avatarId={topThree[2].profile_avatar_id} fallbackText={topThree[2].username} className="w-full h-full" />
+                  <DynamicAvatar avatarId={topThree[2].profile_avatar_id} photo={topThree[2].profile_photo} fallbackText={topThree[2].username} className="w-full h-full" />
                 </div>
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-800 rounded-xl flex items-center justify-center text-white border-2 border-[#022c22] shadow-lg">
                   <Medal className="w-4 h-4" />
@@ -221,7 +221,7 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
                     </div>
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-[1.1rem] sm:rounded-[1.2rem] bg-gradient-to-br from-white/5 to-white/0 flex items-center justify-center text-white/50 font-black text-xs sm:text-sm border border-white/5 group-hover:text-white transition-colors overflow-hidden">
-                        <DynamicAvatar avatarId={user.profile_avatar_id} fallbackText={user.username} className="w-full h-full" />
+                        <DynamicAvatar avatarId={user.profile_avatar_id} photo={user.profile_photo} fallbackText={user.username} className="w-full h-full" />
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-black text-white text-sm sm:text-base tracking-tight uppercase  truncate">{user.username || 'Unknown User'}</h3>

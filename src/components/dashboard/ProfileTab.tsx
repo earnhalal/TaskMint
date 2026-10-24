@@ -13,6 +13,7 @@ export default function ProfileTab({
   email, 
   gender,
   profileAvatarId,
+  profilePhoto,
   status, 
   role, 
   partnerTier = 'basic',
@@ -37,6 +38,7 @@ export default function ProfileTab({
   email: string, 
   gender?: string,
   profileAvatarId?: string,
+  profilePhoto?: string,
   status: string, 
   role: string, 
   partnerTier?: string,
@@ -217,7 +219,7 @@ export default function ProfileTab({
                                 : 'bg-gradient-to-tr from-teal-500 via-emerald-600 to-teal-700'
                         }`}>
                             <div className="w-full h-full rounded-[10px] overflow-hidden bg-[#0F172A] flex items-center justify-center border border-black/20">
-                                <DynamicAvatar avatarId={profileAvatarId} fallbackText={name} className="w-full h-full" />
+                                <DynamicAvatar avatarId={profileAvatarId} photo={profilePhoto} fallbackText={name} className="w-full h-full" />
                             </div>
                         </div>
                         <button 

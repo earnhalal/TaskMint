@@ -370,12 +370,12 @@ export default function HomeTab({
         </div>
         <div className="space-y-2.5">
           {[
-            { icon: <PlayCircleIcon className="w-5 h-5" />, bg: 'bg-rose-500/10 text-rose-400', title: 'Watch Ads', desc: 'Watch short video ads and earn for every view.', tag: 'POPULAR', tagClass: 'text-rose-300 bg-rose-500/10', onClick: onWatchAdsClick },
-            { icon: <Rocket className="w-5 h-5" />, bg: 'bg-teal-500/10 text-teal-400', title: 'Surveys', desc: 'Complete CPX Research surveys — the highest-paying offers.', tag: 'HIGH PAYING', tagClass: 'text-amber-300 bg-amber-500/10', onClick: onTaskWallClick },
-            { icon: <Zap className="w-5 h-5" />, bg: 'bg-cyan-500/10 text-cyan-400', title: 'Offer Walls', desc: 'Try apps and offers from CPA Lead and Wannads.', tag: '', tagClass: '', onClick: onOfferWallClick },
-            { icon: <CheckSquareIcon className="w-5 h-5" />, bg: 'bg-amber-500/10 text-amber-400', title: 'Daily Tasks', desc: 'Simple tasks refreshed every day.', tag: '', tagClass: '', onClick: onTasksClick },
-            { icon: <SparklesIcon className="w-5 h-5" />, bg: 'bg-sky-500/10 text-sky-400', title: 'Easy Tasks', desc: 'Quick micro-tasks with instant rewards.', tag: '', tagClass: '', onClick: onEasyTaskClick },
-            { icon: <MessageCircle className="w-5 h-5" />, bg: 'bg-emerald-500/10 text-emerald-400', title: 'Social Tasks', desc: 'Earn bonuses for social media actions.', tag: '', tagClass: '', onClick: onSocialTaskPlusClick },
+            { icon: <PlayCircleIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-rose-500/10 text-rose-400', title: 'Watch Ads', desc: 'Watch short video ads and earn for every view.', tag: 'POPULAR', tagClass: 'text-rose-300 bg-rose-500/10', onClick: onWatchAdsClick },
+            { icon: <Rocket className="w-5 h-5" strokeWidth={2} />, bg: 'bg-teal-500/10 text-teal-400', title: 'Surveys', desc: 'Complete CPX Research surveys — the highest-paying offers.', tag: 'HIGH PAYING', tagClass: 'text-amber-300 bg-amber-500/10', onClick: onTaskWallClick },
+            { icon: <Zap className="w-5 h-5" strokeWidth={2} />, bg: 'bg-cyan-500/10 text-cyan-400', title: 'Offer Walls', desc: 'Try apps and offers from CPA Lead and Wannads.', tag: '', tagClass: '', onClick: onOfferWallClick },
+            { icon: <CheckSquareIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-amber-500/10 text-amber-400', title: 'Daily Tasks', desc: 'Simple tasks refreshed every day.', tag: '', tagClass: '', onClick: onTasksClick },
+            { icon: <SparklesIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-sky-500/10 text-sky-400', title: 'Easy Tasks', desc: 'Quick micro-tasks with instant rewards.', tag: '', tagClass: '', onClick: onEasyTaskClick },
+            { icon: <MessageCircle className="w-5 h-5" strokeWidth={2} />, bg: 'bg-emerald-500/10 text-emerald-400', title: 'Social Tasks', desc: 'Earn bonuses for social media actions.', tag: '', tagClass: '', onClick: onSocialTaskPlusClick },
           ].map((row) => (
             <button
               key={row.title}

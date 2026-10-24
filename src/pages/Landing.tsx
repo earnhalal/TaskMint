@@ -126,9 +126,7 @@ export default function Landing() {
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all ${scrolled || mobileMenu ? 'bg-white/95 backdrop-blur border-b border-slate-100 shadow-[0_1px_12px_rgba(15,23,42,0.04)]' : 'bg-white/70 backdrop-blur'}`}>
         <div className="max-w-7xl mx-auto px-5 lg:px-8 h-[72px] flex items-center justify-between">
           <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5" aria-label="TaskMint home">
-            <span className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20">
-              <Coins className="w-5.5 h-5.5" />
-            </span>
+            <img src="/favicon.svg" alt="TaskMint logo" className="w-10 h-10 rounded-xl shadow-lg shadow-emerald-600/20" />
             <span className="text-[22px] font-extrabold tracking-tight">Task<span className="text-emerald-600">Mint</span></span>
           </button>
 
