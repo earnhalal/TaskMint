@@ -139,7 +139,6 @@ export default function Dashboard() {
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
-    paymentIban: '',
     whatsappNumber: '923338739929',
     minWithdrawal: 500,
     withdrawalFeeRate: 5,

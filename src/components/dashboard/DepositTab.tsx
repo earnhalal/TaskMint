@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import RaastQrCard from '../RaastQrCard';
+import PaymentQrCard from '../PaymentQrCard';
 import { motion } from 'motion/react';
 import { ClipboardList, CheckCircle2, Copy, Wallet, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -23,7 +23,6 @@ interface DepositTabProps {
  activationFee: number;
  paymentNumber: string;
  paymentName: string;
- paymentIban?: string;
  referralBonusBasic?: number;
  };
  userName: string;
@@ -57,7 +56,6 @@ const EasyPaisaIcon = ({ className }: { className?: string }) => (
 export default function DepositTab({ onDeposit, transactions, userCountry = 'Pakistan', initialType = 'regular', appSettings, userName }: DepositTabProps) {
  const [type, setType] = useState<'activation' | 'regular'>(initialType);
  const [amount, setAmount] = useState(initialType === 'activation' ? appSettings.activationFee.toString() : '');
- const qrAmount = parseFloat(amount);
  const [method, setMethod] = useState<DepositMethod>('EasyPaisa');
  const [message, setMessage] = useState('');
  const [isSubmitting, setIsSubmitting] = useState(false);
@@ -174,13 +172,9 @@ export default function DepositTab({ onDeposit, transactions, userCountry = 'Pak
  )}
  </div>
 
- {/* Raast QR — its amount follows the amount entered in Step 2
-     (for activation deposits it is fixed at the joining fee) */}
- <RaastQrCard
-   iban={appSettings.paymentIban}
-   name={appSettings.paymentName}
-   amount={type === 'activation' ? appSettings.activationFee : (Number.isFinite(qrAmount) && qrAmount > 0 ? qrAmount : undefined)}
- />
+ {/* EasyPaisa QR — scanned with the EasyPaisa app; for activation
+     deposits the caption pins the exact joining fee */}
+ <PaymentQrCard amount={type === 'activation' ? appSettings.activationFee : undefined} />
 
  {/* Step 2 — amount + submit */}
  <div className="bg-[#15181D] border border-white/5 rounded-3xl p-5">

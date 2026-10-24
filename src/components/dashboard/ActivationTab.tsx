@@ -4,7 +4,7 @@ import { CheckCircle2, AlertTriangle, History, Clock, XCircle, ArrowLeft, Copy, 
 import { rtdb, auth } from '../../firebase';
 import { ref, set, update, onValue } from 'firebase/database';
 
-import RaastQrCard from '../RaastQrCard';
+import PaymentQrCard from '../PaymentQrCard';
 
 interface ActivationTabProps {
   onBack: () => void;
@@ -12,7 +12,6 @@ interface ActivationTabProps {
     activationFee: number;
     paymentNumber: string;
     paymentName: string;
-    paymentIban?: string;
   };
   userName: string;
 }
@@ -160,12 +159,8 @@ export default function ActivationTab({ onBack, appSettings, userName }: Activat
             </div>
           </div>
 
-          {/* Raast QR — fixed at the joining fee */}
-          <RaastQrCard
-            iban={appSettings.paymentIban}
-            name={appSettings.paymentName}
-            amount={appSettings.activationFee}
-          />
+          {/* EasyPaisa QR — fixed at the joining fee */}
+          <PaymentQrCard amount={appSettings.activationFee} />
 
           <div className="space-y-4">
             <button
