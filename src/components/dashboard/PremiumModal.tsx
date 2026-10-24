@@ -136,7 +136,7 @@ export default function PremiumModal({ onClose, balance = 0, currentRole = 'user
  tagline: 'Business Pro Partner',
  adEarnings: 'Rs 125 - 250 / Daily',
  features: [
- `Rs ${appSettings?.referralBonusPartner || 150} per Invite`,
+ `Rs ${appSettings?.referralBonusPartner || 125} per Invite`,
  '25.00 Reward per VIP Ad',
  '2 Free monthly tickets',
  'Team Management Tools',

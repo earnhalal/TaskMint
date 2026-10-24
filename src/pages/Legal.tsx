@@ -135,7 +135,7 @@ export default function Legal() {
             <h2 className="text-2xl font-bold text-emerald-900 mb-4 mt-0">Why Promote TaskMint?</h2>
             <p className="text-emerald-800 font-medium mb-4">TaskMint is Pakistan's most trusted online earning platform. By promoting us, you are helping others find a legitimate way to earn money online.</p>
             <ul className="list-disc pl-6 text-emerald-800 font-medium space-y-2">
-              <li>Earn Rs. 125 for every successful referral.</li>
+              <li>Earn up to Rs. 125 for every successful referral.</li>
               <li>Get 10% commission on your team's earnings (Partner levels).</li>
               <li>Access to exclusive promotional materials and banners.</li>
               <li>Real-time tracking of your referrals and commissions.</li>

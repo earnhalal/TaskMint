@@ -405,7 +405,7 @@ export default function HomeTab({
           <InviteIcon className="w-5 h-5 text-white" />
         </span>
         <span className="flex-1">
-          <span className="block text-sm font-black text-white leading-tight">Invite &amp; Earn — Rs. 125 per friend</span>
+          <span className="block text-sm font-black text-white leading-tight">Invite &amp; Earn — up to Rs. 125 per friend</span>
           <span className="block text-[11px] text-white/80 font-semibold">Get paid for every friend who activates an account</span>
         </span>
         <ArrowRight className="w-4 h-4 text-white shrink-0" />
