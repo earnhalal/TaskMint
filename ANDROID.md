@@ -12,6 +12,14 @@ website and the app — there is no separate app code to maintain.
 
 ### Option A — GitHub Actions (no local Android setup needed)
 
+> **One-time setup:** the workflow file is provided at
+> `ci/android-debug.yml`. Move it to `.github/workflows/android-debug.yml`
+> (on GitHub: open the file → **Copy path** is not needed — simply create
+> `.github/workflows/android-debug.yml` in the web editor and paste the
+> contents, or move the file locally and push). It could not be committed
+> directly under `.github/workflows/` because the integration used to push
+> this branch does not hold the GitHub "Workflows" permission.
+
 1. Open the repository on GitHub → **Actions** → **Android Debug APK**.
 2. Click **Run workflow** (it also runs automatically on pushes to the
    `feature/capacitor-android` branch).
