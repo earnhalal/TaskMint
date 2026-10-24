@@ -1,10 +1,12 @@
 import React from 'react';
 import { AVATARS_3D } from '../../assets/avatars3d';
+import { AVATARS_TIER } from '../../assets/avatarsTiers';
 
 export type AvatarId = 
   | 'm1' | 'm2' | 'm3' | 'm4' | 'm5' | 'm6' | 'm7' | 'm8' | 'm9' | 'm10'
   | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8' | 'f9' | 'f10'
-  | 'a1' | 'a2' | 'a3' | 'a4';
+  | 'a1' | 'a2' | 'a3' | 'a4'
+  | 'p1' | 'p2' | 't1' | 't2';
 
 interface DynamicAvatarProps {
   avatarId?: string | null; // e.g. "m1" or "a1"
@@ -276,6 +278,14 @@ export const DynamicAvatar: React.FC<DynamicAvatarProps> = ({ avatarId, photo, c
     const image3d = direct3d || upgraded3d;
     if (image3d) {
       return <img src={image3d} alt="" className={`w-full h-full object-cover rounded-full ${className}`} />;
+    }
+
+    // Plan-tier 3D avatars (PRO p1/p2, Partner t1/t2) render the same way.
+    // Display is never gated on the viewer's plan — locking lives only in
+    // the Edit Profile picker.
+    const tierImage = AVATARS_TIER[avatarId];
+    if (tierImage) {
+      return <img src={tierImage} alt="" className={`w-full h-full object-cover rounded-full ${className}`} />;
     }
   }
 

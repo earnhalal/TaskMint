@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Save, CheckCircle2, ImagePlus, X } from 'lucide-react';
+import { ArrowLeft, Save, CheckCircle2, ImagePlus, X, Lock, Crown, Handshake } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref as rtdbRef, update as rtdbUpdate } from 'firebase/database';
 import { db, rtdb } from '../../firebase';
 import { useAuth } from '../../context/AuthContext';
 import { DynamicAvatar, maleAvatarIds, femaleAvatarIds } from '../ui/DynamicAvatar';
 import { AVATAR_3D_MALE, AVATAR_3D_FEMALE } from '../../assets/avatars3d';
+import { AVATAR_PRO_IDS, AVATAR_PARTNER_IDS } from '../../assets/avatarsTiers';
 import { compressSquareImage } from '../../utils/proofImage';
 
 interface EditProfileViewProps {
@@ -18,10 +19,19 @@ interface EditProfileViewProps {
   profilePhoto?: string;
   country?: string;
   city?: string;
+  // Plan fields from the user doc (same state Dashboard keeps from its
+  // user-doc listener) — used only to gate avatar selection in the picker.
+  role?: string;
+  partnerStatus?: string;
+  partnerTier?: string;
   onBack: () => void;
+  // Existing Dashboard navigation: 'premium' tab (PremiumModal / PRO plans)
+  // and 'partner_upgrade' view (Partner Program join flow).
+  onViewProPlans?: () => void;
+  onViewPartnerProgram?: () => void;
 }
 
-export default function EditProfileView({ name: propName, email: propEmail, phone: propPhone, gender: propGender, profileAvatarId: propProfileAvatarId, profilePhoto: propProfilePhoto, country: propCountry, city: propCity, onBack }: EditProfileViewProps) {
+export default function EditProfileView({ name: propName, email: propEmail, phone: propPhone, gender: propGender, profileAvatarId: propProfileAvatarId, profilePhoto: propProfilePhoto, country: propCountry, city: propCity, role = 'user', partnerStatus = 'none', partnerTier = 'basic', onBack, onViewProPlans, onViewPartnerProgram }: EditProfileViewProps) {
   const { user } = useAuth();
   const [name, setName] = useState(propName);
   const [email, setEmail] = useState(propEmail);
@@ -32,7 +42,15 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
   const [isSaved, setIsSaved] = useState(false);
   const [avatarId, setAvatarId] = useState<string>(propProfileAvatarId || 'm1');
   const [photo, setPhoto] = useState<string>(propProfilePhoto || '');
+  const [lockedPrompt, setLockedPrompt] = useState<'pro' | 'partner' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Plan tiers for avatar locking. The app's paid plans are the partner
+  // tiers (basic/bronze/silver/gold) sold as PRO plans: buying one — or an
+  // approved partner application — sets role 'partner', partnerStatus
+  // 'active' and the tier name on the user doc.
+  const isPartner = role === 'partner' || partnerStatus === 'active';
+  const hasProPlan = isPartner || (partnerStatus === 'active' && ['bronze', 'silver', 'gold'].includes(partnerTier));
 
   useEffect(() => {
     if (propProfileAvatarId) {
@@ -61,6 +79,44 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
   const handlePresetSelect = (avId: string) => {
     setAvatarId(avId);
     setPhoto('');
+  };
+
+  // Locked tier avatars never select — they open the upgrade prompt instead.
+  const handleTierSelect = (avId: string, required: 'pro' | 'partner') => {
+    const unlocked = required === 'partner' ? isPartner : hasProPlan;
+    if (!unlocked) {
+      setLockedPrompt(required);
+      return;
+    }
+    handlePresetSelect(avId);
+  };
+
+  const renderTierTiles = (ids: string[], required: 'pro' | 'partner') => {
+    const unlocked = required === 'partner' ? isPartner : hasProPlan;
+    return (
+      <div className="grid grid-cols-5 gap-3 mt-3">
+        {ids.map((avId) => (
+          <div key={avId} className="relative">
+            <button
+              onClick={() => handleTierSelect(avId, required)}
+              className={`aspect-square w-full rounded-full overflow-hidden border-[3px] transition-all p-0 ${!photo && avatarId === avId ? 'border-emerald-400 scale-110 shadow-xl' : 'border-transparent hover:scale-105 shadow-sm'} ${unlocked ? 'opacity-70 hover:opacity-100' : ''}`}
+            >
+              <span className={`block w-full h-full ${unlocked ? '' : 'opacity-40 grayscale-[35%]'}`}>
+                <DynamicAvatar avatarId={avId} fallbackText={name} className="w-full h-full" />
+              </span>
+            </button>
+            <span className={`absolute -top-1 -left-1 text-[8px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full shadow ${required === 'pro' ? 'bg-amber-400 text-amber-950' : 'bg-teal-400 text-teal-950'}`}>
+              {required === 'pro' ? 'PRO' : 'Partner'}
+            </span>
+            {!unlocked && (
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-zinc-900 border border-white/20 flex items-center justify-center shadow">
+                <Lock className="w-3 h-3 text-white" />
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const handleSave = async () => {
@@ -178,16 +234,29 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
                </button>
              </div>
              
-             <div className="grid grid-cols-5 gap-3 mt-4">
-               {presetTiles.map(({ id: avId, flat }) => (
-                 <button
-                   key={avId}
-                   onClick={() => handlePresetSelect(avId)}
-                   className={`aspect-square w-full rounded-full overflow-hidden border-[3px] transition-all p-0 ${!photo && avatarId === avId ? 'border-emerald-400 scale-110 shadow-xl' : 'border-transparent hover:scale-105 opacity-70 hover:opacity-100 shadow-sm'}`}
-                 >
-                   <DynamicAvatar avatarId={avId} variant={flat ? 'flat' : 'auto'} fallbackText={name} className="w-full h-full" />
-                 </button>
-               ))}
+             <div className="w-full text-left">
+               <p className="text-[11px] font-black text-zinc-300 uppercase tracking-widest mt-4">Free Avatars</p>
+               <div className="grid grid-cols-5 gap-3 mt-3">
+                 {presetTiles.map(({ id: avId, flat }) => (
+                   <button
+                     key={avId}
+                     onClick={() => handlePresetSelect(avId)}
+                     className={`aspect-square w-full rounded-full overflow-hidden border-[3px] transition-all p-0 ${!photo && avatarId === avId ? 'border-emerald-400 scale-110 shadow-xl' : 'border-transparent hover:scale-105 opacity-70 hover:opacity-100 shadow-sm'}`}
+                   >
+                     <DynamicAvatar avatarId={avId} variant={flat ? 'flat' : 'auto'} fallbackText={name} className="w-full h-full" />
+                   </button>
+                 ))}
+               </div>
+
+               <p className="text-[11px] font-black text-zinc-300 uppercase tracking-widest mt-6 flex items-center gap-1.5">
+                 <Crown className="w-3.5 h-3.5 text-amber-400" /> PRO Avatars
+               </p>
+               {renderTierTiles(AVATAR_PRO_IDS, 'pro')}
+
+               <p className="text-[11px] font-black text-zinc-300 uppercase tracking-widest mt-6 flex items-center gap-1.5">
+                 <Handshake className="w-3.5 h-3.5 text-teal-400" /> Partner Avatars
+               </p>
+               {renderTierTiles(AVATAR_PARTNER_IDS, 'partner')}
              </div>
           </div>
         </div>
@@ -271,6 +340,45 @@ export default function EditProfileView({ name: propName, email: propEmail, phon
           )}
         </button>
       </div>
+
+      {lockedPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-6" onClick={() => setLockedPrompt(null)}>
+          <div className="w-full max-w-sm bg-[#15181D] border border-white/10 rounded-3xl p-6 shadow-2xl text-center" onClick={(e) => e.stopPropagation()}>
+            <div className={`w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center ${lockedPrompt === 'pro' ? 'bg-amber-400/15 text-amber-400' : 'bg-teal-400/15 text-teal-400'}`}>
+              {lockedPrompt === 'pro' ? <Crown className="w-7 h-7" /> : <Handshake className="w-7 h-7" />}
+            </div>
+            {lockedPrompt === 'pro' ? (
+              <>
+                <h3 className="text-lg font-bold text-white mb-2">This avatar is exclusive to PRO members.</h3>
+                <p className="text-sm text-zinc-400 mb-6">Upgrade to a PRO plan to unlock PRO avatars.</p>
+                <button
+                  onClick={() => { setLockedPrompt(null); (onViewProPlans ?? onBack)(); }}
+                  className="w-full py-3.5 rounded-xl bg-amber-400 text-amber-950 font-bold text-sm hover:bg-amber-300 transition-all active:scale-[0.98]"
+                >
+                  View PRO Plans
+                </button>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-bold text-white mb-2">This avatar is exclusive to Partners.</h3>
+                <p className="text-sm text-zinc-400 mb-6">Join the Partner Program to unlock Partner avatars.</p>
+                <button
+                  onClick={() => { setLockedPrompt(null); (onViewPartnerProgram ?? onBack)(); }}
+                  className="w-full py-3.5 rounded-xl bg-teal-400 text-teal-950 font-bold text-sm hover:bg-teal-300 transition-all active:scale-[0.98]"
+                >
+                  View Partner Program
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => setLockedPrompt(null)}
+              className="w-full py-3 mt-2 rounded-xl text-zinc-400 font-bold text-sm hover:text-white transition-all"
+            >
+              Not Now
+            </button>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
