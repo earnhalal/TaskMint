@@ -57,6 +57,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 
 let initialisedFor: string | null = null;
 let initialising: Promise<boolean> | null = null;
+let lastInitError = '';
 
 /**
  * Initialises the Unity Ads SDK once per app session for the given
@@ -64,6 +65,17 @@ let initialising: Promise<boolean> | null = null;
  * game ID / test mode was already initialised. Returns false on web or
  * on any SDK failure; never throws.
  */
+async function tryInitialiseOnce(config: UnityAdsConfig): Promise<void> {
+  await withTimeout(
+    UnityAdsBridge.initialize({
+      gameId: config.unityGameId,
+      testMode: config.unityTestMode,
+    }),
+    INIT_TIMEOUT_MS,
+    'Unity Ads initialisation',
+  );
+}
+
 export async function initUnityAds(config: UnityAdsConfig): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   if (!config.unityGameId) return false;
@@ -73,19 +85,26 @@ export async function initUnityAds(config: UnityAdsConfig): Promise<boolean> {
   if (!initialising) {
     initialising = (async () => {
       try {
-        await withTimeout(
-          UnityAdsBridge.initialize({
-            gameId: config.unityGameId,
-            testMode: config.unityTestMode,
-          }),
-          INIT_TIMEOUT_MS,
-          'Unity Ads initialisation',
-        );
+        await tryInitialiseOnce(config);
         initialisedFor = key;
+        lastInitError = '';
         return true;
-      } catch (error) {
-        console.warn('Unity Ads initialisation failed:', error);
-        return false;
+      } catch (firstError) {
+        // One retry after a short pause: first-launch initialisation can
+        // fail on a transient network hiccup while the SDK warms up.
+        console.warn('Unity Ads initialisation failed, retrying:', firstError);
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+        try {
+          await tryInitialiseOnce(config);
+          initialisedFor = key;
+          lastInitError = '';
+          return true;
+        } catch (error) {
+          console.warn('Unity Ads initialisation failed:', error);
+          lastInitError =
+            error instanceof Error ? error.message : String(error);
+          return false;
+        }
       } finally {
         initialising = null;
       }
@@ -116,7 +135,12 @@ export async function showUnityRewarded(
   try {
     const ready = await initUnityAds(config);
     if (!ready) {
-      return { status: 'UNAVAILABLE', reason: 'Unity Ads could not be initialised.' };
+      return {
+        status: 'UNAVAILABLE',
+        reason: lastInitError
+          ? `Unity Ads could not be initialised. (${lastInitError})`
+          : 'Unity Ads could not be initialised.',
+      };
     }
 
     await withTimeout(
@@ -131,9 +155,10 @@ export async function showUnityRewarded(
       : { status: 'SKIPPED' };
   } catch (error) {
     console.warn('Unity rewarded ad failed:', error);
+    const detail = error instanceof Error ? error.message : String(error);
     return {
       status: 'UNAVAILABLE',
-      reason: 'No Unity ad is available right now. Please try again later.',
+      reason: `No Unity ad is available right now. (${detail})`,
     };
   }
 }

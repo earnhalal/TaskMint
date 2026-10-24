@@ -1,6 +1,8 @@
 package click.taskmint.app;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -50,6 +52,9 @@ public class UnityAdsBridge extends Plugin {
     private final List<PluginCall> pendingInitCalls = new ArrayList<>();
 
     private boolean initInProgress = false;
+
+    /** Unity Ads SDK calls are posted here: the SDK expects the main thread. */
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private PluginCall pendingLoadCall = null;
     private PluginCall pendingShowCall = null;
 
@@ -75,7 +80,7 @@ public class UnityAdsBridge extends Plugin {
         }
         initInProgress = true;
 
-        UnityAds.initialize(
+        mainHandler.post(() -> UnityAds.initialize(
             getContext(),
             gameId,
             testMode,
@@ -91,12 +96,13 @@ public class UnityAdsBridge extends Plugin {
                 @Override
                 public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message) {
                     initInProgress = false;
+                    String detail = (error != null ? error.name() : "UNKNOWN") + ": " + message;
                     for (PluginCall pending : drainInitCalls()) {
-                        pending.reject("Unity Ads failed to initialise: " + message);
+                        pending.reject("Unity Ads failed to initialise (" + detail + ")");
                     }
                 }
             }
-        );
+        ));
     }
 
     private List<PluginCall> drainInitCalls() {
@@ -122,7 +128,7 @@ public class UnityAdsBridge extends Plugin {
         }
         pendingLoadCall = call;
 
-        UnityAds.load(
+        mainHandler.post(() -> UnityAds.load(
             placementId,
             new IUnityAdsLoadListener() {
                 @Override
@@ -140,11 +146,12 @@ public class UnityAdsBridge extends Plugin {
                     PluginCall pending = pendingLoadCall;
                     pendingLoadCall = null;
                     if (pending != null) {
-                        pending.reject("Unity Ads failed to load: " + message);
+                        String detail = (error != null ? error.name() : "UNKNOWN") + ": " + message;
+                        pending.reject("Unity Ads failed to load (" + detail + ")");
                     }
                 }
             }
-        );
+        ));
     }
 
     @PluginMethod

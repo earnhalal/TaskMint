@@ -502,34 +502,34 @@ export default function Dashboard() {
     setIsBalanceUpdating(true);
     try {
       const userRtdbRef = ref(rtdb, `users/${user.uid}`);
-      
+
       const balAmt = amount;
 
-      let success = false;
-      await runRtdbTransaction(userRtdbRef, (data) => {
-        if (data === null) return;
-        
-        let newBalance = (data.balance || 0) + balAmt;
+      // IMPORTANT (rules): the RTDB rules grant a signed-in user writes to
+      // the individual unlisted children of users/{uid} (the $other rule),
+      // but NOT a whole-node set/transaction at users/{uid} itself — a
+      // parent-level transaction is denied and every credit failed with
+      // "reward could not be added". So the balance is transacted on the
+      // balance CHILD, and the remaining fields are written per-child.
+      const balanceRef = ref(rtdb, `users/${user.uid}/balance`);
+      const txResult = await runRtdbTransaction(balanceRef, (current) => {
+        const currentBalance = typeof current === 'number' ? current : 0;
+        const newBalance = currentBalance + balAmt;
         if (newBalance < 0) return; // Abort transaction if insufficient funds
-        
-        let newTotalEarnings = (data.totalEarnings || 0);
-
-        if (balAmt > 0) {
-            newTotalEarnings += balAmt;
-        }
-
-        success = true;
-        return {
-            ...data,
-            balance: newBalance,
-            totalEarnings: newTotalEarnings,
-            lastUpdatedAt: Date.now()
-        };
+        return newBalance;
       });
 
-      if (!success) {
+      if (!txResult.committed) {
         throw new Error("Insufficient balance or transaction failed.");
       }
+
+      const childUpdates: { [key: string]: any } = {
+        lastUpdatedAt: Date.now()
+      };
+      if (balAmt > 0) {
+        childUpdates.totalEarnings = rtdbIncrement(balAmt);
+      }
+      await update(userRtdbRef, childUpdates);
 
       // Mirror into Firestore so reports / leaderboard / admin views match the RTDB ledger
       try {
@@ -542,16 +542,22 @@ export default function Dashboard() {
       }
 
       
-      // History in Firestore
-      await addDoc(collection(db, 'earning_history'), {
-        userId: user.uid,
-        amount: amount,
-        type: amount < 0 ? 'expense' : 'earning',
-        source: source,
-        description: description || (amount < 0 ? `Spent on ${source.replace('_', ' ')}` : `Earned from ${source.replace('_', ' ')}`),
-        timestamp: firestoreServerTimestamp(),
-        transactionId: transactionId || null
-      });
+      // History in Firestore — best-effort: the RTDB ledger above is the
+      // source of truth, so a Firestore failure (e.g. quota) must never
+      // turn a successful credit into a reported failure.
+      try {
+        await addDoc(collection(db, 'earning_history'), {
+          userId: user.uid,
+          amount: amount,
+          type: amount < 0 ? 'expense' : 'earning',
+          source: source,
+          description: description || (amount < 0 ? `Spent on ${source.replace('_', ' ')}` : `Earned from ${source.replace('_', ' ')}`),
+          timestamp: firestoreServerTimestamp(),
+          transactionId: transactionId || null
+        });
+      } catch (historyError) {
+        console.error("Earning history write failed (balance already credited):", historyError);
+      }
 
       // Team Commission Logic (Async)
       if (amount > 0 && referredBy) {

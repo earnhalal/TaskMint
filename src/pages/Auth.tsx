@@ -5,7 +5,7 @@ import AuthView from '../components/AuthView';
 
 import { doc, setDoc, getDoc, updateDoc, increment, query, collection, where, getDocs } from 'firebase/firestore';
 import { db, rtdb } from '../firebase';
-import { ref, set } from 'firebase/database';
+import { ref, set, update } from 'firebase/database';
 import { sendWelcomeMail } from '../services/notificationService';
 import { AVATAR_3D_IDS } from '../assets/avatars3d';
 import { useSEO } from '../hooks/useSEO';
@@ -53,7 +53,13 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
       const phoneSuffix = data.phone.slice(-3) || Math.floor(100 + Math.random() * 900).toString();
       const uniqueReferralCode = `${data.username.toLowerCase()}_${phoneSuffix}`;
 
-      // Save user data to RTDB
+      // Save user data to RTDB. The RTDB rules do not allow a whole-node
+      // set at users/{uid}, and the status-family fields (status,
+      // feeStatus, isActivated, isPaid, paymentStatus) are locked to
+      // admin/panel writes — so signup writes only the unlocked fields,
+      // per-child, and never lets an RTDB hiccup block the signup (the
+      // Firestore profile below is the app's source at first login; the
+      // admin panel / agent mirrors the locked RTDB fields).
       const userRef = ref(rtdb, `users/${user.uid}`);
       const userData = {
         uid: user.uid,
@@ -69,8 +75,13 @@ export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
         referralCode: uniqueReferralCode,
         profile_avatar_id: randomAvatarId
       };
-      
-      await set(userRef, userData);
+
+      try {
+        const { status: _lockedStatus, feeStatus: _lockedFeeStatus, ...rtdbSignupData } = userData;
+        await update(userRef, { ...rtdbSignupData, totalEarnings: 0 });
+      } catch (rtdbError) {
+        console.error("RTDB signup profile write failed (continuing):", rtdbError);
+      }
 
       // Save user data to Firestore 'users' collection
       await setDoc(doc(db, 'users', user.uid), {
