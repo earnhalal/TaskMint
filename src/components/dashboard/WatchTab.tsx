@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, Construction, Crown, Zap } from 'lucide-react';
+import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, Construction, Crown, Zap, Eye } from 'lucide-react';
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { db, auth } from '../../firebase';
@@ -48,9 +48,9 @@ function getYouTubeEmbedUrl(url?: string): string | null {
   return id ? `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1` : null;
 }
 
-function getVideoThumbnail(ad: VideoAd): string {
+function getVideoThumbnail(ad: VideoAd): string | null {
   const ytId = getYouTubeId(ad.videoUrl);
-  return ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : `https://picsum.photos/seed/${ad.id}/800/500`;
+  return ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
 }
 
 export default function WatchTab({ onBack, balance, onUpdateBalance, accountStatus, role, partnerTier }: WatchTabProps) {
@@ -240,32 +240,11 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             let reward = data.reward || data.rewardAmount || (tier === 'gold' ? 15.00 : tier === 'silver' ? 10.00 : tier === 'bronze' ? 3.00 : 1.00);
             let finalViews = data.views || 0;
 
-            // FORCE VIEWS UPDATE: No matter what's in DB, we force high/low ranges
+            // Titles from the old script-ad era may still carry the old
+            // network name; display them under the TaskMint brand.
             if (tier === 'basic') {
               title = title.replace(/premium/gi, '').replace(/hilltopads/gi, 'TaskMint').trim();
               if (!title) title = `Daily Ad #${doc.id.split('_').pop()}`;
-              
-              // Realistic basic views (10k to 25k)
-              if (finalViews < 10000 || finalViews > 30000) {
-                finalViews = Math.floor(Math.random() * 15000) + 10000;
-                setDoc(doc.ref, { views: finalViews, title, reward, tier: 'basic' }, { merge: true });
-              }
-            } else if (tier === 'bronze') {
-                if (!title) title = `Bronze Node #${doc.id.split('_').pop()}`;
-                if (finalViews < 5000 || finalViews > 10000) {
-                    finalViews = Math.floor(Math.random() * 5000) + 5000;
-                    setDoc(doc.ref, { views: finalViews, title, reward, tier: 'bronze' }, { merge: true });
-                }
-            } else if (tier === 'silver') {
-                if (finalViews < 2000 || finalViews > 4500) {
-                    finalViews = Math.floor(Math.random() * 2500) + 2000;
-                    setDoc(doc.ref, { views: finalViews, reward }, { merge: true });
-                }
-            } else if (tier === 'gold') {
-                if (finalViews < 1500 || finalViews > 3500) {
-                    finalViews = Math.floor(Math.random() * 2000) + 1500;
-                    setDoc(doc.ref, { views: finalViews, reward }, { merge: true });
-                }
             }
 
             fetchedAds.push({
@@ -478,8 +457,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             <ArrowLeft className="w-5 h-5 text-white/70" />
           </button>
           <div>
-            <h2 className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Transmission</h2>
-            <h3 className="text-lg font-black text-white  tracking-tight truncate max-w-[120px]">{userName}</h3>
+            <h2 className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Watch &amp; Earn</h2>
+            <h3 className="text-lg font-black text-white  tracking-tight truncate max-w-[160px]">{userName}</h3>
           </div>
         </div>
         
@@ -492,17 +471,24 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       </div>
 
       <div className="relative z-10 w-full p-5 space-y-8">
-        {/* Banner */}
-        <div className="relative rounded-3xl p-8 overflow-hidden bg-gradient-to-br from-teal-600 to-teal-900 shadow-2xl border border-white/10">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <h3 className="text-white/60 text-[9px] font-black uppercase tracking-widest mb-2">Neural Node</h3>
-              <h2 className="text-4xl font-black text-white tracking-tighter ">Ad <span className="text-emerald-400">Nodes</span></h2>
-            </div>
-            <div className="p-4 bg-white/10 rounded-2xl border border-white/20">
-              <Zap className="w-8 h-8 text-white fill-white shadow-[0_0_20px_rgba(255,255,255,0.4)]" />
-            </div>
+        {/* Stats band — real numbers only: today's Unity progress, the
+            per-ad reward, and how many partner videos are available. */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">Unity Ads Today</p>
+            <p className="text-lg font-black text-white tracking-tight">
+              {unityConfig && unityConfig.unityDailyLimit > 0 ? `${unityTodayCount}/${unityConfig.unityDailyLimit}` : unityTodayCount}
+            </p>
+          </div>
+          <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">Reward / Ad</p>
+            <p className="text-lg font-black text-emerald-400 tracking-tight">
+              {unityConfig ? `Rs. ${unityConfig.unityRewardAmount}` : '—'}
+            </p>
+          </div>
+          <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
+            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">Videos</p>
+            <p className="text-lg font-black text-white tracking-tight">{videoAds.length}</p>
           </div>
         </div>
 
@@ -523,7 +509,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           <div className="p-8 rounded-3xl bg-rose-500/5 border border-dashed border-rose-500/30 text-center relative overflow-hidden">
             <h3 className="text-rose-400 text-[9px] font-black uppercase tracking-widest mb-3">Payouts Locked</h3>
             <p className="text-[11px] text-rose-300/60 font-bold leading-relaxed mb-6">
-              Account activation ke bagair earnings balance mein nahi ayengi. 
+              Earnings are only credited to activated accounts. Activate your account to start receiving rewards. 
             </p>
             <button 
               onClick={() => navigate('/dashboard')}
@@ -535,57 +521,127 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         )}
 
         {/* Unity Rewarded Ad — native app only, configured from the admin
-            panel (app_settings/ads). Renders only when Unity is enabled
-            with a game ID; never appears on the plain web build. */}
+            panel (app_settings/ads). Player-style hero card: a 16:9 stage
+            with a play affordance, a LIVE/TEST badge straight from the
+            config, and today's progress. Renders only when Unity is
+            enabled with a game ID; never appears on the plain web build. */}
         {Capacitor.isNativePlatform() && unityConfig && isUnityConfigured(unityConfig) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative rounded-[2rem] overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-950 border border-white/10 p-6 md:p-8"
+            className="relative rounded-[2rem] overflow-hidden bg-zinc-950 border border-white/10 shadow-2xl"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="w-14 h-14 shrink-0 bg-white rounded-2xl flex items-center justify-center">
-                  <PlayCircle className="w-8 h-8 text-black" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-lg font-black text-white tracking-tight">Unity Rewarded Ad</h4>
-                    <span className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-[8px] font-black uppercase tracking-widest text-zinc-300">Unity Ads</span>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 font-bold leading-relaxed">
-                    Watch a short ad to the end and earn{' '}
-                    <span className="text-emerald-400">Rs. {unityConfig.unityRewardAmount}</span>.
-                    {unityConfig.unityDailyLimit > 0 && (
-                      <> Watched today: {unityTodayCount}/{unityConfig.unityDailyLimit}.</>
-                    )}
-                  </p>
-                </div>
+            {/* Player stage */}
+            <div className="relative aspect-video w-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl" />
+              <div className="absolute -bottom-24 -left-16 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl" />
+
+              {/* Top bar: network + live/test badge */}
+              <div className="absolute top-0 inset-x-0 p-4 flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
+                  Unity Ads
+                </span>
+                {unityConfig.unityTestMode ? (
+                  <span className="px-2.5 py-1 rounded-lg bg-amber-500/90 text-[8px] font-black uppercase tracking-widest text-black">
+                    Test Ad
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-600 text-[8px] font-black uppercase tracking-widest text-white">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    Live
+                  </span>
+                )}
               </div>
+
+              {/* Center play affordance */}
               <button
                 onClick={handleWatchUnityAd}
                 disabled={isUnityBusy || unityLimitReached}
-                className="shrink-0 bg-white text-black px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
+                className="absolute inset-0 w-full h-full flex flex-col items-center justify-center gap-3 group disabled:cursor-not-allowed"
+                aria-label="Watch Unity ad"
+              >
+                <span className="w-[4.5rem] h-[4.5rem] rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.25)] transition-transform group-hover:scale-105 group-active:scale-95">
+                  {isUnityBusy ? (
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                  ) : (
+                    <PlayCircle className="w-9 h-9" />
+                  )}
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/80">
+                  {isUnityBusy ? 'Loading Ad...' : unityLimitReached ? 'Daily Limit Reached' : 'Tap to Play'}
+                </span>
+              </button>
+
+              {/* Bottom player bar */}
+              <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/85 to-transparent flex items-end justify-between pointer-events-none">
+                <div className="flex items-center gap-2 text-zinc-300">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">~30 sec</span>
+                </div>
+                <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-white shadow-lg flex items-center gap-1.5">
+                  <Zap className="w-3 h-3 fill-current" />
+                  <span className="text-xs font-black">+ Rs. {unityConfig.unityRewardAmount}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Meta + progress */}
+            <div className="p-5 md:p-6 space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h4 className="text-lg font-black text-white tracking-tight">Watch Ad &amp; Earn</h4>
+                  <p className="text-[11px] text-zinc-400 font-bold leading-relaxed mt-0.5">
+                    Watch the full ad to earn your reward instantly.
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Watched Today</p>
+                  <p className="text-sm font-black text-white">
+                    {unityConfig.unityDailyLimit > 0 ? `${unityTodayCount} / ${unityConfig.unityDailyLimit}` : unityTodayCount}
+                  </p>
+                </div>
+              </div>
+              {unityConfig.unityDailyLimit > 0 && (
+                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                    style={{ width: `${Math.min(100, (unityTodayCount / unityConfig.unityDailyLimit) * 100)}%` }}
+                  />
+                </div>
+              )}
+              <button
+                onClick={handleWatchUnityAd}
+                disabled={isUnityBusy || unityLimitReached}
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
               >
                 {isUnityBusy ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Loading Ad...</>
                 ) : unityLimitReached ? (
-                  <><Clock className="w-4 h-4" /> Daily Limit Reached</>
+                  <><Clock className="w-4 h-4" /> Come Back Tomorrow</>
                 ) : (
-                  <><Zap className="w-4 h-4" /> Watch Unity Ad</>
+                  <><PlayCircle className="w-4 h-4" /> Watch Ad — Earn Rs. {unityConfig.unityRewardAmount}</>
                 )}
               </button>
             </div>
           </motion.div>
         )}
 
-        {/* Video Ads Grid */}
+        {/* Partner Videos */}
+        <div>
+          <h3 className="text-xl font-black text-white tracking-tight">Partner Videos</h3>
+          <p className="text-[11px] text-zinc-500 font-bold mt-1">Watch a full video to earn its reward. Rewards are credited instantly.</p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {videoAds.length === 0 ? (
-            <div className="col-span-full py-20 text-center opacity-30">
-              <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4" />
-              <p className="text-[10px] font-black uppercase tracking-widest">Scanning Nodes...</p>
+            <div className="col-span-full py-20 text-center">
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4 text-zinc-500" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Loading videos...</p>
+                </>
+              ) : (
+                <p className="text-[11px] font-bold text-zinc-500">No partner videos are available right now. Please check back later.</p>
+              )}
             </div>
           ) : (
               videoAds
@@ -633,19 +689,25 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                     if (isTimeLocked) return;
                     handleWatchAd(ad);
                   }}
-                  className={`group relative bg-[#064e3b]/50 border border-white/5 rounded-[2rem] overflow-hidden transition-all duration-300 hover:border-teal-500/40 hover:shadow-2xl hover:shadow-none cursor-pointer ${
-                    isLocked ? 'grayscale opacity-70' : ''
+                  className={`group relative bg-zinc-900/80 border border-white/10 rounded-[2rem] overflow-hidden transition-all duration-300 hover:border-emerald-500/40 hover:shadow-2xl cursor-pointer ${
+                    isLocked ? 'opacity-70' : ''
                   }`}
                 >
-                  <div className="relative aspect-[16/10] w-full overflow-hidden">
-                    <img 
-                      src={getVideoThumbnail(ad)}
-                      alt={ad.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    
+                  <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-zinc-800 via-zinc-900 to-black">
+                    {getVideoThumbnail(ad) ? (
+                      <img
+                        src={getVideoThumbnail(ad) as string}
+                        alt={ad.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <PlayCircle className="w-14 h-14 text-white/15" />
+                      </div>
+                    )}
+
                     {/* Dark Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#064e3b] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                     
                     {/* Payout Badge - VISIBLE AND PROMINENT */}
                     <div className="absolute bottom-4 right-4">
@@ -684,22 +746,30 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
                           ad.tier === 'silver' ? 'bg-teal-500/20 border-teal-500/40 text-teal-400' :
                           'bg-white/10 border-white/10 text-white/60'
                        }`}>
-                         {ad.tier || 'Basic'} Node
+                         {ad.tier || 'Basic'} Plan
                        </div>
                     </div>
                   </div>
 
-                  <div className="px-6 py-8">
-                     <h4 className="text-xl font-black text-white  uppercase tracking-tight mb-2 truncate group-hover:text-teal-400 transition-colors">
+                  <div className="px-5 py-5">
+                     <h4 className="text-base font-black text-white tracking-tight mb-2.5 truncate group-hover:text-emerald-400 transition-colors">
                        {ad.title}
                      </h4>
-                     <div className="flex items-center gap-3">
-                       <div className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest text-zinc-400">
-                          <Sparkles className="w-3 h-3 text-emerald-500" />
-                          {formatViews(ad.views || 0)} Harmonic Views
-                       </div>
-                       <div className="w-1 h-1 bg-white/10 rounded-full" />
-                       <span className="text-[9px] font-black uppercase tracking-widest text-zinc-300">60s Node</span>
+                     <div className="flex items-center gap-4 text-zinc-400">
+                       <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest">
+                          <Eye className="w-3.5 h-3.5" />
+                          {formatViews(ad.views || 0)} views
+                       </span>
+                       <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest">
+                          <Clock className="w-3.5 h-3.5" />
+                          {ad.duration ? `${ad.duration} sec` : '60 sec'}
+                       </span>
+                       {isTimeLocked && (
+                         <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-400">
+                            <Lock className="w-3.5 h-3.5" />
+                            {remainingText}
+                         </span>
+                       )}
                      </div>
                   </div>
                 </motion.div>
