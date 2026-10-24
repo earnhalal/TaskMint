@@ -1,16 +1,90 @@
 import { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Download, ShieldCheck, Coins, Wallet, ArrowLeft, Star, CheckCircle2, Smartphone, Gift } from 'lucide-react';
+import {
+  Download,
+  ShieldCheck,
+  Coins,
+  Wallet,
+  ArrowLeft,
+  CheckCircle2,
+  Gift,
+  ListChecks,
+  PlayCircle,
+  UserPlus,
+  BadgeCheck,
+  Info,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
 
+const APK_URL = 'https://github.com/earnhalal/TaskMint/releases/download/v1.0/TaskMint.apk';
+
+const INFO_ITEMS = [
+  { label: 'Version', value: '1.0' },
+  { label: 'Size', value: 'About 10 MB' },
+  { label: 'Requires Android', value: '7.0 and up' },
+  { label: 'Category', value: 'Finance / Earning' },
+];
+
+const FEATURES = [
+  {
+    icon: ListChecks,
+    title: 'Daily Tasks',
+    text: 'Complete simple daily tasks and social media tasks to earn money from your phone.',
+  },
+  {
+    icon: PlayCircle,
+    title: 'Watch & Earn',
+    text: 'Watch sponsored video ads in the app and get rewarded for every completed view.',
+  },
+  {
+    icon: UserPlus,
+    title: 'Refer & Earn',
+    text: 'Invite friends and earn Rs. 100 per referral — Rs. 125 per referral for partner accounts.',
+  },
+  {
+    icon: Wallet,
+    title: 'EasyPaisa & JazzCash Payouts',
+    text: 'Deposit and withdraw with EasyPaisa and JazzCash. Minimum withdrawal is Rs. 500 with a 5% fee.',
+  },
+  {
+    icon: Gift,
+    title: 'Rs. 100 App Bonus',
+    text: 'Install the app, sign in with your TaskMint account and claim a Rs. 100 app-install bonus.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Official & Secure',
+    text: 'This page on taskmint.click is the only official download source for the TaskMint app.',
+  },
+];
+
+const INSTALL_STEPS = [
+  {
+    title: 'Tap "Download APK"',
+    text: 'Tap the green Install button on this page. The official TaskMint APK (about 10 MB) will start downloading.',
+  },
+  {
+    title: 'Open the downloaded file',
+    text: 'When the download finishes, tap the file from your notifications or your Downloads folder.',
+  },
+  {
+    title: 'Allow installation if Android asks',
+    text: 'Because this app is installed directly from taskmint.click instead of the Play Store, Android may ask you to allow "Install unknown apps" for your browser. This is normal for direct installs — allow it for this download.',
+  },
+  {
+    title: 'Install, sign in and claim your bonus',
+    text: 'Tap Install, open TaskMint, sign in with your account and claim the Rs. 100 app-install bonus.',
+  },
+];
+
 export default function DownloadPage() {
   const navigate = useNavigate();
-  const apkLink = "https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4";
 
   useSEO({
-    title: "Download TaskMint App APK | Best Online Earning App in Pakistan 2026",
-    description: "Download the TaskMint App APK - an online earning app in Pakistan. Earn money by watching ads, completing tasks and surveys, with JazzCash & Easypaisa withdrawals from Rs. 500.",
+    title: 'Download the TaskMint App | TaskMint for Android',
+    description:
+      'Download the official TaskMint Android app. Complete daily tasks, watch video ads and refer friends to earn money online in Pakistan, with EasyPaisa and JazzCash withdrawals from Rs. 500.',
     canonical: 'https://www.taskmint.click/app-download',
   });
 
@@ -23,7 +97,7 @@ export default function DownloadPage() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button 
+          <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
           >
@@ -41,159 +115,172 @@ export default function DownloadPage() {
       </header>
 
       <main className="pt-24 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-widest mb-6"
-            >
-              <Star className="w-3 h-3 fill-emerald-500" /> Official TaskMint App APK
-            </motion.div>
-            
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-tight"
-            >
-              Download TaskMint <br/> 
-              <span className="text-emerald-500">Real Earning App APK.</span>
-            </motion.h1>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-slate-600 text-lg mb-10 max-w-2xl mx-auto font-medium"
-            >
-              TaskMint app apk download karein aur ghar baithy online earning shuru karein. Pakistan ka sabse bharosemand online work platform.
-            </motion.p>
+        <div className="max-w-3xl mx-auto">
+          {/* Store-style app header */}
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 mb-6"
+          >
+            <div className="flex items-start gap-5 mb-6">
+              <img
+                src="/favicon.svg"
+                alt="TaskMint app icon"
+                className="w-20 h-20 md:w-24 md:h-24 rounded-[1.4rem] shadow-lg shadow-emerald-500/20 shrink-0"
+              />
+              <div className="min-w-0">
+                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+                  TaskMint
+                </h1>
+                <p className="text-slate-600 font-semibold mt-0.5">Earn Money Online in Pakistan</p>
+                <p className="text-emerald-600 text-sm font-bold mt-1 flex items-center gap-1.5">
+                  TaskMint
+                  <BadgeCheck className="w-4 h-4" />
+                  <span className="text-slate-400 font-semibold">· Contains ads</span>
+                </p>
+              </div>
+            </div>
 
-            {/* Download Card */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-slate-200 border border-slate-100 relative overflow-hidden group"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-              
-              <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-emerald-500/40 animate-float">
-                  <Smartphone className="w-16 h-16 md:w-20 md:h-20" />
-                </div>
-                
-                <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-2xl font-black text-slate-900 mb-2">TaskMint App APK (Latest)</h3>
-                  <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-                    <div className="flex items-center gap-1 text-emerald-500">
-                      <Star className="w-4 h-4 fill-emerald-500" />
-                      <Star className="w-4 h-4 fill-emerald-500" />
-                      <Star className="w-4 h-4 fill-emerald-500" />
-                      <Star className="w-4 h-4 fill-emerald-500" />
-                      <Star className="w-4 h-4 fill-emerald-500" />
-                    </div>
-                    <span className="text-xs font-bold text-slate-400">4.9/5 Rating</span>
-                  </div>
-                  
-                  <div className="flex flex-wrap justify-center md:justify-start gap-3 mb-8">
-                    <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">Version 4.0</span>
-                    <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wider">Size: 12MB</span>
-                    <span className="px-3 py-1 bg-emerald-50 rounded-full text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Verified Secure</span>
-                  </div>
-
-                  <a 
-                    href={apkLink}
-                    download
-                    className="inline-flex items-center gap-3 bg-slate-900 text-white px-10 py-5 rounded-2xl font-black text-xl hover:bg-slate-800 transition-all shadow-xl hover:shadow-slate-900/20 active:scale-95 group"
-                  >
-                    <Download className="w-6 h-6 group-hover:animate-bounce" />
-                    Download TaskMint APK
-                  </a>
-                  
-                  <p className="mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    TaskMint app install karein aur Rs. 100 bonus claim karein!
+            {/* Info strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-slate-100 border-y border-slate-100 py-4 mb-6">
+              {INFO_ITEMS.map((item) => (
+                <div key={item.label} className="text-center px-2">
+                  <p className="text-sm font-black text-slate-900">{item.value}</p>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                    {item.label}
                   </p>
                 </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 mb-20">
-            <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-6">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-              <h4 className="text-lg font-black text-slate-900 mb-2">100% Secure APK</h4>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">Verified TaskMint app apk with no malware. Safe for all Android devices.</p>
-            </div>
-            
-            <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-6">
-                <Wallet className="w-6 h-6" />
-              </div>
-              <h4 className="text-lg font-black text-slate-900 mb-2">JazzCash Earnings</h4>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">TaskMint app se earn kiya hua paisa JazzCash aur Easypaisa mein withdraw karein.</p>
+              ))}
             </div>
 
-            <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-6">
-                <Gift className="w-6 h-6" />
-              </div>
-              <h4 className="text-lg font-black text-slate-900 mb-2">App Install Bonus</h4>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed">TaskMint app apk install karne par Rs. 100 ka instant welcome bonus milta hai.</p>
-            </div>
-          </div>
-
-          {/* SEO Content Section */}
-          <article className="prose prose-slate max-w-none bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-sm">
-            <h3 className="text-2xl font-black text-slate-900 mb-6">TaskMint App APK: Pakistan's Best Online Earning App</h3>
-            <p className="text-slate-600 font-medium leading-relaxed mb-6">
-              Agar aap real <strong>online earning app</strong> talash kar rahe hain, to <strong>TaskMint app apk</strong> aapke liye behtareen choice hai. Is app mein aap video ads dekh kar, surveys mukammal kar ke, aur doston ko invite kar ke rozana earning kar sakte hain — aapki earning mukammal kiye gaye tasks par depend karti hai.
+            <a
+              href={APK_URL}
+              download
+              className="flex items-center justify-center gap-2.5 w-full bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-full font-black text-lg transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.98]"
+            >
+              <Download className="w-5 h-5" />
+              Install
+            </a>
+            <p className="mt-3 text-center text-xs font-semibold text-slate-400">
+              Direct APK download — free. One-time account activation fee of Rs. 150 applies in the app.
             </p>
-            
-            <div className="space-y-4 mb-8">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                <p className="text-sm text-slate-700 font-bold">TaskMint App APK Download: Simple aur fast installation process.</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                <p className="text-sm text-slate-700 font-bold">Online Work from Home: Ghar baithy mobile par kaam karein.</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                <p className="text-sm text-slate-700 font-bold">Real Earning App: 100% verified payouts aur local support.</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                <p className="text-sm text-slate-700 font-bold">TaskMint APK: Low data usage aur fast performance.</p>
-              </div>
+          </motion.section>
+
+          {/* About this app */}
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 mb-6"
+          >
+            <h2 className="text-xl font-black text-slate-900 mb-4">About this app</h2>
+            <div className="space-y-4 text-slate-600 font-medium leading-relaxed text-[15px]">
+              <p>
+                TaskMint is an online earning platform for Pakistan. With the TaskMint Android app you
+                can complete daily tasks, watch sponsored video ads and invite friends — and manage
+                your balance, deposits and withdrawals in one place, using the same account and wallet
+                as the TaskMint website.
+              </p>
+              <p>
+                Getting started is simple: create your account, activate it with a one-time fee of
+                Rs. 150, and start completing tasks. Earnings can be withdrawn to EasyPaisa or JazzCash
+                once your balance reaches Rs. 500. A 5% withdrawal fee applies, and payouts are
+                processed in the monthly payout windows (1st–3rd and 16th–18th). Referrals pay
+                Rs. 100 per friend, or Rs. 125 per friend for partner accounts.
+              </p>
+              <p>
+                Installing the app from this page also makes you eligible for the Rs. 100 app-install
+                bonus — just sign in after installing and claim it in the app.
+              </p>
             </div>
 
-            <h4 className="text-xl font-black text-slate-900 mb-4">How to Download and Install TaskMint App APK?</h4>
-            <ol className="list-decimal list-inside space-y-3 text-slate-600 font-medium">
-              <li>Upar diye gaye <strong>"Download TaskMint APK"</strong> button par click karein.</li>
-              <li>APK file download hone ke baad notification bar se file open karein.</li>
-              <li>Settings mein ja kar "Allow from this source" ya "Unknown Sources" ko enable karein.</li>
-              <li>Install par click karein aur app open kar ke Register karein.</li>
-              <li>Apna referral code enter karein aur bonus hasil karein!</li>
-            </ol>
-          </article>
+            <h3 className="text-base font-black text-slate-900 mt-8 mb-4">What's new</h3>
+            <p className="text-slate-600 font-medium text-[15px] leading-relaxed">
+              Version 1.0 — the first official release of the TaskMint Android app, with the full
+              TaskMint dashboard, tasks, video ads, wallet and referral system.
+            </p>
+          </motion.section>
 
+          {/* Features */}
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.14 }}
+            className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 mb-6"
+          >
+            <h2 className="text-xl font-black text-slate-900 mb-6">Features</h2>
+            <div className="grid sm:grid-cols-2 gap-6">
+              {FEATURES.map((feature) => (
+                <div key={feature.title} className="flex items-start gap-4">
+                  <div className="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
+                    <feature.icon className="w-5.5 h-5.5 w-[22px] h-[22px]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 mb-1">{feature.title}</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">{feature.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* How to install */}
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 mb-6"
+          >
+            <h2 className="text-xl font-black text-slate-900 mb-6">How to install</h2>
+            <ol className="space-y-6">
+              {INSTALL_STEPS.map((step, i) => (
+                <li key={step.title} className="flex items-start gap-4">
+                  <span className="w-8 h-8 rounded-full bg-emerald-600 text-white text-sm font-black flex items-center justify-center shrink-0">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 mb-1">{step.title}</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">{step.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <div className="mt-8 flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+              <Info className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              <p className="text-sm text-emerald-900 font-medium leading-relaxed">
+                <strong>Seeing a security prompt?</strong> That is normal. Android and some phone
+                brands (such as Huawei) show a caution screen for any app installed from outside the
+                Play Store. This page on <strong>taskmint.click</strong> is the official TaskMint
+                download link — if your phone asks, choose "Install anyway" to continue. Only download
+                the TaskMint app from this page.
+              </p>
+            </div>
+
+            <a
+              href={APK_URL}
+              download
+              className="mt-8 flex items-center justify-center gap-2.5 w-full bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-full font-black text-lg transition-all shadow-lg active:scale-[0.98]"
+            >
+              <Download className="w-5 h-5" />
+              Download APK
+            </a>
+
+            <div className="mt-6 space-y-2.5">
+              {[
+                'Free to download — about 10 MB, works on Android 7.0 and up',
+                'Same account and wallet as taskmint.click',
+                'Rs. 100 app-install bonus for app users',
+              ].map((line) => (
+                <p key={line} className="flex items-center gap-2.5 text-sm font-semibold text-slate-600">
+                  <CheckCircle2 className="w-4.5 h-4.5 w-[18px] h-[18px] text-emerald-500 shrink-0" />
+                  {line}
+                </p>
+              ))}
+            </div>
+          </motion.section>
         </div>
       </main>
-
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-float { animation: float 4s ease-in-out infinite; }
-      `}</style>
     </div>
   );
 }
