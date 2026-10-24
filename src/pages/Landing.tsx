@@ -43,7 +43,7 @@ const faqs = [
   },
   {
     q: 'How does the referral programme work?',
-    a: 'Share your personal referral link with friends. When a friend joins TaskMint through your link and becomes an active user, you earn a referral bonus of Rs. 125 per active referral, credited to your wallet.',
+    a: 'Share your personal referral link with friends. When a friend joins TaskMint through your link and becomes an active user, you earn a referral bonus of up to Rs. 125 per active referral, credited to your wallet.',
   },
   {
     q: 'Which tasks pay the most?',
