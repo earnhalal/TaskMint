@@ -156,26 +156,32 @@ export async function getAdsConfig(): Promise<AdsConfig> {
   if (cachedConfig) return cachedConfig;
   if (!inflight) {
     inflight = (async () => {
+      // Merge PER NETWORK, not per document: the Firestore document may
+      // configure only one network (it was written when Unity launched,
+      // before Start.io existed) while the RTDB mirror carries both.
+      // Taking the Firestore document wholesale hid Start.io entirely —
+      // each network is therefore taken from whichever source actually
+      // configures it, Firestore first.
       const fromFirestore = await readFirestoreConfig();
-      if (
-        fromFirestore &&
-        (isUnityConfigured(fromFirestore) || isStartIoConfigured(fromFirestore))
-      ) {
-        cachedConfig = fromFirestore;
-        return cachedConfig;
-      }
       const fromRtdb = await readRtdbConfig();
-      if (
-        fromRtdb &&
-        (isUnityConfigured(fromRtdb) || isStartIoConfigured(fromRtdb))
-      ) {
-        cachedConfig = fromRtdb;
+
+      const unitySource = isUnityConfigured(fromFirestore || UNITY_CONFIG_DEFAULTS)
+        ? fromFirestore
+        : fromRtdb || fromFirestore;
+      const startioSource = isStartIoConfigured(fromFirestore || STARTIO_CONFIG_DEFAULTS)
+        ? fromFirestore
+        : fromRtdb || fromFirestore;
+
+      if (!unitySource && !startioSource) {
+        cachedConfig = { ...UNITY_CONFIG_DEFAULTS, ...STARTIO_CONFIG_DEFAULTS };
         return cachedConfig;
       }
-      cachedConfig =
-        fromFirestore ||
-        fromRtdb ||
-        { ...UNITY_CONFIG_DEFAULTS, ...STARTIO_CONFIG_DEFAULTS };
+      cachedConfig = {
+        ...UNITY_CONFIG_DEFAULTS,
+        ...(unitySource ? toConfig(unitySource as any) : {}),
+        ...STARTIO_CONFIG_DEFAULTS,
+        ...(startioSource ? toStartIoConfig(startioSource as any) : {}),
+      };
       return cachedConfig;
     })();
   }
