@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Bot, CheckCircle2, XCircle, Clock, MessageCircle, ShieldCheck } from 'lucide-react';
 import { doc, getDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { ref as rtdbRef, onValue } from 'firebase/database';
+import { db, rtdb, auth } from '../../firebase';
 
 interface PaymentVerificationChatProps {
   depositId: string;
@@ -14,16 +15,24 @@ interface ChatMessage {
   text: string;
   kind?: string;
   createdAt?: any;
+  ts?: number;
 }
 
 // Live verification thread for an in-app screenshot deposit. The proof
 // image is the user's first bubble; every agent update (received,
 // approved, rejected with reason) is posted by the TaskMint agent into
 // deposits/{id}/chat and appears here in real time.
+//
+// Failover: the agent also mirrors every message into RTDB at
+// users/{uid}/depositChats/{depositId}. Both lists are merged and
+// de-duplicated by (kind + text), Firestore first, so the thread keeps
+// working even if the Firestore quota is exhausted and only the RTDB
+// copy is updating.
 export default function PaymentVerificationChat({ depositId, whatsappNumber, onBack }: PaymentVerificationChatProps) {
   const [deposit, setDeposit] = useState<any>(null);
   const [proofUrl, setProofUrl] = useState<string>('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [fsMessages, setFsMessages] = useState<ChatMessage[]>([]);
+  const [rtdbMessages, setRtdbMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     const unsubDep = onSnapshot(doc(db, 'deposits', depositId), snap => {
@@ -34,10 +43,44 @@ export default function PaymentVerificationChat({ depositId, whatsappNumber, onB
     }).catch(() => {});
     const q = query(collection(db, 'deposits', depositId, 'chat'), orderBy('createdAt', 'asc'));
     const unsubChat = onSnapshot(q, snap => {
-      setMessages(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
+      setFsMessages(snap.docs.map(d => {
+        const data = d.data() as any;
+        return { id: d.id, ...data, ts: data.createdAt?.toMillis ? data.createdAt.toMillis() : 0 };
+      }));
     }, () => {});
-    return () => { unsubDep(); unsubChat(); };
+
+    // RTDB failover copy of the same thread (may simply be empty).
+    let unsubRtdb: (() => void) | undefined;
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      unsubRtdb = onValue(rtdbRef(rtdb, `users/${uid}/depositChats/${depositId}`), snap => {
+        const val = snap.val();
+        if (!val) { setRtdbMessages([]); return; }
+        const list = Object.entries(val)
+          .map(([key, m]: [string, any]) => ({
+            id: `rtdb-${key}`,
+            text: m?.text || '',
+            kind: m?.kind,
+            ts: typeof m?.at === 'number' ? m.at : 0
+          }))
+          .filter(m => m.text);
+        setRtdbMessages(list);
+      }, () => {});
+    }
+    return () => { unsubDep(); unsubChat(); if (unsubRtdb) unsubRtdb(); };
   }, [depositId]);
+
+  const messages = useMemo(() => {
+    const seen = new Set<string>();
+    const merged: ChatMessage[] = [];
+    for (const m of [...fsMessages, ...rtdbMessages]) {
+      const key = `${m.kind || ''}|${m.text}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(m);
+    }
+    return merged.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  }, [fsMessages, rtdbMessages]);
 
   const status = (deposit?.status || 'Pending').toLowerCase();
   const isApproved = status === 'approved';

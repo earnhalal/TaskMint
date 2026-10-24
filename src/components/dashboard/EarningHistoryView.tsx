@@ -122,7 +122,7 @@ export default function EarningHistoryView({ onBack, totalEarnings = 0, totalInd
 
       {/* Filters */}
       <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar mb-4">
-        {['all', 'ad_watch', 'task', 'spin', 'lottery', 'invite_commission', 'indirect_invite_commission', 'app_bonus', 'daily_reward'].map((f) => (
+        {['all', 'ad_watch', 'task', 'lottery', 'invite_commission', 'indirect_invite_commission', 'app_bonus', 'daily_reward'].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}

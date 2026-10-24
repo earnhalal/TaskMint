@@ -197,7 +197,6 @@ export default function Dashboard() {
                     partnerStatus: 'none',
                     partnerTier: 'basic'
                 });
-                console.log("[EXPIRY_SYNC] Partner plan expired for user", user.uid);
             }
         }
 
@@ -222,13 +221,11 @@ export default function Dashboard() {
               });
 
               if (oldDocs.length > 0) {
-                console.log(`[CLEANUP] Found ${oldDocs.length} old earning history records. Deleting...`);
                 const batch = writeBatch(db);
                 oldDocs.forEach(doc => {
                   batch.delete(doc.ref);
                 });
                 await batch.commit();
-                console.log("[CLEANUP] Old earning history deleted successfully.");
               }
             }
           } catch (error) {
@@ -250,7 +247,6 @@ export default function Dashboard() {
         }
       } else {
         // If Firestore doc doesn't exist, try to recover from RTDB
-        console.log("[MIGRATION] Firestore document missing for user:", user.uid);
         const rtdbRef = ref(rtdb, `users/${user.uid}`);
         const rtdbSnap = await get(rtdbRef);
         if (rtdbSnap.exists()) {
@@ -264,7 +260,6 @@ export default function Dashboard() {
             withdrawalAccounts: [],
             seenUpdates: []
           });
-          console.log("[MIGRATION] Firestore document created from RTDB data");
           setIsProfileLoaded(true);
         } else {
           setIsProfileLoaded(true);
@@ -647,7 +642,6 @@ export default function Dashboard() {
             balance: increment(lockedBalance),
             lockedBalance: 0
           });
-          console.log("Locked balance unlocked automatically!");
         } catch (error) {
           console.error("Unlock Error:", error);
         }
@@ -681,13 +675,11 @@ export default function Dashboard() {
     }
 
     try {
-      console.log(`[WITHDRAWAL_START] Amount: ${amount}, Method: ${method}, User: ${user.uid}`);
       // 2. Deduct balance in Firestore
       await handleUpdateBalance(-amount, 'withdrawal', `Requested Withdrawal to ${method}`);
       const balanceAfter = balance - amount;
 
       // 3. Save to Firestore (for Admin Panel)
-      console.log("[WITHDRAWAL_FIRESTORE] Attempting to save to Firestore...");
       const withdrawalDocRef = await addDoc(collection(db, 'withdrawals'), {
         userId: user.uid,
         userName: userName,
@@ -703,10 +695,8 @@ export default function Dashboard() {
         timestamp: firestoreServerTimestamp()
       });
       const withdrawalId = withdrawalDocRef.id;
-      console.log("[WITHDRAWAL_FIRESTORE_SUCCESS] Saved with ID:", withdrawalId);
 
       // 4. Save to RTDB (for User History)
-      console.log("[WITHDRAWAL_RTDB] Attempting to save to RTDB...");
       const withdrawalRef = ref(rtdb, `withdrawals/${user.uid}/${withdrawalId}`);
       
       const account = withdrawalAccounts[0] || {};
@@ -729,7 +719,6 @@ export default function Dashboard() {
       
       await set(withdrawalRef, newTx);
 
-      console.log("[WITHDRAWAL_RTDB_SUCCESS] Saved to withdrawals list");
       
       // 5. Send internal notification
       await sendWithdrawalRequestMail(user.uid, amount, method);
@@ -791,7 +780,25 @@ export default function Dashboard() {
       // Regular deposit still goes to Firestore
       await setDoc(doc(db, 'deposits', depositId), newTx);
     }
-    
+
+    // RTDB failover record for screenshot deposits: the 24/7 agent reads
+    // this queue and mirrors its verification-chat replies into RTDB, so
+    // the user still gets agent updates if the Firestore quota is ever
+    // exhausted. Written after the activation overwrite above so it is
+    // never wiped by it. Best-effort only — it must never break a deposit.
+    if (proof?.proofMethod === 'upload') {
+      try {
+        await set(ref(rtdb, `pending_requests/${user.uid}/proof/${depositId}`), {
+          amount,
+          type,
+          userName,
+          date: newTx.date,
+          screenshotHash: proof.screenshotHash || '',
+          at: Date.now()
+        });
+      } catch (e) { /* failover record only */ }
+    }
+
     // Send internal notification
     await sendDepositRequestMail(user.uid, amount, method);
     return depositId;
@@ -825,7 +832,6 @@ export default function Dashboard() {
 
   const handleActivateUser = async (targetUserId: string, depositId?: string) => {
     try {
-      console.log(`[ADMIN_ACTION] Activating user: ${targetUserId}`);
       const userRef = doc(db, 'users', targetUserId);
       const userRtdbRef = ref(rtdb, `users/${targetUserId}`);
       
@@ -1038,7 +1044,6 @@ export default function Dashboard() {
         const data = snapshot.data();
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.pendingIndirect !== undefined) setPendingIndirect(data.pendingIndirect);
-        console.log("[SYNC] Manually re-synced from Firestore");
       }
     } catch (error) {
       console.error("Manual sync error:", error);

@@ -15,7 +15,7 @@ const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869
 export const playNotificationSound = () => {
   try {
     const audio = new Audio(NOTIFICATION_SOUND_URL);
-    audio.play().catch(err => console.log('Audio play blocked by browser', err));
+    audio.play().catch(() => { /* audio blocked by the browser — non-fatal */ });
   } catch (error) {
     console.error('Error playing notification sound:', error);
   }
@@ -30,7 +30,7 @@ export const sendInternalNotification = async (data: NotificationData) => {
     };
     
     await addDoc(collection(db, 'notifications'), notification);
-    console.log(`Notification sent to ${data.userId}: ${data.title}`);
+
   } catch (error) {
     console.error('Error sending internal notification:', error);
   }

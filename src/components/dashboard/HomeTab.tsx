@@ -123,7 +123,6 @@ export default function HomeTab({
     const isParam = window.location.search.includes('isApp=true') || window.location.search.includes('app=true');
     
     // Log for debugging (only in development or if needed)
-    console.log("[APP_DETECTION]", { ua, isWebView, isAC24, isStandalone, isParam });
     
     return isWebView || isAC24 || isStandalone || isParam;
   }, []);
@@ -137,7 +136,6 @@ export default function HomeTab({
     
     setIsClaiming(true);
     try {
-      console.log("[BONUS_CLAIM] Starting APK Bonus Claim...");
       const userRef = doc(db, 'users', auth.currentUser.uid);
       
       // 1. Update the flag in both databases first
@@ -150,11 +148,9 @@ export default function HomeTab({
         appBonusClaimed: true
       });
       
-      console.log("[BONUS_CLAIM] Flag updated in both Firestore and RTDB");
       
       // 2. Use the centralized balance update logic which handles both DBs and commissions
       await onUpdateBalance(100, 'app_bonus', 'APK Install Welcome Bonus');
-      console.log("[BONUS_CLAIM] Balance updated successfully");
 
       alert("Mubarak ho! Rs. 100 App Welcome Bonus aapke main balance mein add kar diya gaya hai.");
     } catch (error) {
@@ -167,7 +163,6 @@ export default function HomeTab({
 
   const handleDailyCheckin = async () => {
     if (!isApp) {
-      console.log("[DAILY_CHECKIN] Not in App, redirecting...");
       alert("Ye reward sirf TaskMint App par milta hai. Bonus lene ke liye App download karein!");
       navigate('/app-download');
       return;
@@ -190,18 +185,15 @@ export default function HomeTab({
 
     setIsClaiming(true);
     try {
-      console.log("[DAILY_CHECKIN] Starting Daily Checkin...");
       const userRef = doc(db, 'users', auth.currentUser.uid);
       
       // 1. Update the timestamp in Firestore
       await setDoc(userRef, {
         lastDailyCheckin: serverTimestamp()
       }, { merge: true });
-      console.log("[DAILY_CHECKIN] Timestamp updated in Firestore");
       
       // 2. Use the centralized balance update logic
       await onUpdateBalance(10, 'daily_reward', 'Daily Attendance Reward');
-      console.log("[DAILY_CHECKIN] Balance updated successfully");
 
       alert("Mubarak ho! Rs. 10 Daily Reward aapke wallet mein add kar diya gaya hai. Agla reward 24 ghante baad milega.");
     } catch (error) {

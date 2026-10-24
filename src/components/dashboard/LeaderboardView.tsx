@@ -64,12 +64,19 @@ export default function LeaderboardView({ earners, onBack }: LeaderboardViewProp
           </div>
           <div className="hidden sm:flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
               <Trophy className="w-4 h-4 text-emerald-500" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Total Earning: 2.4M PKR</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Top 10 Earners</span>
           </div>
         </div>
       </div>
 
       <div className="max-w-xl mx-auto px-6 relative z-10">
+        {earners.length === 0 && (
+          <div className="text-center py-16">
+            <Trophy className="w-10 h-10 text-zinc-600 mx-auto mb-3" />
+            <p className="text-xs font-black uppercase tracking-widest text-zinc-400">No rankings yet</p>
+            <p className="text-[11px] font-semibold text-zinc-500 mt-2 leading-relaxed">Complete tasks and watch ads to climb the board — the top earners appear here.</p>
+          </div>
+        )}
         {/* Dynamic Podium Architecture */}
         <div className="relative mb-20 mt-12 flex justify-center items-end gap-3 h-72">
           {/* Base Glow */}
