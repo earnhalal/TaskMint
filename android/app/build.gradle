@@ -7,8 +7,8 @@ android {
         applicationId "click.taskmint.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -64,6 +64,11 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+    // Unity Ads SDK — used only through the in-app UnityAdsBridge plugin
+    // (click.taskmint.app.UnityAdsBridge). Its game ID / placements are
+    // supplied at runtime from the admin panel config; nothing is
+    // hardcoded in native code.
+    implementation 'com.unity3d.ads:unity-ads:4.12.2'
 }
 
 apply from: 'capacitor.build.gradle'

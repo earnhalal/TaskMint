@@ -2,8 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCircle, Loader2, Lock, Construction, Crown, Zap } from 'lucide-react';
-import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
+import { Capacitor } from '@capacitor/core';
 import { db, auth } from '../../firebase';
+import { getUnityAdsConfig, isUnityConfigured, type UnityAdsConfig } from '../../services/adsSettings';
+import { showUnityRewarded } from '../../services/unityAds';
+
+/** earning_history source used for Unity rewarded ads (credits + daily cap). */
+const UNITY_AD_SOURCE = 'unity_ad';
 
 interface WatchTabProps {
   onBack: () => void;
@@ -74,6 +80,113 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const [userName, setUserName] = useState<string>('User');
   const [tierLockModal, setTierLockModal] = useState<'silver' | 'gold' | null>(null);
   const navigate = useNavigate();
+
+  // --- Unity rewarded ads (native app only, admin-panel configured) -----
+  const [unityConfig, setUnityConfig] = useState<UnityAdsConfig | null>(null);
+  const [unityTodayCount, setUnityTodayCount] = useState(0);
+  const [isUnityBusy, setIsUnityBusy] = useState(false);
+
+  /**
+   * Counts today's Unity rewarded credits for the daily limit. Follows
+   * the codebase's history pattern (see EarningHistoryView): query
+   * earning_history by userId only — no composite index — then filter
+   * client-side by source and start-of-day timestamp.
+   */
+  const countUnityToday = async (uid: string): Promise<number> => {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const snap = await getDocs(
+      query(collection(db, 'earning_history'), where('userId', '==', uid))
+    );
+    let count = 0;
+    snap.forEach((d) => {
+      const data = d.data();
+      if (data.source !== UNITY_AD_SOURCE) return;
+      const ts = data.timestamp;
+      const ms = ts?.toMillis ? ts.toMillis() : ts ? new Date(ts).getTime() : 0;
+      if (ms >= startOfDay.getTime()) count++;
+    });
+    return count;
+  };
+
+  useEffect(() => {
+    // Unity ads exist only inside the native app — on the plain web build
+    // the config is never even fetched and the card never renders.
+    if (!Capacitor.isNativePlatform() || !auth.currentUser) return;
+    let cancelled = false;
+    (async () => {
+      const config = await getUnityAdsConfig();
+      if (cancelled) return;
+      setUnityConfig(config);
+      if (isUnityConfigured(config) && auth.currentUser) {
+        try {
+          const count = await countUnityToday(auth.currentUser.uid);
+          if (!cancelled) setUnityTodayCount(count);
+        } catch (error) {
+          console.error('Error counting Unity ads:', error);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const unityLimitReached =
+    !!unityConfig && unityConfig.unityDailyLimit > 0 && unityTodayCount >= unityConfig.unityDailyLimit;
+
+  const handleWatchUnityAd = async () => {
+    if (isUnityBusy || !unityConfig || !auth.currentUser) return;
+    if (unityLimitReached) {
+      setMessage({ type: 'error', text: 'You have reached today\'s Unity ad limit. Please try again tomorrow.' });
+      return;
+    }
+    if (unityConfig.unityRewardAmount <= 0) {
+      setMessage({ type: 'error', text: 'The Unity ad reward is not configured yet. Please try again later.' });
+      return;
+    }
+
+    setIsUnityBusy(true);
+    setMessage(null);
+    try {
+      const result = await showUnityRewarded(unityConfig);
+      if (result.status === 'COMPLETED') {
+        // Credit only on a fully completed view — same balance path as the
+        // video ads (RTDB transaction + Firestore mirror + earning_history
+        // record with source "unity_ad").
+        const isUserActive = accountStatus.toLowerCase() === 'active';
+        if (isUserActive) {
+          const credited = await onUpdateBalance(
+            unityConfig.unityRewardAmount,
+            UNITY_AD_SOURCE,
+            'Watched Unity rewarded ad'
+          );
+          if (credited) {
+            setUnityTodayCount((prev) => prev + 1);
+            setShowSuccessPopup({
+              amount: unityConfig.unityRewardAmount,
+              adTitle: 'Unity Rewarded Ad',
+              timestamp: new Date().toLocaleString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            });
+          } else {
+            setMessage({ type: 'error', text: 'The ad was completed but the reward could not be added. Please try again.' });
+          }
+        } else {
+          setMessage({ type: 'error', text: 'Your account is not active, so the reward was not added to your balance.' });
+        }
+      } else if (result.status === 'SKIPPED') {
+        setMessage({ type: 'error', text: 'Ad closed early — watch the full ad to earn the reward.' });
+      } else {
+        setMessage({ type: 'error', text: result.reason });
+      }
+    } finally {
+      setIsUnityBusy(false);
+    }
+  };
 
   // YouTube-like view formatter
   const formatViews = (num: number) => {
@@ -535,6 +648,52 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
               Verify Account
             </button>
           </div>
+        )}
+
+        {/* Unity Rewarded Ad — native app only, configured from the admin
+            panel (app_settings/ads). Renders only when Unity is enabled
+            with a game ID; never appears on the plain web build. */}
+        {Capacitor.isNativePlatform() && unityConfig && isUnityConfigured(unityConfig) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative rounded-[2rem] overflow-hidden bg-gradient-to-br from-zinc-800 to-zinc-950 border border-white/10 p-6 md:p-8"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-14 h-14 shrink-0 bg-white rounded-2xl flex items-center justify-center">
+                  <PlayCircle className="w-8 h-8 text-black" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="text-lg font-black text-white tracking-tight">Unity Rewarded Ad</h4>
+                    <span className="px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-[8px] font-black uppercase tracking-widest text-zinc-300">Unity Ads</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 font-bold leading-relaxed">
+                    Watch a short ad to the end and earn{' '}
+                    <span className="text-emerald-400">Rs. {unityConfig.unityRewardAmount}</span>.
+                    {unityConfig.unityDailyLimit > 0 && (
+                      <> Watched today: {unityTodayCount}/{unityConfig.unityDailyLimit}.</>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleWatchUnityAd}
+                disabled={isUnityBusy || unityLimitReached}
+                className="shrink-0 bg-white text-black px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2"
+              >
+                {isUnityBusy ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Loading Ad...</>
+                ) : unityLimitReached ? (
+                  <><Clock className="w-4 h-4" /> Daily Limit Reached</>
+                ) : (
+                  <><Zap className="w-4 h-4" /> Watch Unity Ad</>
+                )}
+              </button>
+            </div>
+          </motion.div>
         )}
 
         {/* Video Ads Grid */}
