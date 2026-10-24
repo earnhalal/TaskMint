@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, ArrowLeft, ShieldCheck, CheckCheck, Headphones, Clock, Paperclip, X, Lock, Star, Headset } from 'lucide-react';
+import { Send, ArrowLeft, ShieldCheck, CheckCheck, Headphones, Clock, Paperclip, X, Star, Headset } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ref as rtdbRef, onValue, push, update, serverTimestamp } from 'firebase/database';
 import { auth, rtdb } from '../../firebase';
 
 interface ChatMessage {
   id: string;
-  role: 'user' | 'agent';
+  role: 'user' | 'agent' | 'system';
   text?: string;
   image?: string;
   at: number;
@@ -20,7 +20,13 @@ interface SupportMeta {
   sessionClosedAt?: number;
   lockedUntil?: number;
   rating?: number;
+  timedOut?: boolean;
 }
+
+/** Auto message posted when no agent reply lands within 2 minutes. */
+const TIMEOUT_TEXT =
+  'Yeh chat khatam kar di gayi hai — 2 minute ke andar agent ka reply nahi aa saka. Mazrat ke sath! Aap dobara message bhej kar nayi chat shuru kar sakte hain, hamari team aap ki poori madad karegi.';
+const REPLY_TIMEOUT_MS = 120000;
 
 interface SupportAIChatProps {
   onBack: () => void;
@@ -56,14 +62,17 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
-  const [nowTs, setNowTs] = useState(Date.now());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const lockedUntil = meta.lockedUntil || 0;
-  const isLocked = lockedUntil > nowTs;
-  const sessionClosed = !!meta.sessionClosedAt && (meta.sessionClosedAt || 0) >= (meta.lastUserMsgAt || 0);
+  // A session ends ONLY when the user ends it, or when the 2-minute
+  // no-reply timeout fires (owner's rule). The agent can never close
+  // or lock a session, and there is no waiting-period lock afterwards.
+  const sessionEnded =
+    !!meta.sessionClosedAt && (meta.sessionClosedAt || 0) >= (meta.lastUserMsgAt || 0);
+  const lastMessage = messages.length ? messages[messages.length - 1] : null;
+  const awaitingReply = !!lastMessage && lastMessage.role === 'user' && !sessionEnded;
 
   // Live listeners: messages + meta.
   useEffect(() => {
@@ -91,16 +100,44 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
     return () => timers.forEach(clearTimeout);
   }, []);
 
-  // Tick for the lock countdown.
-  useEffect(() => {
-    if (!isLocked) return;
-    const t = setInterval(() => setNowTs(Date.now()), 30000);
-    return () => clearInterval(t);
-  }, [isLocked]);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isConnecting]);
+
+  // Owner's rule: if no agent reply arrives within 2 minutes of the
+  // user's message, an automatic message ends the chat. Fires once per
+  // unanswered round; cancelled the moment an agent reply lands.
+  const timeoutFiredForRef = useRef(0);
+  useEffect(() => {
+    if (!awaitingReply || !uid) return;
+    const lastUserAt = meta.lastUserMsgAt || lastMessage?.at || 0;
+    if (!lastUserAt || timeoutFiredForRef.current === lastUserAt) return;
+    const fire = async () => {
+      timeoutFiredForRef.current = lastUserAt;
+      try {
+        await push(rtdbRef(rtdb, `users/${uid}/supportChat/messages`), {
+          role: 'system',
+          text: TIMEOUT_TEXT,
+          at: serverTimestamp(),
+        });
+        await update(rtdbRef(rtdb, `users/${uid}/supportChat/meta`), {
+          needsReply: false,
+          sessionClosedAt: Date.now(),
+          timedOut: true,
+        });
+        await update(rtdbRef(rtdb, `users/${uid}`), { supportChatActive: false });
+      } catch (error) {
+        console.error('Support timeout error:', error);
+      }
+    };
+    const remaining = REPLY_TIMEOUT_MS - (Date.now() - lastUserAt);
+    if (remaining <= 0) {
+      void fire();
+      return;
+    }
+    const t = setTimeout(fire, remaining);
+    return () => clearTimeout(t);
+  }, [awaitingReply, meta.lastUserMsgAt, lastMessage, uid]);
 
   const formatTime = (at: number) =>
     at ? new Date(at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -139,7 +176,7 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
   };
 
   const handleSend = async () => {
-    if ((!input.trim() && !selectedImage) || sending || !uid || isLocked || sessionClosed) return;
+    if ((!input.trim() && !selectedImage) || sending || !uid || sessionEnded) return;
     setSending(true);
     try {
       const text = input.trim();
@@ -175,8 +212,19 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
     await update(rtdbRef(rtdb, `users/${uid}/supportChat/meta`), {
       sessionClosedAt: null,
       lockedUntil: null,
+      timedOut: null,
       rating: null,
     });
+  };
+
+  /** The user — and only the user — ends the chat from the header. */
+  const endChat = async () => {
+    if (!uid) return;
+    await update(rtdbRef(rtdb, `users/${uid}/supportChat/meta`), {
+      needsReply: false,
+      sessionClosedAt: Date.now(),
+    });
+    await update(rtdbRef(rtdb, `users/${uid}`), { supportChatActive: false });
   };
 
   const submitRating = async () => {
@@ -185,12 +233,9 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
     await update(rtdbRef(rtdb, `users/${uid}/supportChat/meta`), { rating });
   };
 
-  // Waiting state shown under the header.
-  const waitingState = (() => {
-    if (!meta.needsReply) return null;
-    const seen = (meta.agentSeenAt || 0) >= (meta.lastUserMsgAt || 0);
-    return seen ? 'typing' : 'busy';
-  })();
+  // Waiting state: purely "your last message is still unanswered".
+  // It disappears the moment an agent message lands — after a reply the
+  // app never shows "busy" or "typing" again (owner flagged both).
 
   if (isConnecting) {
     return (
@@ -219,52 +264,6 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
     );
   }
 
-  if (isLocked) {
-    const remainingMins = Math.max(1, Math.ceil((lockedUntil - nowTs) / 60000));
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-center h-full bg-zinc-950">
-        <div className="w-24 h-24 rounded-full border border-emerald-500/20 flex items-center justify-center bg-zinc-900 mb-8 shadow-2xl">
-          <Lock className="w-10 h-10 text-zinc-400" />
-        </div>
-        <h2 className="text-white font-black text-2xl mb-4 tracking-tighter uppercase">Session Ended</h2>
-        {!feedbackSubmitted ? (
-          <>
-            <p className="text-zinc-400 text-sm leading-relaxed max-w-xs mb-6">
-              Please rate your support session before you go.
-            </p>
-            <div className="flex justify-center gap-2 mb-6">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-                  className={`transition-all ${rating >= star ? 'text-emerald-500 scale-110' : 'text-zinc-600 hover:text-zinc-400'}`}
-                >
-                  <Star className="w-7 h-7" strokeWidth={2} fill={rating >= star ? 'currentColor' : 'none'} />
-                </button>
-              ))}
-            </div>
-            <button
-              disabled={rating === 0}
-              onClick={submitRating}
-              className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-black uppercase tracking-widest text-xs transition-all disabled:opacity-30"
-            >
-              Submit Feedback
-            </button>
-          </>
-        ) : (
-          <p className="text-zinc-400 text-sm leading-relaxed max-w-xs mb-8">
-            Thank you for your feedback. You can start a new session in{' '}
-            <span className="text-emerald-400 font-black">{remainingMins} minute{remainingMins === 1 ? '' : 's'}</span>.
-          </p>
-        )}
-        <button onClick={onBack} className="mt-6 px-8 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-white font-black uppercase tracking-widest text-xs transition-all border border-white/5">
-          Go Back
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-full bg-zinc-950 text-white overflow-hidden relative">
       {/* Header */}
@@ -284,10 +283,18 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="w-3 h-3 text-emerald-400" />
               <p className="text-[8px] sm:text-[9px] text-emerald-400/80 font-black uppercase tracking-widest truncate">
-                {waitingState === 'typing' ? 'Agent is typing...' : waitingState === 'busy' ? 'Agent busy — please wait' : 'Online — replies in a few minutes'}
+                {awaitingReply ? 'Waiting for a reply' : 'Online — replies within a few minutes'}
               </p>
             </div>
           </div>
+          {!sessionEnded && messages.length > 0 && (
+            <button
+              onClick={endChat}
+              className="shrink-0 px-3 py-1.5 rounded-full bg-white/5 hover:bg-rose-500/20 hover:text-rose-300 border border-white/10 text-[9px] font-black uppercase tracking-widest text-white/70 transition-all"
+            >
+              End Chat
+            </button>
+          )}
         </div>
       </div>
 
@@ -318,6 +325,13 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
           )}
 
           {messages.map((msg) => (
+            msg.role === 'system' ? (
+              <div key={msg.id} className="flex justify-center">
+                <div className="bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-2.5 max-w-[90%] text-center">
+                  <p className="text-[11px] leading-relaxed text-zinc-400 font-medium">{msg.text}</p>
+                </div>
+              </div>
+            ) : (
             <motion.div
               key={msg.id}
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -341,22 +355,16 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
                 </div>
               </div>
             </motion.div>
+            )
           ))}
 
-          {waitingState && (
+          {awaitingReply && (
             <div className="flex justify-start">
-              <div className="bg-white/[0.04] px-5 py-4 rounded-[1.5rem] rounded-bl-[0.2rem] border border-white/10">
-                {waitingState === 'typing' ? (
-                  <div className="flex gap-2.5">
-                    <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                    <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                    <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-bounce"></span>
-                  </div>
-                ) : (
-                  <p className="text-[11px] font-bold text-zinc-400">
-                    Agents are busy with other users right now — please wait. Your message is saved and the reply will appear here.
-                  </p>
-                )}
+              <div className="bg-white/[0.04] px-5 py-3.5 rounded-[1.5rem] rounded-bl-[0.2rem] border border-white/10 flex items-center gap-2.5">
+                <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                <p className="text-[11px] font-bold text-zinc-400">
+                  Your message has been sent — an agent will reply here shortly.
+                </p>
               </div>
             </div>
           )}
@@ -377,10 +385,36 @@ export default function SupportAIChat({ onBack, userName }: SupportAIChatProps) 
           )}
         </AnimatePresence>
 
-        {sessionClosed && !isLocked ? (
-          <button onClick={startNewSession} className="w-full py-3.5 rounded-[1.2rem] bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98]">
-            Start New Session
-          </button>
+        {sessionEnded ? (
+          <div className="flex flex-col gap-3">
+            {!feedbackSubmitted && (
+              <div className="flex flex-col items-center gap-2.5 py-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Rate this session</p>
+                <div className="flex justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => setRating(star)}
+                      aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                      className={`transition-all ${rating >= star ? 'text-emerald-500 scale-110' : 'text-zinc-600 hover:text-zinc-400'}`}
+                    >
+                      <Star className="w-6 h-6" strokeWidth={2} fill={rating >= star ? 'currentColor' : 'none'} />
+                    </button>
+                  ))}
+                </div>
+                <button
+                  disabled={rating === 0}
+                  onClick={submitRating}
+                  className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-white font-black uppercase tracking-widest text-[10px] transition-all disabled:opacity-30"
+                >
+                  Submit Feedback
+                </button>
+              </div>
+            )}
+            <button onClick={startNewSession} className="w-full py-3.5 rounded-[1.2rem] bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98]">
+              Start New Chat
+            </button>
+          </div>
         ) : (
           <div className="flex items-center gap-3">
             <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
