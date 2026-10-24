@@ -33,8 +33,8 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
   let currentBonus = appSettings?.referralBonusBasic || 100;
   if (role === 'partner') {
     if (partnerTier === 'gold') currentBonus = 200;
-    else if (partnerTier === 'silver' || partnerTier === 'bronze') currentBonus = 150;
-    else currentBonus = 150;
+    else if (partnerTier === 'silver' || partnerTier === 'bronze') currentBonus = appSettings?.referralBonusPartner || 125;
+    else currentBonus = appSettings?.referralBonusPartner || 125;
   }
 
   useEffect(() => {

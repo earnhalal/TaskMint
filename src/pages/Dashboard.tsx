@@ -145,7 +145,7 @@ export default function Dashboard() {
     minWithdrawal: 500,
     withdrawalFeeRate: 5,
     referralBonusBasic: 100,
-    referralBonusPartner: 150,
+    referralBonusPartner: 125,
     indirectReferralBonus: 10,
     offerExpiryTime: null as any,
     manualWithdrawUnlock: false
@@ -867,9 +867,9 @@ export default function Dashboard() {
             let l1BonusAmount = activeAppSettings.referralBonusBasic || 100;
             if (l1.data.role === 'partner') {
                if (l1.data.partnerTier === 'gold') l1BonusAmount = 200;
-               else if (l1.data.partnerTier === 'silver') l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
+               else if (l1.data.partnerTier === 'silver') l1BonusAmount = activeAppSettings.referralBonusPartner || 125;
                else if (l1.data.partnerTier === 'bronze') l1BonusAmount = 130;
-               else l1BonusAmount = activeAppSettings.referralBonusPartner || 150;
+               else l1BonusAmount = activeAppSettings.referralBonusPartner || 125;
             }
 
             // L1 Updates

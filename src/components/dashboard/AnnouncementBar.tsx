@@ -4,7 +4,7 @@ import { Rocket, Flame, Crown, PartyPopper, X, Bell } from 'lucide-react';
 
 const defaultAnnouncements = [
   { text: "New CPX surveys are live — high rewards", icon: <Flame className="w-3 h-3 text-red-500" /> },
-  { text: "Invite friends and earn Rs. 125 per activation", icon: <Rocket className="w-3 h-3 text-teal-500" /> },
+  { text: "Invite friends and earn up to Rs. 125 per activation", icon: <Rocket className="w-3 h-3 text-teal-500" /> },
   { text: "Payouts are processed on the 1st–3rd and 16th–18th of every month", icon: <Bell className="w-3 h-3 text-emerald-500" /> },
   { text: "Daily check-in bonus: Rs. 10 in the TaskMint app", icon: <PartyPopper className="w-3 h-3 text-emerald-500" /> },
   { text: "Go PRO: higher ad rewards and instant partner payouts", icon: <Crown className="w-3 h-3 text-emerald-500" /> },
