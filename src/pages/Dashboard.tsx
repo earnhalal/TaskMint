@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserCircle, Bell, Tv2, Rocket, Zap, ShieldCheck, LayoutGrid, X, Sparkles, AlertTriangle, Wallet, Download } from 'lucide-react';
 import { 
@@ -1056,7 +1057,8 @@ export default function Dashboard() {
   const isAppEnv = useMemo(() => {
     if (typeof window === 'undefined') return false;
     const ua = (navigator.userAgent || '').toLowerCase();
-    return ua.includes('wv') || ua.includes('appcreator24') || !!(window as any).AppCreator24 ||
+    return Capacitor.isNativePlatform() ||
+      ua.includes('wv') || ua.includes('appcreator24') || !!(window as any).AppCreator24 ||
       window.matchMedia('(display-mode: standalone)').matches;
   }, []);
 

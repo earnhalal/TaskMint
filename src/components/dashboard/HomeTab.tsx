@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus as InviteIcon, CheckSquare as CheckSquareIcon, Sparkles as SparklesIcon, ArrowRight, Wallet as WalletIcon, Gift as GiftIcon, PlusCircle as PlusCircleIcon, PlayCircle as PlayCircleIcon, Ticket as TicketIcon, Calendar as CalendarIcon, Trophy, MessageCircle, Download, Lock, Crown, Rocket, Headphones, Zap, Gift, Clock } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
@@ -124,7 +125,7 @@ export default function HomeTab({
     
     // Log for debugging (only in development or if needed)
     
-    return isWebView || isAC24 || isStandalone || isParam;
+    return Capacitor.isNativePlatform() || isWebView || isAC24 || isStandalone || isParam;
   }, []);
 
   const handleClaimAppBonus = async () => {
