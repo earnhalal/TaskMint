@@ -5,7 +5,7 @@ import { PlayCircle, Clock, Sparkles, Wallet, ArrowLeft, CheckCircle2, AlertCirc
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { db, auth } from '../../firebase';
-import { getAdsConfig, isUnityConfigured, isStartIoConfigured, type AdsConfig } from '../../services/adsSettings';
+import { getAdsConfig, isUnityConfigured, isStartIoConfigured, resolveAdReward, effectivePlanTier, type AdsConfig } from '../../services/adsSettings';
 import { showUnityRewarded } from '../../services/unityAds';
 import { showStartIoRewarded } from '../../services/startIoAds';
 
@@ -58,6 +58,9 @@ function getVideoThumbnail(ad: VideoAd): string | null {
 }
 
 export default function WatchTab({ onBack, balance, onUpdateBalance, accountStatus, role, partnerTier }: WatchTabProps) {
+  // Ad reward rates follow the member's plan tier (owner's ladder:
+  // basic < bronze < silver < gold), resolved from the ads config.
+  const myTier = effectivePlanTier(role, partnerTier);
   const [adStats, setAdStats] = useState<Record<string, any>>({});
   const [videoAds, setVideoAds] = useState<VideoAd[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -143,7 +146,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       setMessage({ type: 'error', text: 'You have reached today\'s Unity ad limit. Please try again tomorrow.' });
       return;
     }
-    if (unityConfig.unityRewardAmount <= 0) {
+    const unityReward = resolveAdReward(unityConfig, 'unity', myTier);
+    if (unityReward <= 0) {
       setMessage({ type: 'error', text: 'The Unity ad reward is not configured yet. Please try again later.' });
       return;
     }
@@ -159,7 +163,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         const isUserActive = accountStatus.toLowerCase() === 'active';
         if (isUserActive) {
           const credited = await onUpdateBalance(
-            unityConfig.unityRewardAmount,
+            unityReward,
             UNITY_AD_SOURCE,
             'Watched Unity rewarded ad'
           );
@@ -167,7 +171,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             setUnityTodayCount((prev) => prev + 1);
             if (slotIndex !== undefined) advanceSequence(slotIndex);
             setShowSuccessPopup({
-              amount: unityConfig.unityRewardAmount,
+              amount: unityReward,
               adTitle: 'Unity Rewarded Ad',
               timestamp: new Date().toLocaleString('en-US', {
                 day: 'numeric',
@@ -243,7 +247,8 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
       setMessage({ type: 'error', text: 'You have reached today\'s Start.io ad limit. Please try again tomorrow.' });
       return;
     }
-    if (startioConfig.startioRewardAmount <= 0) {
+    const startioReward = resolveAdReward(startioConfig, 'startio', myTier);
+    if (startioReward <= 0) {
       setMessage({ type: 'error', text: 'The Start.io ad reward is not configured yet. Please try again later.' });
       return;
     }
@@ -258,7 +263,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
         const isUserActive = accountStatus.toLowerCase() === 'active';
         if (isUserActive) {
           const credited = await onUpdateBalance(
-            startioConfig.startioRewardAmount,
+            startioReward,
             STARTIO_AD_SOURCE,
             'Watched Start.io rewarded ad'
           );
@@ -266,7 +271,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             setStartioTodayCount((prev) => prev + 1);
             if (slotIndex !== undefined) advanceSequence(slotIndex);
             setShowSuccessPopup({
-              amount: startioConfig.startioRewardAmount,
+              amount: startioReward,
               adTitle: 'Start.io Rewarded Ad',
               timestamp: new Date().toLocaleString('en-US', {
                 day: 'numeric',
@@ -367,14 +372,14 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
     const slots: AdSlot[] = [];
     if (unityConfig && isUnityConfigured(unityConfig)) {
       const n = unityConfig.unityDailyLimit > 0 ? unityConfig.unityDailyLimit : 25;
-      for (let i = 1; i <= n; i++) slots.push({ network: 'unity', number: i, reward: unityConfig.unityRewardAmount });
+      for (let i = 1; i <= n; i++) slots.push({ network: 'unity', number: i, reward: resolveAdReward(unityConfig, 'unity', myTier) });
     }
     if (startioConfig && isStartIoConfigured(startioConfig)) {
       const n = startioConfig.startioDailyLimit > 0 ? startioConfig.startioDailyLimit : 25;
-      for (let i = 1; i <= n; i++) slots.push({ network: 'startio', number: i, reward: startioConfig.startioRewardAmount });
+      for (let i = 1; i <= n; i++) slots.push({ network: 'startio', number: i, reward: resolveAdReward(startioConfig, 'startio', myTier) });
     }
     return slots;
-  }, [unityConfig, startioConfig]);
+  }, [unityConfig, startioConfig, myTier]);
 
   const seqLockActive = !!seq && seq.lockUntil > seqNow;
   const seqCooldownLeft = seqLockActive ? Math.ceil((seq!.lockUntil - seqNow) / 1000) : 0;
@@ -681,7 +686,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
           <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
             <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-1.5">Reward / Ad</p>
             <p className="text-lg font-black text-emerald-400 tracking-tight">
-              {unityConfig ? `Rs. ${unityConfig.unityRewardAmount}` : '—'}
+              {unityConfig ? `Rs. ${resolveAdReward(unityConfig, 'unity', myTier)}` : '—'}
             </p>
           </div>
           <div className="rounded-3xl bg-white/[0.04] border border-white/10 p-4">
