@@ -8,12 +8,25 @@ import { db, rtdb } from '../firebase';
 import { ref, set } from 'firebase/database';
 import { sendWelcomeMail } from '../services/notificationService';
 import { AVATAR_3D_IDS } from '../assets/avatars3d';
+import { useSEO } from '../hooks/useSEO';
 
 const auth = getAuth(app);
 
 export default function Auth({ mode }: { mode: 'login' | 'signup' }) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  useSEO(mode === 'signup'
+    ? {
+        title: 'Sign Up for TaskMint | Start Earning Money Online in Pakistan',
+        description: 'Create your TaskMint account and activate it with a one-time Rs. 150 fee to start earning money online with tasks, video ads and referrals. Withdraw from Rs. 500 via EasyPaisa or JazzCash.',
+        canonical: 'https://www.taskmint.click/signup',
+      }
+    : {
+        title: 'Login to TaskMint | Earn Money Online in Pakistan',
+        description: 'Log in to your TaskMint account to complete tasks, watch video ads, invite friends and track your online earnings and withdrawals.',
+        canonical: 'https://www.taskmint.click/login',
+      });
   
   // Check if there's a referral code in the URL
   const queryParams = new URLSearchParams(location.search);

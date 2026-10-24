@@ -2,17 +2,20 @@ import { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Download, ShieldCheck, Coins, Wallet, ArrowLeft, Star, CheckCircle2, Smartphone, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 
 export default function DownloadPage() {
   const navigate = useNavigate();
   const apkLink = "https://apk.e-droid.net/apk/app3991921-5okpg1.apk?v=4";
 
+  useSEO({
+    title: "Download TaskMint App APK | Best Online Earning App in Pakistan 2026",
+    description: "Download the TaskMint App APK - an online earning app in Pakistan. Earn money by watching ads, completing tasks and surveys, with JazzCash & Easypaisa withdrawals from Rs. 500.",
+    canonical: 'https://www.taskmint.click/app-download',
+  });
+
   useEffect(() => {
-    document.title = "Download TaskMint App APK | Best Online Earning App in Pakistan 2026";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', "Download the TaskMint App APK - an online earning app in Pakistan. Earn money by watching ads, completing tasks and surveys, with JazzCash & Easypaisa withdrawals from Rs. 500.");
-    }
+    window.scrollTo(0, 0);
   }, []);
 
   return (

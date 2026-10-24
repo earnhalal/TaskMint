@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSEO } from '../hooks/useSEO';
 import {
   Menu as MenuIcon,
   X as CloseIcon,
@@ -100,12 +101,13 @@ export default function Landing() {
   const [openFaq, setOpenFaq] = useState<number>(0);
   const navigate = useNavigate();
 
+  useSEO({
+    title: 'TaskMint - Earn Money Online in Pakistan | Online Earning Platform',
+    description: 'TaskMint is an online earning platform in Pakistan. Earn money by watching ads, taking surveys and completing simple tasks. Withdraw from Rs. 500 via JazzCash, EasyPaisa or bank transfer.',
+    canonical: 'https://www.taskmint.click/',
+  });
+
   useEffect(() => {
-    document.title = 'TaskMint - Earn Money Online in Pakistan | Online Earning Platform';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute('content', 'TaskMint is an online earning platform in Pakistan. Earn money by watching ads, taking surveys and completing simple tasks. Withdraw from Rs. 500 via JazzCash, EasyPaisa or bank transfer.');
-    }
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
