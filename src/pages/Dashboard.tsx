@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserCircle, Bell, Tv2, Rocket, Zap, ShieldCheck, LayoutGrid, X, Sparkles, AlertTriangle, Wallet, Download } from 'lucide-react';
@@ -26,6 +26,8 @@ import { ref, onValue, update, set, increment as rtdbIncrement, get, runTransact
 import { useAuth } from '../context/AuthContext';
 import { sendDepositRequestMail, sendWithdrawalRequestMail, sendActivationMail, playNotificationSound } from '../services/notificationService';
 import { checkForUpdate, type UpdateInfo } from '../services/appUpdate';
+import { getAdsConfig } from '../services/adsSettings';
+import { showUnityInterstitial } from '../services/unityAds';
 import HomeTab from '../components/dashboard/HomeTab';
 import AnnouncementBar from '../components/dashboard/AnnouncementBar';
 import ProfileTab from '../components/dashboard/ProfileTab';
@@ -58,6 +60,30 @@ import { DynamicAvatar } from '../components/ui/DynamicAvatar';
 export default function Dashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+
+  // Page-transition interstitial (owner's spec): when the user opens
+  // another main section, a Unity interstitial is shown first. Native
+  // app only, best-effort (never blocks navigation), at most once every
+  // 3 minutes so it cannot spam the user or the ad network.
+  const prevTabRef = useRef<string | null>(null);
+  useEffect(() => {
+    const prev = prevTabRef.current;
+    prevTabRef.current = activeTab;
+    if (prev === null || prev === activeTab) return; // initial mount / no change
+    if (!Capacitor.isNativePlatform()) return;
+    const GATED_TABS = ['home', 'watch', 'tasks', 'social_tasks', 'earning_history', 'invite', 'premium', 'leaderboard', 'updates', 'wallet', 'withdraw', 'deposit'];
+    if (!GATED_TABS.includes(activeTab)) return;
+    const KEY = 'taskmint_last_interstitial';
+    const last = Number(sessionStorage.getItem(KEY) || 0);
+    if (Date.now() - last < 180_000) return;
+    sessionStorage.setItem(KEY, String(Date.now()));
+    (async () => {
+      try {
+        const cfg = await getAdsConfig();
+        await showUnityInterstitial(cfg);
+      } catch { /* ads are best-effort; navigation already happened */ }
+    })();
+  }, [activeTab]);
   const [showNotification, setShowNotification] = useState(true);
   const [pinMode, setPinMode] = useState<'enter' | 'set'>('set');
   const [pendingWithdrawal, setPendingWithdrawal] = useState<{amount: number, method: string, accountName: string, accountNumber: string} | null>(null);
