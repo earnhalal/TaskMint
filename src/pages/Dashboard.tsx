@@ -139,6 +139,7 @@ export default function Dashboard() {
     partnerFee: 1000,
     paymentNumber: '03338739929',
     paymentName: 'M-WASEEM',
+    paymentIban: '',
     whatsappNumber: '923338739929',
     minWithdrawal: 500,
     withdrawalFeeRate: 5,
@@ -386,7 +387,9 @@ export default function Dashboard() {
     const unsubscribeSettings = onSnapshot(doc(db, 'app_settings', 'global'), async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
-        setAppSettings(data as any);
+        // Merge over the built-in defaults so a settings document that is
+        // missing a field can never blank it out in the app.
+        setAppSettings(prev => ({ ...prev, ...(data as any) }));
         
       }
     });
