@@ -114,15 +114,15 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   };
 
   useEffect(() => {
-    // Unity ads exist only inside the native app — on the plain web build
-    // the config is never even fetched and the card never renders.
-    if (!Capacitor.isNativePlatform() || !auth.currentUser) return;
+    // The config is fetched on web too so the ad LIST can be displayed
+    // there; playing (and the SDKs) stay native-only.
+    if (!auth.currentUser) return;
     let cancelled = false;
     (async () => {
       const config = await getAdsConfig();
       if (cancelled) return;
       setUnityConfig(config);
-      if (isUnityConfigured(config) && auth.currentUser) {
+      if (Capacitor.isNativePlatform() && isUnityConfigured(config) && auth.currentUser) {
         try {
           const count = await countUnityToday(auth.currentUser.uid);
           if (!cancelled) setUnityTodayCount(count);
@@ -216,13 +216,13 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   };
 
   useEffect(() => {
-    if (!Capacitor.isNativePlatform() || !auth.currentUser) return;
+    if (!auth.currentUser) return;
     let cancelled = false;
     (async () => {
       const config = await getAdsConfig();
       if (cancelled) return;
       setStartioConfig(config);
-      if (isStartIoConfigured(config) && auth.currentUser) {
+      if (Capacitor.isNativePlatform() && isStartIoConfigured(config) && auth.currentUser) {
         try {
           const count = await countStartioToday(auth.currentUser.uid);
           if (!cancelled) setStartioTodayCount(count);
@@ -303,6 +303,7 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
   const SEQ_COOLDOWN_MS = 60_000;
   interface SeqState { date: string; nextIndex: number; lockUntil: number }
   const [seq, setSeq] = useState<SeqState | null>(null);
+  const [showAppPrompt, setShowAppPrompt] = useState(false);
   const [seqNow, setSeqNow] = useState(Date.now());
 
   const todayKey = () => {
@@ -363,7 +364,6 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
 
   type AdSlot = { network: 'unity' | 'startio'; number: number; reward: number };
   const adSlots = useMemo<AdSlot[]>(() => {
-    if (!Capacitor.isNativePlatform()) return [];
     const slots: AdSlot[] = [];
     if (unityConfig && isUnityConfigured(unityConfig)) {
       const n = unityConfig.unityDailyLimit > 0 ? unityConfig.unityDailyLimit : 25;
@@ -722,16 +722,18 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             Unity slots first, then Start.io slots; one slot open at a
             time; a watched slot locks with a 1-minute timer, then the
             next slot unlocks. Native app only (SDK ads). */}
-        {Capacitor.isNativePlatform() && adSlots.length > 0 && seq && (
+        {adSlots.length > 0 && (Capacitor.isNativePlatform() ? !!seq : true) && (
           <div className="space-y-4">
             <div>
               <h3 className="text-xl font-black text-white tracking-tight">Reward Ads</h3>
               <p className="text-[11px] text-zinc-500 font-bold mt-1">
-                Watch the open ad to unlock the next one. Each fully watched ad pays instantly.
+                {Capacitor.isNativePlatform()
+                  ? 'Watch the open ad to unlock the next one. Each fully watched ad pays instantly.'
+                  : 'Ads play inside the TaskMint Android app. Download the app to watch and earn.'}
               </p>
             </div>
 
-            {seqNextIndex >= adSlots.length && !seqLockActive ? (
+            {Capacitor.isNativePlatform() && seqNextIndex >= adSlots.length && !seqLockActive ? (
               <div className="rounded-[2rem] bg-emerald-500/10 border border-emerald-500/30 p-6 text-center">
                 <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
                 <p className="text-white font-black">All ads completed for today</p>
@@ -740,6 +742,50 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {adSlots.map((slot, i) => {
+                  if (!Capacitor.isNativePlatform()) {
+                    // Web: display-only card — playing happens in the app.
+                    return (
+                      <div key={`${slot.network}-${slot.number}`} className="relative rounded-[1.75rem] overflow-hidden bg-zinc-900/80 border border-white/10 shadow-xl">
+                        <div className="relative aspect-video w-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black overflow-hidden">
+                          <span className="absolute -bottom-5 -left-1 text-[6rem] leading-none font-black text-white/5 select-none">{slot.number}</span>
+                          <div className="absolute top-0 inset-x-0 p-3 flex items-center justify-between">
+                            <span className="px-2 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
+                              {slot.network === 'unity' ? 'Unity Ads' : 'Start.io'}
+                            </span>
+                            <span className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-600 text-[8px] font-black uppercase tracking-widest text-white">
+                              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
+                            </span>
+                          </div>
+                          <button onClick={() => setShowAppPrompt(true)} className="absolute inset-0 w-full h-full flex flex-col items-center justify-center gap-2 group" aria-label="Watch in the app">
+                            <span className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-transform group-hover:scale-105 group-active:scale-95">
+                              <PlayCircle className="w-7 h-7" />
+                            </span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-white/80">Watch in App</span>
+                          </button>
+                          <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-black/85 to-transparent flex items-end justify-between pointer-events-none">
+                            <span className="flex items-center gap-1.5 text-zinc-300 text-[9px] font-black uppercase tracking-widest">
+                              <Clock className="w-3 h-3" /> ~30 sec
+                            </span>
+                            <span className="px-2.5 py-1 rounded-lg bg-emerald-500 text-white flex items-center gap-1">
+                              <Zap className="w-3 h-3 fill-current" />
+                              <span className="text-[10px] font-black">+ Rs. {slot.reward}</span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="px-4 py-3.5 flex items-center justify-between gap-3">
+                          <div>
+                            <h4 className="text-sm font-black text-white tracking-tight">
+                              {slot.network === 'unity' ? 'Unity' : 'Start.io'} Ad #{slot.number}
+                            </h4>
+                            <p className="text-[10px] text-zinc-500 font-bold">Plays in the Android app</p>
+                          </div>
+                          <button onClick={() => setShowAppPrompt(true)} className="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95">
+                            Get the App
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
                   const isCompleted = i < seqCompletedThrough;
                   const isCooling = seqLockActive && i === seqCompletedThrough && seqNextIndex > 0 && i === seqNextIndex - 1 && seqCompletedThrough >= 0 && i < seqNextIndex;
                   const isCurrent = !seqLockActive && i === seqNextIndex;
@@ -854,6 +900,47 @@ export default function WatchTab({ onBack, balance, onUpdateBalance, accountStat
             )}
           </div>
         )}
+
+        {/* Web download prompt — ads play only in the app */}
+        <AnimatePresence>
+          {showAppPrompt && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm flex items-center justify-center p-5"
+              onClick={() => setShowAppPrompt(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.92, y: 16 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 8 }}
+                className="w-full max-w-sm rounded-[2rem] bg-zinc-900 border border-white/10 p-7 text-center shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="mx-auto mb-4 w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                  <PlayCircle className="w-8 h-8 text-emerald-400" />
+                </span>
+                <h3 className="text-xl font-black text-white tracking-tight">Ads play in the TaskMint app</h3>
+                <p className="text-[12px] text-zinc-400 font-bold leading-relaxed mt-2">
+                  Rewarded ads can only be watched inside the Android app. Download TaskMint, sign in with this account, and every ad you watch credits your balance instantly.
+                </p>
+                <button
+                  onClick={() => { setShowAppPrompt(false); navigate('/download'); }}
+                  className="mt-6 w-full bg-emerald-500 hover:bg-emerald-400 text-white py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98]"
+                >
+                  Download the App
+                </button>
+                <button
+                  onClick={() => setShowAppPrompt(false)}
+                  className="mt-2.5 w-full bg-white/5 hover:bg-white/10 text-zinc-300 py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all"
+                >
+                  Not Now
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Partner Videos */}
         <div>
