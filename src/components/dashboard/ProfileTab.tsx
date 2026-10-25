@@ -7,6 +7,96 @@ import { useAuth } from '../../context/AuthContext';
 import { ChevronRight, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint, Briefcase, Users, Shield, LogOut, Crown, AlertCircle, Clock, History, Keyboard, Video, Database, Headphones, PenTool, Sparkles } from 'lucide-react';
 
 import { DynamicAvatar } from '../ui/DynamicAvatar';
+import { Capacitor } from '@capacitor/core';
+import { APP_VERSION, checkForUpdate, type UpdateInfo } from '../../services/appUpdate';
+import { RefreshCw, ArrowUpCircle, CheckCircle2 } from 'lucide-react';
+
+function AppUpdateSection() {
+  const [status, setStatus] = React.useState<'idle' | 'checking' | 'uptodate' | 'update'>('idle');
+  const [info, setInfo] = React.useState<UpdateInfo | null>(null);
+  const [checkedAt, setCheckedAt] = React.useState<string>('');
+
+  React.useEffect(() => {
+    let cancelled = false;
+    checkForUpdate().then((res) => {
+      if (!cancelled && res) {
+        setInfo(res);
+        setStatus('update');
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!Capacitor.isNativePlatform()) return null;
+
+  const onCheck = async () => {
+    setStatus('checking');
+    const res = await checkForUpdate(true);
+    setCheckedAt(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    if (res) {
+      setInfo(res);
+      setStatus('update');
+    } else {
+      setInfo(null);
+      setStatus('uptodate');
+    }
+  };
+
+  return (
+    <div className="mb-6">
+      <h3 className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase mb-3 px-1">App</h3>
+      <div className="bg-[#15181D] rounded-2xl shadow-sm border border-white/5 overflow-hidden">
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-sky-500/10 text-sky-400">
+                <ArrowUpCircle className="w-4 h-4" />
+              </div>
+              <span className="text-sm font-bold text-zinc-200">App Update</span>
+            </div>
+            <span className="text-[10px] font-black text-zinc-400 bg-white/10 px-2 py-1 rounded-lg tracking-wider">
+              v{APP_VERSION}
+            </span>
+          </div>
+          <p className="text-xs text-zinc-400 mt-3 leading-relaxed">
+            {status === 'update' && info
+              ? `TaskMint v${info.latestVersion} is available. Update for the latest features and fixes.`
+              : status === 'uptodate'
+                ? 'You are up to date — this is the latest version of TaskMint.'
+                : status === 'checking'
+                  ? 'Checking for updates…'
+                  : 'Your current version is shown above. Check if a newer version is available.'}
+          </p>
+          {checkedAt && status !== 'checking' && (
+            <p className="text-[10px] text-zinc-500 mt-1">Last checked at {checkedAt}</p>
+          )}
+          {status === 'update' && info ? (
+            <button
+              onClick={() => { window.open(info.downloadUrl, '_blank'); }}
+              className="w-full mt-3 bg-sky-500 hover:bg-sky-400 text-black text-xs font-black py-3 rounded-xl active:scale-95 transition"
+            >
+              UPDATE NOW — v{info.latestVersion}
+            </button>
+          ) : (
+            <button
+              onClick={onCheck}
+              disabled={status === 'checking'}
+              className="w-full mt-3 bg-white/10 hover:bg-white/15 text-zinc-100 text-xs font-black py-3 rounded-xl active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${status === 'checking' ? 'animate-spin' : ''}`} />
+              {status === 'checking' ? 'CHECKING…' : 'CHECK FOR UPDATES'}
+            </button>
+          )}
+          {status === 'uptodate' && (
+            <p className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-3">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Latest version installed
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProfileTab({ 
   name, 
@@ -315,11 +405,19 @@ export default function ProfileTab({
         />
               </Section>
 
+      <AppUpdateSection />
+
       <Section title="Support">
         <Item icon={<Headphones className="w-4 h-4 text-blue-400" />} label="Live Support Chat" onClick={onSupportAIClick} />
         <Item icon={<LogOut className="w-4 h-4" />} label="Log Out" isDestructive onClick={handleLogout} />
         <Item icon={<AlertCircle className="w-4 h-4" />} label="Delete Account" isDestructive onClick={() => setShowDeleteModal(true)} />
       </Section>
+
+      {Capacitor.isNativePlatform() && (
+        <p className="text-center text-[10px] font-bold text-zinc-600 tracking-wider pb-2">
+          TaskMint v{APP_VERSION}
+        </p>
+      )}
 
       {/* Premium Jobs Modal */}
       {showJobsModal && (
