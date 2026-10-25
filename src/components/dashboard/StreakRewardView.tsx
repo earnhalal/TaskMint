@@ -5,8 +5,9 @@ import {
   ArrowLeft, Check, Lock, Gift, Flame, PlayCircle, Clock, Sparkles,
   Loader2, CalendarDays, Zap,
 } from 'lucide-react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../../firebase';
+import { doc, getDoc, setDoc, deleteField } from 'firebase/firestore';
+import { ref as rtdbRef, get as rtdbGet, update as rtdbUpdate } from 'firebase/database';
+import { auth, db, rtdb } from '../../firebase';
 import { getAdsConfig, isUnityConfigured, isStartIoConfigured } from '../../services/adsSettings';
 import { showUnityRewarded } from '../../services/unityAds';
 import { showStartIoRewarded } from '../../services/startIoAds';
@@ -18,16 +19,16 @@ import { showStartIoRewarded } from '../../services/startIoAds';
  * - One streak claim per 24 hours (a rolling window, not midnight).
  * - To claim, the user first watches a rewarded ad to the end (Unity,
  *   falling back to Start.io). Only a COMPLETED ad unlocks the claim.
- * - The reward is credited instantly: a weighted random Rs. 1–5 on
- *   normal days (mostly Rs. 1–2), and a weighted random Rs. 10–20 on
- *   the last 5 days of the month.
+ * - The reward is credited instantly in Gold Coins: a weighted
+ *   random 100–500 on normal days (mostly 100–200), and a weighted
+ *   random 1,000–2,000 on the last 5 days of the month.
  * - State lives on the Firestore user doc (streakCount, streakMonthKey,
  *   lastStreakClaimAt), so it follows the account across devices.
  */
 
 interface StreakRewardViewProps {
   onBack: () => void;
-  onUpdateBalance: (amount: number, source?: string, description?: string) => Promise<boolean>;
+  onCreditCoins: (coins: number, source?: string, description?: string) => Promise<boolean>;
   accountStatus: string;
 }
 
@@ -43,18 +44,18 @@ function weightedPick(table: Array<[number, number]>): number {
   return table[0][0];
 }
 
-/** Normal days: Rs. 1–5, mostly 1–2. */
+/** Normal days: 100–500 Gold Coins, mostly 100–200. */
 const rollStreakReward = () =>
-  weightedPick([[1, 45], [2, 30], [3, 12], [4, 8], [5, 5]]);
+  weightedPick([[100, 45], [200, 30], [300, 12], [400, 8], [500, 5]]);
 
-/** Last 5 days of the month: Rs. 10–20, mostly 10–13. */
+/** Last 5 days of the month: 1,000–2,000 Gold Coins, mostly 1,000–1,300. */
 const rollMonthEndReward = () =>
   weightedPick([
-    [10, 18], [11, 16], [12, 14], [13, 12], [14, 10], [15, 8],
-    [16, 6], [17, 5], [18, 4], [19, 3], [20, 2],
+    [1000, 18], [1100, 16], [1200, 14], [1300, 12], [1400, 10], [1500, 8],
+    [1600, 6], [1700, 5], [1800, 4], [1900, 3], [2000, 2],
   ]);
 
-export default function StreakRewardView({ onBack, onUpdateBalance, accountStatus }: StreakRewardViewProps) {
+export default function StreakRewardView({ onBack, onCreditCoins, accountStatus }: StreakRewardViewProps) {
   const [loading, setLoading] = useState(true);
   const [streakCount, setStreakCount] = useState(0);
   const [lastClaimAt, setLastClaimAt] = useState<number | null>(null);
@@ -85,17 +86,36 @@ export default function StreakRewardView({ onBack, onUpdateBalance, accountStatu
     return `${hh}:${mm}:${ss}`;
   }, [remainingMs]);
 
-  // Load streak state from the user doc.
+  // Load streak state: the RTDB mirror is the primary source (it is
+  // written by the same claim flow and was never blocked by the old
+  // Firestore rules), the Firestore user doc is the fallback. Whichever
+  // carries the LATER lastStreakClaimAt wins. A completed ad unlock is
+  // also persisted per claim window, so leaving and returning to this
+  // page never asks the user to watch the ad again.
   useEffect(() => {
     (async () => {
       try {
         const uid = auth.currentUser?.uid;
         if (!uid) return;
-        const snap = await getDoc(doc(db, 'users', uid));
-        if (snap.exists()) {
-          const d = snap.data() as any;
-          setStreakCount(d.streakMonthKey === monthKey ? Number(d.streakCount || 0) : 0);
-          setLastClaimAt(typeof d.lastStreakClaimAt === 'number' ? d.lastStreakClaimAt : null);
+        let fsState: any = null;
+        let rtState: any = null;
+        try {
+          const snap = await getDoc(doc(db, 'users', uid));
+          if (snap.exists()) fsState = snap.data();
+        } catch { /* fall through to RTDB */ }
+        try {
+          const snap = await rtdbGet(rtdbRef(rtdb, `users/${uid}/streakState`));
+          if (snap.exists()) rtState = snap.val();
+        } catch { /* fall through */ }
+        const pick = (rtState?.lastStreakClaimAt || 0) >= (fsState?.lastStreakClaimAt || 0) ? (rtState || fsState) : fsState;
+        if (pick) {
+          setStreakCount(pick.streakMonthKey === monthKey ? Number(pick.streakCount || 0) : 0);
+          const last = typeof pick.lastStreakClaimAt === 'number' ? pick.lastStreakClaimAt : null;
+          setLastClaimAt(last);
+          try {
+            const saved = localStorage.getItem(`tm_streak_unlocked_${uid}`);
+            if (saved !== null && Number(saved) === (last || 0)) setUnlocked(true);
+          } catch { /* storage unavailable */ }
         }
       } catch (error) {
         console.error('Error loading streak state:', error);
@@ -145,6 +165,10 @@ export default function StreakRewardView({ onBack, onUpdateBalance, accountStatu
       }
       if (completed) {
         setUnlocked(true);
+        try {
+          const uid = auth.currentUser?.uid;
+          if (uid) localStorage.setItem(`tm_streak_unlocked_${uid}`, String(lastClaimAt || 0));
+        } catch { /* storage unavailable */ }
         setMessage({ type: 'success', text: 'Ad completed — your streak reward is unlocked. Claim it now!' });
       } else {
         setMessage({ type: 'error', text: lastReason || 'No ad is available right now. Please try again in a little while.' });
@@ -162,31 +186,53 @@ export default function StreakRewardView({ onBack, onUpdateBalance, accountStatu
     }
     setClaiming(true);
     setMessage(null);
+    const uid = auth.currentUser?.uid;
+    const claimedAt = Date.now();
+    const newCount = streakCount + 1;
+    const amount = isMonthEndBoost ? rollMonthEndReward() : rollStreakReward();
+    let stamped = false;
     try {
-      const amount = isMonthEndBoost ? rollMonthEndReward() : rollStreakReward();
-      const newCount = streakCount + 1;
-      const credited = await onUpdateBalance(
-        amount,
-        'streak_reward',
-        `Daily streak reward — day ${newCount} of ${monthName}`,
-      );
-      if (!credited) {
-        setMessage({ type: 'error', text: 'The reward could not be added. Please try again.' });
-        return;
-      }
-      const claimedAt = Date.now();
-      setStreakCount(newCount);
-      setLastClaimAt(claimedAt);
-      setUnlocked(false);
-      setRevealed(amount);
-      const uid = auth.currentUser?.uid;
+      // 1. Persist the claim FIRST (both stores), so the 24-hour timer
+      // survives leaving the page — previously the balance was credited
+      // first and a failed save silently re-opened the claim.
       if (uid) {
         await setDoc(
           doc(db, 'users', uid),
           { streakCount: newCount, streakMonthKey: monthKey, lastStreakClaimAt: claimedAt },
           { merge: true },
         );
+        await rtdbUpdate(rtdbRef(rtdb, `users/${uid}/streakState`), {
+          streakCount: newCount, streakMonthKey: monthKey, lastStreakClaimAt: claimedAt,
+        }).catch(() => {});
+        stamped = true;
       }
+      // 2. Credit the reward. If the credit fails, roll the stamp back
+      // so the user does not lose the claim.
+      const credited = await onCreditCoins(
+        amount,
+        'streak_reward',
+        `Daily streak reward — day ${newCount} of ${monthName}`,
+      );
+      if (!credited) {
+        if (uid && stamped) {
+          const rollback = lastClaimAt
+            ? { streakCount, streakMonthKey: monthKey, lastStreakClaimAt: lastClaimAt }
+            : { streakCount: 0, streakMonthKey: monthKey, lastStreakClaimAt: deleteField() };
+          await setDoc(doc(db, 'users', uid), rollback, { merge: true }).catch(() => {});
+          await rtdbUpdate(rtdbRef(rtdb, `users/${uid}/streakState`), {
+            streakCount, streakMonthKey: monthKey, lastStreakClaimAt: lastClaimAt || null,
+          }).catch(() => {});
+        }
+        setMessage({ type: 'error', text: 'The reward could not be added. Please try again.' });
+        return;
+      }
+      setStreakCount(newCount);
+      setLastClaimAt(claimedAt);
+      setUnlocked(false);
+      setRevealed(amount);
+      try {
+        if (uid) localStorage.removeItem(`tm_streak_unlocked_${uid}`);
+      } catch { /* storage unavailable */ }
     } catch (error) {
       console.error('Error claiming streak reward:', error);
       setMessage({ type: 'error', text: 'Something went wrong while claiming. Please try again.' });
@@ -251,7 +297,7 @@ export default function StreakRewardView({ onBack, onUpdateBalance, accountStatu
             <div className="mt-4 flex items-center gap-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 px-3.5 py-2.5">
               <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
               <p className="text-[11px] font-bold text-amber-200">
-                Month-end boost is ON — streak rewards are Rs. 10–20 for the last 5 days of {monthName}.
+                Month-end boost is ON — streak rewards are 1,000–2,000 Gold Coins for the last 5 days of {monthName}.
               </p>
             </div>
           )}
@@ -297,8 +343,8 @@ export default function StreakRewardView({ onBack, onUpdateBalance, accountStatu
           )}
           <p className="text-center text-[11px] text-zinc-500 font-bold leading-relaxed">
             {isMonthEndBoost
-              ? 'Today’s reward: a surprise between Rs. 10 and Rs. 20 (month-end boost).'
-              : 'Today’s reward: a surprise between Rs. 1 and Rs. 5 — most days pay Rs. 1–2.'}
+              ? 'Today’s reward: a surprise between 1,000 and 2,000 Gold Coins (month-end boost).'
+              : 'Today’s reward: a surprise between 100 and 500 Gold Coins — most days pay 100–200.'}
           </p>
         </div>
 
@@ -374,8 +420,8 @@ export default function StreakRewardView({ onBack, onUpdateBalance, accountStatu
                 <Gift className="w-8 h-8 text-orange-400" />
               </motion.div>
               <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Streak Reward</p>
-              <p className="text-4xl font-black text-white mt-1.5">Rs. {revealed}</p>
-              <p className="text-[11px] text-zinc-400 font-bold mt-2">Added to your balance. See you in 24 hours!</p>
+              <p className="text-4xl font-black text-white mt-1.5">{revealed.toLocaleString()} <span className="text-lg text-amber-400">Gold Coins</span></p>
+              <p className="text-[11px] text-zinc-400 font-bold mt-2">Added to your coin balance. Convert 100 Coins = Rs. 1 any time on the Watch page. See you in 24 hours!</p>
               <button
                 onClick={() => setRevealed(null)}
                 className="mt-5 w-full bg-orange-500 hover:bg-orange-400 text-white py-3 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-[0.98]"
