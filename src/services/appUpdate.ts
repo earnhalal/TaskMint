@@ -20,7 +20,7 @@ import { rtdb } from '../firebase';
  *   never disturbed.
  */
 
-export const APP_VERSION = '1.17';
+export const APP_VERSION = '1.18';
 
 const LATEST_RELEASE_API =
   'https://api.github.com/repos/earnhalal/TaskMint/releases/latest';
@@ -88,7 +88,17 @@ export async function checkForUpdate(force = false): Promise<UpdateInfo | null> 
         const lastCheck = Number(localStorage.getItem(LAST_CHECK_KEY) || 0);
         if (lastCheck && Date.now() - lastCheck < CHECK_INTERVAL_MS) {
           const cached = localStorage.getItem(CACHED_RESULT_KEY);
-          return cached ? (JSON.parse(cached) as UpdateInfo) : null;
+          if (!cached) return null;
+          const parsed = JSON.parse(cached) as UpdateInfo;
+          // A cached result was computed by an OLDER build of the app.
+          // After the user updates, that cache would keep announcing the
+          // very version they just installed — re-validate it against
+          // the CURRENT app version before trusting it.
+          if (parsed?.latestVersion && isNewerVersion(parsed.latestVersion, APP_VERSION)) {
+            return parsed;
+          }
+          localStorage.removeItem(CACHED_RESULT_KEY);
+          return null;
         }
       } catch {
         // localStorage unavailable — fall through and check live.
