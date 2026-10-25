@@ -1,19 +1,26 @@
 import { Capacitor } from '@capacitor/core';
+import { get, ref } from 'firebase/database';
+import { rtdb } from '../firebase';
 
 /**
  * In-app update check for the native (Capacitor) app.
  *
  * - The website never checks: this module only runs on native platforms.
- * - The latest version is read from the GitHub Releases API for
- *   earnhalal/TaskMint (`/releases/latest`); the download URL is the APK
- *   asset attached to that release (falling back to the
- *   `releases/latest/download/...` magic URL).
- * - Checks are cached in localStorage and run at most once every 6 hours.
- * - Never throws: any failure (offline, rate limit, unexpected payload)
- *   silently returns `null` so the app UI is never disturbed.
+ * - Sources, in order:
+ *   1. The GitHub Releases API for earnhalal/TaskMint (`/releases/latest`).
+ *   2. Fallback: RTDB `app_settings/global` ({ latestAppVersion,
+ *      latestApkUrl }) — the GitHub API is rate-limited per IP and on
+ *      shared carrier IPs that quota is often already exhausted, which
+ *      silently hid every update prompt; the RTDB copy is ours and
+ *      always answers.
+ * - Automatic checks are cached in localStorage and run at most once
+ *   every 6 hours; `checkForUpdate(true)` (the Profile tab's manual
+ *   "Check for Updates") always checks live.
+ * - Never throws: any failure silently returns `null` so the app UI is
+ *   never disturbed.
  */
 
-export const APP_VERSION = '1.16';
+export const APP_VERSION = '1.17';
 
 const LATEST_RELEASE_API =
   'https://api.github.com/repos/earnhalal/TaskMint/releases/latest';
@@ -41,39 +48,65 @@ function isNewerVersion(a: string, b: string): boolean {
   return false;
 }
 
-export async function checkForUpdate(): Promise<UpdateInfo | null> {
+async function fetchFromGitHub(): Promise<UpdateInfo | null> {
+  const response = await fetch(LATEST_RELEASE_API, {
+    headers: { Accept: 'application/vnd.github+json' },
+  });
+  if (!response.ok) return null;
+  const data: any = await response.json();
+  const latestVersion = String(data?.tag_name || '').replace(/^v/i, '').trim();
+  if (!latestVersion || !isNewerVersion(latestVersion, APP_VERSION)) return null;
+  let downloadUrl = LATEST_APK_URL;
+  const assets = Array.isArray(data?.assets) ? data.assets : [];
+  const apkAsset = assets.find(
+    (a: any) => typeof a?.name === 'string' && a.name.toLowerCase().endsWith('.apk'),
+  );
+  if (apkAsset?.browser_download_url) downloadUrl = apkAsset.browser_download_url;
+  return { latestVersion, downloadUrl };
+}
+
+async function fetchFromRtdb(): Promise<UpdateInfo | null> {
+  const snap = await get(ref(rtdb, 'app_settings/global'));
+  if (!snap.exists()) return null;
+  const data = snap.val() as { latestAppVersion?: string; latestApkUrl?: string };
+  const latestVersion = String(data.latestAppVersion || '').replace(/^v/i, '').trim();
+  if (!latestVersion || !isNewerVersion(latestVersion, APP_VERSION)) return null;
+  return {
+    latestVersion,
+    downloadUrl: data.latestApkUrl?.trim() ? data.latestApkUrl.trim() : LATEST_APK_URL,
+  };
+}
+
+export async function checkForUpdate(force = false): Promise<UpdateInfo | null> {
   try {
     if (!Capacitor.isNativePlatform()) return null;
 
-    // Respect the 6-hour cache: return the cached result (which may be
-    // "no update") instead of calling the API again.
-    try {
-      const lastCheck = Number(localStorage.getItem(LAST_CHECK_KEY) || 0);
-      if (lastCheck && Date.now() - lastCheck < CHECK_INTERVAL_MS) {
-        const cached = localStorage.getItem(CACHED_RESULT_KEY);
-        return cached ? (JSON.parse(cached) as UpdateInfo) : null;
+    // Respect the 6-hour cache for automatic checks: return the cached
+    // result (which may be "no update") instead of checking again.
+    if (!force) {
+      try {
+        const lastCheck = Number(localStorage.getItem(LAST_CHECK_KEY) || 0);
+        if (lastCheck && Date.now() - lastCheck < CHECK_INTERVAL_MS) {
+          const cached = localStorage.getItem(CACHED_RESULT_KEY);
+          return cached ? (JSON.parse(cached) as UpdateInfo) : null;
+        }
+      } catch {
+        // localStorage unavailable — fall through and check live.
       }
-    } catch {
-      // localStorage unavailable — fall through and check live.
     }
 
-    const response = await fetch(LATEST_RELEASE_API, {
-      headers: { Accept: 'application/vnd.github+json' },
-    });
-    if (!response.ok) return null;
-    const data: any = await response.json();
-
-    const latestVersion = String(data?.tag_name || '').replace(/^v/i, '').trim();
     let result: UpdateInfo | null = null;
-
-    if (latestVersion && isNewerVersion(latestVersion, APP_VERSION)) {
-      let downloadUrl = LATEST_APK_URL;
-      const assets = Array.isArray(data?.assets) ? data.assets : [];
-      const apkAsset = assets.find(
-        (a: any) => typeof a?.name === 'string' && a.name.toLowerCase().endsWith('.apk'),
-      );
-      if (apkAsset?.browser_download_url) downloadUrl = apkAsset.browser_download_url;
-      result = { latestVersion, downloadUrl };
+    try {
+      result = await fetchFromGitHub();
+    } catch {
+      result = null;
+    }
+    if (!result) {
+      try {
+        result = await fetchFromRtdb();
+      } catch {
+        result = null;
+      }
     }
 
     try {
