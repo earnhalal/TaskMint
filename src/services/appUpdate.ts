@@ -20,7 +20,7 @@ import { rtdb } from '../firebase';
  *   never disturbed.
  */
 
-export const APP_VERSION = '1.18';
+export const APP_VERSION = '1.19';
 
 const LATEST_RELEASE_API =
   'https://api.github.com/repos/earnhalal/TaskMint/releases/latest';

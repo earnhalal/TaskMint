@@ -386,15 +386,15 @@ export default function Dashboard() {
     }, (error) => console.error("Referral Stats RTDB Error:", error));
 
 
-    const q = query(collection(db, 'users'), orderBy('balance', 'desc'), limit(10));
-    const unsubscribeEarners = onSnapshot(q, (snapshot) => {
-      const earnersData = snapshot.docs.map((doc, index) => ({ 
-        id: doc.id, 
-        rank: index + 1,
-        ...doc.data() 
-      }));
-      setTopEarners(earnersData);
-    });
+    // Leaderboard: the top earners are precomputed by the server agent
+    // into app_settings/leaderboard (ranked by lifetime earnings from
+    // the RTDB ledger). Querying the whole users collection from the
+    // client no longer works — the security rules let a member read
+    // only their own document, so the board showed just one user.
+    const unsubscribeEarners = onSnapshot(doc(db, 'app_settings', 'leaderboard'), (snapshot) => {
+      const entries = snapshot.exists() ? (snapshot.data() as any)?.entries : null;
+      setTopEarners(Array.isArray(entries) ? entries : []);
+    }, () => setTopEarners([]));
 
     // Listener for app settings
     const unsubscribeSettings = onSnapshot(doc(db, 'app_settings', 'global'), async (snapshot) => {
@@ -1328,7 +1328,7 @@ export default function Dashboard() {
       case 'streak':
         return <StreakRewardView 
           onBack={() => setActiveTab('home')} 
-          onUpdateBalance={handleUpdateBalance}
+          onCreditCoins={handleCreditCoins}
           accountStatus={accountStatus}
         />;
       case 'withdraw':
@@ -1434,7 +1434,7 @@ export default function Dashboard() {
           onPayClick={() => setActiveTab('deposit')}
         />;
       case 'leaderboard':
-        return <LeaderboardView earners={topEarners} onBack={() => setActiveTab('home')} />;
+        return <LeaderboardView earners={topEarners} currentUserId={user?.uid} onBack={() => setActiveTab('home')} />;
       case 'partner_tools':
         return <PartnerToolsView 
                  onBack={() => setActiveTab('home')} 
@@ -1474,6 +1474,7 @@ export default function Dashboard() {
           onUpdateBalance={handleUpdateBalance}
           appSettings={activeAppSettings}
           appBonusClaimed={appBonusClaimed}
+          onCreditCoins={handleCreditCoins}
           lastDailyCheckin={lastDailyCheckin}
           unreadChatCount={unreadChatCount}
         />;

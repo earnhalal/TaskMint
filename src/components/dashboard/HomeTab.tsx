@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserPlus as InviteIcon, CheckSquare as CheckSquareIcon, Sparkles as SparklesIcon, ArrowRight, Wallet as WalletIcon, Gift as GiftIcon, PlusCircle as PlusCircleIcon, PlayCircle as PlayCircleIcon, Ticket as TicketIcon, Calendar as CalendarIcon, Trophy, MessageCircle, Download, Lock, Crown, Rocket, Headphones, Zap, Gift, Clock } from 'lucide-react';
 import QuickPromotions from './QuickPromotions';
 import { db, auth, rtdb } from '../../firebase';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, serverTimestamp, setDoc, deleteField } from 'firebase/firestore';
 import { ref, update } from 'firebase/database';
 import { useCurrency } from '../../context/CurrencyContext';
 
@@ -32,6 +32,7 @@ interface HomeTabProps {
   onOfferWallClick: () => void;
   onPartnerToolsClick: () => void;
   onUpdateBalance: (amount: number, source?: string, description?: string, transactionId?: string) => Promise<boolean>;
+  onCreditCoins: (coins: number, source?: string, description?: string) => Promise<boolean>;
   appSettings: {
     activationFee: number;
     minWithdrawal?: number;
@@ -104,6 +105,7 @@ export default function HomeTab({
   onOfferWallClick,
   onPartnerToolsClick,
   onUpdateBalance,
+  onCreditCoins,
   appSettings,
   appBonusClaimed,
   lastDailyCheckin,
@@ -162,9 +164,11 @@ export default function HomeTab({
     }
   };
 
-  // Daily Bonus: weighted random Rs. 1–10 (mostly under Rs. 5), once per 24h.
+  // Daily Bonus: weighted random 100–1,000 Gold Coins (mostly under
+  // 500), once per 24h. 100 Coins = Rs. 1, so the value matches the
+  // old Rs. 1–10 bonus exactly.
   const rollDailyBonus = () => {
-    const table: Array<[number, number]> = [[1, 26], [2, 24], [3, 20], [4, 12], [5, 8], [6, 4], [7, 3], [8, 1.5], [9, 1], [10, 0.5]];
+    const table: Array<[number, number]> = [[100, 26], [200, 24], [300, 20], [400, 12], [500, 8], [600, 4], [700, 3], [800, 1.5], [900, 1], [1000, 0.5]];
     const total = table.reduce((sum, [, w]) => sum + w, 0);
     let r = Math.random() * total;
     for (const [value, w] of table) { r -= w; if (r <= 0) return value; }
@@ -194,20 +198,26 @@ export default function HomeTab({
     }
 
     setIsClaiming(true);
+    const userRef = doc(db, 'users', auth.currentUser.uid);
+    let stamped = false;
     try {
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      
-      // 1. Update the timestamp in Firestore
+      // 1. Stamp the claim FIRST so a double-tap or a second device
+      // cannot claim twice...
       await setDoc(userRef, {
         lastDailyCheckin: serverTimestamp()
       }, { merge: true });
-      
-      // 2. Credit the (weighted random) bonus via the centralized logic
-      const bonusAmount = rollDailyBonus();
-      const credited = await onUpdateBalance(bonusAmount, 'daily_reward', 'Daily Bonus');
+      stamped = true;
+
+      // 2. ...then credit the (weighted random) bonus in Gold Coins.
+      // If the credit fails, the stamp is rolled back so the claim
+      // is not burned.
+      const bonusCoins = rollDailyBonus();
+      const credited = await onCreditCoins(bonusCoins, 'daily_reward', 'Daily Bonus');
       if (credited) {
-        alert(`Congratulations! Your Daily Bonus of Rs. ${bonusAmount} has been added to your wallet. The next bonus will be available in 24 hours.`);
+        alert(`Congratulations! Your Daily Bonus of ${bonusCoins} Gold Coins has been added to your coin balance. The next bonus will be available in 24 hours.`);
       } else {
+        await setDoc(userRef, { lastDailyCheckin: deleteField() }, { merge: true }).catch(() => {});
+        stamped = false;
         alert("The bonus could not be added to your wallet. Please try again.");
       }
     } catch (error) {
@@ -353,7 +363,7 @@ export default function HomeTab({
             <GiftIcon className="w-5 h-5" />
           </span>
           <p className="text-sm font-extrabold text-white mt-3 leading-tight">Daily Bonus</p>
-          <p className="text-[11px] text-zinc-400 font-semibold mt-0.5">Win Rs. 1–10 every 24 hours</p>
+          <p className="text-[11px] text-zinc-400 font-semibold mt-0.5">Win 100–1,000 Gold Coins every 24 hours</p>
           <button
             onClick={handleDailyCheckin}
             className={`mt-3 text-[10px] font-black px-3 py-2 rounded-full transition active:scale-95 ${isDailyClaimable ? 'bg-green-500 text-black' : 'bg-white/10 text-zinc-500'}`}
