@@ -5,9 +5,10 @@ import { PlayCircle, Clock, Sparkles, Coins, ArrowLeft, CheckCircle2, AlertCircl
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
 import { Capacitor } from '@capacitor/core';
 import { db, auth } from '../../firebase';
-import { getAdsConfig, isUnityConfigured, isStartIoConfigured, resolveAdReward, effectivePlanTier, type AdsConfig } from '../../services/adsSettings';
+import { getAdsConfig, isUnityConfigured, isStartIoConfigured, isLevelPlayConfigured, resolveAdReward, effectivePlanTier, type AdsConfig } from '../../services/adsSettings';
 import { rsToCoins, coinsCount, coinsLabel, coinsToRs, MIN_CONVERT_COINS } from '../../utils/coins';
 import { showUnityRewarded } from '../../services/unityAds';
+import { showLevelPlayRewarded } from '../../services/levelplayAds';
 import { showStartIoRewarded } from '../../services/startIoAds';
 
 /** earning_history source used for Unity rewarded ads (credits + daily cap). */
@@ -167,7 +168,14 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
     setIsUnityBusy(true);
     setMessage(null);
     try {
-      const result = await showUnityRewarded(unityConfig);
+      // When LevelPlay mediation is enabled in the panel config, the
+      // Unity playlist slots are served through LevelPlay instead of
+      // the direct Unity path (same slots, same ladder, same
+      // 'unity_ad' history source — mediation is a delivery detail).
+      const useLevelPlay = isLevelPlayConfigured(unityConfig);
+      const result = useLevelPlay
+        ? await showLevelPlayRewarded(unityConfig, auth.currentUser.uid)
+        : await showUnityRewarded(unityConfig);
       if (result.status === 'COMPLETED') {
         // Credit only on a fully completed view — same balance path as the
         // video ads (RTDB transaction + Firestore mirror + earning_history
@@ -184,7 +192,7 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
             if (slotIndex !== undefined) advanceSequence(slotIndex);
             setShowSuccessPopup({
               amount: rsToCoins(unityReward),
-              adTitle: 'Unity Rewarded Ad',
+              adTitle: useLevelPlay ? 'LevelPlay Rewarded Ad' : 'Unity Rewarded Ad',
               timestamp: new Date().toLocaleString('en-US', {
                 day: 'numeric',
                 month: 'short',
@@ -839,7 +847,7 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                           <span className="absolute -bottom-5 -left-1 text-[6rem] leading-none font-black text-white/5 select-none">{slot.number}</span>
                           <div className="absolute top-0 inset-x-0 p-3 flex items-center justify-between">
                             <span className="px-2 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
-                              {slot.network === 'unity' ? 'Unity Ads' : 'Start.io'}
+                              {slot.network === 'unity' ? (isLevelPlayConfigured(unityConfig ?? ({} as AdsConfig)) ? 'LevelPlay' : 'Unity Ads') : 'Start.io'}
                             </span>
                             <span className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-600 text-[8px] font-black uppercase tracking-widest text-white">
                               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
@@ -864,7 +872,7 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                         <div className="px-4 py-3.5 flex items-center justify-between gap-3">
                           <div>
                             <h4 className="text-sm font-black text-white tracking-tight">
-                              {slot.network === 'unity' ? 'Unity' : 'Start.io'} Ad #{slot.number}
+                              {slot.network === 'unity' ? (isLevelPlayConfigured(unityConfig ?? ({} as AdsConfig)) ? 'LevelPlay' : 'Unity') : 'Start.io'} Ad #{slot.number}
                             </h4>
                             <p className="text-[10px] text-zinc-500 font-bold">Plays in the Android app</p>
                           </div>
@@ -902,7 +910,7 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                         </span>
                         <div className="absolute top-0 inset-x-0 p-3 flex items-center justify-between">
                           <span className="px-2 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
-                            {slot.network === 'unity' ? 'Unity Ads' : 'Start.io'}
+                            {slot.network === 'unity' ? (isLevelPlayConfigured(unityConfig ?? ({} as AdsConfig)) ? 'LevelPlay' : 'Unity Ads') : 'Start.io'}
                           </span>
                           {testMode ? (
                             <span className="px-2 py-1 rounded-lg bg-amber-500/90 text-[8px] font-black uppercase tracking-widest text-black">Test Ad</span>
@@ -943,7 +951,7 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                               onClick={() => handleWatchSlot(slot, i)}
                               disabled={busy}
                               className="flex flex-col items-center gap-2 group disabled:cursor-not-allowed"
-                              aria-label={`Watch ${slot.network === 'unity' ? 'Unity' : 'Start.io'} ad ${slot.number}`}
+                              aria-label={`Watch ${slot.network === 'unity' ? (isLevelPlayConfigured(unityConfig ?? ({} as AdsConfig)) ? 'LevelPlay' : 'Unity') : 'Start.io'} ad ${slot.number}`}
                             >
                               <span className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.25)] transition-transform group-hover:scale-105 group-active:scale-95">
                                 {busy ? <Loader2 className="w-6 h-6 animate-spin" /> : <PlayCircle className="w-7 h-7" />}
@@ -977,7 +985,7 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                       <div className="px-4 py-3.5 flex items-center justify-between gap-3">
                         <div>
                           <h4 className="text-sm font-black text-white tracking-tight">
-                            {slot.network === 'unity' ? 'Unity' : 'Start.io'} Ad #{slot.number}
+                            {slot.network === 'unity' ? (isLevelPlayConfigured(unityConfig ?? ({} as AdsConfig)) ? 'LevelPlay' : 'Unity') : 'Start.io'} Ad #{slot.number}
                           </h4>
                           <p className="text-[10px] text-zinc-500 font-bold">
                             {isCompleted ? 'Reward earned' : isCooling ? 'Watched — cooling down' : isCurrent ? 'Ready to watch' : isWaitingUnlock ? 'Next in line' : 'Watch the previous ad first'}

@@ -12,6 +12,7 @@ public class MainActivity extends BridgeActivity {
         // explicitly before the bridge starts.
         registerPlugin(UnityAdsBridge.class);
         registerPlugin(StartIoAdsBridge.class);
+        registerPlugin(LevelPlayAdsBridge.class);
         super.onCreate(savedInstanceState);
     }
 }

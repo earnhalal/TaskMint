@@ -51,6 +51,17 @@ export interface StartIoAdsConfig {
   startioDailyLimit: number;
 }
 
+export interface LevelPlayAdsConfig {
+  /** Master switch for LevelPlay mediation (owner flips it on last). */
+  levelplayEnabled: boolean;
+  /** LevelPlay App Key from the LevelPlay dashboard. */
+  levelplayAppKey: string;
+  /** Rewarded Video ad unit ID in LevelPlay. */
+  levelplayRewardedUnitId: string;
+  /** Interstitial ad unit ID in LevelPlay. */
+  levelplayInterstitialUnitId: string;
+}
+
 /** Reward ladder by plan tier — one ladder for both networks. */
 export interface TierRewardConfig {
   /** Rs. per completed rewarded ad for members with no package. */
@@ -64,7 +75,7 @@ export interface TierRewardConfig {
 }
 
 /** The full ads configuration: every network, one document. */
-export type AdsConfig = UnityAdsConfig & StartIoAdsConfig & TierRewardConfig;
+export type AdsConfig = UnityAdsConfig & StartIoAdsConfig & TierRewardConfig & LevelPlayAdsConfig;
 
 export type PlanTier = 'basic' | 'bronze' | 'silver' | 'gold';
 
@@ -161,6 +172,25 @@ function toStartIoConfig(data: Record<string, any> | undefined): StartIoAdsConfi
   };
 }
 
+export const LEVELPLAY_CONFIG_DEFAULTS: LevelPlayAdsConfig = {
+  levelplayEnabled: false,
+  levelplayAppKey: '',
+  levelplayRewardedUnitId: '',
+  levelplayInterstitialUnitId: '',
+};
+
+function toLevelPlayConfig(data: Record<string, any> | undefined): LevelPlayAdsConfig {
+  const d = data || {};
+  const str = (v: any, fallback: string) =>
+    typeof v === 'string' && v.trim() ? v.trim() : fallback;
+  return {
+    levelplayEnabled: d.levelplayEnabled === true,
+    levelplayAppKey: str(d.levelplayAppKey, ''),
+    levelplayRewardedUnitId: str(d.levelplayRewardedUnitId, ''),
+    levelplayInterstitialUnitId: str(d.levelplayInterstitialUnitId, ''),
+  };
+}
+
 export const TIER_REWARD_DEFAULTS: TierRewardConfig = {
   rewardBasic: 0,
   rewardBronze: 0,
@@ -180,7 +210,7 @@ function toTierRewardConfig(data: Record<string, any> | undefined): TierRewardCo
 }
 
 function toAdsConfig(data: Record<string, any> | undefined): AdsConfig {
-  return { ...toConfig(data), ...toStartIoConfig(data), ...toTierRewardConfig(data) };
+  return { ...toConfig(data), ...toStartIoConfig(data), ...toTierRewardConfig(data), ...toLevelPlayConfig(data) };
 }
 
 let cachedConfig: AdsConfig | null = null;
@@ -254,9 +284,12 @@ export async function getAdsConfig(): Promise<AdsConfig> {
       const startioSource = isStartIoConfigured(fromRtdb || STARTIO_CONFIG_DEFAULTS)
         ? fromRtdb
         : fromFirestore || fromRtdb;
+      const levelplaySource = isLevelPlayConfigured(fromRtdb || LEVELPLAY_CONFIG_DEFAULTS)
+        ? fromRtdb
+        : fromFirestore || fromRtdb;
 
-      if (!unitySource && !startioSource) {
-        cachedConfig = { ...UNITY_CONFIG_DEFAULTS, ...STARTIO_CONFIG_DEFAULTS, ...TIER_REWARD_DEFAULTS };
+      if (!unitySource && !startioSource && !levelplaySource) {
+        cachedConfig = { ...UNITY_CONFIG_DEFAULTS, ...STARTIO_CONFIG_DEFAULTS, ...TIER_REWARD_DEFAULTS, ...LEVELPLAY_CONFIG_DEFAULTS };
         return cachedConfig;
       }
       cachedConfig = {
@@ -264,6 +297,8 @@ export async function getAdsConfig(): Promise<AdsConfig> {
         ...(unitySource ? toConfig(unitySource as any) : {}),
         ...STARTIO_CONFIG_DEFAULTS,
         ...(startioSource ? toStartIoConfig(startioSource as any) : {}),
+        ...LEVELPLAY_CONFIG_DEFAULTS,
+        ...(levelplaySource ? toLevelPlayConfig(levelplaySource as any) : {}),
         // Tier ladder: per field, the RTDB mirror wins when it sets
         // the rate; Firestore fills any rate RTDB leaves unset.
         ...mergeTierLadder(fromFirestore, fromRtdb),
@@ -287,4 +322,9 @@ export function isUnityConfigured(config: UnityAdsConfig): boolean {
 /** True when Start.io rewarded ads should be offered at all. */
 export function isStartIoConfigured(config: StartIoAdsConfig): boolean {
   return config.startioEnabled && config.startioAppId.trim().length > 0;
+}
+
+/** True when LevelPlay mediation should serve the Unity playlist slots. */
+export function isLevelPlayConfigured(config: LevelPlayAdsConfig): boolean {
+  return config.levelplayEnabled && config.levelplayAppKey.trim().length > 0 && config.levelplayRewardedUnitId.trim().length > 0;
 }
