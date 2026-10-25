@@ -213,6 +213,7 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
   const [startioConfig, setStartioConfig] = useState<AdsConfig | null>(null);
   const [startioTodayCount, setStartioTodayCount] = useState(0);
   const [isStartioBusy, setIsStartioBusy] = useState(false);
+  const [startioPausedUntil, setStartioPausedUntil] = useState(0);
 
   const countStartioToday = async (uid: string): Promise<number> => {
     const startOfDay = new Date();
@@ -301,6 +302,12 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
         }
       } else if (result.status === 'SKIPPED') {
         setMessage({ type: 'error', text: 'Ad closed early — watch the full ad to earn the reward.' });
+      } else if (result.noFill) {
+        // No fill is a demand-side state, not an app error (owner
+        // report 2026-10-25: the raw technical warning was the actual
+        // complaint). Pause the Start.io slots quietly — the playlist
+        // explains it inline — instead of flashing a warning banner.
+        setStartioPausedUntil(Date.now() + STARTIO_PAUSE_MS);
       } else {
         setMessage({ type: 'error', text: result.reason });
       }
@@ -318,6 +325,7 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
   // are still enforced server-side from earning_history, so the pacing
   // can never pay more than the panel limits.
   const SEQ_COOLDOWN_MS = 60_000;
+  const STARTIO_PAUSE_MS = 15 * 60_000; // no-fill pause for Start.io slots
   interface SeqState { date: string; nextIndex: number; lockUntil: number }
   const [seq, setSeq] = useState<SeqState | null>(null);
   const [showAppPrompt, setShowAppPrompt] = useState(false);
@@ -365,6 +373,22 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seq]);
 
+  // Start.io no-fill pause: load once, then persist changes.
+  useEffect(() => {
+    if (!auth.currentUser) return;
+    try {
+      const v = Number(localStorage.getItem(`taskmint_startio_pause_${auth.currentUser.uid}`) || 0);
+      if (v > Date.now()) setStartioPausedUntil(v);
+    } catch { /* private mode */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!auth.currentUser || startioPausedUntil <= 0) return;
+    try { localStorage.setItem(`taskmint_startio_pause_${auth.currentUser.uid}`, String(startioPausedUntil)); } catch { /* private mode */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startioPausedUntil]);
+
   // 1-second ticker so the cooldown countdown is smooth.
   useEffect(() => {
     const t = setInterval(() => setSeqNow(Date.now()), 1000);
@@ -397,6 +421,8 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
   const seqCooldownLeft = seqLockActive ? Math.ceil((seq!.lockUntil - seqNow) / 1000) : 0;
   const seqNextIndex = seq ? seq.nextIndex : 0;
   const seqCompletedThrough = seqLockActive ? seqNextIndex - 1 : seqNextIndex;
+  const startioPaused = startioPausedUntil > seqNow;
+  const startioPauseLeft = startioPaused ? Math.ceil((startioPausedUntil - seqNow) / 1000) : 0;
 
   const handleWatchSlot = (slot: AdSlot, index: number) => {
     if (slot.network === 'unity') void handleWatchUnityAd(index);
@@ -852,6 +878,9 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                   const isCompleted = i < seqCompletedThrough;
                   const isCooling = seqLockActive && i === seqCompletedThrough && seqNextIndex > 0 && i === seqNextIndex - 1 && seqCompletedThrough >= 0 && i < seqNextIndex;
                   const isCurrent = !seqLockActive && i === seqNextIndex;
+                  const isStartioPausedSlot = slot.network === 'startio' && startioPaused && !isCompleted;
+                  const pmm = Math.floor(startioPauseLeft / 60);
+                  const pss = String(startioPauseLeft % 60).padStart(2, '0');
                   const isWaitingUnlock = seqLockActive && i === seqNextIndex;
                   const isLocked = i > seqNextIndex || isWaitingUnlock;
                   const cfg = slot.network === 'unity' ? unityConfig : startioConfig;
@@ -900,6 +929,14 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                               <span className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
                                 {isCooling ? 'Next ad unlocks in' : 'Unlocks in'} {mm}:{ss}
                               </span>
+                            </>
+                          ) : isStartioPausedSlot ? (
+                            <>
+                              <span className="w-12 h-12 rounded-full bg-amber-500/15 border border-amber-400/30 flex items-center justify-center">
+                                <Clock className="w-5 h-5 text-amber-300" />
+                              </span>
+                              <span className="text-[9px] font-black uppercase tracking-widest text-amber-200">No Ads Available</span>
+                              <span className="text-[8px] font-bold text-zinc-400">Start.io is restocking — retry in {pmm}:{pss}</span>
                             </>
                           ) : isCurrent ? (
                             <button
