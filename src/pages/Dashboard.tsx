@@ -26,8 +26,9 @@ import { ref, onValue, update, set, increment as rtdbIncrement, get, runTransact
 import { useAuth } from '../context/AuthContext';
 import { sendDepositRequestMail, sendWithdrawalRequestMail, sendActivationMail, playNotificationSound } from '../services/notificationService';
 import { checkForUpdate, type UpdateInfo } from '../services/appUpdate';
-import { getAdsConfig } from '../services/adsSettings';
+import { getAdsConfig, isLevelPlayConfigured } from '../services/adsSettings';
 import { showUnityInterstitial } from '../services/unityAds';
+import { showLevelPlayInterstitial } from '../services/levelplayAds';
 import HomeTab from '../components/dashboard/HomeTab';
 import AnnouncementBar from '../components/dashboard/AnnouncementBar';
 import ProfileTab from '../components/dashboard/ProfileTab';
@@ -80,7 +81,11 @@ export default function Dashboard() {
     (async () => {
       try {
         const cfg = await getAdsConfig();
-        await showUnityInterstitial(cfg);
+        if (isLevelPlayConfigured(cfg)) {
+          await showLevelPlayInterstitial(cfg, user?.uid ?? '');
+        } else {
+          await showUnityInterstitial(cfg);
+        }
       } catch { /* ads are best-effort; navigation already happened */ }
     })();
   }, [activeTab]);
