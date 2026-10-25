@@ -32,8 +32,11 @@ export type StartIoRewardedResult =
   | { status: 'COMPLETED' }
   /** The user closed the ad before it finished. Never pays. */
   | { status: 'SKIPPED' }
-  /** No ad could be shown (web, disabled, no fill, error, timeout). */
-  | { status: 'UNAVAILABLE'; reason: string };
+  /** No ad could be shown (web, disabled, no fill, error, timeout).
+   *  `noFill` is true when the Start.io exchange simply had no ad to
+   *  serve (HTTP 204 from its ad exchange) — a demand-side state, not
+   *  an app error; callers should degrade gracefully, not warn. */
+  | { status: 'UNAVAILABLE'; reason: string; noFill?: boolean };
 
 const INIT_TIMEOUT_MS = 20_000;
 const SHOW_TIMEOUT_MS = 120_000;
@@ -112,35 +115,61 @@ export async function showStartIoRewarded(
   try {
     const ready = await initStartIoAds(config);
     if (!ready) {
+      if (lastInitError) console.warn('Start.io init detail:', lastInitError);
       return {
         status: 'UNAVAILABLE',
-        reason: lastInitError
-          ? `Start.io could not be initialised. (${lastInitError})`
-          : 'Start.io could not be initialised.',
+        reason: 'Start.io could not be initialised. Please try again shortly.',
       };
     }
 
+    const attemptShow = async (): Promise<string> => {
+      try {
+        const { state } = await withTimeout(
+          StartIoAdsBridge.showRewarded(),
+          SHOW_TIMEOUT_MS,
+          'Start.io ad show',
+        );
+        return state;
+      } catch (showError) {
+        // Un-poison the native side so the next attempt can proceed.
+        try { await StartIoAdsBridge.resetPending(); } catch {}
+        throw showError;
+      }
+    };
+
+    const isNoFill = (e: unknown) => {
+      const m = (e instanceof Error ? e.message : String(e)).toLowerCase();
+      return m.includes('failed to load') || m.includes('204') || m.includes('no fill') || m.includes('no ad');
+    };
+
     let state: string;
     try {
-      ({ state } = await withTimeout(
-        StartIoAdsBridge.showRewarded(),
-        SHOW_TIMEOUT_MS,
-        'Start.io ad show',
-      ));
-    } catch (showError) {
-      // Un-poison the native side so the next attempt can proceed.
-      try { await StartIoAdsBridge.resetPending(); } catch {}
-      throw showError;
+      state = await attemptShow();
+    } catch (firstError) {
+      if (!isNoFill(firstError)) throw firstError;
+      // The exchange answered "no content" (HTTP 204) — its own error
+      // text says "retry". Wait a few seconds and ask once more before
+      // reporting the network as unavailable.
+      console.warn('Start.io no fill on first attempt — retrying once:', firstError);
+      await new Promise((r) => setTimeout(r, 3000));
+      state = await attemptShow();
     }
     return state === 'COMPLETED'
       ? { status: 'COMPLETED' }
       : { status: 'SKIPPED' };
   } catch (error) {
+    // Raw SDK detail (URLs, HTTP codes) is for logs only — the user
+    // facing reason stays short and calm (owner report 2026-10-25: the
+    // technical warning text itself was the complaint).
     console.warn('Start.io rewarded ad failed:', error);
     const detail = error instanceof Error ? error.message : String(error);
+    const noFill = /failed to load|204|no fill|no ad/i.test(detail);
     return {
       status: 'UNAVAILABLE',
-      reason: `No Start.io ad is available right now. (${detail})`,
+      reason: noFill
+        ? 'Start.io has no ad available at the moment.'
+        : 'Start.io could not show an ad right now. Please try again shortly.',
+      noFill,
     };
   }
 }
