@@ -56,6 +56,44 @@ function getYouTubeEmbedUrl(url?: string): string | null {
   return id ? `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1` : null;
 }
 
+// Poster art for Unity/LevelPlay slots. Rewarded network ads expose no
+// creative preview before they play, so the slot stage carries this branded
+// artwork as its thumbnail (the owner's YouTube-style Watch page request).
+function UnityPosterArt({ dim }: { dim?: boolean }) {
+  return (
+    <svg viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice" className={`absolute inset-0 w-full h-full ${dim ? 'opacity-40' : 'opacity-100'}`} aria-hidden="true">
+      <defs>
+        <linearGradient id="tmPosterBg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#065f46" />
+          <stop offset="55%" stopColor="#064e3b" />
+          <stop offset="100%" stopColor="#022c22" />
+        </linearGradient>
+        <radialGradient id="tmPosterGlow" cx="0.78" cy="0.3" r="0.75">
+          <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="tmPosterCoin" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#fde68a" />
+          <stop offset="55%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+      </defs>
+      <rect width="400" height="225" fill="url(#tmPosterBg)" />
+      <rect width="400" height="225" fill="url(#tmPosterGlow)" />
+      <polyline points="16,182 96,146 152,160 232,102 306,116 384,58" fill="none" stroke="#ffffff" strokeOpacity="0.55" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M384 58 L362 60 L380 76 Z" fill="#ffffff" fillOpacity="0.7" />
+      <circle cx="312" cy="86" r="44" fill="url(#tmPosterCoin)" stroke="#92400e" strokeOpacity="0.35" strokeWidth="2" />
+      <circle cx="312" cy="86" r="33" fill="none" stroke="#92400e" strokeOpacity="0.45" strokeWidth="2.5" />
+      <path d="M312 66 L319 79 L333 80 L322 89 L326 103 L312 96 L298 103 L302 89 L291 80 L305 79 Z" fill="#92400e" fillOpacity="0.65" />
+      <circle cx="66" cy="152" r="19" fill="url(#tmPosterCoin)" opacity="0.9" />
+      <circle cx="112" cy="52" r="13" fill="url(#tmPosterCoin)" opacity="0.75" />
+      <path d="M52 40 l2.4 5.6 5.6 2.4 -5.6 2.4 -2.4 5.6 -2.4 -5.6 -5.6 -2.4 5.6 -2.4 Z" fill="#ffffff" opacity="0.85" />
+      <path d="M356 156 l2 4.7 4.7 2 -4.7 2 -2 4.7 -2 -4.7 -4.7 -2 4.7 -2 Z" fill="#fde68a" opacity="0.9" />
+      <path d="M196 34 l1.7 4 4 1.7 -4 1.7 -1.7 4 -1.7 -4 -4 -1.7 4 -1.7 Z" fill="#ffffff" opacity="0.6" />
+    </svg>
+  );
+}
+
 function getVideoThumbnail(ad: VideoAd): string | null {
   const ytId = getYouTubeId(ad.videoUrl);
   return ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null;
@@ -844,7 +882,9 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                     return (
                       <div key={`${slot.network}-${slot.number}`} className="relative rounded-[1.75rem] overflow-hidden bg-zinc-900/80 border border-white/10 shadow-xl">
                         <div className="relative aspect-video w-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black overflow-hidden">
-                          <span className="absolute -bottom-5 -left-1 text-[6rem] leading-none font-black text-white/5 select-none">{slot.number}</span>
+                          {slot.network === 'unity' ? <UnityPosterArt /> : (
+                            <span className="absolute -bottom-5 -left-1 text-[6rem] leading-none font-black text-white/5 select-none">{slot.number}</span>
+                          )}
                           <div className="absolute top-0 inset-x-0 p-3 flex items-center justify-between">
                             <span className="px-2 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
                               {slot.network === 'unity' ? (isLevelPlayConfigured(unityConfig ?? ({} as AdsConfig)) ? 'LevelPlay' : 'Unity Ads') : 'Start.io'}
@@ -905,9 +945,13 @@ export default function WatchTab({ onBack, balance, coinBalance, onCreditCoins, 
                     >
                       {/* Player stage */}
                       <div className="relative aspect-video w-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-black overflow-hidden">
-                        <span className="absolute -bottom-5 -left-1 text-[6rem] leading-none font-black text-white/5 select-none">
-                          {slot.number}
-                        </span>
+                        {slot.network === 'unity' ? (
+                          <UnityPosterArt dim={isCompleted || isCooling || isLocked} />
+                        ) : (
+                          <span className="absolute -bottom-5 -left-1 text-[6rem] leading-none font-black text-white/5 select-none">
+                            {slot.number}
+                          </span>
+                        )}
                         <div className="absolute top-0 inset-x-0 p-3 flex items-center justify-between">
                           <span className="px-2 py-1 rounded-lg bg-black/50 backdrop-blur border border-white/10 text-[8px] font-black uppercase tracking-widest text-zinc-300">
                             {slot.network === 'unity' ? (isLevelPlayConfigured(unityConfig ?? ({} as AdsConfig)) ? 'LevelPlay' : 'Unity Ads') : 'Start.io'}
