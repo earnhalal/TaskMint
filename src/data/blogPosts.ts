@@ -339,5 +339,211 @@ export const blogPosts: BlogPost[] = [
       <h2>The Verdict: Which Should Earners Choose?</h2>
       <p>There is no single winner — there is a right wallet for your situation. Choose <strong>EasyPaisa</strong> if you use a Telenor SIM or prefer its app and debit card experience. Choose <strong>JazzCash</strong> if you are on Jazz or Warid, or if your area has stronger Jazz agent coverage. Many experienced earners simply keep both accounts: it costs nothing, gives you a backup when one network is down, and lets you use whichever payout option a platform processes first. If you are just starting, open the wallet that matches your SIM today, <a href="/signup">create your TaskMint account</a>, and improve your setup later as your earnings grow. More practical guides for Pakistani earners are published on our <a href="/blog">blog</a>.</p>
     `
+  },
+  {
+    id: '10',
+    slug: 'online-earning-pakistan-2026-real-ways',
+    title: 'Online Earning in Pakistan in 2026: Real Ways That Actually Pay',
+    excerpt: 'Tired of fake promises? This 2026 guide explains how online earning in Pakistan really works — the legit methods, what each one honestly pays, and how to start without being scammed.',
+    date: 'October 26, 2026',
+    author: 'TaskMint Team',
+    category: 'Online Earning',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['online earning in Pakistan', 'earn money online Pakistan 2026', 'online kamai', 'real online earning', 'make money online Pakistan'],
+    content: `
+      <h2>The Short Answer First</h2>
+      <p>Yes, online earning in Pakistan is real — thousands of Pakistanis are paid every month through freelancing platforms, local wallets like EasyPaisa and JazzCash, and task-based apps. But it works like any other income: you exchange time, attention, or skill for money. Any website or person promising lakhs of rupees for "no work" is selling you a story, not an income. This guide explains the methods that genuinely pay in 2026, what they honestly pay, and who each one suits.</p>
+
+      <h2>Method 1: Freelancing (Highest Ceiling, Needs a Skill)</h2>
+      <p>Freelancing on Fiverr, Upwork, and local Facebook groups remains the strongest online income in Pakistan. Writing, design, video editing, and development gigs pay from a few thousand rupees per project to a full-time salary for experienced sellers. The catch: you must learn a real skill first, which takes weeks to months. If you have the patience, this is where the serious money is — our <a href="/blog/earn-money-online-pakistan-students-guide">students' guide</a> breaks down how to start.</p>
+
+      <h2>Method 2: Task and Reward Apps (Lowest Barrier, Pocket Money)</h2>
+      <p>Task platforms pay you for small actions advertisers value: watching short rewarded ads, answering surveys, testing apps, and checking in daily. On <a href="/">TaskMint</a>, for example, rewarded ads pay Gold Coins (100 Coins = Rs. 1), there is a Daily Bonus and Streak Rewards every day, and friends you invite earn you a referral commission of Rs. 100–125 when they activate. Accounts are free to create, a one-time Rs. 150 activation unlocks full earning, and withdrawals open at Rs. 500 to EasyPaisa or JazzCash. Be realistic: this is steady pocket money for spare minutes, not a salary — and that honesty is exactly what separates a real platform from a scam.</p>
+
+      <h2>Method 3: Online Teaching and Content</h2>
+      <p>Online tuition for matric and intermediate students pays reliably through word of mouth, and short-form video (TikTok, YouTube Shorts, Instagram Reels) can grow into ad and brand income over months. Both reward consistency far more than talent: the earners who win are the ones still posting and teaching after everyone else quits.</p>
+
+      <h2>Method 4: Selling Skills Locally Online</h2>
+      <p>Pakistan's own market is underrated. Shops, restaurants, and online sellers in your city need social media posts, menus, logos, data entry, and store management — and they prefer someone local they can call. Canva design, spreadsheet work, and WhatsApp business management are all sellable this week, with payment straight to your mobile wallet.</p>
+
+      <h2>What Actually Determines Your Income</h2>
+      <p>Three things, in order: <strong>consistency</strong> (showing up daily beats occasional bursts), <strong>trust</strong> (clients and platforms pay people who deliver honestly), and <strong>stacking</strong> (combining two or three methods — a skill for real income, tasks for spare minutes, referrals for passive growth). Our detailed explainer on <a href="/blog/taskmint-guide-how-it-works">how TaskMint works</a> shows how small daily rewards compound over a month.</p>
+
+      <h2>Five Rules to Never Get Scammed</h2>
+      <ul>
+        <li><strong>Never pay large "investment" amounts</strong> to unlock earnings. A small, clearly explained one-time fee is one thing; open-ended deposits are how Ponzi schemes breathe.</li>
+        <li><strong>Check the payout method.</strong> Legit platforms pay to your own EasyPaisa or JazzCash — read our <a href="/blog/easypaisa-vs-jazzcash-online-earnings">wallet comparison</a> before you start.</li>
+        <li><strong>Refuse anyone asking for your OTP or password</strong>, including people claiming to be support.</li>
+        <li><strong>Distrust guaranteed-income claims.</strong> Real platforms show rates and let maths decide; scams show luxury cars.</li>
+        <li><strong>Start free or cheap, withdraw once, then scale.</strong> A platform that pays your first Rs. 500 has earned your trust — see our full <a href="/blog/avoid-online-earning-scams">scam-avoidance guide</a>.</li>
+      </ul>
+
+      <h2>The Bottom Line</h2>
+      <p>Online earning in Pakistan in 2026 is neither a gold rush nor a myth — it is work, paid digitally. Pick one skill-based method for growth and one phone-based method for spare time, stay consistent for ninety days, and judge platforms by whether they actually pay out. If you want the lowest-barrier start, <a href="/signup">create a free TaskMint account</a> and explore the guides on our <a href="/blog">blog</a> to plan your first month.</p>
+    `
+  },
+  {
+    id: '11',
+    slug: 'taskmint-gold-coins-guide',
+    title: 'TaskMint Gold Coins Explained: Earn Coins and Convert Them to Rupees',
+    excerpt: 'Gold Coins are how TaskMint pays you for watching ads. Learn how coins are earned, the plan rates (30–60 coins per ad), and how to convert 100 Coins into Rs. 1 in your balance.',
+    date: 'October 26, 2026',
+    author: 'TaskMint Team',
+    category: 'TaskMint Guides',
+    image: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['TaskMint Gold Coins', 'gold coins rupees', 'convert coins', 'watch ads earn coins', 'TaskMint coins guide'],
+    content: `
+      <h2>What Are Gold Coins?</h2>
+      <p>Gold Coins are the reward currency inside the TaskMint app. Instead of adding tiny fractions of a rupee for every ad you watch, TaskMint pays you in coins — and coins convert into real balance at a simple, fixed rate: <strong>100 Gold Coins = Rs. 1</strong>. Your coin balance sits in its own wallet at the top of the Watch page, separate from your rupee balance, so you always know exactly what your viewing has earned.</p>
+
+      <h2>How You Earn Coins</h2>
+      <ul>
+        <li><strong>Rewarded ads:</strong> every fully watched ad on the Watch page pays coins instantly. The rate depends on your plan: <strong>Basic 30 coins, Bronze 40, Silver 50, and Gold 60</strong> per completed ad.</li>
+        <li><strong>Daily Bonus:</strong> once every 24 hours, claim a bonus of <strong>100–1,000 Gold Coins</strong>.</li>
+        <li><strong>Streak Rewards:</strong> watch a rewarded ad to unlock your daily streak claim of <strong>100–500 coins</strong> — rising to <strong>1,000–2,000 coins</strong> in the last five days of the month.</li>
+      </ul>
+      <p>Only completed ads pay. Closing an ad early earns nothing, and the daily playlist unlocks one ad at a time with a short pause between ads — this keeps the system fair for advertisers, whose payments fund your coins.</p>
+
+      <h2>How to Convert Coins to Rupees</h2>
+      <p>Converting takes under a minute, right inside the app:</p>
+      <ul>
+        <li><strong>Step 1:</strong> Open the <strong>Watch</strong> page in the TaskMint app.</li>
+        <li><strong>Step 2:</strong> Find the <strong>Convert</strong> card under your coin balance.</li>
+        <li><strong>Step 3:</strong> Enter any amount from <strong>100 coins</strong> upwards and confirm.</li>
+      </ul>
+      <p>The converted rupees land in your main balance immediately, at exactly 100 coins = Rs. 1, with <strong>no conversion fee</strong>. From there they behave like any other balance: they count toward the Rs. 500 minimum withdrawal, which is paid to EasyPaisa or JazzCash with a 5% fee during the payout windows (1st–3rd and 16th–18th of each month).</p>
+
+      <h2>Why Coins Instead of Direct Rupees?</h2>
+      <p>Honest maths. A single rewarded ad pays a fraction of a rupee — showing "Rs. 0.30" confuses people and looks like a trick. Coins make small rewards readable (30 coins feels like what it is), let you watch your progress build toward the next rupee, and keep every rate transparent on one screen. If a platform ever hides its conversion rate, that is a red flag — ours is printed at the top of the Watch page.</p>
+
+      <h2>Tips to Grow Your Coin Balance Faster</h2>
+      <ul>
+        <li>Finish the full daily playlist instead of stopping after a few ads — the habit matters more than any single day.</li>
+        <li>Claim the Daily Bonus and your Streak Reward every day; streaks reward the last five days of the month most.</li>
+        <li>If you upgrade to a partner plan, your per-ad rate rises to 40, 50, or 60 coins — work out whether your daily viewing makes the plan worth it, using the rates in our <a href="/blog/taskmint-guide-how-it-works">complete TaskMint guide</a>.</li>
+        <li>Invite friends: referral commission is paid in rupees (Rs. 100–125 per activated friend), separate from coins — see the <a href="/blog/taskmint-referral-program-guide">referral program guide</a>.</li>
+      </ul>
+
+      <h2>The Bottom Line</h2>
+      <p>Gold Coins are simply TaskMint's clear way of paying for your attention: watch, earn coins, convert at 100 = Rs. 1, withdraw from Rs. 500. <a href="/signup">Create your free account</a>, open the Watch page, and let your first coins land today — more earning guides are waiting on our <a href="/blog">blog</a>.</p>
+    `
+  },
+  {
+    id: '12',
+    slug: 'taskmint-referral-program-guide',
+    title: 'TaskMint Referral Program: Earn Rs. 100–125 for Every Friend Who Joins',
+    excerpt: 'Inviting friends is the fastest way to grow your TaskMint balance. See the exact flat rates — Rs. 100 basic, Rs. 125 for package members — plus team commissions and sharing tips that actually work.',
+    date: 'October 26, 2026',
+    author: 'TaskMint Team',
+    category: 'TaskMint Guides',
+    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['TaskMint referral', 'invite and earn Pakistan', 'referral commission', 'earn by inviting friends', 'TaskMint invite'],
+    content: `
+      <h2>Simple, Flat Rates — No Confusing Tiers</h2>
+      <p>TaskMint's referral program pays a flat commission when a friend you invited activates their account: <strong>Rs. 100</strong> if you are a basic member, and <strong>Rs. 125</strong> if you hold any package or partner plan. That is the whole table — the rate does not secretly change by tier, and it is the same rates shown inside the app on the Invite page.</p>
+
+      <h2>Team Commissions: Levels 2 and 3</h2>
+      <p>Your network earns beyond direct invites. When people your friends invited (Level 2) activate, you earn <strong>Rs. 15</strong> each; when their invites (Level 3) activate, you earn <strong>Rs. 10</strong> each. The Invite page in the app shows your three levels separately — how many members each level has and exactly how much each level has earned you — so nothing is hidden or estimated.</p>
+
+      <h2>How to Invite, Step by Step</h2>
+      <ul>
+        <li><strong>Step 1:</strong> Open the <strong>Invite</strong> tab in the TaskMint app.</li>
+        <li><strong>Step 2:</strong> Copy your personal invite link (your referral code is shown on the same card).</li>
+        <li><strong>Step 3:</strong> Share it on WhatsApp or with the Share button — status, family groups, and class groups work best.</li>
+        <li><strong>Step 4:</strong> When your friend signs up with your link and activates their account (one-time Rs. 150 fee), your commission lands in your balance.</li>
+      </ul>
+      <p>Your Invite page also shows your totals — invited, active members, and total earned — so you can watch the network grow in real time.</p>
+
+      <h2>Sharing That Actually Converts</h2>
+      <ul>
+        <li><strong>Be honest about amounts.</strong> "I earn daily pocket money from an app" brings real sign-ups; "get rich quick" brings suspicion and unfollows.</li>
+        <li><strong>Explain the activation fee upfront.</strong> Friends who know about the one-time Rs. 150 before signing up activate far more often than friends surprised by it.</li>
+        <li><strong>Help your first three friends personally.</strong> Walk them through their first ads and first conversion to balance — active friends build your Level 2 and Level 3, which is where referrals become serious money.</li>
+        <li><strong>Share proof, not promises.</strong> A screenshot of your own withdrawal (details hidden) convinces more people than any caption.</li>
+      </ul>
+
+      <h2>What Referral Income Is Not</h2>
+      <p>Referral commission is a bonus on top of your own earning, not a replacement for it. The members who earn most on TaskMint combine three streams: their own daily ads, bonuses and streaks (see the <a href="/blog/taskmint-daily-bonus-streak-rewards">daily rewards guide</a>), and a steadily growing team. Fake accounts and self-invites violate the rules and get networks removed — build a real team and it pays you for months.</p>
+
+      <h2>The Bottom Line</h2>
+      <p>One activated friend is worth Rs. 100–125 today and a growing Level 2 and 3 tomorrow. <a href="/signup">Create your free account</a>, open the Invite tab, and send your link to the first five people who trust you — then read how those earnings withdraw in our <a href="/blog/easypaisa-vs-jazzcash-online-earnings">EasyPaisa vs JazzCash guide</a>.</p>
+    `
+  },
+  {
+    id: '13',
+    slug: 'taskmint-daily-bonus-streak-rewards',
+    title: 'Daily Bonus and Streak Rewards: Earn Gold Coins Every Day on TaskMint',
+    excerpt: 'Two daily habits pay you on TaskMint even before you watch a single ad: the Daily Bonus (100–1,000 coins) and Streak Rewards (up to 2,000 coins at month-end). Here is how both work.',
+    date: 'October 26, 2026',
+    author: 'TaskMint Team',
+    category: 'TaskMint Guides',
+    image: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['TaskMint daily bonus', 'streak rewards', 'daily earning app Pakistan', 'free gold coins', 'daily bonus app'],
+    content: `
+      <h2>Two Rewards, Every Single Day</h2>
+      <p>Most earning apps pay only when you work. TaskMint adds two daily rewards on top of ad earnings, both paid in Gold Coins (100 Coins = Rs. 1, convertible any time from the Watch page): the <strong>Daily Bonus</strong> and <strong>Streak Rewards</strong>. Together they reward the simplest habit in online earning — opening the app every day.</p>
+
+      <h2>The Daily Bonus: 100–1,000 Coins Every 24 Hours</h2>
+      <p>Once every 24 hours, the Daily Bonus card on your Home screen lets you claim a bonus drawn from <strong>100 to 1,000 Gold Coins</strong>. Most claims land in the 100–300 range; the bigger amounts are rarer, which keeps the bonus sustainable for everyone. The card shows a live countdown to your next claim, so you always know exactly when to come back. Claiming takes one tap — no ad needs to be watched first.</p>
+
+      <h2>Streak Rewards: Your Daily Chain</h2>
+      <p>Streak Rewards pay you for consecutive days. The flow is simple:</p>
+      <ul>
+        <li><strong>Step 1:</strong> Open Streak Rewards and watch <strong>one rewarded ad</strong> to unlock today's claim.</li>
+        <li><strong>Step 2:</strong> Claim between <strong>100 and 500 Gold Coins</strong>.</li>
+        <li><strong>Step 3:</strong> Come back tomorrow — your streak count grows, and the 24-hour timer shows exactly when the next claim opens.</li>
+      </ul>
+      <p>The generous part: in the <strong>last five days of the month</strong>, streak claims jump to <strong>1,000–2,000 coins</strong>. Members who keep their streak alive all month earn the most precisely when casual users have dropped off.</p>
+
+      <h2>How Much Do the Two Add Up To?</h2>
+      <p>Realistic maths for an ordinary member: a Daily Bonus averaging around 200 coins plus a streak claim averaging around 200 coins is roughly <strong>400 coins a day — about Rs. 4 daily, or Rs. 120 a month</strong> — before a single playlist ad, survey, or referral. Add the month-end streak boost and daily ad watching (30–60 coins per ad depending on your plan, explained in the <a href="/blog/taskmint-gold-coins-guide">Gold Coins guide</a>) and the "small" daily habits become the most reliable part of your balance.</p>
+
+      <h2>Keeping the Habit Alive</h2>
+      <ul>
+        <li>Claim at the same time daily — with breakfast or before bed — so the 24-hour windows line up.</li>
+        <li>The app remembers your streak unlock: if you watch the unlocking ad and get interrupted, your claim is still waiting when you return.</li>
+        <li>Convert coins whenever you pass 100 — watching the rupee balance grow is the motivation that keeps streaks alive.</li>
+        <li>Protect the last week of the month: that is when streak claims are worth two to four times more.</li>
+      </ul>
+
+      <h2>The Bottom Line</h2>
+      <p>Daily Bonus plus Streak Rewards turn two minutes a day into a permanent earning habit. <a href="/signup">Create your free TaskMint account</a>, claim today's bonus, and read the <a href="/blog/taskmint-guide-how-it-works">complete TaskMint guide</a> to stack these rewards with ads, surveys, and referrals.</p>
+    `
+  },
+  {
+    id: '14',
+    slug: 'is-online-earning-halal-guide',
+    title: 'Is Online Earning Halal? A Practical Guide for Pakistani Earners',
+    excerpt: 'Many Pakistanis ask whether earning online is halal. This guide explains the basic principles scholars use — real work, honest dealing, avoiding interest and gambling — and applies them to freelancing, ads, tasks and apps.',
+    date: 'October 26, 2026',
+    author: 'TaskMint Team',
+    category: 'Guides',
+    image: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['is online earning halal', 'halal earning Pakistan', 'online kamai halal', 'halal income from home', 'task app halal or haram'],
+    content: `
+      <h2>A Question Worth Asking Properly</h2>
+      <p>For many Pakistanis, earning money is not only about amount — it is about whether the income is halal. This guide is not a fatwa, and it does not replace asking a scholar you trust about your specific situation. What it can do is explain the well-known principles Islamic scholars apply to new kinds of work, so you can judge online earning methods — including apps like ours — with clear eyes.</p>
+
+      <h2>The Core Principles</h2>
+      <ul>
+        <li><strong>Real work or value in exchange for pay.</strong> Income is earned by doing something genuinely useful: a skill, your time, your attention, or a service someone willingly pays for.</li>
+        <li><strong>Honesty and consent.</strong> No deception, fake claims, or hidden terms — both sides know what is being exchanged.</li>
+        <li><strong>No riba (interest).</strong> Money should not grow simply by lending money at interest.</li>
+        <li><strong>No gambling (maysir).</strong> Income should not depend on staking money on pure chance.</li>
+        <li><strong>Halal subject matter.</strong> The work itself should not promote what Islam forbids.</li>
+      </ul>
+
+      <h2>Applying the Principles, Method by Method</h2>
+      <p><strong>Freelancing, teaching, and services</strong> sit on the firmest ground: you sell a skill, the client pays for the work — the same exchange as any offline job.</p>
+      <p><strong>Watching rewarded ads and completing tasks</strong> is payment for your time and attention. Advertisers pay platforms to reach real viewers, and the platform shares that payment with you. Your side of the exchange is genuine — you watched, you answered, you tested. On TaskMint, that is exactly how <a href="/blog/taskmint-gold-coins-guide">Gold Coins</a> are funded, and the rates are published rather than promised as "guaranteed profit".</p>
+      <p><strong>Referral commissions</strong> are payment for marketing work: you introduced a customer, and the platform pays you from its own margin when that customer activates — the same principle as a commission agent in any bazaar, explained openly in our <a href="/blog/taskmint-referral-program-guide">referral guide</a>.</p>
+      <p><strong>Points of caution:</strong> scholars generally advise avoiding schemes where your money is staked on chance outcomes — lotteries and prize draws fall in this grey-to-avoided area for many people, which is why conscientious users simply skip such features and stick to work-based earning. Likewise, any platform demanding ever-larger deposits with "guaranteed returns" fails both the honesty test and basic common sense — see our <a href="/blog/avoid-online-earning-scams">scam guide</a>.</p>
+
+      <h2>What About Activation Fees?</h2>
+      <p>Paying a fee for a service is a normal commercial exchange when three things hold: the fee is fixed and stated upfront, you know exactly what it buys, and nothing more is demanded later to "unlock" your own earnings again and again. TaskMint's one-time Rs. 150 activation is published on the site and in the app before you pay — judge any platform, including ours, by that standard of transparency.</p>
+
+      <h2>The Bottom Line</h2>
+      <p>Online earning is a channel, not a ruling: the same principles that judge a shop judge an app. Earn by real work, deal honestly, avoid interest and staking money on chance, and stay away from anything you cannot explain to your family in one sentence. For your personal situation, please consult a scholar whose knowledge you trust — and whatever you decide, our <a href="/blog">blog</a> will keep explaining exactly how every rupee on <a href="/">TaskMint</a> is earned, because transparency is a principle we share.</p>
+    `
   }
 ];
