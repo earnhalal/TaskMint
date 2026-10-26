@@ -12,10 +12,13 @@ interface LeaderboardViewProps {
  * Leaderboard — "Champions" redesign (2026-10-25).
  *
  * Data: `earners` is the server-precomputed top 10 (app_settings/
- * leaderboard, ranked by lifetime totalEarnings from the RTDB
- * ledger) — the client can no longer query the whole users
- * collection under the current security rules. Amounts render
- * totalEarnings (falling back to balance for older payloads).
+ * leaderboard) — the client can no longer query the whole users
+ * collection under the current security rules. Per the owner's
+ * direction (2026-10-26) the board ranks by current BALANCE: the
+ * member holding the most money tops the board. Amounts render
+ * balance (falling back to totalEarnings for older payloads).
+ * Identity (username / avatar / photo) is published by the server
+ * from the RTDB profile mirrors, so DPs show.
  *
  * Look: deep emerald night background with gold champion accents —
  * a glowing crowned #1 on a raised pedestal, silver and bronze
@@ -23,7 +26,7 @@ interface LeaderboardViewProps {
  * The signed-in user's own row is highlighted with a YOU chip.
  */
 
-const amountOf = (u: any) => Number(u?.totalEarnings ?? u?.balance ?? 0);
+const amountOf = (u: any) => Number(u?.balance ?? u?.totalEarnings ?? 0);
 
 const RING: Record<number, string> = {
   1: 'from-amber-300 via-yellow-500 to-amber-600 shadow-[0_0_45px_rgba(245,197,66,0.35)]',
@@ -125,14 +128,14 @@ export default function LeaderboardView({ earners, currentUserId, onBack }: Lead
           </button>
           <div className="flex-1 min-w-0">
             <h2 className="text-[22px] font-black tracking-tight leading-none">
-              Top <span className="bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-500 bg-clip-text text-transparent">Earners</span>
+              Top <span className="bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-500 bg-clip-text text-transparent">Balances</span>
             </h2>
             <div className="flex items-center gap-2 mt-1.5">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
               </span>
-              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Champions board • Lifetime earnings</p>
+              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Champions board • Ranked by balance</p>
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-2 bg-amber-400/10 border border-amber-400/25 px-3.5 py-2 rounded-2xl shrink-0">

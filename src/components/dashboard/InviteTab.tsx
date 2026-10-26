@@ -175,7 +175,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       {/* Compact header */}
       <div className="mb-5">
         <h1 className="text-2xl font-black text-white tracking-tight">
-          Invite &amp; <span className="text-emerald-400">Earn</span>
+          Invite &amp; <span className="bg-gradient-to-r from-amber-300 to-yellow-500 bg-clip-text text-transparent">Earn</span>
         </h1>
         <p className="text-[13px] text-zinc-300 leading-relaxed mt-1">
           Earn <span className="text-emerald-400 font-bold">Rs {currentBonus}</span> for every friend who joins and activates, plus team commission from Levels 2 and 3.
@@ -185,7 +185,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2.5 mb-5">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl bg-[#06382b] border border-white/10 px-3 py-3 text-center">
+          <div key={s.label} className="rounded-2xl bg-gradient-to-b from-emerald-500/20 to-teal-600/10 border border-emerald-400/25 px-3 py-3 text-center">
             <s.icon className="w-4 h-4 text-emerald-400 mx-auto mb-1.5" />
             <p className="text-base font-black text-white leading-none">{s.value}</p>
             <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-300 mt-1.5">{s.label}</p>
@@ -194,7 +194,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
       </div>
 
       {/* Invite link card */}
-      <div className="mb-6 rounded-3xl p-4 sm:p-5 bg-[#06382b] border border-white/10">
+      <div className="mb-6 rounded-3xl p-4 sm:p-5 bg-gradient-to-br from-emerald-600/25 via-[#0c231a] to-teal-700/20 border border-emerald-400/25">
         <div className="flex items-center justify-between mb-3 px-0.5">
           <label className="text-[11px] font-black uppercase tracking-wider text-zinc-200">Your Invite Link</label>
           <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-white/10 text-white">{referralCode}</span>
@@ -279,7 +279,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                 className={`flex flex-col items-center py-3.5 px-2 rounded-2xl border transition-all duration-200 active:scale-95 ${
                   isActive
                     ? 'border-emerald-400/60 bg-[#064e3b]'
-                    : 'border-white/10 bg-[#06382b] hover:border-white/20'
+                    : 'border-white/10 bg-white/[0.04] hover:border-emerald-400/30'
                 }`}
               >
                 <span className={`text-[10px] font-black uppercase tracking-wider ${isActive ? 'text-emerald-300' : 'text-zinc-300'}`}>
@@ -303,12 +303,12 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
 
         <div className="flex flex-col gap-2.5">
           {loadingTree ? (
-            <div className="rounded-3xl p-10 text-center border border-dashed bg-[#06382b] border-white/15">
+            <div className="rounded-3xl p-10 text-center border border-dashed bg-white/[0.03] border-emerald-400/20">
               <Sparkles className="w-8 h-8 mx-auto mb-2.5 text-emerald-400 animate-pulse" />
               <p className="text-[11px] font-black uppercase tracking-wider text-zinc-200">Loading your team…</p>
             </div>
           ) : activeData.length === 0 ? (
-            <div className="rounded-3xl p-10 text-center border border-dashed bg-[#06382b] border-white/15">
+            <div className="rounded-3xl p-10 text-center border border-dashed bg-white/[0.03] border-emerald-400/20">
               <UsersRound className="w-8 h-8 mx-auto mb-2.5 text-zinc-400" />
               <p className="text-[11px] font-black uppercase tracking-wider text-zinc-200">No members in this level yet</p>
               <p className="text-xs text-zinc-400 mt-1.5">Share your invite link to grow your team.</p>
@@ -322,7 +322,7 @@ export default function InviteTab({ status, referralStats, referralCode, onActiv
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(idx * 0.04, 0.4) }}
-                className="p-3.5 rounded-2xl border flex items-center justify-between bg-[#06382b] border-white/10"
+                className="p-3.5 rounded-2xl border flex items-center justify-between bg-white/[0.04] border-white/10"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-base shrink-0 ${isPaid ? 'bg-emerald-500 text-emerald-950' : 'bg-white/10 text-zinc-200 border border-white/10'}`}>
