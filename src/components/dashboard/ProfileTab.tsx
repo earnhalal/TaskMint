@@ -115,6 +115,7 @@ export default function ProfileTab({
   onEarningHistoryClick,
   onActivateClick,
   onMailboxClick,
+  mailboxUnread = 0,
   onSupportAIClick,
   appSettings,
   accountNumber,
@@ -140,6 +141,7 @@ export default function ProfileTab({
   onEarningHistoryClick?: () => void,
   onActivateClick?: () => void,
   onMailboxClick?: () => void,
+  mailboxUnread?: number,
   onSupportAIClick?: () => void,
   appSettings?: any,
   accountNumber?: string,
@@ -188,7 +190,7 @@ export default function ProfileTab({
     </div>
   );
 
-  const Item = ({ icon, label, hasToggle = false, isDestructive = false, onClick }: any) => (
+  const Item = ({ icon, label, hasToggle = false, isDestructive = false, onClick, badge }: any) => (
     <div onClick={onClick} className="flex items-center justify-between p-4 border-b border-slate-50 last:border-0 hover:bg-white/5 transition-colors cursor-pointer">
       <div className="flex items-center gap-3">
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDestructive ? 'bg-red-500/10 text-red-500' : 'bg-white/10 text-zinc-300'}`}>
@@ -196,7 +198,9 @@ export default function ProfileTab({
         </div>
         <span className={`text-sm font-bold ${isDestructive ? 'text-red-500' : 'text-zinc-200'}`}>{label}</span>
       </div>
-      {hasToggle ? (
+      {badge ? (
+        <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center">{badge}</span>
+      ) : hasToggle ? (
         <div className="w-10 h-6 bg-white/15 rounded-full relative">
           <div className="absolute left-1 top-1 w-4 h-4 bg-[#15181D] rounded-full shadow-sm"></div>
         </div>
@@ -390,7 +394,7 @@ export default function ProfileTab({
       <Section title="Account">
         <Item icon={<ImageIcon className="w-4 h-4" />} label="Change Avatar" onClick={onEditProfile} />
         <Item icon={<Wallet className="w-4 h-4" />} label="Manage Wallet & PIN" onClick={onManageWalletClick} />
-        <Item icon={<Mail className="w-4 h-4" />} label="System Mailbox" onClick={onMailboxClick} />
+        <Item icon={<Mail className="w-4 h-4" />} label="Mailbox" badge={mailboxUnread > 0 ? (mailboxUnread > 9 ? '9+' : mailboxUnread) : undefined} onClick={onMailboxClick} />
       </Section>
 
       <Section title="Features">

@@ -42,6 +42,7 @@ import PremiumModal from '../components/dashboard/PremiumModal';
 import LeaderboardView from '../components/dashboard/LeaderboardView';
 import PinLockView from '../components/PinLockView';
 import UpdatesView from '../components/dashboard/UpdatesView';
+import MailboxView from '../components/dashboard/MailboxView';
 import PartnerUpgradeView from '../components/dashboard/PartnerUpgradeView';
 import ActivationTab from '../components/dashboard/ActivationTab';
 import WannadsSurveyView from '../components/dashboard/WannadsSurveyView';
@@ -124,6 +125,7 @@ export default function Dashboard() {
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [unreadChatCount, setUnreadChatCount] = useState(0);
+  const [mailboxUnread, setMailboxUnread] = useState(0);
 
   useEffect(() => {
     if (activeTab === 'support_ai') {
@@ -383,6 +385,10 @@ export default function Dashboard() {
         if (data.totalEarnings !== undefined) setTotalEarnings(data.totalEarnings);
         if (data.totalIndirectCommission !== undefined) setTotalIndirectCommission(data.totalIndirectCommission);
         if (data.lockedBalance !== undefined) setLockedBalance(data.lockedBalance);
+        // Mailbox unread badge (Profile row) — the mailbox lives under
+        // this same RTDB node, mirrored there by the server agent.
+        const mb = data.mailbox || {};
+        setMailboxUnread(Object.values(mb).filter((m: any) => m && !m.read).length);
       }
     }, (error) => console.error("Referral Stats RTDB Error:", error));
 
@@ -1280,7 +1286,8 @@ export default function Dashboard() {
                  onEarningHistoryClick={() => setActiveTab('earning_history')}
                  onActivateClick={() => setActiveTab('activation')}
                  onSupportAIClick={() => setActiveTab('support_ai')}
-                 onMailboxClick={() => setActiveTab('updates')}
+                 onMailboxClick={() => setActiveTab('mailbox')}
+                 mailboxUnread={mailboxUnread}
                  appSettings={activeAppSettings}
                />;
       case 'partner_upgrade':
@@ -1379,8 +1386,10 @@ export default function Dashboard() {
           userName={userName}
           onOpenVerification={(id) => setVerifyDepositId(id)}
         />;
+      case 'mailbox':
+        return <MailboxView uid={user?.uid || ''} onBack={() => setActiveTab('profile')} />;
       case 'updates':
-        return <UpdatesView 
+        return <UpdatesView
           updates={notifications}
           onMarkAsRead={async (id) => {
             await updateDoc(doc(db, 'notifications', id), { status: 'read' });
