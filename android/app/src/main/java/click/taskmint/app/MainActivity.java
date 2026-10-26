@@ -13,6 +13,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(UnityAdsBridge.class);
         registerPlugin(StartIoAdsBridge.class);
         registerPlugin(LevelPlayAdsBridge.class);
+        registerPlugin(UpdateInstallerBridge.class);
         super.onCreate(savedInstanceState);
     }
 }

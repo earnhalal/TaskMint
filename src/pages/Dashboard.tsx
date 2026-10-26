@@ -26,6 +26,7 @@ import { ref, onValue, update, set, increment as rtdbIncrement, get, runTransact
 import { useAuth } from '../context/AuthContext';
 import { sendDepositRequestMail, sendWithdrawalRequestMail, sendActivationMail, playNotificationSound } from '../services/notificationService';
 import { checkForUpdate, type UpdateInfo } from '../services/appUpdate';
+import UpdateNowButton from '../components/dashboard/UpdateNowButton';
 import { getAdsConfig, isLevelPlayConfigured } from '../services/adsSettings';
 import { showUnityInterstitial } from '../services/unityAds';
 import { showLevelPlayInterstitial } from '../services/levelplayAds';
@@ -1656,12 +1657,7 @@ export default function Dashboard() {
               <p className="text-xs font-extrabold text-white leading-tight">Update available</p>
               <p className="text-[10px] font-semibold text-zinc-400 leading-tight mt-0.5">TaskMint v{updateInfo.latestVersion} is ready. Update for the latest features and fixes.</p>
             </div>
-            <button
-              onClick={() => { window.open(updateInfo.downloadUrl, '_blank'); }}
-              className="bg-sky-500 hover:bg-sky-400 text-black text-[10px] font-black px-3 py-2 rounded-lg active:scale-95 transition shrink-0"
-            >
-              UPDATE NOW
-            </button>
+            <UpdateNowButton variant="banner" url={updateInfo.downloadUrl} version={updateInfo.latestVersion} />
             <button
               onClick={() => { setUpdateDismissedVersion(updateInfo.latestVersion); try { localStorage.setItem('tm_update_dismissed_version', updateInfo.latestVersion); } catch {} }}
               className="text-zinc-500 hover:text-zinc-300 shrink-0 p-1"

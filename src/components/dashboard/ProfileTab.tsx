@@ -9,6 +9,7 @@ import { ChevronRight, BarChart3, Image as ImageIcon, Wallet, Mail, Fingerprint,
 import { DynamicAvatar } from '../ui/DynamicAvatar';
 import { Capacitor } from '@capacitor/core';
 import { APP_VERSION, checkForUpdate, type UpdateInfo } from '../../services/appUpdate';
+import UpdateNowButton from './UpdateNowButton';
 import { RefreshCw, ArrowUpCircle, CheckCircle2 } from 'lucide-react';
 
 function AppUpdateSection() {
@@ -71,12 +72,7 @@ function AppUpdateSection() {
             <p className="text-[10px] text-zinc-500 mt-1">Last checked at {checkedAt}</p>
           )}
           {status === 'update' && info ? (
-            <button
-              onClick={() => { window.open(info.downloadUrl, '_blank'); }}
-              className="w-full mt-3 bg-sky-500 hover:bg-sky-400 text-black text-xs font-black py-3 rounded-xl active:scale-95 transition"
-            >
-              UPDATE NOW — v{info.latestVersion}
-            </button>
+            <UpdateNowButton url={info.downloadUrl} version={info.latestVersion} />
           ) : (
             <button
               onClick={onCheck}
