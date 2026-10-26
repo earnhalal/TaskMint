@@ -1687,7 +1687,7 @@ export default function Dashboard() {
               <p className="text-xs font-extrabold text-white leading-tight">Update available</p>
               <p className="text-[10px] font-semibold text-zinc-400 leading-tight mt-0.5">TaskMint v{updateInfo.latestVersion} is ready. Update for the latest features and fixes.</p>
             </div>
-            <UpdateNowButton variant="banner" url={updateInfo.downloadUrl} version={updateInfo.latestVersion} />
+            <UpdateNowButton variant="banner" version={updateInfo.latestVersion} />
             <button
               onClick={() => { setUpdateDismissedVersion(updateInfo.latestVersion); try { localStorage.setItem('tm_update_dismissed_version', updateInfo.latestVersion); } catch {} }}
               className="text-zinc-500 hover:text-zinc-300 shrink-0 p-1"
