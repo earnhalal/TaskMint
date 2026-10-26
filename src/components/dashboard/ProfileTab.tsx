@@ -72,7 +72,7 @@ function AppUpdateSection() {
             <p className="text-[10px] text-zinc-500 mt-1">Last checked at {checkedAt}</p>
           )}
           {status === 'update' && info ? (
-            <UpdateNowButton url={info.downloadUrl} version={info.latestVersion} />
+            <UpdateNowButton version={info.latestVersion} />
           ) : (
             <button
               onClick={onCheck}
