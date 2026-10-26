@@ -422,75 +422,96 @@ export default function Dashboard() {
   }, [user, role]);
 
   // Dedicated Listener for Referrals (Reactive to referralCode)
+  //
+  // Invite history has been written under TWO different RTDB keys over
+  // the app's lifetime: some under the referrer's uid
+  // (invites/{uid}/history) and some under their referral code
+  // (invites/{code}/history). Listening to only the code path left the
+  // Invite page empty for members whose history sits under their uid —
+  // so both paths are subscribed and merged by entry id.
   useEffect(() => {
-    if (!user || !referralCode) return;
+    if (!user) return;
 
     // RTDB paths cannot contain ., #, $, [, ], or /
-    const safeRefCode = referralCode.replace(/[.#$\[\]\/]/g, '') || 'invalid_code';
-    const invitesRef = ref(rtdb, `invites/${safeRefCode}/history`);
-    const unsubscribeReferrals = onValue(invitesRef, async (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const referralItems = Object.keys(data).map(key => ({
-          id: key,
-          ...data[key],
-          status: data[key].status ? String(data[key].status).toLowerCase() : 'pending'
-        }));
+    const safeRefCode = (referralCode || '').replace(/[.#$\[\]\/]/g, '');
+    const stores: { uid: any; code: any } = { uid: null, code: null };
+    let disposed = false;
 
-        // Fetch missing names from Firestore if needed
-        const enrichedReferrals = await Promise.all(referralItems.map(async (r) => {
-          try {
-            const uDoc = await getDoc(doc(db, 'users', r.id));
-            if (uDoc.exists()) {
-              const uData = uDoc.data();
-              return { 
-                ...r, 
-                name: r.name && r.name !== 'Anonymous' ? r.name : (uData.username || uData.name || 'User'),
-                referralCode: uData.referralCode || uData.username || ''
-              };
-            }
-          } catch (e) {
-            console.error("Error fetching username for referral:", e);
-          }
-          return r;
-        }));
+    const emit = async () => {
+      const merged: Record<string, any> = { ...(stores.code || {}), ...(stores.uid || {}) };
+      const referralItems = Object.keys(merged).map(key => ({
+        id: key,
+        ...merged[key],
+        status: merged[key].status ? String(merged[key].status).toLowerCase() : 'pending'
+      }));
 
-        enrichedReferrals.sort((a, b) => {
-          const timeA = a.timestamp || a.paidAt || 0;
-          const timeB = b.timestamp || b.paidAt || 0;
-          return timeB - timeA;
-        });
-
-        setPartnerReferrals(enrichedReferrals);
-
-        // Update Stats locally to ensure UI consistency
-        const totalCount = enrichedReferrals.length;
-        const activeCount = enrichedReferrals.filter(r => r.status === 'paid').length;
-        const commissions = enrichedReferrals.reduce((sum, r) => {
-          if (r.status === 'paid') return sum + (r.commission || 125);
-          return sum;
-        }, 0);
-
-        setReferralStats(prev => {
-          // If local commissions are higher than DB, we use local for display
-          const effectiveCommissions = Math.max(prev.totalCommission, commissions);
-          
-          // Calculate if there's a "missing" amount (commissions not yet in DB)
-          const missingInDb = Math.max(0, commissions - prev.totalCommission);
-
-          return {
-            totalInvited: Math.max(prev.totalInvited, totalCount),
-            activeMembers: Math.max(prev.activeMembers, activeCount),
-            totalCommission: effectiveCommissions
-          };
-        });
-
-      } else {
-        setPartnerReferrals([]);
+      if (!referralItems.length) {
+        if (!disposed) setPartnerReferrals([]);
+        return;
       }
+
+      // Fetch missing names from Firestore if needed
+      const enrichedReferrals = await Promise.all(referralItems.map(async (r) => {
+        try {
+          const uDoc = await getDoc(doc(db, 'users', r.id));
+          if (uDoc.exists()) {
+            const uData = uDoc.data();
+            return {
+              ...r,
+              name: r.name && r.name !== 'Anonymous' ? r.name : (uData.username || uData.name || 'User'),
+              referralCode: uData.referralCode || uData.username || ''
+            };
+          }
+        } catch (e) {
+          console.error("Error fetching username for referral:", e);
+        }
+        return r;
+      }));
+      if (disposed) return;
+
+      enrichedReferrals.sort((a, b) => {
+        const timeA = a.timestamp || a.paidAt || 0;
+        const timeB = b.timestamp || b.paidAt || 0;
+        return timeB - timeA;
+      });
+
+      setPartnerReferrals(enrichedReferrals);
+
+      // Update Stats locally to ensure UI consistency
+      const totalCount = enrichedReferrals.length;
+      const activeCount = enrichedReferrals.filter(r => r.status === 'paid').length;
+      const commissions = enrichedReferrals.reduce((sum, r) => {
+        if (r.status === 'paid') return sum + (r.commission || 125);
+        return sum;
+      }, 0);
+
+      setReferralStats(prev => {
+        const effectiveCommissions = Math.max(prev.totalCommission, commissions);
+        return {
+          totalInvited: Math.max(prev.totalInvited, totalCount),
+          activeMembers: Math.max(prev.activeMembers, activeCount),
+          totalCommission: effectiveCommissions
+        };
+      });
+    };
+
+    const unsubscribeUid = onValue(ref(rtdb, `invites/${user.uid}/history`), (snapshot) => {
+      stores.uid = snapshot.exists() ? snapshot.val() : null;
+      void emit();
     }, (error) => console.error("RTDB Referrals Error:", error));
 
-    return () => unsubscribeReferrals();
+    const unsubscribeCode = safeRefCode && safeRefCode !== user.uid
+      ? onValue(ref(rtdb, `invites/${safeRefCode}/history`), (snapshot) => {
+          stores.code = snapshot.exists() ? snapshot.val() : null;
+          void emit();
+        }, (error) => console.error("RTDB Referrals Error:", error))
+      : () => {};
+
+    return () => {
+      disposed = true;
+      unsubscribeUid();
+      unsubscribeCode();
+    };
   }, [user, referralCode]);
 
   useEffect(() => {
@@ -1567,7 +1588,7 @@ export default function Dashboard() {
       </AnimatePresence>
 
       {/* Mobile App Container */}
-      <div className={`w-full ${activeTab === 'watch' ? 'max-w-full' : 'sm:max-w-[440px]'} ${role === 'partner' ? 'bg-[#0A0C0A]' : 'bg-[#0B0D10]'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-zinc-800`}>
+      <div className={`w-full ${activeTab === 'watch' ? 'max-w-full' : 'sm:max-w-[440px]'} ${role === 'partner' ? 'bg-gradient-to-b from-[#0d2018] via-[#0A0C0A] to-[#0A0C0A]' : 'bg-gradient-to-b from-[#0a1f16] via-[#0B0D10] to-[#0B0D10]'} h-[100dvh] sm:h-[850px] sm:rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,0.2)] relative flex flex-col overflow-hidden border-0 sm:border-[12px] border-zinc-800`}>
         
         {/* Top Notification Bar & Announcements */}
         <AnimatePresence>
@@ -1669,7 +1690,7 @@ export default function Dashboard() {
         )}
 
         {/* Scrollable Content */}
-        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-4 pt-4'} hide-scrollbar ${role === 'partner' ? 'bg-[#0A0C0A]' : 'bg-[#0B0D10]'}`}>
+        <div className={`flex-1 overflow-y-auto ${['watch', 'support_ai'].includes(activeTab) ? 'px-0 pt-0' : 'px-4 pt-4'} hide-scrollbar ${role === 'partner' ? 'bg-gradient-to-b from-[#0d2018] via-[#0A0C0A] to-[#0A0C0A]' : 'bg-gradient-to-b from-[#0a1f16] via-[#0B0D10] to-[#0B0D10]'}`}>
           <div className={`${['watch', 'support_ai'].includes(activeTab) ? 'max-w-full h-full' : 'max-w-2xl mx-auto pb-28'}`}>
             {renderTabContent()}
           </div>
@@ -1677,7 +1698,7 @@ export default function Dashboard() {
 
         {/* Bottom tab bar */}
         {activeTab !== 'support_ai' && (
-          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-[#15181D] border-white/5'} border-t px-2 pt-2 pb-4 flex items-start justify-around`}>
+          <div className={`fixed bottom-0 left-0 right-0 z-50 ${role === 'partner' ? 'bg-[#022c22] border-white/10' : 'bg-[#0e1512] border-emerald-400/10'} border-t px-2 pt-2 pb-4 flex items-start justify-around`}>
             {[
               { id: 'home', icon: <LayoutGrid className="w-5 h-5" strokeWidth={2} />, label: 'Home' },
               { id: 'watch', icon: <Tv2 className="w-5 h-5" strokeWidth={2} />, label: 'Watch' },
@@ -1692,7 +1713,7 @@ export default function Dashboard() {
                   onClick={() => setActiveTab(tab.id)}
                   className="flex-1 flex flex-col items-center gap-1 active:scale-95 transition"
                 >
-                  <span className={`px-4 py-1.5 rounded-full transition ${active ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' : (role === 'partner' ? 'text-zinc-500' : 'text-zinc-500')}`}>
+                  <span className={`px-4 py-1.5 rounded-full transition ${active ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/40' : (role === 'partner' ? 'text-zinc-500' : 'text-zinc-500')}`}>
                     {tab.icon}
                   </span>
                   <span className={`text-[10px] font-bold leading-none ${active ? 'text-emerald-400' : (role === 'partner' ? 'text-zinc-400' : 'text-zinc-500')}`}>

@@ -308,7 +308,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
         </button>
         <div className="min-w-0">
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            Mega <span className="text-emerald-400">Lottery</span> <Sparkles className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            Mega <span className="bg-gradient-to-r from-amber-300 via-orange-400 to-fuchsia-500 bg-clip-text text-transparent">Lottery</span> <Sparkles className="w-5 h-5 text-amber-400 flex-shrink-0" />
           </h2>
           <p className="text-xs text-zinc-300 font-medium">Buy a ticket, fill the pool, and the draw runs automatically.</p>
         </div>
@@ -316,15 +316,15 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
 
       {/* Balance strip */}
       <div className="flex flex-wrap items-center gap-2.5 mb-6">
-        <div className="flex items-center gap-2.5 rounded-2xl bg-[#06382b] border border-white/10 px-4 py-2.5">
-          <Ticket className="w-4 h-4 text-emerald-400" />
+        <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-violet-600/30 to-fuchsia-600/20 border border-violet-400/30 px-4 py-2.5">
+          <Ticket className="w-4 h-4 text-violet-300" />
           <span className="text-xs font-bold text-zinc-300">Your balance</span>
           <span className="text-sm font-black text-white">Rs {balance.toLocaleString()}</span>
         </div>
         {freeTickets > 0 && (
-          <div className="flex items-center gap-2 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 px-4 py-2.5">
-            <Crown className="w-4 h-4 text-emerald-300" />
-            <span className="text-xs font-black text-emerald-200">You have {freeTickets} free ticket{freeTickets > 1 ? 's' : ''}</span>
+          <div className="flex items-center gap-2 rounded-2xl bg-amber-400/15 border border-amber-300/30 px-4 py-2.5">
+            <Crown className="w-4 h-4 text-amber-300" />
+            <span className="text-xs font-black text-amber-100">You have {freeTickets} free ticket{freeTickets > 1 ? 's' : ''}</span>
           </div>
         )}
       </div>
@@ -352,11 +352,11 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-14">
-            <div className="w-10 h-10 border-4 border-white/10 border-t-emerald-400 rounded-full animate-spin mb-4"></div>
+            <div className="w-10 h-10 border-4 border-white/10 border-t-fuchsia-400 rounded-full animate-spin mb-4"></div>
             <p className="text-[11px] font-black text-zinc-300 uppercase tracking-wider">Loading draws…</p>
           </div>
         ) : lotteries.length === 0 ? (
-          <div className="bg-[#06382b] rounded-3xl border border-white/10 p-10 text-center">
+          <div className="bg-gradient-to-b from-[#2b1152] to-[#170a30] rounded-3xl border border-violet-400/25 p-10 text-center">
             <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-zinc-400">
               <Ticket className="w-7 h-7" />
             </div>
@@ -376,12 +376,12 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.06 }}
                     key={lottery.id}
-                    className="relative bg-[#06382b] rounded-3xl overflow-hidden border border-white/10 flex flex-col"
+                    className="relative bg-gradient-to-b from-[#2b1152] to-[#170a30] rounded-3xl overflow-hidden border border-violet-400/25 shadow-[0_16px_45px_-14px_rgba(139,92,246,0.5)] flex flex-col"
                   >
-                    <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500" />
+                    <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-300 via-fuchsia-500 to-violet-600" />
 
                     <div className="p-5 pb-0 flex justify-between items-start">
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-black text-emerald-300 uppercase tracking-wider bg-emerald-500/10 border border-emerald-400/25 px-2.5 py-1 rounded-full">
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-black text-fuchsia-200 uppercase tracking-wider bg-fuchsia-500/15 border border-fuchsia-400/30 px-2.5 py-1 rounded-full">
                            <Crown className="w-3.5 h-3.5" /> Mega Draw
                         </span>
                         <div className="text-right">
@@ -408,7 +408,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                                 initial={{ width: 0 }}
                                 animate={{ width: `${fillPercentage}%` }}
                                 transition={{ duration: 1.2, ease: "easeOut" }}
-                                className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full"
+                                className="h-full bg-gradient-to-r from-fuchsia-500 to-amber-400 rounded-full"
                             />
                         </div>
                         <p className="text-[11px] text-zinc-400 font-medium">The draw runs automatically when all {lottery.maxMembers} spots fill.</p>
@@ -421,10 +421,10 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
                             disabled={isJoined || lottery.currentMembers >= lottery.maxMembers}
                             className={`w-full py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 ${
                                 isJoined
-                                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/30'
+                                ? 'bg-fuchsia-500/15 text-fuchsia-200 border border-fuchsia-400/30'
                                 : lottery.currentMembers >= lottery.maxMembers
                                 ? 'bg-white/5 text-zinc-400 cursor-not-allowed border border-white/10'
-                                : 'bg-emerald-500 text-emerald-950 hover:bg-emerald-400 shadow-lg shadow-emerald-500/20'
+                                : 'bg-gradient-to-r from-amber-300 to-yellow-500 text-amber-950 hover:from-amber-200 hover:to-yellow-400 shadow-lg shadow-amber-500/30'
                             }`}
                         >
                             {isJoined ? (
@@ -454,7 +454,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
             <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-3">
                 <Users className="w-4 h-4 text-teal-300" /> Recent Entries
             </h3>
-            <div className="bg-[#06382b] rounded-3xl border border-white/10 overflow-hidden">
+            <div className="bg-gradient-to-b from-[#2b1152] to-[#170a30] rounded-3xl border border-violet-400/25 overflow-hidden">
                 <div className="p-2">
                     {recentEntries.length === 0 ? (
                         <div className="text-center py-12 px-4">
@@ -491,7 +491,7 @@ export default function LotteryView({ onBack, balance, userName, onUpdateBalance
             <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2 mb-3">
                 <Trophy className="w-4 h-4 text-amber-400" /> Recent Winners
             </h3>
-            <div className="bg-[#06382b] rounded-3xl border border-white/10 overflow-hidden">
+            <div className="bg-gradient-to-b from-[#2b1152] to-[#170a30] rounded-3xl border border-violet-400/25 overflow-hidden">
                  <div className="p-2">
                     {pastWinners.length === 0 ? (
                         <div className="text-center py-12 px-4">

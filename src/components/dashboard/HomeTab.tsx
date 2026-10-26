@@ -287,19 +287,21 @@ export default function HomeTab({
       )}
 
       {/* Balance card */}
-      <div className="bg-[#15181D] border border-white/5 rounded-3xl p-5">
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.18em]">Available Balance</p>
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-600 to-emerald-800 border border-emerald-300/30 rounded-3xl p-5 shadow-[0_18px_45px_-15px_rgba(16,185,129,0.55)]">
+        <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-yellow-300/20 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-14 -left-8 w-36 h-36 rounded-full bg-teal-300/20 blur-2xl pointer-events-none" />
+        <div className="relative flex items-center justify-between">
+          <p className="text-[10px] font-black text-emerald-50/80 uppercase tracking-[0.18em]">Available Balance</p>
           <button
             onClick={toggleCurrency}
-            className="text-[10px] font-black text-zinc-300 bg-white/5 border border-white/10 rounded-full px-2.5 py-1"
+            className="text-[10px] font-black text-white bg-black/25 border border-white/25 rounded-full px-2.5 py-1"
           >
             {currency}
           </button>
         </div>
-        <div className="flex items-center gap-3 mt-2.5">
-          <span className="w-10 h-10 rounded-full bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
-            <WalletIcon className="w-5 h-5 text-amber-400" />
+        <div className="relative flex items-center gap-3 mt-2.5">
+          <span className="w-10 h-10 rounded-full bg-black/25 border border-white/25 flex items-center justify-center shrink-0">
+            <WalletIcon className="w-5 h-5 text-amber-300" />
           </span>
           <p className="text-4xl font-black text-white tracking-tight">
             {currency === 'PKR' ? 'Rs. ' : '$ '}
@@ -307,14 +309,14 @@ export default function HomeTab({
           </p>
         </div>
 
-        <div className="mt-4">
-          <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+        <div className="relative mt-4">
+          <div className="h-2 rounded-full bg-black/25 overflow-hidden">
             <div
-              className="h-full rounded-full bg-green-500 transition-all duration-700"
+              className="h-full rounded-full bg-gradient-to-r from-amber-300 to-yellow-500 transition-all duration-700"
               style={{ width: `${Math.min(100, Math.max(0, (balance / (appSettings.minWithdrawal ?? 500)) * 100))}%` }}
             ></div>
           </div>
-          <p className="text-[11px] font-semibold text-zinc-400 mt-2">
+          <p className="text-[11px] font-semibold text-emerald-50/85 mt-2">
             {balance >= (appSettings.minWithdrawal ?? 500)
               ? `Your balance is ready to cash out (minimum Rs. ${appSettings.minWithdrawal ?? 500}).`
               : `You are Rs. ${((appSettings.minWithdrawal ?? 500) - balance).toFixed(0)} away from cashing out (minimum Rs. ${appSettings.minWithdrawal ?? 500}).`}
@@ -324,13 +326,13 @@ export default function HomeTab({
         <div className="grid grid-cols-2 gap-3 mt-4">
           <button
             onClick={onWithdrawClick}
-            className="h-11 rounded-xl bg-green-500 hover:bg-green-400 text-black text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
+            className="h-11 rounded-xl bg-gradient-to-r from-amber-300 to-yellow-500 hover:from-amber-200 hover:to-yellow-400 text-black text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-lg shadow-amber-500/25"
           >
             <WalletIcon className="w-4 h-4" /> Cash Out
           </button>
           <button
             onClick={onDepositClick}
-            className="h-11 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
+            className="h-11 rounded-xl bg-black/25 hover:bg-black/35 border border-white/25 text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98] transition"
           >
             <PlusCircleIcon className="w-4 h-4" /> Deposit
           </button>
@@ -339,15 +341,15 @@ export default function HomeTab({
 
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2.5">
-        <div className="bg-[#15181D] rounded-2xl border border-white/5 px-3 py-3.5 text-center">
-          <p className="text-sm font-black text-white">{currency === 'PKR' ? 'Rs. ' : '$ '}{convertAmount(totalEarnings).toFixed(0)}</p>
-          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Total Earned</p>
+        <div className="bg-gradient-to-b from-emerald-500/15 to-white/[0.03] rounded-2xl border border-emerald-400/20 px-3 py-3.5 text-center">
+          <p className="text-sm font-black text-emerald-300">{currency === 'PKR' ? 'Rs. ' : '$ '}{convertAmount(totalEarnings).toFixed(0)}</p>
+          <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider mt-1">Total Earned</p>
         </div>
-        <div className="bg-[#15181D] rounded-2xl border border-white/5 px-3 py-3.5 text-center">
-          <p className="text-sm font-black text-white">{currency === 'PKR' ? 'Rs. ' : '$ '}{convertAmount(totalIndirectCommission).toFixed(0)}</p>
-          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider mt-1">Team Earnings</p>
+        <div className="bg-gradient-to-b from-amber-500/15 to-white/[0.03] rounded-2xl border border-amber-400/20 px-3 py-3.5 text-center">
+          <p className="text-sm font-black text-amber-300">{currency === 'PKR' ? 'Rs. ' : '$ '}{convertAmount(totalIndirectCommission).toFixed(0)}</p>
+          <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider mt-1">Team Earnings</p>
         </div>
-        <div className="bg-[#15181D] rounded-2xl border border-white/5 px-3 py-3.5 text-center">
+        <div className="bg-gradient-to-b from-sky-500/15 to-white/[0.03] rounded-2xl border border-sky-400/20 px-3 py-3.5 text-center">
           <p className={`text-sm font-black flex items-center justify-center gap-1.5 ${accountStatus?.toLowerCase() === 'active' ? 'text-green-400' : 'text-rose-400'}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${accountStatus?.toLowerCase() === 'active' ? 'bg-green-400' : 'bg-rose-400'}`}></span>
             {accountStatus}
@@ -358,8 +360,8 @@ export default function HomeTab({
 
       {/* Daily rewards */}
       <div className="grid grid-cols-2 gap-2.5">
-        <div className="bg-[#15181D] border border-white/5 rounded-2xl p-4">
-          <span className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
+        <div className="bg-gradient-to-br from-orange-500/25 via-[#1a1207] to-[#15181D] border border-orange-400/30 rounded-2xl p-4">
+          <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-rose-500 text-white shadow-lg shadow-orange-500/30 flex items-center justify-center">
             <GiftIcon className="w-5 h-5" />
           </span>
           <p className="text-sm font-extrabold text-white mt-3 leading-tight">Daily Bonus</p>
@@ -373,9 +375,9 @@ export default function HomeTab({
         </div>
         <button
           onClick={onStreakClick}
-          className="bg-[#15181D] border border-white/5 rounded-2xl p-4 text-left active:scale-[0.98] transition"
+          className="bg-gradient-to-br from-amber-500/25 via-[#1a1407] to-[#15181D] border border-amber-400/30 rounded-2xl p-4 text-left active:scale-[0.98] transition"
         >
-          <span className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+          <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-300 to-yellow-600 text-white shadow-lg shadow-amber-500/30 flex items-center justify-center">
             <CalendarIcon className="w-5 h-5" />
           </span>
           <p className="text-sm font-extrabold text-white mt-3 leading-tight">Streak Rewards</p>
@@ -394,17 +396,17 @@ export default function HomeTab({
         </div>
         <div className="space-y-2.5">
           {[
-            { icon: <PlayCircleIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-rose-500/10 text-rose-400', title: 'Watch Ads', desc: 'Watch short video ads and earn for every view.', tag: 'POPULAR', tagClass: 'text-rose-300 bg-rose-500/10', onClick: onWatchAdsClick },
-            { icon: <Rocket className="w-5 h-5" strokeWidth={2} />, bg: 'bg-teal-500/10 text-teal-400', title: 'Surveys', desc: 'Complete CPX Research surveys — the highest-paying offers.', tag: 'HIGH PAYING', tagClass: 'text-amber-300 bg-amber-500/10', onClick: onTaskWallClick },
-            { icon: <Zap className="w-5 h-5" strokeWidth={2} />, bg: 'bg-cyan-500/10 text-cyan-400', title: 'Offer Walls', desc: 'More apps and offers from Wannads.', tag: '', tagClass: '', onClick: onOfferWallClick },
-            { icon: <Rocket className="w-5 h-5" strokeWidth={2} />, bg: 'bg-cyan-500/10 text-cyan-400', title: 'Earn Zone', desc: 'Install apps & complete offers — top payouts.', tag: 'HIGH PAYING', tagClass: 'text-amber-300 bg-amber-500/10', onClick: onTasksClick },
-            { icon: <SparklesIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-sky-500/10 text-sky-400', title: 'Easy Tasks', desc: 'Quick micro-tasks with instant rewards.', tag: '', tagClass: '', onClick: onEasyTaskClick },
-            { icon: <MessageCircle className="w-5 h-5" strokeWidth={2} />, bg: 'bg-emerald-500/10 text-emerald-400', title: 'Social Tasks', desc: 'Earn bonuses for social media actions.', tag: '', tagClass: '', onClick: onSocialTaskPlusClick },
+            { icon: <PlayCircleIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/30', title: 'Watch Ads', desc: 'Watch short video ads and earn for every view.', tag: 'POPULAR', tagClass: 'text-rose-300 bg-rose-500/10', onClick: onWatchAdsClick },
+            { icon: <Rocket className="w-5 h-5" strokeWidth={2} />, bg: 'bg-gradient-to-br from-teal-400 to-emerald-600 text-white shadow-lg shadow-teal-500/30', title: 'Surveys', desc: 'Complete CPX Research surveys — the highest-paying offers.', tag: 'HIGH PAYING', tagClass: 'text-amber-300 bg-amber-500/10', onClick: onTaskWallClick },
+            { icon: <Zap className="w-5 h-5" strokeWidth={2} />, bg: 'bg-gradient-to-br from-cyan-400 to-sky-600 text-white shadow-lg shadow-cyan-500/30', title: 'Offer Walls', desc: 'More apps and offers from Wannads.', tag: '', tagClass: '', onClick: onOfferWallClick },
+            { icon: <Rocket className="w-5 h-5" strokeWidth={2} />, bg: 'bg-gradient-to-br from-violet-500 to-purple-700 text-white shadow-lg shadow-violet-500/30', title: 'Earn Zone', desc: 'Install apps & complete offers — top payouts.', tag: 'HIGH PAYING', tagClass: 'text-amber-300 bg-amber-500/10', onClick: onTasksClick },
+            { icon: <SparklesIcon className="w-5 h-5" strokeWidth={2} />, bg: 'bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-lg shadow-sky-500/30', title: 'Easy Tasks', desc: 'Quick micro-tasks with instant rewards.', tag: '', tagClass: '', onClick: onEasyTaskClick },
+            { icon: <MessageCircle className="w-5 h-5" strokeWidth={2} />, bg: 'bg-gradient-to-br from-emerald-400 to-green-600 text-white shadow-lg shadow-emerald-500/30', title: 'Social Tasks', desc: 'Earn bonuses for social media actions.', tag: '', tagClass: '', onClick: onSocialTaskPlusClick },
           ].map((row) => (
             <button
               key={row.title}
               onClick={row.onClick}
-              className="w-full flex items-center gap-3 bg-[#15181D] rounded-2xl border border-white/5 px-4 py-3.5 text-left active:scale-[0.99] transition"
+              className="w-full flex items-center gap-3 bg-white/[0.045] rounded-2xl border border-white/10 px-4 py-3.5 text-left active:scale-[0.99] transition"
             >
               <span className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${row.bg}`}>{row.icon}</span>
               <span className="flex-1 min-w-0">
@@ -423,7 +425,7 @@ export default function HomeTab({
       {/* Referral banner */}
       <button
         onClick={onInviteClick}
-        className="w-full flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl px-4 py-4 text-left active:scale-[0.99] transition shadow-lg shadow-none"
+        className="w-full flex items-center gap-3 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 rounded-2xl px-4 py-4 text-left active:scale-[0.99] transition shadow-lg shadow-orange-500/25"
       >
         <span className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center shrink-0">
           <InviteIcon className="w-5 h-5 text-white" />
