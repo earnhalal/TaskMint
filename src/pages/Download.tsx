@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   Download,
@@ -28,6 +28,45 @@ import { useNavigate } from 'react-router-dom';
 import { useSEO } from '../hooks/useSEO';
 
 const APK_URL = 'https://github.com/earnhalal/TaskMint/releases/latest/download/TaskMint.apk';
+
+/* ── In-page download with progress ──────────────────────────────────
+   A plain link gives the page no visibility into download progress, so
+   downloads are fetched as a stream: bytes counted as they arrive give
+   a live % / speed / ETA, then the completed file is saved. If the
+   stream fails for any reason (network, browser quirk), it falls back
+   to a normal direct download. */
+interface DownloadState {
+  status: 'idle' | 'downloading' | 'saving' | 'done' | 'fallback' | 'error';
+  label: string;
+  fileName: string;
+  directUrl: string;
+  pct: number | null; // null = total size unknown
+  loadedMb: string;
+  totalMb: string;
+  speedMbps: string;
+  etaText: string;
+}
+
+const IDLE_DOWNLOAD: DownloadState = {
+  status: 'idle',
+  label: '',
+  fileName: '',
+  directUrl: '',
+  pct: null,
+  loadedMb: '0.0',
+  totalMb: '',
+  speedMbps: '0.0',
+  etaText: '',
+};
+
+function fmtEta(sec: number): string {
+  if (!isFinite(sec) || sec < 0) return '';
+  if (sec < 5) return 'a few seconds left';
+  if (sec < 60) return `about ${Math.ceil(sec)} seconds left`;
+  const m = Math.floor(sec / 60);
+  const s = Math.ceil(sec % 60);
+  return `about ${m}m ${s}s left`;
+}
 const RELEASES_API = 'https://api.github.com/repos/earnhalal/TaskMint/releases?per_page=30';
 const RELEASES_PAGE = 'https://github.com/earnhalal/TaskMint/releases';
 
@@ -292,6 +331,138 @@ export default function DownloadPage() {
 
   const latest = releases[0];
 
+  /* Download-with-progress machinery */
+  const [dl, setDl] = useState<DownloadState>(IDLE_DOWNLOAD);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const directDownload = (url: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  const startDownload = async (tag: string, label: string) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const proxyUrl = `/api/download${tag ? `?v=${encodeURIComponent(tag)}` : ''}`;
+    const directUrl = tag
+      ? `https://github.com/earnhalal/TaskMint/releases/download/${tag}/TaskMint.apk`
+      : APK_URL;
+    const fileName = tag ? `TaskMint-${tag}.apk` : 'TaskMint.apk';
+    setDl({ ...IDLE_DOWNLOAD, status: 'downloading', label, fileName, directUrl });
+
+    const fallback = () => {
+      directDownload(directUrl);
+      setDl((d) => ({ ...d, status: 'fallback' }));
+    };
+
+    const paint = (loaded: number, total: number, startedAt: number) => {
+      const elapsedSec = (performance.now() - startedAt) / 1000;
+      const speed = elapsedSec > 0 ? loaded / elapsedSec : 0;
+      setDl((d) => ({
+        ...d,
+        status: 'downloading',
+        pct: total > 0 ? Math.min(99, Math.floor((loaded / total) * 100)) : null,
+        loadedMb: (loaded / 1048576).toFixed(1),
+        totalMb: total > 0 ? (total / 1048576).toFixed(1) : '',
+        speedMbps: (speed / 1048576).toFixed(1),
+        etaText: total > 0 && speed > 0 ? fmtEta((total - loaded) / speed) : '',
+      }));
+    };
+
+    try {
+      const chunks: Uint8Array[] = [];
+      let loaded = 0;
+      let total = 0;
+      const startedAt = performance.now();
+      let lastPaint = 0;
+      let attempts = 0;
+      let stalledAttempts = 0;
+
+      while ((total === 0 || loaded < total) && attempts < 60 && stalledAttempts < 3) {
+        attempts++;
+        const before = loaded;
+        try {
+          const res = await fetch(proxyUrl, {
+            signal: controller.signal,
+            headers: loaded > 0 ? { Range: `bytes=${loaded}-` } : undefined,
+          });
+          if (!res.ok || !res.body) {
+            if (attempts === 1 && loaded === 0) {
+              fallback();
+              return;
+            }
+            break;
+          }
+          // Total size: from Content-Range on a 206, else Content-Length.
+          const cr = res.headers.get('Content-Range');
+          const crTotal = cr ? Number(cr.split('/')[1]) : NaN;
+          if (Number.isFinite(crTotal) && crTotal > 0) total = crTotal;
+          else if (res.status === 200) total = Number(res.headers.get('Content-Length')) || total;
+          // A 200 answer to a Range request means ranges were ignored:
+          // restart the assembly from scratch with this stream.
+          if (res.status === 200 && loaded > 0) {
+            chunks.length = 0;
+            loaded = 0;
+          }
+          const reader = res.body.getReader();
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value) {
+              chunks.push(value);
+              loaded += value.length;
+            }
+            const now = performance.now();
+            if (now - lastPaint > 120) {
+              lastPaint = now;
+              paint(loaded, total, startedAt);
+            }
+          }
+        } catch (err: any) {
+          if (err?.name === 'AbortError') throw err;
+          // Stream broke mid-way — the loop resumes from `loaded`
+          // with a Range request, unless we are making no progress.
+        }
+        if (loaded === before) stalledAttempts++;
+        else stalledAttempts = 0;
+      }
+
+      if (total > 0 && loaded < total) {
+        fallback();
+        return;
+      }
+
+      paint(loaded, total, startedAt);
+      setDl((d) => ({ ...d, status: 'saving', pct: 100 }));
+      const blob = new Blob(chunks as BlobPart[], { type: 'application/vnd.android.package-archive' });
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(objUrl), 30000);
+      setDl((d) => ({ ...d, status: 'done', pct: 100 }));
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        setDl(IDLE_DOWNLOAD);
+      } else {
+        fallback();
+      }
+    }
+  };
+
+  const cancelDownload = () => {
+    abortRef.current?.abort();
+    setDl(IDLE_DOWNLOAD);
+  };
+
   const techInfo = [
     { icon: Tag, label: 'Version', value: latest ? latest.version : '1.21' },
     { icon: CalendarDays, label: 'Updated on', value: latest ? latest.date : '—' },
@@ -322,12 +493,12 @@ export default function DownloadPage() {
             <span className="font-black text-xl tracking-tighter text-slate-900">TaskMint</span>
             <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest bg-emerald-600 text-white px-2 py-0.5 rounded-full">App Store</span>
           </div>
-          <a
-            href={APK_URL}
+          <button
+            onClick={() => startDownload(latest?.tag || '', latest?.name || 'TaskMint — latest version')}
             className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-4 py-2 rounded-full transition-colors"
           >
             <Download className="w-3.5 h-3.5" /> Get the App
-          </a>
+          </button>
         </div>
       </header>
 
@@ -369,14 +540,17 @@ export default function DownloadPage() {
               </div>
             </div>
 
-            <a
-              href={APK_URL}
-              download
+            <button
+              onClick={() => startDownload(latest?.tag || '', latest?.name || 'TaskMint — latest version')}
               className="mt-7 flex items-center justify-center gap-2.5 w-full bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black text-lg transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.99]"
             >
               <Download className="w-5 h-5" />
-              Download APK{latest ? ` — v${latest.version}` : ''}
-            </a>
+              {dl.status === 'downloading'
+                ? `Downloading… ${dl.pct !== null ? `${dl.pct}%` : `${dl.loadedMb} MB`}`
+                : dl.status === 'done'
+                  ? 'Downloaded — tap to download again'
+                  : `Download APK${latest ? ` — v${latest.version}` : ''}`}
+            </button>
             <p className="mt-2.5 text-center text-xs font-semibold text-slate-400">
               Fast, direct download from the official TaskMint source · Free · One-time in-app activation fee of Rs. 150 applies
             </p>
@@ -565,9 +739,8 @@ export default function DownloadPage() {
                     >
                       Notes
                     </a>
-                    <a
-                      href={rel.apkUrl}
-                      download
+                    <button
+                      onClick={() => startDownload(rel.tag, rel.name)}
                       className={`shrink-0 inline-flex items-center gap-1.5 text-xs font-black px-4 py-2.5 rounded-full transition-all active:scale-95 ${
                         i === 0
                           ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/25'
@@ -575,7 +748,7 @@ export default function DownloadPage() {
                       }`}
                     >
                       <Download className="w-3.5 h-3.5" /> Download
-                    </a>
+                    </button>
                   </div>
                 ))}
             </div>
@@ -678,17 +851,87 @@ export default function DownloadPage() {
             <p className="relative text-emerald-50/85 font-medium text-sm mt-1.5 max-w-md mx-auto">
               Tasks, video ads, Gold Coins and referrals — start earning from your phone today.
             </p>
-            <a
-              href={APK_URL}
-              download
+            <button
+              onClick={() => startDownload(latest?.tag || '', latest?.name || 'TaskMint — latest version')}
               className="relative mt-6 inline-flex items-center gap-2.5 bg-white text-emerald-800 px-8 py-3.5 rounded-full font-black text-base shadow-xl active:scale-[0.98] transition-all"
             >
               <Download className="w-5 h-5" />
               Download APK{latest ? ` — v${latest.version}` : ''}
-            </a>
+            </button>
           </motion.section>
         </div>
       </main>
+
+      {/* ── Download progress bar (fixed, follows the user) ──────── */}
+      {dl.status !== 'idle' && (
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[380px] z-[60]">
+          <div className="bg-slate-900 text-white rounded-3xl shadow-2xl shadow-slate-900/40 p-4 border border-white/10">
+            <div className="flex items-start gap-3">
+              <img src="/favicon.svg" alt="" className="w-10 h-10 rounded-xl shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-black truncate">{dl.label}</p>
+                {dl.status === 'downloading' && (
+                  <>
+                    <div className="h-2 rounded-full bg-white/15 overflow-hidden mt-2">
+                      {dl.pct !== null ? (
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full transition-[width] duration-150"
+                          style={{ width: `${dl.pct}%` }}
+                        />
+                      ) : (
+                        <div className="h-full w-1/3 bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full animate-pulse" />
+                      )}
+                    </div>
+                    <p className="text-[11px] font-bold text-zinc-300 mt-1.5">
+                      {dl.pct !== null ? <span className="text-emerald-300 font-black">{dl.pct}%</span> : null}
+                      {dl.pct !== null ? ' · ' : ''}
+                      {dl.loadedMb} MB{dl.totalMb ? ` of ${dl.totalMb} MB` : ' downloaded'}
+                      {dl.speedMbps !== '0.0' ? ` · ${dl.speedMbps} MB/s` : ''}
+                      {dl.etaText ? ` · ${dl.etaText}` : ''}
+                    </p>
+                  </>
+                )}
+                {dl.status === 'saving' && (
+                  <p className="text-[11px] font-bold text-zinc-300 mt-1.5">Preparing the file…</p>
+                )}
+                {dl.status === 'done' && (
+                  <>
+                    <p className="text-[11px] font-bold text-emerald-300 mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Download complete — open the file to install.
+                    </p>
+                    <button
+                      onClick={() => directDownload(dl.directUrl)}
+                      className="text-[11px] font-black text-sky-300 underline underline-offset-2 mt-1"
+                    >
+                      Nothing started? Tap for a direct download
+                    </button>
+                  </>
+                )}
+                {dl.status === 'fallback' && (
+                  <p className="text-[11px] font-bold text-zinc-300 mt-1.5">
+                    Download started in your browser — its progress shows in the browser&apos;s download bar / notification.
+                  </p>
+                )}
+              </div>
+              {dl.status === 'downloading' ? (
+                <button
+                  onClick={cancelDownload}
+                  className="shrink-0 text-[11px] font-black text-rose-300 bg-rose-400/10 px-3 py-1.5 rounded-full"
+                >
+                  Cancel
+                </button>
+              ) : (
+                <button
+                  onClick={() => setDl(IDLE_DOWNLOAD)}
+                  className="shrink-0 text-[11px] font-black text-zinc-300 bg-white/10 px-3 py-1.5 rounded-full"
+                >
+                  Close
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
