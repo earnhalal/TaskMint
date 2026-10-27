@@ -4,3 +4,4 @@ Disallow: /dashboard
 Disallow: /api/
 
 Sitemap: https://www.taskmint.click/sitemap.xml
+Sitemap: https://www.taskmint.click/sitemap1.xml
