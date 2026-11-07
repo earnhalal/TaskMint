@@ -96,7 +96,23 @@
       ]
     }
     </script>
-    <script src="https://quge5.com/88/tag.min.js" data-zone="235306" async data-cfasync="false"></script>
+    <script>
+      // Monetag tag (zone 235306) — public pages only; never loads inside the app (dashboard/auth/promotion).
+      (function () {
+        var p = window.location.pathname;
+        if (p.length > 1 && p.charAt(p.length - 1) === '/') p = p.slice(0, -1);
+        var pub = p === '/' || p === '/landing' || p === '/blog' || p.indexOf('/blog/') === 0 ||
+          p === '/app-download' || p === '/contact' || p === '/disclaimer' || p === '/privacy' ||
+          p === '/refund' || p === '/terms' || p.indexOf('/ref/') === 0;
+        if (!pub) return;
+        var s = document.createElement('script');
+        s.src = 'https://quge5.com/88/tag.min.js';
+        s.async = true;
+        s.setAttribute('data-zone', '235306');
+        s.setAttribute('data-cfasync', 'false');
+        document.head.appendChild(s);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
