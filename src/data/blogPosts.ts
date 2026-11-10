@@ -545,5 +545,101 @@ export const blogPosts: BlogPost[] = [
       <h2>The Bottom Line</h2>
       <p>Online earning is a channel, not a ruling: the same principles that judge a shop judge an app. Earn by real work, deal honestly, avoid interest and staking money on chance, and stay away from anything you cannot explain to your family in one sentence. For your personal situation, please consult a scholar whose knowledge you trust — and whatever you decide, our <a href="/blog">blog</a> will keep explaining exactly how every rupee on <a href="/">TaskMint</a> is earned, because transparency is a principle we share.</p>
     `
+  },
+  {
+    id: '15',
+    slug: 'online-earning-without-investment-pakistan-honest-guide',
+    title: 'Online Earning Without Investment in Pakistan: The Honest Answer',
+    excerpt: 'Searching for online earning without investment in Pakistan? Here is the honest version: most "free" earning apps still gate payouts behind something. This guide explains exactly what TaskMint costs, what it pays, and how to judge any platform.',
+    date: 'November 11, 2026',
+    author: 'TaskMint Team',
+    category: 'Online Earning',
+    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['online earning without investment Pakistan', 'earn money online without investment', 'real earning app Pakistan'],
+    content: `
+      <h2>The Question Everyone Asks First</h2>
+      <p>"Online earning without investment" is one of the most searched phrases in Pakistan — and one of the most abused. Many apps promise free money, then block withdrawals until you pay, invite friends, or watch an impossible number of ads.</p>
+
+      <h2>What TaskMint Actually Costs</h2>
+      <p>Signing up for TaskMint is free, but activation costs <strong>Rs. 150</strong>. That is the whole fee — it is not a daily charge, and it is stated up front so you can decide before you pay anything. Any platform that hides its fee until withdrawal time is a warning sign.</p>
+
+      <h2>What You Earn, In Real Numbers</h2>
+      <p>TaskMint pays for completed rewarded ads in <strong>Gold Coins</strong>: <strong>100 Gold Coins = Rs. 1</strong>. Coins convert into your main balance once you reach 100 coins. Withdrawals start at <strong>Rs. 500</strong> with a <strong>5% fee</strong>, in the payout windows <strong>1st–3rd and 16th–18th</strong> of each month, to JazzCash or EasyPaisa.</p>
+
+      <h2>Three Checks Before You Trust Any Earning App</h2>
+      <ul>
+        <li>Does it state its fee, minimum withdrawal and payout dates clearly?</li>
+        <li>Does it pay through JazzCash or EasyPaisa, not just "points"?</li>
+        <li>Does it promise a fixed daily income? If yes, walk away — real ad income varies.</li>
+      </ul>
+    `
+  },
+  {
+    id: '16',
+    slug: 'how-much-earn-watching-ads-taskmint',
+    title: 'How Much Can You Really Earn Watching Ads on TaskMint?',
+    excerpt: 'No hype, just the maths: how TaskMint\u2019s Gold Coins convert to rupees, what a realistic day of ad-watching looks like, and why any app promising a fixed daily income should not be trusted.',
+    date: 'November 11, 2026',
+    author: 'TaskMint Team',
+    category: 'TaskMint Guides',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['earn money watching ads Pakistan', 'watch ads earn money', 'TaskMint Gold Coins value'],
+    content: `
+      <h2>The Only Conversion That Matters</h2>
+      <p>TaskMint ads pay in <strong>Gold Coins</strong>. The rate is fixed and public: <strong>100 Gold Coins = Rs. 1</strong>. If you have 1,000 coins, that is Rs. 10. There is no hidden exchange rate and no second conversion step.</p>
+
+      <h2>How Coins Become Cash</h2>
+      <p>Once your coin balance reaches 100 coins, you can convert it into your main balance. From there the normal withdrawal rules apply: minimum <strong>Rs. 500</strong>, <strong>5%</strong> fee, payout windows <strong>1st–3rd and 16th–18th</strong>.</p>
+
+      <h2>A Realistic Expectation</h2>
+      <p>Ad income depends on how many rewarded ads are available on a given day and whether you complete them. It is pocket money that adds up over weeks, not a salary — and any site telling you otherwise is selling you something. Combine ad-watching with tasks and referrals (<a href="/blog/taskmint-referral-earning-explained">see how referral earnings work</a>) rather than relying on ads alone.</p>
+    `
+  },
+  {
+    id: '17',
+    slug: 'taskmint-withdrawal-jazzcash-easypaisa-payout-windows',
+    title: 'TaskMint Withdrawal Guide: JazzCash and EasyPaisa Payout Windows Explained',
+    excerpt: 'Exactly when TaskMint pays, what the minimum and fee are, and the mistakes that delay a payout — so your withdrawal is ready before the window opens.',
+    date: 'November 11, 2026',
+    author: 'TaskMint Team',
+    category: 'TaskMint Guides',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['TaskMint withdrawal', 'JazzCash withdrawal', 'EasyPaisa earning app withdrawal', 'online earning payout Pakistan'],
+    content: `
+      <h2>When TaskMint Pays</h2>
+      <p>TaskMint pays in two windows every month: <strong>1st–3rd</strong> and <strong>16th–18th</strong>. Requests made outside a window wait for the next one, so plan around those dates.</p>
+
+      <h2>Minimum, Fee and Method</h2>
+      <ul>
+        <li><strong>Minimum withdrawal:</strong> Rs. 500</li>
+        <li><strong>Fee:</strong> 5% of the withdrawal amount</li>
+        <li><strong>Methods:</strong> JazzCash and EasyPaisa</li>
+      </ul>
+
+      <h2>Before You Submit</h2>
+      <p>Double-check that your wallet number and account name match exactly. Incomplete payout details are the most common reason a withdrawal is held back — the TaskMint agent rejects incomplete requests with a refund rather than paying them to the wrong account, and valid withdrawals are paid by the owner in the window.</p>
+    `
+  },
+  {
+    id: '18',
+    slug: 'taskmint-referral-earning-explained',
+    title: 'TaskMint Referral Earnings: Rs. 100 or Rs. 125 Per Friend, Explained',
+    excerpt: 'TaskMint\u2019s referral rule is flat and simple: a basic referrer earns Rs. 100 per activated friend, any package or partner referrer earns Rs. 125. No tiers, no ladder, no fine print.',
+    date: 'November 11, 2026',
+    author: 'TaskMint Team',
+    category: 'TaskMint Guides',
+    image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80&w=1200',
+    keywords: ['TaskMint referral', 'referral earning app Pakistan', 'earn money referring friends'],
+    content: `
+      <h2>One Rule, No Tiers</h2>
+      <p>TaskMint referrals work on a flat rule: a <strong>basic referrer earns Rs. 100</strong> per friend, and <strong>any package or partner referrer earns Rs. 125</strong> per friend. The amount does not depend on a tier ladder.</p>
+
+      <h2>What Counts as a Referral</h2>
+      <p>Your friend signs up with your referral link and activates their account (activation fee Rs. 150). Referral commission is paid on activated referrals — a signup alone, without activation, does not earn commission.</p>
+
+      <h2>The Honest Warning</h2>
+      <p>Referrals only work if the person you invite genuinely uses the app. Creating extra accounts to farm referral bonuses breaks the rules and puts your own account at risk. Invite people who actually want to earn, and let the flat rate do the rest.</p>
+    `
   }
+
 ];
